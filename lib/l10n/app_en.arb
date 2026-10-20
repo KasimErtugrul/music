@@ -1,0 +1,53 @@
+{
+  "@@locale": "en",
+  "appName": "Resonance",
+  "@appName": {
+    "description": "Application name"
+  },
+  "tabHome": "Home",
+  "tabLibrary": "Library",
+  "tabPlaylists": "Playlists",
+  "tabSearch": "Search",
+  "tabSettings": "Settings",
+  "libraryTabSongs": "Songs",
+  "libraryTabAlbums": "Albums",
+  "libraryTabArtists": "Artists",
+  "libraryTabGenres": "Genres",
+  "libraryTabFolders": "Folders",
+  "commonOk": "OK",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonDelete": "Delete",
+  "commonRetry": "Try again",
+  "commonClose": "Close",
+  "songCount": "{count, plural, =0{No songs} =1{1 song} other{{count} songs}}",
+  "@songCount": {
+    "description": "Number of songs",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debugLanguageToggle": "Switch language (temporary)",
+  "@debugLanguageToggle": {
+    "description": "Temporary Day 1 button; removed on Day 17 when the language picker is added"
+  },
+  "permissionTitle": "Offline music player",
+  "permissionSubtitle": "To play the music on your device, Resonance needs access to your audio files.",
+  "permissionMediaTitle": "Music and audio files",
+  "permissionMediaDescription": "Required to list and play the songs in your local library.",
+  "permissionGrantButton": "Allow access",
+  "permissionGrantedLabel": "Access granted",
+  "permissionDeniedTitle": "Permission denied",
+  "permissionDeniedDescription": "Without access to your music files, Resonance can't build your library. You can try again.",
+  "permissionPermanentlyDeniedTitle": "Permission permanently denied",
+  "permissionPermanentlyDeniedDescription": "Access was blocked. To play your music, allow it manually in the app settings.",
+  "permissionOpenSettingsButton": "Open app settings",
+  "permissionContinueButton": "Continue",
+  "permissionNotificationTitle": "Notification access",
+  "permissionNotificationBadge": "Android 13+",
+  "permissionNotificationDescription": "Optional. Shows playback controls on the lock screen and in the notification shade. Playback works without it.",
+  "permissionPrivacyTitle": "Privacy and offline promise",
+  "permissionPrivacyBody": "Resonance never connects to the internet. Your data stays on this device and is never sent over a network."
+}
