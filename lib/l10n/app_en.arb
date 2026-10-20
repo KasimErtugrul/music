@@ -49,5 +49,32 @@
   "permissionNotificationBadge": "Android 13+",
   "permissionNotificationDescription": "Optional. Shows playback controls on the lock screen and in the notification shade. Playback works without it.",
   "permissionPrivacyTitle": "Privacy and offline promise",
-  "permissionPrivacyBody": "Resonance never connects to the internet. Your data stays on this device and is never sent over a network."
+  "permissionPrivacyBody": "Resonance never connects to the internet. Your data stays on this device and is never sent over a network.",
+  "spikeOpenButton": "Raw song list (Day 3 spike)",
+  "@spikeOpenButton": {
+    "description": "Temporary Day 3 button; removed when the real Songs tab lands on Day 5"
+  },
+  "spikeTitle": "Raw song list",
+  "spikeScanButton": "Scan library",
+  "spikeStats": "{count} songs, {ms} ms",
+  "@spikeStats": {
+    "description": "Temporary Day 3 spike statistics",
+    "placeholders": {
+      "count": {"type": "int"},
+      "ms": {"type": "int"}
+    }
+  },
+  "spikeMissingStats": "No artist: {noArtist}, no genre: {noGenre}",
+  "@spikeMissingStats": {
+    "description": "Temporary Day 3 spike statistics",
+    "placeholders": {
+      "noArtist": {"type": "int"},
+      "noGenre": {"type": "int"}
+    }
+  },
+  "spikeNotScanned": "Tap scan to read your library.",
+  "spikeEmpty": "No songs found.",
+  "spikeLoadError": "Couldn't read the library.",
+  "unknownArtist": "Unknown artist",
+  "unknownAlbum": "Unknown album"
 }

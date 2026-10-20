@@ -35,5 +35,15 @@
   "permissionNotificationBadge": "Android 13+",
   "permissionNotificationDescription": "İsteğe bağlı. Kilit ekranında ve bildirim panelinde çalma kontrollerini gösterir. İzin verilmezse çalma etkilenmez.",
   "permissionPrivacyTitle": "Gizlilik ve çevrimdışı taahhüt",
-  "permissionPrivacyBody": "Resonance hiçbir zaman internet bağlantısı kurmaz. Verileriniz bu cihazda kalır, hiçbir ağa gönderilmez."
+  "permissionPrivacyBody": "Resonance hiçbir zaman internet bağlantısı kurmaz. Verileriniz bu cihazda kalır, hiçbir ağa gönderilmez.",
+  "spikeOpenButton": "Ham şarkı listesi (Gün 3 spike)",
+  "spikeTitle": "Ham şarkı listesi",
+  "spikeScanButton": "Kütüphaneyi tara",
+  "spikeStats": "{count} şarkı, {ms} ms",
+  "spikeMissingStats": "Sanatçısız: {noArtist}, türsüz: {noGenre}",
+  "spikeNotScanned": "Kütüphaneni okumak için taramaya dokun.",
+  "spikeEmpty": "Şarkı bulunamadı.",
+  "spikeLoadError": "Kütüphane okunamadı.",
+  "unknownArtist": "Bilinmeyen sanatçı",
+  "unknownAlbum": "Bilinmeyen albüm"
 }

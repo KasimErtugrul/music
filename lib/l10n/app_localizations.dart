@@ -313,6 +313,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resonance never connects to the internet. Your data stays on this device and is never sent over a network.'**
   String get permissionPrivacyBody;
+
+  /// Temporary Day 3 button; removed when the real Songs tab lands on Day 5
+  ///
+  /// In en, this message translates to:
+  /// **'Raw song list (Day 3 spike)'**
+  String get spikeOpenButton;
+
+  /// No description provided for @spikeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw song list'**
+  String get spikeTitle;
+
+  /// No description provided for @spikeScanButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan library'**
+  String get spikeScanButton;
+
+  /// Temporary Day 3 spike statistics
+  ///
+  /// In en, this message translates to:
+  /// **'{count} songs, {ms} ms'**
+  String spikeStats(int count, int ms);
+
+  /// Temporary Day 3 spike statistics
+  ///
+  /// In en, this message translates to:
+  /// **'No artist: {noArtist}, no genre: {noGenre}'**
+  String spikeMissingStats(int noArtist, int noGenre);
+
+  /// No description provided for @spikeNotScanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap scan to read your library.'**
+  String get spikeNotScanned;
+
+  /// No description provided for @spikeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No songs found.'**
+  String get spikeEmpty;
+
+  /// No description provided for @spikeLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the library.'**
+  String get spikeLoadError;
+
+  /// No description provided for @unknownArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown artist'**
+  String get unknownArtist;
+
+  /// No description provided for @unknownAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown album'**
+  String get unknownAlbum;
 }
 
 class _AppLocalizationsDelegate

@@ -132,4 +132,38 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get permissionPrivacyBody =>
       'Resonance never connects to the internet. Your data stays on this device and is never sent over a network.';
+
+  @override
+  String get spikeOpenButton => 'Raw song list (Day 3 spike)';
+
+  @override
+  String get spikeTitle => 'Raw song list';
+
+  @override
+  String get spikeScanButton => 'Scan library';
+
+  @override
+  String spikeStats(int count, int ms) {
+    return '$count songs, $ms ms';
+  }
+
+  @override
+  String spikeMissingStats(int noArtist, int noGenre) {
+    return 'No artist: $noArtist, no genre: $noGenre';
+  }
+
+  @override
+  String get spikeNotScanned => 'Tap scan to read your library.';
+
+  @override
+  String get spikeEmpty => 'No songs found.';
+
+  @override
+  String get spikeLoadError => 'Couldn\'t read the library.';
+
+  @override
+  String get unknownArtist => 'Unknown artist';
+
+  @override
+  String get unknownAlbum => 'Unknown album';
 }

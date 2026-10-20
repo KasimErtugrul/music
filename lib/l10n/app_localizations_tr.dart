@@ -131,4 +131,38 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get permissionPrivacyBody =>
       'Resonance hiçbir zaman internet bağlantısı kurmaz. Verileriniz bu cihazda kalır, hiçbir ağa gönderilmez.';
+
+  @override
+  String get spikeOpenButton => 'Ham şarkı listesi (Gün 3 spike)';
+
+  @override
+  String get spikeTitle => 'Ham şarkı listesi';
+
+  @override
+  String get spikeScanButton => 'Kütüphaneyi tara';
+
+  @override
+  String spikeStats(int count, int ms) {
+    return '$count şarkı, $ms ms';
+  }
+
+  @override
+  String spikeMissingStats(int noArtist, int noGenre) {
+    return 'Sanatçısız: $noArtist, türsüz: $noGenre';
+  }
+
+  @override
+  String get spikeNotScanned => 'Kütüphaneni okumak için taramaya dokun.';
+
+  @override
+  String get spikeEmpty => 'Şarkı bulunamadı.';
+
+  @override
+  String get spikeLoadError => 'Kütüphane okunamadı.';
+
+  @override
+  String get unknownArtist => 'Bilinmeyen sanatçı';
+
+  @override
+  String get unknownAlbum => 'Bilinmeyen albüm';
 }

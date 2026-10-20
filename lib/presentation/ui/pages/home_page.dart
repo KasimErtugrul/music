@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 
 /// GEÇİCİ ana sayfa (Gün 1): yalnızca TR/EN metin değişimini göstermek için.
@@ -39,6 +40,12 @@ class HomePage extends StatelessWidget {
               onPressed: () =>
                   Get.updateLocale(Locale(isTurkish ? 'en' : 'tr')),
               child: Text(l10n.debugLanguageToggle),
+            ),
+            const SizedBox(height: 8),
+            // GEÇİCİ (Gün 3 spike): Gün 5'te gerçek Şarkılar sekmesiyle değişir.
+            FilledButton.tonal(
+              onPressed: () => Get.toNamed<void>(AppRoutes.songs),
+              child: Text(l10n.spikeOpenButton),
             ),
           ],
         ),

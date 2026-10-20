@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/presentation/ui/pages/home_page.dart';
 import 'package:resonance/presentation/ui/pages/permission_page.dart';
+import 'package:resonance/presentation/ui/pages/songs_page.dart';
 import 'package:resonance/presentation/ui/pages/splash_page.dart';
 
 abstract final class AppPages {
@@ -14,5 +15,6 @@ abstract final class AppPages {
       page: () => const PermissionPage(),
     ),
     GetPage<dynamic>(name: AppRoutes.home, page: () => const HomePage()),
+    GetPage<dynamic>(name: AppRoutes.songs, page: () => const SongsPage()),
   ];
 }
