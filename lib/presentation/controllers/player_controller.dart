@@ -10,7 +10,7 @@ import 'package:resonance/data/repositories/queue_state_repository.dart';
 class PlayerController extends GetxController {
   PlayerController(this._repository, this._libraryRepo, this._stateRepo);
 
-  final PlayerRepository _repository;
+   final PlayerRepository _repository;
   final LibraryRepository _libraryRepo;
   final QueueStateRepository _stateRepo;
 
@@ -23,6 +23,17 @@ class PlayerController extends GetxController {
   final shuffleEnabled = false.obs;
   final repeatMode = AudioServiceRepeatMode.none.obs;
   final lastError = Rxn<PlayerException>();
+
+  // Gün 11: UI'da dar kapsamlı dinlenmesi için
+  final position = Duration.zero.obs;
+  final duration = Duration.zero.obs;
+
+  SongModel? get currentSong {
+    final id = currentItem.value?.id;
+    if (id == null) return null;
+    final idx = songQueue.indexWhere((s) => s.uri == id);
+    return idx >= 0 ? songQueue[idx] : null;
+  }
 
   @override
   void onInit() {
@@ -49,6 +60,12 @@ class PlayerController extends GetxController {
     });
 
     _repository.errorStream.listen((error) => lastError.value = error);
+  // Gün 11: Pozisyon ve süre güncellemeleri
+    _repository.positionStream.listen((pos) => position.value = pos);
+    _repository.durationStream.listen((dur) {
+      if (dur != null) duration.value = dur;
+    });
+    
   }
 
   Future<void> _restoreQueue() async {

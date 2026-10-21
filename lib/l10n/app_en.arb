@@ -102,5 +102,7 @@
   "spikeLoadError": "Failed to load stats",
   "spikeNotScanned": "Not scanned yet",
   "spikeEmpty": "No items found",
+    "nowPlaying": "Now playing",
+  "playerTitle": "Player",
   "backToParent": "Back"
 }

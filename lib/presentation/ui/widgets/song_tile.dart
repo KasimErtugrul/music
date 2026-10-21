@@ -24,29 +24,56 @@ class SongTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final subtitle = <String>[
-      song.artist ?? l10n.unknownArtist,
-      song.album ?? l10n.unknownAlbum,
-    ].join(' • ');
+    final player = Get.find<PlayerController>();
+    final theme = Theme.of(context);
 
-    return ListTile(
-      leading: ArtworkImage(
-        songId: song.id,
-        size: 48,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      title: Text(song.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
-      trailing: trailing ??
-          Text(song.duration.clock, style: Theme.of(context).textTheme.bodySmall),
-      onTap: () {
-        if (onTap != null) {
-          onTap!();
-        } else {
-          Get.find<PlayerController>().playSong(song, queue: queueContext);
-        }
-      },
-      onLongPress: () => SongOptionsSheet.show(context, song),
-    );
+    // Gün 11: Obx ile reaktif hale getirildi. 
+    // currentItem değiştiğinde sadece bu satır rebuild olur.
+    return Obx(() {
+      // MediaItem.id bizim repository'de song.uri olarak atanmıştı.
+      final isCurrent = player.currentItem.value?.id == song.uri;
+
+      final subtitle = <String>[
+        song.artist ?? l10n.unknownArtist,
+        song.album ?? l10n.unknownAlbum,
+      ].join(' • ');
+
+      return ListTile(
+        selected: isCurrent,
+        selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.08),
+        leading: ArtworkImage(
+          songId: song.id,
+          size: 48,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        title: Text(
+          song.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: isCurrent ? theme.colorScheme.primary : null,
+            fontWeight: isCurrent ? FontWeight.bold : null,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: trailing ??
+            Text(
+              song.duration.clock,
+              style: theme.textTheme.bodySmall,
+            ),
+        onTap: () {
+          if (onTap != null) {
+            onTap!();
+          } else {
+            player.playSong(song, queue: queueContext);
+          }
+        },
+        onLongPress: () => SongOptionsSheet.show(context, song),
+      );
+    });
   }
 }

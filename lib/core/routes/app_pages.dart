@@ -6,6 +6,7 @@ import 'package:resonance/presentation/ui/pages/artist_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/genre_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/home_page.dart';
 import 'package:resonance/presentation/ui/pages/permission_page.dart';
+import 'package:resonance/presentation/ui/pages/player/player_page.dart';
 import 'package:resonance/presentation/ui/pages/songs_page.dart';
 import 'package:resonance/presentation/ui/pages/splash_page.dart';
 import 'package:resonance/presentation/ui/pages/queue_page.dart';
@@ -48,6 +49,10 @@ abstract final class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.queue,
       page: () => const QueuePage(),
+    ),
+     GetPage<dynamic>(
+      name: AppRoutes.player,
+      page: () => const PlayerPage(),
     ),
   ];
 }

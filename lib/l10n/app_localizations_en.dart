@@ -279,5 +279,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spikeEmpty => 'No items found';
 
   @override
+  String get nowPlaying => 'Now playing';
+
+  @override
+  String get playerTitle => 'Player';
+
+  @override
   String get backToParent => 'Back';
 }

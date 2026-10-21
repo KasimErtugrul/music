@@ -277,5 +277,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get spikeEmpty => 'Öğe bulunamadı';
 
   @override
+  String get nowPlaying => 'Şu an çalıyor';
+
+  @override
+  String get playerTitle => 'Oynatıcı';
+
+  @override
   String get backToParent => 'Geri';
 }

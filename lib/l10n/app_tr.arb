@@ -90,5 +90,7 @@
   "spikeLoadError": "İstatistikler yüklenemedi",
   "spikeNotScanned": "Henüz taranmadı",
   "spikeEmpty": "Öğe bulunamadı",
+    "nowPlaying": "Şu an çalıyor",
+  "playerTitle": "Oynatıcı",
   "backToParent": "Geri"
 }

@@ -566,6 +566,18 @@ abstract class AppLocalizations {
   /// **'No items found'**
   String get spikeEmpty;
 
+  /// No description provided for @nowPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Now playing'**
+  String get nowPlaying;
+
+  /// No description provided for @playerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Player'**
+  String get playerTitle;
+
   /// No description provided for @backToParent.
   ///
   /// In en, this message translates to:
