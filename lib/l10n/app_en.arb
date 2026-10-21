@@ -104,5 +104,6 @@
   "spikeEmpty": "No items found",
     "nowPlaying": "Now playing",
   "playerTitle": "Player",
+    "playerNoSong": "Nothing is playing right now",
   "backToParent": "Back"
 }

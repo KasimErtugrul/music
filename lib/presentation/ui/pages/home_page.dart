@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/l10n/app_localizations.dart';
+import 'package:resonance/presentation/ui/layouts/adaptive_scaffold.dart';
 import 'package:resonance/presentation/ui/pages/library_tabs_page.dart';
-import 'package:resonance/presentation/ui/widgets/mini_player.dart';
 
-/// Ana iskelet. Gün 12'de `adaptive_scaffold.dart` + compact/expanded
-/// yerleşimleriyle değiştirilecek. Şimdilik: IndexedStack + NavigationBar.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -19,7 +17,35 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
+    return AdaptiveScaffold(
+      currentIndex: _index,
+      onDestinationSelected: (i) => setState(() => _index = i),
+      destinations: <NavigationDestination>[
+        NavigationDestination(
+          icon: const Icon(Icons.home_outlined),
+          selectedIcon: const Icon(Icons.home),
+          label: l10n.tabHome,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.library_music_outlined),
+          selectedIcon: const Icon(Icons.library_music),
+          label: l10n.tabLibrary,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.queue_music_outlined),
+          selectedIcon: const Icon(Icons.queue_music),
+          label: l10n.tabPlaylists,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.search),
+          label: l10n.tabSearch,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.settings_outlined),
+          selectedIcon: const Icon(Icons.settings),
+          label: l10n.tabSettings,
+        ),
+      ],
       body: IndexedStack(
         index: _index,
         children: const <Widget>[
@@ -30,49 +56,10 @@ class _HomePageState extends State<HomePage> {
           _PlaceholderTab(icon: Icons.settings_outlined),
         ],
       ),
-      // Gün 11: Mini Player alt menünün hemen üstünde
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const MiniPlayer(),
-          NavigationBar(
-            selectedIndex: _index,
-            onDestinationSelected: (i) => setState(() => _index = i),
-            destinations: <NavigationDestination>[
-              NavigationDestination(
-                icon: const Icon(Icons.home_outlined),
-                selectedIcon: const Icon(Icons.home),
-                label: l10n.tabHome,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.library_music_outlined),
-                selectedIcon: const Icon(Icons.library_music),
-                label: l10n.tabLibrary,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.queue_music_outlined),
-                selectedIcon: const Icon(Icons.queue_music),
-                label: l10n.tabPlaylists,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.search),
-                label: l10n.tabSearch,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.settings_outlined),
-                selectedIcon: const Icon(Icons.settings),
-                label: l10n.tabSettings,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }
 
-/// Home sekmesi: Gün 1'den kalan geçici içerik. Gerçek Home görünümü
-/// sonraki günlerde; şimdilik sadece dil değiştirici.
 class _HomeTabContent extends StatelessWidget {
   const _HomeTabContent();
 
@@ -116,7 +103,6 @@ class _HomeTabContent extends StatelessWidget {
   }
 }
 
-/// Henüz içeriği olmayan sekmeler için geçici yer tutucu.
 class _PlaceholderTab extends StatelessWidget {
   const _PlaceholderTab({required this.icon});
 

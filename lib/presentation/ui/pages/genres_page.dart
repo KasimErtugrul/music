@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/routes/app_routes.dart';
+import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/data/models/genre_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
@@ -35,16 +36,43 @@ class GenresPage extends GetView<LibraryController> {
           message: l10n.libraryEmptyGenresMessage,
         );
       }
-      return ListView.builder(
-        itemCount: controller.genres.length,
-        itemBuilder: (context, i) {
-          final genre = controller.genres[i];
-          return _GenreTile(
-            genre: genre,
-            onTap: () => Get.toNamed<dynamic>(
-              AppRoutes.genreDetail,
-              arguments: genre,
-            ),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
+          if (isWide) {
+            return GridView.builder(
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 400,
+                mainAxisExtent: 72,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: controller.genres.length,
+              itemBuilder: (context, i) {
+                final genre = controller.genres[i];
+                return _GenreTile(
+                  genre: genre,
+                  onTap: () => Get.toNamed<dynamic>(
+                    AppRoutes.genreDetail,
+                    arguments: genre,
+                  ),
+                );
+              },
+            );
+          }
+          return ListView.builder(
+            itemCount: controller.genres.length,
+            itemBuilder: (context, i) {
+              final genre = controller.genres[i];
+              return _GenreTile(
+                genre: genre,
+                onTap: () => Get.toNamed<dynamic>(
+                  AppRoutes.genreDetail,
+                  arguments: genre,
+                ),
+              );
+            },
           );
         },
       );

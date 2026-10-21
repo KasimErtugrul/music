@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/l10n/app_localizations.dart';
+import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 
-/// Şarkıların gövde içeriği (Scaffold'suz). `LibraryTabsPage`'in
-/// `TabBarView`'u ve `/songs` rotası tarafından kullanılır.
 class SongsView extends GetView<LibraryController> {
   const SongsView({super.key});
 
@@ -44,15 +43,32 @@ class SongsView extends GetView<LibraryController> {
             total: controller.songs.length,
           ),
           const Divider(height: 1),
-          // _SortHeader ve SongsView aynı kalıyor, sadece ListView.builder kısmı:
           Expanded(
-            child: ListView.builder(
-              itemCount: controller.songs.length,
-              itemBuilder: (context, i) {
-                final song = controller.songs[i];
-                return SongTile(
-                  song: song,
-                  queueContext: controller.songs, // Gün 9
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
+                if (isWide) {
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(8),
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 400,
+                      mainAxisExtent: 72,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemCount: controller.songs.length,
+                    itemBuilder: (context, i) => SongTile(
+                      song: controller.songs[i],
+                      queueContext: controller.songs,
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: controller.songs.length,
+                  itemBuilder: (context, i) => SongTile(
+                    song: controller.songs[i],
+                    queueContext: controller.songs,
+                  ),
                 );
               },
             ),
@@ -63,8 +79,6 @@ class SongsView extends GetView<LibraryController> {
   }
 }
 
-/// Tek başına açılan Şarkılar sayfası (`/songs` rotası). `HomeBinding`
-/// sayesinde `LibraryController` burada mevcuttur.
 class SongsPage extends StatelessWidget {
   const SongsPage({super.key});
 
@@ -115,15 +129,12 @@ class _SortHeader extends StatelessWidget {
                       children: <Widget>[
                         SizedBox(
                           width: 20,
-                          child:
-                              current ==
-                                      SongSort(field: field, direction: dir)
-                                  ? const Icon(Icons.check, size: 16)
-                                  : null,
+                          child: current == SongSort(field: field, direction: dir)
+                              ? const Icon(Icons.check, size: 16)
+                              : null,
                         ),
                         Text(
-                          '${_fieldLabel(l10n, field)} · '
-                          '${_dirLabel(l10n, dir)}',
+                          '${_fieldLabel(l10n, field)} · ${_dirLabel(l10n, dir)}',
                         ),
                       ],
                     ),
@@ -137,16 +148,11 @@ class _SortHeader extends StatelessWidget {
 
   String _fieldLabel(AppLocalizations l10n, SongSortField f) {
     switch (f) {
-      case SongSortField.title:
-        return l10n.sortFieldTitle;
-      case SongSortField.artist:
-        return l10n.sortFieldArtist;
-      case SongSortField.album:
-        return l10n.sortFieldAlbum;
-      case SongSortField.dateAdded:
-        return l10n.sortFieldDateAdded;
-      case SongSortField.duration:
-        return l10n.sortFieldDuration;
+      case SongSortField.title: return l10n.sortFieldTitle;
+      case SongSortField.artist: return l10n.sortFieldArtist;
+      case SongSortField.album: return l10n.sortFieldAlbum;
+      case SongSortField.dateAdded: return l10n.sortFieldDateAdded;
+      case SongSortField.duration: return l10n.sortFieldDuration;
     }
   }
 

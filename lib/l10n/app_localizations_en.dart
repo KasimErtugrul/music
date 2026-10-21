@@ -285,5 +285,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerTitle => 'Player';
 
   @override
+  String get playerNoSong => 'Nothing is playing right now';
+
+  @override
   String get backToParent => 'Back';
 }

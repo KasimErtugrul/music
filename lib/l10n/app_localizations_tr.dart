@@ -283,5 +283,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get playerTitle => 'Oynatıcı';
 
   @override
+  String get playerNoSong => 'Şu an çalan bir şarkı yok';
+
+  @override
   String get backToParent => 'Geri';
 }

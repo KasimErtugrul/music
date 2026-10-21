@@ -578,6 +578,12 @@ abstract class AppLocalizations {
   /// **'Player'**
   String get playerTitle;
 
+  /// No description provided for @playerNoSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is playing right now'**
+  String get playerNoSong;
+
   /// No description provided for @backToParent.
   ///
   /// In en, this message translates to:

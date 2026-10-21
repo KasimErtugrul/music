@@ -92,5 +92,6 @@
   "spikeEmpty": "Öğe bulunamadı",
     "nowPlaying": "Şu an çalıyor",
   "playerTitle": "Oynatıcı",
+    "playerNoSong": "Şu an çalan bir şarkı yok",
   "backToParent": "Geri"
 }
