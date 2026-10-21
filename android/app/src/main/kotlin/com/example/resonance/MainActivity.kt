@@ -1,6 +1,7 @@
 package com.example.resonance
 
 import android.content.ContentUris
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
@@ -8,7 +9,9 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.util.Size
-import io.flutter.embedding.android.FlutterActivity
+// DEĞİŞİKLİK 1: FlutterActivity yerine AudioServiceActivity import edildi.
+import com.ryanheise.audioservice.AudioServiceActivity
+import com.ryanheise.audioservice.AudioServicePlugin
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayOutputStream
@@ -20,12 +23,20 @@ import java.nio.charset.CodingErrorAction
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class MainActivity : FlutterActivity() {
+// DEĞİŞİKLİK 2: Miras alınan sınıf AudioServiceActivity olarak değiştirildi.
+class MainActivity : AudioServiceActivity() {
     private val executor: ExecutorService = Executors.newFixedThreadPool(2)
     private val mainHandler = Handler(Looper.getMainLooper())
 
+    // DEĞİŞİKLİK 3: audio_service'in beklediği paylaşılan FlutterEngine'i sağla.
+    // Bu sayede Activity ve arka plan servisi aynı Dart isolate'ini kullanır.
+    override fun provideFlutterEngine(context: Context): FlutterEngine? {
+        return AudioServicePlugin.getFlutterEngine(context)
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // Mevcut MethodChannel kodun aynen korunuyor.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -84,8 +95,6 @@ class MainActivity : FlutterActivity() {
             MediaStore.Audio.Media.IS_ALARM,
             MediaStore.Audio.Media.IS_NOTIFICATION,
         )
-        // GENRE sütunu yalnızca API 30+ içinde var; altında null döner
-        // (Gün 4'te Genres.Members ile tamamlanabilir).
         if (hasGenre) projection.add(MediaStore.Audio.Media.GENRE)
 
         val songs = ArrayList<Map<String, Any?>>()
@@ -107,7 +116,6 @@ class MainActivity : FlutterActivity() {
             val iGenre = if (hasGenre) c.getColumnIndexOrThrow(MediaStore.Audio.Media.GENRE) else -1
 
             while (c.moveToNext()) {
-                // NULL değerler 0 sayılır (satırı yanlışlıkla dışlamamak için).
                 if (c.getInt(iRing) != 0 || c.getInt(iAlarm) != 0 || c.getInt(iNotif) != 0) continue
                 val id = c.getLong(iId)
                 songs.add(
@@ -138,7 +146,7 @@ class MainActivity : FlutterActivity() {
             try {
                 contentResolver.loadThumbnail(uri, Size(size, size), null)
             } catch (e: Exception) {
-                null // kapak yok / okunamadı
+                null
             }
         } else {
             legacyAlbumArt(songId, size)
@@ -150,7 +158,6 @@ class MainActivity : FlutterActivity() {
         return out.toByteArray()
     }
 
-    /** API 24–28: Albums.ALBUM_ART yolundan kapak (eski yöntem). */
     @Suppress("DEPRECATION")
     private fun legacyAlbumArt(songId: Long, size: Int): Bitmap? {
         val albumId = contentResolver.query(
@@ -178,13 +185,6 @@ class MainActivity : FlutterActivity() {
         return BitmapFactory.decodeFile(artPath, opts)
     }
 
-    // --- Etiket kodlaması onarımı -------------------------------------------
-    // MediaStore bazı dosyalarda UTF-8 (BOM'lu) etiketi yanlış kodlamayla
-    // okuyup kaydediyor (Latin-1/windows-125x veya GBK ailesi). Bu, ham metni
-    // aynı kodlamayla geri bayta çevirip katı UTF-8 olarak okuyarak onarılır.
-    // Yalnızca geri çevirme tam başarılı olursa değişiklik uygulanır; aksi halde
-    // metin olduğu gibi bırakılır. DOĞRULANMADI: Android'in kullandığı kodlama
-    // çözücüsü Java'dakiyle birebir aynı olmayabilir (CJK kolu için).
     private val repairCharsets: List<Charset> by lazy {
         listOf("ISO-8859-1", "windows-1252", "windows-1254", "GB18030", "GBK", "Big5")
             .mapNotNull { name -> try { Charset.forName(name) } catch (e: Exception) { null } }
