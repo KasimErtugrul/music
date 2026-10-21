@@ -1,22 +1,20 @@
 import 'package:get/get.dart';
+import 'package:resonance/core/utils/permission_helper.dart';
+import 'package:resonance/data/datasources/audio_handler.dart';
 import 'package:resonance/data/datasources/device_media_datasource.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
-import 'package:resonance/core/utils/permission_helper.dart';
+import 'package:resonance/data/repositories/player_repository.dart';
 import 'package:resonance/presentation/controllers/permission_controller.dart';
+import 'package:resonance/presentation/controllers/player_controller.dart';
 
-/// Uygulama genelinde kalıcı bağımlılıklar burada kaydedilir.
-/// `PlayerController` (permanent) Gün 8'de eklenecek.
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
     Get.put<PermissionHelper>(PermissionHelper(), permanent: true);
-    // Splash ve izin sayfası aynı örneği kullanır; fenix: rota değişiminde
-    // silinirse yeniden oluşturulur.
     Get.lazyPut<PermissionController>(
       () => PermissionController(Get.find<PermissionHelper>()),
       fenix: true,
     );
-    // Gün 4: kütüphane verisi. Controller (Gün 5) soyut tipe bağlanır.
     Get.lazyPut<DeviceMediaDataSource>(
       () => MediaStoreChannelDataSource(),
       fenix: true,
@@ -24,6 +22,16 @@ class InitialBinding extends Bindings {
     Get.lazyPut<LibraryRepository>(
       () => LibraryRepositoryImpl(Get.find<DeviceMediaDataSource>()),
       fenix: true,
+    );
+
+    // Gün 8: AudioHandler `main()`'de kaydedilir (ResonanceApp çalışmadan önce).
+    Get.put<PlayerRepository>(
+      PlayerRepositoryImpl(Get.find<ResonanceAudioHandler>()),
+      permanent: true,
+    );
+    Get.put<PlayerController>(
+      PlayerController(Get.find<PlayerRepository>()),
+      permanent: true,
     );
   }
 }

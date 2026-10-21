@@ -4,12 +4,9 @@ import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:resonance/data/datasources/player_datasource.dart';
 
-/// `audio_service` tarafından yönetilen arka plan oynatma köprüsü.
-/// `PlayerDataSource`'ı sarar; kuyruk, medya öğesi ve playback durumunu
-/// `audio_service`'e bildirir.
 class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   ResonanceAudioHandler({PlayerDataSource? source})
-      : _source = source ?? PlayerDataSource() {
+    : _source = source ?? PlayerDataSource() {
     _bindStreams();
   }
 
@@ -17,15 +14,17 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
 
   AudioPlayer get _player => _source.player;
 
-  // ---- Başlangıç bağlantıları ----
+  /// Gün 8: pozisyon ve süre UI'da dar kapsamlı dinlenir.
+  Stream<Duration> get positionStream => _source.positionStream;
+  Stream<Duration?> get durationStream => _source.durationStream;
+  Stream<PlayerException> get errorStream => _source.errorStream;
+
+  bool get hasNext => _source.hasNext;
+  bool get hasPrevious => _source.hasPrevious;
 
   void _bindStreams() {
-    // just_audio → audio_service playback state.
-    _source.playbackEventStream
-        .map(_transformEvent)
-        .pipe(playbackState);
+    _source.playbackEventStream.map(_transformEvent).pipe(playbackState);
 
-    // Mevcut kuyruk indeksi değiştiğinde MediaItem'ı güncelle.
     _source.currentIndexStream.listen((index) {
       if (index == null) return;
       final items = queue.value;
@@ -34,15 +33,11 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
       }
     });
 
-    // Hatalar: `errorStream` (0.10.x). Otomatik atlama `maxSkipsOnError`
-    // ile yapılıyor; burada yalnızca loglama/ileride UI bildirimi için
-    // dinliyoruz.
     _source.errorStream.listen((e) {
-      // Gün 8'de yerelleştirilmiş hata gösterimi eklenecek; şimdilik sessiz.
+      // Gün 11: PlayerController üzerinden UI'da yerelleştirilmiş mesaj.
     });
   }
 
-  /// `just_audio` `PlaybackEvent` → `audio_service` `PlaybackState`.
   PlaybackState _transformEvent(PlaybackEvent event) {
     return PlaybackState(
       controls: const <MediaControl>[
@@ -51,11 +46,7 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
         MediaControl.pause,
         MediaControl.skipToNext,
       ],
-      systemActions: const <MediaAction>{
-        MediaAction.seek,
-      },
-      // Bildirim kompakt görünümünde gösterilecek kontrol indeksleri.
-      // (0=previous, 1=play, 2=pause, 3=next) → previous, play, next.
+      systemActions: const <MediaAction>{MediaAction.seek},
       androidCompactActionIndices: const <int>[0, 1, 3],
       processingState: _mapProcessingState(_player.processingState),
       playing: _player.playing,
@@ -81,10 +72,6 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
     }
   }
 
-  // ---- Kuyruk ----
-
-  /// Şarkı listesini kuyruğa yükler. `sources` sırası `items` sırasıyla
-  /// aynı olmalıdır.
   Future<void> loadTracks({
     required List<MediaItem> items,
     required List<AudioSource> sources,
@@ -98,8 +85,6 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
     mediaItem.add(items[initialIndex.clamp(0, items.length - 1)]);
     await _source.loadQueue(sources, initialIndex: initialIndex);
   }
-
-  // ---- AudioHandler API ----
 
   @override
   Future<void> play() => _source.play();
@@ -137,15 +122,15 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
     final mode = switch (repeatMode) {
       AudioServiceRepeatMode.none => LoopMode.off,
       AudioServiceRepeatMode.one => LoopMode.one,
-      AudioServiceRepeatMode.all || AudioServiceRepeatMode.group => LoopMode.all,
+      AudioServiceRepeatMode.all ||
+      AudioServiceRepeatMode.group => LoopMode.all,
     };
     await _source.setLoopMode(mode);
   }
 
   @override
   Future<void> onTaskRemoved() async {
-    // Uygulama son görevden kaldırıldığında varsayılan: çalmaya devam et.
-    // Gün 21'de "uygulama kapatılınca durdur" ayarı eklenecek.
+    // Gün 21: "uygulama kapatılınca durdur" ayarı bağlanacak.
     await super.onTaskRemoved();
   }
 }
