@@ -1,10 +1,9 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:resonance/app.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
 
-/// Gün 7: arka plan oynatma köprüsü. Gün 8'de `PlayerRepository` bunu
-/// kullanacak; şimdilik global tutuluyor.
 late final AudioHandler audioHandler;
 
 Future<void> main() async {
@@ -15,12 +14,15 @@ Future<void> main() async {
     config: const AudioServiceConfig(
       androidNotificationChannelId: 'com.example.resonance.channel.audio',
       androidNotificationChannelName: 'Playback',
-      androidNotificationChannelDescription:
-          'Playback controls for Resonance',
+      androidNotificationChannelDescription: 'Playback controls for Resonance',
       androidNotificationOngoing: true,
-      // Uygulama görevden kaldırılınca servisi durdurmak için Gün 21'de
-      // ilgili parametre DOĞRULANIP eklenecek.
     ),
+  );
+
+  // `InitialBinding` bu örneği `Get.find<ResonanceAudioHandler>()` ile bulur.
+  Get.put<ResonanceAudioHandler>(
+    audioHandler as ResonanceAudioHandler,
+    permanent: true,
   );
 
   runApp(const ResonanceApp());
