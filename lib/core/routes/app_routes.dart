@@ -6,4 +6,5 @@ abstract final class AppRoutes {
   static const String albumDetail = '/album';
   static const String artistDetail = '/artist';
   static const String genreDetail = '/genre';
+  static const String queue = '/queue';
 }

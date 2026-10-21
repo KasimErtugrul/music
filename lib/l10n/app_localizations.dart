@@ -506,6 +506,48 @@ abstract class AppLocalizations {
   /// **'Missing artist: {noArtist}, missing genre: {noGenre}'**
   String spikeMissingStats(int noArtist, int noGenre);
 
+  /// No description provided for @queueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue'**
+  String get queueTitle;
+
+  /// No description provided for @playNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Play next'**
+  String get playNext;
+
+  /// No description provided for @addToQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to queue'**
+  String get addToQueue;
+
+  /// No description provided for @queueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The queue is empty'**
+  String get queueEmpty;
+
+  /// No description provided for @clearQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear queue'**
+  String get clearQueue;
+
+  /// No description provided for @clearQueueConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear the queue?'**
+  String get clearQueueConfirm;
+
+  /// No description provided for @queueCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue cleared'**
+  String get queueCleared;
+
   /// No description provided for @spikeLoadError.
   ///
   /// In en, this message translates to:

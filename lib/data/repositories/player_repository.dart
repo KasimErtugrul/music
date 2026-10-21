@@ -1,11 +1,9 @@
 import 'dart:async';
-
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
 import 'package:resonance/data/models/song_model.dart';
 
-/// Oynatma durumunun soyut arayüzü. Controller yalnızca buna bağlanır.
 abstract class PlayerRepository {
   Stream<MediaItem?> get mediaItemStream;
   Stream<List<MediaItem>> get queueStream;
@@ -14,7 +12,13 @@ abstract class PlayerRepository {
   Stream<Duration?> get durationStream;
   Stream<PlayerException> get errorStream;
 
-  Future<void> loadQueue(List<SongModel> songs, {int initialIndex = 0});
+  Duration get position;
+
+  Future<void> loadQueue(
+    List<SongModel> songs, {
+    int initialIndex = 0,
+    Duration? initialPosition,
+  });
   Future<void> play();
   Future<void> pause();
   Future<void> stop();
@@ -30,41 +34,37 @@ abstract class PlayerRepository {
 
 class PlayerRepositoryImpl implements PlayerRepository {
   PlayerRepositoryImpl(this._handler);
-
   final ResonanceAudioHandler _handler;
 
   @override
   Stream<MediaItem?> get mediaItemStream => _handler.mediaItem;
-
   @override
   Stream<List<MediaItem>> get queueStream => _handler.queue;
-
   @override
   Stream<PlaybackState> get playbackStateStream => _handler.playbackState;
-
   @override
   Stream<Duration> get positionStream => _handler.positionStream;
-
   @override
   Stream<Duration?> get durationStream => _handler.durationStream;
-
   @override
   Stream<PlayerException> get errorStream => _handler.errorStream;
+  @override
+  Duration get position => _handler.position;
 
   @override
-  Future<void> loadQueue(List<SongModel> songs, {int initialIndex = 0}) async {
-    final items = <MediaItem>[
-      for (final s in songs) _toMediaItem(s),
-    ];
-    // `useLazyPreparation` just_audio'da varsayılan true → büyük listelerde
-    // ilk yükleme hızlı; her öğe çalınmadan hemen önce hazırlanır.
-    final sources = <AudioSource>[
-      for (final s in songs) AudioSource.uri(Uri.parse(s.uri)),
-    ];
+  Future<void> loadQueue(
+    List<SongModel> songs, {
+    int initialIndex = 0,
+    Duration? initialPosition,
+  }) async {
+    final items = <MediaItem>[for (final s in songs) _toMediaItem(s)];
+    final sources = <AudioSource>[for (final s in songs) AudioSource.uri(Uri.parse(s.uri))];
+    
     await _handler.loadTracks(
       items: items,
       sources: sources,
       initialIndex: initialIndex,
+      initialPosition: initialPosition,
     );
   }
 
@@ -79,10 +79,6 @@ class PlayerRepositoryImpl implements PlayerRepository {
     );
   }
 
-  /// DOĞRULANMADI: Android'in standart albüm kapağı content URI'si bu formatta
-  /// (`content://media/external/audio/albumart/{albumId}`), ancak cihazda
-  /// gerçekten çalıştığı test edilmedi. Çalışmazsa Gün 11'de `file://` ile
-  /// önbelleğe alınmış kapak yoluna geçilecek.
   Uri? _artUri(SongModel song) {
     final albumId = song.albumId;
     if (albumId == null) return null;
@@ -91,34 +87,24 @@ class PlayerRepositoryImpl implements PlayerRepository {
 
   @override
   Future<void> play() => _handler.play();
-
   @override
   Future<void> pause() => _handler.pause();
-
   @override
   Future<void> stop() => _handler.stop();
-
   @override
   Future<void> seek(Duration position) => _handler.seek(position);
-
   @override
   Future<void> skipToNext() => _handler.skipToNext();
-
   @override
   Future<void> skipToPrevious() => _handler.skipToPrevious();
-
   @override
   Future<void> setShuffleMode(bool enabled) => _handler.setShuffleMode(
         enabled ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none,
       );
-
   @override
-  Future<void> setRepeatMode(AudioServiceRepeatMode mode) =>
-      _handler.setRepeatMode(mode);
-
+  Future<void> setRepeatMode(AudioServiceRepeatMode mode) => _handler.setRepeatMode(mode);
   @override
   bool get hasNext => _handler.hasNext;
-
   @override
   bool get hasPrevious => _handler.hasPrevious;
 }

@@ -246,6 +246,28 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get queueTitle => 'Kuyruk';
+
+  @override
+  String get playNext => 'Sonra çal';
+
+  @override
+  String get addToQueue => 'Kuyruğa ekle';
+
+  @override
+  String get queueEmpty => 'Kuyruk boş';
+
+  @override
+  String get clearQueue => 'Kuyruğu temizle';
+
+  @override
+  String get clearQueueConfirm =>
+      'Kuyruğu temizlemek istediğinize emin misiniz?';
+
+  @override
+  String get queueCleared => 'Kuyruk temizlendi';
+
+  @override
   String get spikeLoadError => 'İstatistikler yüklenemedi';
 
   @override

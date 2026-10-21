@@ -44,10 +44,17 @@ class SongsView extends GetView<LibraryController> {
             total: controller.songs.length,
           ),
           const Divider(height: 1),
+          // _SortHeader ve SongsView aynı kalıyor, sadece ListView.builder kısmı:
           Expanded(
             child: ListView.builder(
               itemCount: controller.songs.length,
-              itemBuilder: (context, i) => SongTile(song: controller.songs[i]),
+              itemBuilder: (context, i) {
+                final song = controller.songs[i];
+                return SongTile(
+                  song: song,
+                  queueContext: controller.songs, // Gün 9
+                );
+              },
             ),
           ),
         ],

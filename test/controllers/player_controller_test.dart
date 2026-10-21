@@ -4,47 +4,51 @@ import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:resonance/data/models/song_model.dart';
+import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
+import 'package:resonance/data/repositories/queue_state_repository.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 
 class _MockPlayerRepository extends Mock implements PlayerRepository {}
+class _MockLibraryRepository extends Mock implements LibraryRepository {}
+class _MockQueueStateRepository extends Mock implements QueueStateRepository {}
 
 SongModel _song(int id, String title) => SongModel(
-      id: id,
-      uri: 'content://media/external/audio/media/$id',
-      path: '/music/$id.mp3',
-      title: title,
-      durationMs: 180000,
-      sizeBytes: 4000000,
+      id: id, uri: 'content://media/external/audio/media/$id', path: '/music/$id.mp3',
+      title: title, durationMs: 180000, sizeBytes: 4000000,
     );
 
 void main() {
   late _MockPlayerRepository repo;
+  late _MockLibraryRepository libRepo;
+  late _MockQueueStateRepository stateRepo;
   late PlayerController controller;
 
   setUpAll(() {
     registerFallbackValue(<SongModel>[]);
+    registerFallbackValue(Duration.zero);
     registerFallbackValue(AudioServiceRepeatMode.none);
+    registerFallbackValue(const SongSort());
   });
 
   setUp(() {
     Get.testMode = true;
     repo = _MockPlayerRepository();
+    libRepo = _MockLibraryRepository();
+    stateRepo = _MockQueueStateRepository();
 
-    when(() => repo.mediaItemStream)
-        .thenAnswer((_) => const Stream<MediaItem?>.empty());
-    when(() => repo.queueStream)
-        .thenAnswer((_) => const Stream<List<MediaItem>>.empty());
-    when(() => repo.playbackStateStream)
-        .thenAnswer((_) => const Stream<PlaybackState>.empty());
-    when(() => repo.positionStream)
-        .thenAnswer((_) => const Stream<Duration>.empty());
-    when(() => repo.durationStream)
-        .thenAnswer((_) => const Stream<Duration?>.empty());
-    when(() => repo.errorStream)
-        .thenAnswer((_) => const Stream<PlayerException>.empty());
+    when(() => repo.mediaItemStream).thenAnswer((_) => const Stream<MediaItem?>.empty());
+    when(() => repo.queueStream).thenAnswer((_) => const Stream<List<MediaItem>>.empty());
+    when(() => repo.playbackStateStream).thenAnswer((_) => const Stream<PlaybackState>.empty());
+    when(() => repo.positionStream).thenAnswer((_) => const Stream<Duration>.empty());
+    when(() => repo.durationStream).thenAnswer((_) => const Stream<Duration?>.empty());
+    when(() => repo.errorStream).thenAnswer((_) => const Stream<PlayerException>.empty());
+    when(() => repo.position).thenReturn(Duration.zero);
+    
+    when(() => libRepo.songs(sort: any(named: 'sort'))).thenAnswer((_) async => <SongModel>[]);
+    when(() => stateRepo.loadState()).thenAnswer((_) async => null);
 
-    controller = PlayerController(repo);
+    controller = PlayerController(repo, libRepo, stateRepo);
     controller.onInit();
   });
 

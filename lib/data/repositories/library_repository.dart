@@ -92,11 +92,11 @@ abstract class LibraryRepository {
 /// gruplar, klasör ağacı) arka plan isolate'inde kurar ve önbellekte tutur.
 class LibraryRepositoryImpl implements LibraryRepository {
   /// [useIsolate] yalnızca testler içindir.
-  LibraryRepositoryImpl(this._source, {bool useIsolate = true})
-      : _useIsolate = useIsolate;
+    LibraryRepositoryImpl(this._source, {this.useIsolate = true});
+
 
   final DeviceMediaDataSource _source;
-  final bool _useIsolate;
+  final bool useIsolate;
 
   _LibraryIndex? _index;
   Future<_LibraryIndex>? _loading;
@@ -112,7 +112,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
   Future<_LibraryIndex> _load() async {
     try {
       final songs = await _source.querySongs();
-      final index = _useIsolate
+      final index = useIsolate
           ? await _buildIndexInIsolate(songs)
           : _buildIndex(songs);
       _orders.clear();

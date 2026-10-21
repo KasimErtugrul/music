@@ -2,8 +2,11 @@ import 'package:get/get.dart';
 import 'package:resonance/core/utils/permission_helper.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
 import 'package:resonance/data/datasources/device_media_datasource.dart';
+import 'package:resonance/data/datasources/local/app_database.dart';
+import 'package:resonance/data/datasources/local/daos/queue_state_dao.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
+import 'package:resonance/data/repositories/queue_state_repository.dart';
 import 'package:resonance/presentation/controllers/permission_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 
@@ -24,13 +27,25 @@ class InitialBinding extends Bindings {
       fenix: true,
     );
 
-    // Gün 8: AudioHandler `main()`'de kaydedilir (ResonanceApp çalışmadan önce).
+    // Gün 10: DB, Kuyruk Kalıcılığı
+    Get.put<AppDatabase>(AppDatabase.defaults(), permanent: true);
+    Get.put<QueueStateDao>(Get.find<AppDatabase>().queueStateDao, permanent: true);
+    Get.put<QueueStateRepository>(
+      QueueStateRepositoryImpl(Get.find<QueueStateDao>()),
+      permanent: true,
+    );
+
+    // Gün 8: Player
     Get.put<PlayerRepository>(
       PlayerRepositoryImpl(Get.find<ResonanceAudioHandler>()),
       permanent: true,
     );
     Get.put<PlayerController>(
-      PlayerController(Get.find<PlayerRepository>()),
+      PlayerController(
+        Get.find<PlayerRepository>(),
+        Get.find<LibraryRepository>(),
+        Get.find<QueueStateRepository>(),
+      ),
       permanent: true,
     );
   }

@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:resonance/data/datasources/audio_session_datasource.dart';
 import 'package:resonance/data/datasources/player_datasource.dart';
 
 class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   ResonanceAudioHandler({PlayerDataSource? source})
-    : _source = source ?? PlayerDataSource() {
+      : _source = source ?? PlayerDataSource() {
+    // Gün 10: Ses odağı ve kulaklık olayları
+    AudioSessionDatasource(_source).init();
     _bindStreams();
   }
 
@@ -14,11 +17,13 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
 
   AudioPlayer get _player => _source.player;
 
-  /// Gün 8: pozisyon ve süre UI'da dar kapsamlı dinlenir.
   Stream<Duration> get positionStream => _source.positionStream;
   Stream<Duration?> get durationStream => _source.durationStream;
   Stream<PlayerException> get errorStream => _source.errorStream;
-
+  
+  // Senkron pozisyon (Gün 9'da eklendi)
+  Duration get position => _source.position;
+  
   bool get hasNext => _source.hasNext;
   bool get hasPrevious => _source.hasPrevious;
 
@@ -34,7 +39,7 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
     });
 
     _source.errorStream.listen((e) {
-      // Gün 11: PlayerController üzerinden UI'da yerelleştirilmiş mesaj.
+      // Gün 11'de UI'da yerelleştirilmiş mesaj gösterilecek.
     });
   }
 
@@ -76,6 +81,7 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
     required List<MediaItem> items,
     required List<AudioSource> sources,
     int initialIndex = 0,
+    Duration? initialPosition,
   }) async {
     queue.add(items);
     if (items.isEmpty) {
@@ -83,7 +89,11 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
       return;
     }
     mediaItem.add(items[initialIndex.clamp(0, items.length - 1)]);
-    await _source.loadQueue(sources, initialIndex: initialIndex);
+    await _source.loadQueue(
+      sources,
+      initialIndex: initialIndex,
+      initialPosition: initialPosition,
+    );
   }
 
   @override
@@ -122,15 +132,14 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
     final mode = switch (repeatMode) {
       AudioServiceRepeatMode.none => LoopMode.off,
       AudioServiceRepeatMode.one => LoopMode.one,
-      AudioServiceRepeatMode.all ||
-      AudioServiceRepeatMode.group => LoopMode.all,
+      AudioServiceRepeatMode.all || AudioServiceRepeatMode.group =>
+        LoopMode.all,
     };
     await _source.setLoopMode(mode);
   }
 
   @override
   Future<void> onTaskRemoved() async {
-    // Gün 21: "uygulama kapatılınca durdur" ayarı bağlanacak.
     await super.onTaskRemoved();
   }
 }

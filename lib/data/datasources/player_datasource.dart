@@ -1,26 +1,28 @@
 import 'dart:async';
-
 import 'package:just_audio/just_audio.dart';
 
-/// `just_audio`'nun ince sarmalayıcısı.
 class PlayerDataSource {
   PlayerDataSource({AudioPlayer? player})
       : _player = player ?? AudioPlayer(maxSkipsOnError: 6);
 
   final AudioPlayer _player;
-
   AudioPlayer get player => _player;
 
   Future<void> loadQueue(
     List<AudioSource> sources, {
     int initialIndex = 0,
+    Duration? initialPosition,
   }) async {
     if (sources.isEmpty) {
       await _player.setAudioSources(const <AudioSource>[]);
       return;
     }
     final index = initialIndex.clamp(0, sources.length - 1);
-    await _player.setAudioSources(sources, initialIndex: index);
+    await _player.setAudioSources(
+      sources,
+      initialIndex: index,
+      initialPosition: initialPosition,
+    );
   }
 
   Future<void> play() => _player.play();
@@ -28,9 +30,9 @@ class PlayerDataSource {
   Future<void> stop() => _player.stop();
   Future<void> seek(Duration position) => _player.seek(position);
   Future<void> setSpeed(double speed) => _player.setSpeed(speed);
+  Future<void> setVolume(double volume) => _player.setVolume(volume);
   Future<void> setLoopMode(LoopMode mode) => _player.setLoopMode(mode);
-  Future<void> setShuffleModeEnabled(bool enabled) =>
-      _player.setShuffleModeEnabled(enabled);
+  Future<void> setShuffleModeEnabled(bool enabled) => _player.setShuffleModeEnabled(enabled);
 
   Future<void> skipToNext() async {
     if (_player.hasNext) await _player.seekToNext();

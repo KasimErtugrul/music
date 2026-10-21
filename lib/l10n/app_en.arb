@@ -92,6 +92,13 @@
       "noGenre": { "type": "int" }
     }
   },
+   "queueTitle": "Queue",
+  "playNext": "Play next",
+  "addToQueue": "Add to queue",
+  "queueEmpty": "The queue is empty",
+  "clearQueue": "Clear queue",
+  "clearQueueConfirm": "Are you sure you want to clear the queue?",
+  "queueCleared": "Queue cleared",
   "spikeLoadError": "Failed to load stats",
   "spikeNotScanned": "Not scanned yet",
   "spikeEmpty": "No items found",

@@ -80,6 +80,13 @@
       "noGenre": { "type": "int" }
     }
   },
+    "queueTitle": "Kuyruk",
+  "playNext": "Sonra çal",
+  "addToQueue": "Kuyruğa ekle",
+  "queueEmpty": "Kuyruk boş",
+  "clearQueue": "Kuyruğu temizle",
+  "clearQueueConfirm": "Kuyruğu temizlemek istediğinize emin misiniz?",
+  "queueCleared": "Kuyruk temizlendi",
   "spikeLoadError": "İstatistikler yüklenemedi",
   "spikeNotScanned": "Henüz taranmadı",
   "spikeEmpty": "Öğe bulunamadı",

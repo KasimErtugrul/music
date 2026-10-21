@@ -8,6 +8,7 @@ import 'package:resonance/presentation/ui/pages/home_page.dart';
 import 'package:resonance/presentation/ui/pages/permission_page.dart';
 import 'package:resonance/presentation/ui/pages/songs_page.dart';
 import 'package:resonance/presentation/ui/pages/splash_page.dart';
+import 'package:resonance/presentation/ui/pages/queue_page.dart';
 
 abstract final class AppPages {
   static const String initial = AppRoutes.splash;
@@ -42,6 +43,11 @@ abstract final class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.genreDetail,
       page: () => const GenreDetailPage(),
+    ),
+    // import 'package:resonance/presentation/ui/pages/queue_page.dart';  (en üste ekle)
+    GetPage<dynamic>(
+      name: AppRoutes.queue,
+      page: () => const QueuePage(),
     ),
   ];
 }

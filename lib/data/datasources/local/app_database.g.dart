@@ -1447,6 +1447,479 @@ class LyricsCompanion extends UpdateCompanion<Lyric> {
   }
 }
 
+class $QueueStatesTable extends QueueStates
+    with TableInfo<$QueueStatesTable, QueueState> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QueueStatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _songUrisMeta = const VerificationMeta(
+    'songUris',
+  );
+  @override
+  late final GeneratedColumn<String> songUris = GeneratedColumn<String>(
+    'song_uris',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currentIndexMeta = const VerificationMeta(
+    'currentIndex',
+  );
+  @override
+  late final GeneratedColumn<int> currentIndex = GeneratedColumn<int>(
+    'current_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _positionMsMeta = const VerificationMeta(
+    'positionMs',
+  );
+  @override
+  late final GeneratedColumn<int> positionMs = GeneratedColumn<int>(
+    'position_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _shuffleEnabledMeta = const VerificationMeta(
+    'shuffleEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> shuffleEnabled = GeneratedColumn<bool>(
+    'shuffle_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("shuffle_enabled" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _repeatModeMeta = const VerificationMeta(
+    'repeatMode',
+  );
+  @override
+  late final GeneratedColumn<int> repeatMode = GeneratedColumn<int>(
+    'repeat_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _shuffleOrderMeta = const VerificationMeta(
+    'shuffleOrder',
+  );
+  @override
+  late final GeneratedColumn<String> shuffleOrder = GeneratedColumn<String>(
+    'shuffle_order',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    songUris,
+    currentIndex,
+    positionMs,
+    shuffleEnabled,
+    repeatMode,
+    shuffleOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'queue_states';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QueueState> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('song_uris')) {
+      context.handle(
+        _songUrisMeta,
+        songUris.isAcceptableOrUnknown(data['song_uris']!, _songUrisMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_songUrisMeta);
+    }
+    if (data.containsKey('current_index')) {
+      context.handle(
+        _currentIndexMeta,
+        currentIndex.isAcceptableOrUnknown(
+          data['current_index']!,
+          _currentIndexMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_currentIndexMeta);
+    }
+    if (data.containsKey('position_ms')) {
+      context.handle(
+        _positionMsMeta,
+        positionMs.isAcceptableOrUnknown(data['position_ms']!, _positionMsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMsMeta);
+    }
+    if (data.containsKey('shuffle_enabled')) {
+      context.handle(
+        _shuffleEnabledMeta,
+        shuffleEnabled.isAcceptableOrUnknown(
+          data['shuffle_enabled']!,
+          _shuffleEnabledMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_shuffleEnabledMeta);
+    }
+    if (data.containsKey('repeat_mode')) {
+      context.handle(
+        _repeatModeMeta,
+        repeatMode.isAcceptableOrUnknown(data['repeat_mode']!, _repeatModeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_repeatModeMeta);
+    }
+    if (data.containsKey('shuffle_order')) {
+      context.handle(
+        _shuffleOrderMeta,
+        shuffleOrder.isAcceptableOrUnknown(
+          data['shuffle_order']!,
+          _shuffleOrderMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QueueState map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QueueState(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      songUris: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}song_uris'],
+      )!,
+      currentIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_index'],
+      )!,
+      positionMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position_ms'],
+      )!,
+      shuffleEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}shuffle_enabled'],
+      )!,
+      repeatMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}repeat_mode'],
+      )!,
+      shuffleOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shuffle_order'],
+      ),
+    );
+  }
+
+  @override
+  $QueueStatesTable createAlias(String alias) {
+    return $QueueStatesTable(attachedDatabase, alias);
+  }
+}
+
+class QueueState extends DataClass implements Insertable<QueueState> {
+  final int id;
+  final String songUris;
+  final int currentIndex;
+  final int positionMs;
+  final bool shuffleEnabled;
+  final int repeatMode;
+  final String? shuffleOrder;
+  const QueueState({
+    required this.id,
+    required this.songUris,
+    required this.currentIndex,
+    required this.positionMs,
+    required this.shuffleEnabled,
+    required this.repeatMode,
+    this.shuffleOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['song_uris'] = Variable<String>(songUris);
+    map['current_index'] = Variable<int>(currentIndex);
+    map['position_ms'] = Variable<int>(positionMs);
+    map['shuffle_enabled'] = Variable<bool>(shuffleEnabled);
+    map['repeat_mode'] = Variable<int>(repeatMode);
+    if (!nullToAbsent || shuffleOrder != null) {
+      map['shuffle_order'] = Variable<String>(shuffleOrder);
+    }
+    return map;
+  }
+
+  QueueStatesCompanion toCompanion(bool nullToAbsent) {
+    return QueueStatesCompanion(
+      id: Value(id),
+      songUris: Value(songUris),
+      currentIndex: Value(currentIndex),
+      positionMs: Value(positionMs),
+      shuffleEnabled: Value(shuffleEnabled),
+      repeatMode: Value(repeatMode),
+      shuffleOrder: shuffleOrder == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shuffleOrder),
+    );
+  }
+
+  factory QueueState.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QueueState(
+      id: serializer.fromJson<int>(json['id']),
+      songUris: serializer.fromJson<String>(json['songUris']),
+      currentIndex: serializer.fromJson<int>(json['currentIndex']),
+      positionMs: serializer.fromJson<int>(json['positionMs']),
+      shuffleEnabled: serializer.fromJson<bool>(json['shuffleEnabled']),
+      repeatMode: serializer.fromJson<int>(json['repeatMode']),
+      shuffleOrder: serializer.fromJson<String?>(json['shuffleOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'songUris': serializer.toJson<String>(songUris),
+      'currentIndex': serializer.toJson<int>(currentIndex),
+      'positionMs': serializer.toJson<int>(positionMs),
+      'shuffleEnabled': serializer.toJson<bool>(shuffleEnabled),
+      'repeatMode': serializer.toJson<int>(repeatMode),
+      'shuffleOrder': serializer.toJson<String?>(shuffleOrder),
+    };
+  }
+
+  QueueState copyWith({
+    int? id,
+    String? songUris,
+    int? currentIndex,
+    int? positionMs,
+    bool? shuffleEnabled,
+    int? repeatMode,
+    Value<String?> shuffleOrder = const Value.absent(),
+  }) => QueueState(
+    id: id ?? this.id,
+    songUris: songUris ?? this.songUris,
+    currentIndex: currentIndex ?? this.currentIndex,
+    positionMs: positionMs ?? this.positionMs,
+    shuffleEnabled: shuffleEnabled ?? this.shuffleEnabled,
+    repeatMode: repeatMode ?? this.repeatMode,
+    shuffleOrder: shuffleOrder.present ? shuffleOrder.value : this.shuffleOrder,
+  );
+  QueueState copyWithCompanion(QueueStatesCompanion data) {
+    return QueueState(
+      id: data.id.present ? data.id.value : this.id,
+      songUris: data.songUris.present ? data.songUris.value : this.songUris,
+      currentIndex: data.currentIndex.present
+          ? data.currentIndex.value
+          : this.currentIndex,
+      positionMs: data.positionMs.present
+          ? data.positionMs.value
+          : this.positionMs,
+      shuffleEnabled: data.shuffleEnabled.present
+          ? data.shuffleEnabled.value
+          : this.shuffleEnabled,
+      repeatMode: data.repeatMode.present
+          ? data.repeatMode.value
+          : this.repeatMode,
+      shuffleOrder: data.shuffleOrder.present
+          ? data.shuffleOrder.value
+          : this.shuffleOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QueueState(')
+          ..write('id: $id, ')
+          ..write('songUris: $songUris, ')
+          ..write('currentIndex: $currentIndex, ')
+          ..write('positionMs: $positionMs, ')
+          ..write('shuffleEnabled: $shuffleEnabled, ')
+          ..write('repeatMode: $repeatMode, ')
+          ..write('shuffleOrder: $shuffleOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    songUris,
+    currentIndex,
+    positionMs,
+    shuffleEnabled,
+    repeatMode,
+    shuffleOrder,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QueueState &&
+          other.id == this.id &&
+          other.songUris == this.songUris &&
+          other.currentIndex == this.currentIndex &&
+          other.positionMs == this.positionMs &&
+          other.shuffleEnabled == this.shuffleEnabled &&
+          other.repeatMode == this.repeatMode &&
+          other.shuffleOrder == this.shuffleOrder);
+}
+
+class QueueStatesCompanion extends UpdateCompanion<QueueState> {
+  final Value<int> id;
+  final Value<String> songUris;
+  final Value<int> currentIndex;
+  final Value<int> positionMs;
+  final Value<bool> shuffleEnabled;
+  final Value<int> repeatMode;
+  final Value<String?> shuffleOrder;
+  const QueueStatesCompanion({
+    this.id = const Value.absent(),
+    this.songUris = const Value.absent(),
+    this.currentIndex = const Value.absent(),
+    this.positionMs = const Value.absent(),
+    this.shuffleEnabled = const Value.absent(),
+    this.repeatMode = const Value.absent(),
+    this.shuffleOrder = const Value.absent(),
+  });
+  QueueStatesCompanion.insert({
+    this.id = const Value.absent(),
+    required String songUris,
+    required int currentIndex,
+    required int positionMs,
+    required bool shuffleEnabled,
+    required int repeatMode,
+    this.shuffleOrder = const Value.absent(),
+  }) : songUris = Value(songUris),
+       currentIndex = Value(currentIndex),
+       positionMs = Value(positionMs),
+       shuffleEnabled = Value(shuffleEnabled),
+       repeatMode = Value(repeatMode);
+  static Insertable<QueueState> custom({
+    Expression<int>? id,
+    Expression<String>? songUris,
+    Expression<int>? currentIndex,
+    Expression<int>? positionMs,
+    Expression<bool>? shuffleEnabled,
+    Expression<int>? repeatMode,
+    Expression<String>? shuffleOrder,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (songUris != null) 'song_uris': songUris,
+      if (currentIndex != null) 'current_index': currentIndex,
+      if (positionMs != null) 'position_ms': positionMs,
+      if (shuffleEnabled != null) 'shuffle_enabled': shuffleEnabled,
+      if (repeatMode != null) 'repeat_mode': repeatMode,
+      if (shuffleOrder != null) 'shuffle_order': shuffleOrder,
+    });
+  }
+
+  QueueStatesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? songUris,
+    Value<int>? currentIndex,
+    Value<int>? positionMs,
+    Value<bool>? shuffleEnabled,
+    Value<int>? repeatMode,
+    Value<String?>? shuffleOrder,
+  }) {
+    return QueueStatesCompanion(
+      id: id ?? this.id,
+      songUris: songUris ?? this.songUris,
+      currentIndex: currentIndex ?? this.currentIndex,
+      positionMs: positionMs ?? this.positionMs,
+      shuffleEnabled: shuffleEnabled ?? this.shuffleEnabled,
+      repeatMode: repeatMode ?? this.repeatMode,
+      shuffleOrder: shuffleOrder ?? this.shuffleOrder,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (songUris.present) {
+      map['song_uris'] = Variable<String>(songUris.value);
+    }
+    if (currentIndex.present) {
+      map['current_index'] = Variable<int>(currentIndex.value);
+    }
+    if (positionMs.present) {
+      map['position_ms'] = Variable<int>(positionMs.value);
+    }
+    if (shuffleEnabled.present) {
+      map['shuffle_enabled'] = Variable<bool>(shuffleEnabled.value);
+    }
+    if (repeatMode.present) {
+      map['repeat_mode'] = Variable<int>(repeatMode.value);
+    }
+    if (shuffleOrder.present) {
+      map['shuffle_order'] = Variable<String>(shuffleOrder.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QueueStatesCompanion(')
+          ..write('id: $id, ')
+          ..write('songUris: $songUris, ')
+          ..write('currentIndex: $currentIndex, ')
+          ..write('positionMs: $positionMs, ')
+          ..write('shuffleEnabled: $shuffleEnabled, ')
+          ..write('repeatMode: $repeatMode, ')
+          ..write('shuffleOrder: $shuffleOrder')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1455,10 +1928,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $FavoritesTable favorites = $FavoritesTable(this);
   late final $PlayHistoryTable playHistory = $PlayHistoryTable(this);
   late final $LyricsTable lyrics = $LyricsTable(this);
+  late final $QueueStatesTable queueStates = $QueueStatesTable(this);
   late final PlaylistDao playlistDao = PlaylistDao(this as AppDatabase);
   late final FavoriteDao favoriteDao = FavoriteDao(this as AppDatabase);
   late final HistoryDao historyDao = HistoryDao(this as AppDatabase);
   late final LyricsDao lyricsDao = LyricsDao(this as AppDatabase);
+  late final QueueStateDao queueStateDao = QueueStateDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1469,6 +1944,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     favorites,
     playHistory,
     lyrics,
+    queueStates,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2564,6 +3040,257 @@ typedef $$LyricsTableProcessedTableManager =
       Lyric,
       PrefetchHooks Function()
     >;
+typedef $$QueueStatesTableCreateCompanionBuilder =
+    QueueStatesCompanion Function({
+      Value<int> id,
+      required String songUris,
+      required int currentIndex,
+      required int positionMs,
+      required bool shuffleEnabled,
+      required int repeatMode,
+      Value<String?> shuffleOrder,
+    });
+typedef $$QueueStatesTableUpdateCompanionBuilder =
+    QueueStatesCompanion Function({
+      Value<int> id,
+      Value<String> songUris,
+      Value<int> currentIndex,
+      Value<int> positionMs,
+      Value<bool> shuffleEnabled,
+      Value<int> repeatMode,
+      Value<String?> shuffleOrder,
+    });
+
+class $$QueueStatesTableFilterComposer
+    extends Composer<_$AppDatabase, $QueueStatesTable> {
+  $$QueueStatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get songUris => $composableBuilder(
+    column: $table.songUris,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get currentIndex => $composableBuilder(
+    column: $table.currentIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get positionMs => $composableBuilder(
+    column: $table.positionMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get shuffleEnabled => $composableBuilder(
+    column: $table.shuffleEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get repeatMode => $composableBuilder(
+    column: $table.repeatMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shuffleOrder => $composableBuilder(
+    column: $table.shuffleOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$QueueStatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $QueueStatesTable> {
+  $$QueueStatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get songUris => $composableBuilder(
+    column: $table.songUris,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get currentIndex => $composableBuilder(
+    column: $table.currentIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get positionMs => $composableBuilder(
+    column: $table.positionMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get shuffleEnabled => $composableBuilder(
+    column: $table.shuffleEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get repeatMode => $composableBuilder(
+    column: $table.repeatMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shuffleOrder => $composableBuilder(
+    column: $table.shuffleOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$QueueStatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QueueStatesTable> {
+  $$QueueStatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get songUris =>
+      $composableBuilder(column: $table.songUris, builder: (column) => column);
+
+  GeneratedColumn<int> get currentIndex => $composableBuilder(
+    column: $table.currentIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get positionMs => $composableBuilder(
+    column: $table.positionMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get shuffleEnabled => $composableBuilder(
+    column: $table.shuffleEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get repeatMode => $composableBuilder(
+    column: $table.repeatMode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get shuffleOrder => $composableBuilder(
+    column: $table.shuffleOrder,
+    builder: (column) => column,
+  );
+}
+
+class $$QueueStatesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QueueStatesTable,
+          QueueState,
+          $$QueueStatesTableFilterComposer,
+          $$QueueStatesTableOrderingComposer,
+          $$QueueStatesTableAnnotationComposer,
+          $$QueueStatesTableCreateCompanionBuilder,
+          $$QueueStatesTableUpdateCompanionBuilder,
+          (
+            QueueState,
+            BaseReferences<_$AppDatabase, $QueueStatesTable, QueueState>,
+          ),
+          QueueState,
+          PrefetchHooks Function()
+        > {
+  $$QueueStatesTableTableManager(_$AppDatabase db, $QueueStatesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QueueStatesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QueueStatesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QueueStatesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> songUris = const Value.absent(),
+                Value<int> currentIndex = const Value.absent(),
+                Value<int> positionMs = const Value.absent(),
+                Value<bool> shuffleEnabled = const Value.absent(),
+                Value<int> repeatMode = const Value.absent(),
+                Value<String?> shuffleOrder = const Value.absent(),
+              }) => QueueStatesCompanion(
+                id: id,
+                songUris: songUris,
+                currentIndex: currentIndex,
+                positionMs: positionMs,
+                shuffleEnabled: shuffleEnabled,
+                repeatMode: repeatMode,
+                shuffleOrder: shuffleOrder,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String songUris,
+                required int currentIndex,
+                required int positionMs,
+                required bool shuffleEnabled,
+                required int repeatMode,
+                Value<String?> shuffleOrder = const Value.absent(),
+              }) => QueueStatesCompanion.insert(
+                id: id,
+                songUris: songUris,
+                currentIndex: currentIndex,
+                positionMs: positionMs,
+                shuffleEnabled: shuffleEnabled,
+                repeatMode: repeatMode,
+                shuffleOrder: shuffleOrder,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QueueStatesTable, QueueState>(table),
+                  BaseReferences<_$AppDatabase, $QueueStatesTable, QueueState>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QueueStatesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QueueStatesTable,
+      QueueState,
+      $$QueueStatesTableFilterComposer,
+      $$QueueStatesTableOrderingComposer,
+      $$QueueStatesTableAnnotationComposer,
+      $$QueueStatesTableCreateCompanionBuilder,
+      $$QueueStatesTableUpdateCompanionBuilder,
+      (
+        QueueState,
+        BaseReferences<_$AppDatabase, $QueueStatesTable, QueueState>,
+      ),
+      QueueState,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2578,4 +3305,6 @@ class $AppDatabaseManager {
       $$PlayHistoryTableTableManager(_db, _db.playHistory);
   $$LyricsTableTableManager get lyrics =>
       $$LyricsTableTableManager(_db, _db.lyrics);
+  $$QueueStatesTableTableManager get queueStates =>
+      $$QueueStatesTableTableManager(_db, _db.queueStates);
 }
