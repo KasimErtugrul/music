@@ -18,6 +18,7 @@
   "commonRetry": "Tekrar dene",
   "commonClose": "Kapat",
   "songCount": "{count, plural, =0{Şarkı yok} other{{count} şarkı}}",
+  "albumCount": "{count, plural, =0{Albüm yok} other{{count} albüm}}",
   "debugLanguageToggle": "Dili değiştir (geçici)",
   "permissionTitle": "Çevrimdışı müzik çalar",
   "permissionSubtitle": "Cihazınızdaki müzik dosyalarını çalabilmek için ses dosyalarına erişim izni gerekir.",
@@ -36,14 +37,51 @@
   "permissionNotificationDescription": "İsteğe bağlı. Kilit ekranında ve bildirim panelinde çalma kontrollerini gösterir. İzin verilmezse çalma etkilenmez.",
   "permissionPrivacyTitle": "Gizlilik ve çevrimdışı taahhüt",
   "permissionPrivacyBody": "Resonance hiçbir zaman internet bağlantısı kurmaz. Verileriniz bu cihazda kalır, hiçbir ağa gönderilmez.",
-  "spikeOpenButton": "Ham şarkı listesi (Gün 3 spike)",
-  "spikeTitle": "Ham şarkı listesi",
-  "spikeScanButton": "Kütüphaneyi tara",
-  "spikeStats": "{count} şarkı, {ms} ms",
-  "spikeMissingStats": "Sanatçısız: {noArtist}, türsüz: {noGenre}",
-  "spikeNotScanned": "Kütüphaneni okumak için taramaya dokun.",
-  "spikeEmpty": "Şarkı bulunamadı.",
-  "spikeLoadError": "Kütüphane okunamadı.",
   "unknownArtist": "Bilinmeyen sanatçı",
-  "unknownAlbum": "Bilinmeyen albüm"
+  "unknownAlbum": "Bilinmeyen albüm",
+  "unknownGenre": "Bilinmeyen tür",
+  "sortBy": "Sırala",
+  "sortFieldTitle": "Ad",
+  "sortFieldArtist": "Sanatçı",
+  "sortFieldAlbum": "Albüm",
+  "sortFieldDateAdded": "Eklenme tarihi",
+  "sortFieldDuration": "Süre",
+  "sortAscending": "Artan",
+  "sortDescending": "Azalan",
+  "libraryEmptySongsTitle": "Şarkı bulunamadı",
+  "libraryEmptySongsMessage": "Kütüphanenizde henüz şarkı yok. Cihazınızda müzik dosyaları olduğundan emin olun.",
+  "libraryEmptyAlbumsTitle": "Albüm yok",
+  "libraryEmptyAlbumsMessage": "Kütüphane tarandığında albümler burada görünecek.",
+  "libraryEmptyArtistsTitle": "Sanatçı yok",
+  "libraryEmptyArtistsMessage": "Kütüphane tarandığında sanatçılar burada görünecek.",
+  "libraryEmptyGenresTitle": "Tür yok",
+  "libraryEmptyGenresMessage": "Kütüphane tarandığında türler burada görünecek.",
+  "libraryEmptyFoldersTitle": "Müzik klasörü yok",
+  "libraryEmptyFoldersMessage": "Müzik içeren klasörler burada görünecek.",
+  "libraryLoadErrorTitle": "Kütüphane yüklenemedi",
+  "libraryLoadErrorMessage": "Kütüphane okunurken bir hata oluştu.",
+  "folderRootName": "Depolama",
+  "folderSubfoldersTitle": "Alt klasörler",
+  "folderSongsTitle": "Bu klasördeki şarkılar",
+  "spikeTitle": "Spike Test Sayfası",
+  "spikeOpenButton": "Spike Testini Aç",
+  "spikeScanButton": "Kütüphaneyi Tara",
+  "spikeStats": "İstatistik: {total} şarkı ({elapsed} ms)",
+  "@spikeStats": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "elapsed": { "type": "int" }
+    }
+  },
+  "spikeMissingStats": "Sanatçısı yok: {noArtist}, türü yok: {noGenre}",
+  "@spikeMissingStats": {
+    "placeholders": {
+      "noArtist": { "type": "int" },
+      "noGenre": { "type": "int" }
+    }
+  },
+  "spikeLoadError": "İstatistikler yüklenemedi",
+  "spikeNotScanned": "Henüz taranmadı",
+  "spikeEmpty": "Öğe bulunamadı",
+  "backToParent": "Geri"
 }

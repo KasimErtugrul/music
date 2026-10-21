@@ -1,58 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/l10n/app_localizations.dart';
+import 'package:resonance/presentation/ui/pages/library_tabs_page.dart';
 
-/// GEÇİCİ ana sayfa (Gün 1): yalnızca TR/EN metin değişimini göstermek için.
-/// Gün 5 ve Gün 12'de gerçek sayfa ve adaptif yerleşimle değiştirilecek.
-class HomePage extends StatelessWidget {
+/// Ana iskelet. Gün 12'de `adaptive_scaffold.dart` + compact/expanded
+/// yerleşimleriyle değiştirilecek. Şimdilik: IndexedStack + NavigationBar.
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _index = 0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isTurkish = Localizations.localeOf(context).languageCode == 'tr';
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appName)),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.songCount(1842),
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                Chip(label: Text(l10n.libraryTabSongs)),
-                Chip(label: Text(l10n.libraryTabAlbums)),
-                Chip(label: Text(l10n.libraryTabArtists)),
-                Chip(label: Text(l10n.libraryTabGenres)),
-                Chip(label: Text(l10n.libraryTabFolders)),
-              ],
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () =>
-                  Get.updateLocale(Locale(isTurkish ? 'en' : 'tr')),
-              child: Text(l10n.debugLanguageToggle),
-            ),
-            const SizedBox(height: 8),
-            // GEÇİCİ (Gün 3 spike): Gün 5'te gerçek Şarkılar sekmesiyle değişir.
-            FilledButton.tonal(
-              onPressed: () => Get.toNamed<void>(AppRoutes.songs),
-              child: Text(l10n.spikeOpenButton),
-            ),
-          ],
-        ),
+      body: IndexedStack(
+        index: _index,
+        children: const <Widget>[
+          _HomeTabContent(),
+          LibraryTabsPage(),
+          _PlaceholderTab(icon: Icons.queue_music_outlined),
+          _PlaceholderTab(icon: Icons.search),
+          _PlaceholderTab(icon: Icons.settings_outlined),
+        ],
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: 0,
-        destinations: [
+        selectedIndex: _index,
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: <NavigationDestination>[
           NavigationDestination(
             icon: const Icon(Icons.home_outlined),
             selectedIcon: const Icon(Icons.home),
@@ -78,6 +58,71 @@ class HomePage extends StatelessWidget {
             label: l10n.tabSettings,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Home sekmesi: Gün 1'den kalan geçici içerik. Gerçek Home görünümü
+/// sonraki günlerde; şimdilik sadece dil değiştirici.
+class _HomeTabContent extends StatelessWidget {
+  const _HomeTabContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final isTurkish = Localizations.localeOf(context).languageCode == 'tr';
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.appName)),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              l10n.songCount(1842),
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                Chip(label: Text(l10n.libraryTabSongs)),
+                Chip(label: Text(l10n.libraryTabAlbums)),
+                Chip(label: Text(l10n.libraryTabArtists)),
+                Chip(label: Text(l10n.libraryTabGenres)),
+                Chip(label: Text(l10n.libraryTabFolders)),
+              ],
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () =>
+                  Get.updateLocale(Locale(isTurkish ? 'en' : 'tr')),
+              child: Text(l10n.debugLanguageToggle),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Henüz içeriği olmayan sekmeler için geçici yer tutucu.
+class _PlaceholderTab extends StatelessWidget {
+  const _PlaceholderTab({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Icon(
+          icon,
+          size: 64,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

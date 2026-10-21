@@ -73,6 +73,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String albumCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count albums',
+      one: '1 album',
+      zero: 'No albums',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get debugLanguageToggle => 'Switch language (temporary)';
 
   @override
@@ -134,36 +146,117 @@ class AppLocalizationsEn extends AppLocalizations {
       'Resonance never connects to the internet. Your data stays on this device and is never sent over a network.';
 
   @override
-  String get spikeOpenButton => 'Raw song list (Day 3 spike)';
-
-  @override
-  String get spikeTitle => 'Raw song list';
-
-  @override
-  String get spikeScanButton => 'Scan library';
-
-  @override
-  String spikeStats(int count, int ms) {
-    return '$count songs, $ms ms';
-  }
-
-  @override
-  String spikeMissingStats(int noArtist, int noGenre) {
-    return 'No artist: $noArtist, no genre: $noGenre';
-  }
-
-  @override
-  String get spikeNotScanned => 'Tap scan to read your library.';
-
-  @override
-  String get spikeEmpty => 'No songs found.';
-
-  @override
-  String get spikeLoadError => 'Couldn\'t read the library.';
-
-  @override
   String get unknownArtist => 'Unknown artist';
 
   @override
   String get unknownAlbum => 'Unknown album';
+
+  @override
+  String get unknownGenre => 'Unknown genre';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get sortFieldTitle => 'Title';
+
+  @override
+  String get sortFieldArtist => 'Artist';
+
+  @override
+  String get sortFieldAlbum => 'Album';
+
+  @override
+  String get sortFieldDateAdded => 'Date added';
+
+  @override
+  String get sortFieldDuration => 'Duration';
+
+  @override
+  String get sortAscending => 'Ascending';
+
+  @override
+  String get sortDescending => 'Descending';
+
+  @override
+  String get libraryEmptySongsTitle => 'No songs found';
+
+  @override
+  String get libraryEmptySongsMessage =>
+      'Your library doesn\'t contain any songs yet. Make sure music files are on this device.';
+
+  @override
+  String get libraryEmptyAlbumsTitle => 'No albums';
+
+  @override
+  String get libraryEmptyAlbumsMessage =>
+      'Albums will appear here once your library has been scanned.';
+
+  @override
+  String get libraryEmptyArtistsTitle => 'No artists';
+
+  @override
+  String get libraryEmptyArtistsMessage =>
+      'Artists will appear here once your library has been scanned.';
+
+  @override
+  String get libraryEmptyGenresTitle => 'No genres';
+
+  @override
+  String get libraryEmptyGenresMessage =>
+      'Genres will appear here once your library has been scanned.';
+
+  @override
+  String get libraryEmptyFoldersTitle => 'No music folders';
+
+  @override
+  String get libraryEmptyFoldersMessage =>
+      'Folders containing music will appear here.';
+
+  @override
+  String get libraryLoadErrorTitle => 'Couldn\'t load library';
+
+  @override
+  String get libraryLoadErrorMessage =>
+      'An error occurred while reading your library.';
+
+  @override
+  String get folderRootName => 'Storage';
+
+  @override
+  String get folderSubfoldersTitle => 'Subfolders';
+
+  @override
+  String get folderSongsTitle => 'Songs in this folder';
+
+  @override
+  String get spikeTitle => 'Spike Test Page';
+
+  @override
+  String get spikeOpenButton => 'Open Spike Test';
+
+  @override
+  String get spikeScanButton => 'Scan Library';
+
+  @override
+  String spikeStats(int total, int elapsed) {
+    return 'Stats: $total songs ($elapsed ms)';
+  }
+
+  @override
+  String spikeMissingStats(int noArtist, int noGenre) {
+    return 'Missing artist: $noArtist, missing genre: $noGenre';
+  }
+
+  @override
+  String get spikeLoadError => 'Failed to load stats';
+
+  @override
+  String get spikeNotScanned => 'Not scanned yet';
+
+  @override
+  String get spikeEmpty => 'No items found';
+
+  @override
+  String get backToParent => 'Back';
 }

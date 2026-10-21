@@ -72,6 +72,17 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String albumCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count albüm',
+      zero: 'Albüm yok',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get debugLanguageToggle => 'Dili değiştir (geçici)';
 
   @override
@@ -133,36 +144,116 @@ class AppLocalizationsTr extends AppLocalizations {
       'Resonance hiçbir zaman internet bağlantısı kurmaz. Verileriniz bu cihazda kalır, hiçbir ağa gönderilmez.';
 
   @override
-  String get spikeOpenButton => 'Ham şarkı listesi (Gün 3 spike)';
-
-  @override
-  String get spikeTitle => 'Ham şarkı listesi';
-
-  @override
-  String get spikeScanButton => 'Kütüphaneyi tara';
-
-  @override
-  String spikeStats(int count, int ms) {
-    return '$count şarkı, $ms ms';
-  }
-
-  @override
-  String spikeMissingStats(int noArtist, int noGenre) {
-    return 'Sanatçısız: $noArtist, türsüz: $noGenre';
-  }
-
-  @override
-  String get spikeNotScanned => 'Kütüphaneni okumak için taramaya dokun.';
-
-  @override
-  String get spikeEmpty => 'Şarkı bulunamadı.';
-
-  @override
-  String get spikeLoadError => 'Kütüphane okunamadı.';
-
-  @override
   String get unknownArtist => 'Bilinmeyen sanatçı';
 
   @override
   String get unknownAlbum => 'Bilinmeyen albüm';
+
+  @override
+  String get unknownGenre => 'Bilinmeyen tür';
+
+  @override
+  String get sortBy => 'Sırala';
+
+  @override
+  String get sortFieldTitle => 'Ad';
+
+  @override
+  String get sortFieldArtist => 'Sanatçı';
+
+  @override
+  String get sortFieldAlbum => 'Albüm';
+
+  @override
+  String get sortFieldDateAdded => 'Eklenme tarihi';
+
+  @override
+  String get sortFieldDuration => 'Süre';
+
+  @override
+  String get sortAscending => 'Artan';
+
+  @override
+  String get sortDescending => 'Azalan';
+
+  @override
+  String get libraryEmptySongsTitle => 'Şarkı bulunamadı';
+
+  @override
+  String get libraryEmptySongsMessage =>
+      'Kütüphanenizde henüz şarkı yok. Cihazınızda müzik dosyaları olduğundan emin olun.';
+
+  @override
+  String get libraryEmptyAlbumsTitle => 'Albüm yok';
+
+  @override
+  String get libraryEmptyAlbumsMessage =>
+      'Kütüphane tarandığında albümler burada görünecek.';
+
+  @override
+  String get libraryEmptyArtistsTitle => 'Sanatçı yok';
+
+  @override
+  String get libraryEmptyArtistsMessage =>
+      'Kütüphane tarandığında sanatçılar burada görünecek.';
+
+  @override
+  String get libraryEmptyGenresTitle => 'Tür yok';
+
+  @override
+  String get libraryEmptyGenresMessage =>
+      'Kütüphane tarandığında türler burada görünecek.';
+
+  @override
+  String get libraryEmptyFoldersTitle => 'Müzik klasörü yok';
+
+  @override
+  String get libraryEmptyFoldersMessage =>
+      'Müzik içeren klasörler burada görünecek.';
+
+  @override
+  String get libraryLoadErrorTitle => 'Kütüphane yüklenemedi';
+
+  @override
+  String get libraryLoadErrorMessage => 'Kütüphane okunurken bir hata oluştu.';
+
+  @override
+  String get folderRootName => 'Depolama';
+
+  @override
+  String get folderSubfoldersTitle => 'Alt klasörler';
+
+  @override
+  String get folderSongsTitle => 'Bu klasördeki şarkılar';
+
+  @override
+  String get spikeTitle => 'Spike Test Sayfası';
+
+  @override
+  String get spikeOpenButton => 'Spike Testini Aç';
+
+  @override
+  String get spikeScanButton => 'Kütüphaneyi Tara';
+
+  @override
+  String spikeStats(int total, int elapsed) {
+    return 'İstatistik: $total şarkı ($elapsed ms)';
+  }
+
+  @override
+  String spikeMissingStats(int noArtist, int noGenre) {
+    return 'Sanatçısı yok: $noArtist, türü yok: $noGenre';
+  }
+
+  @override
+  String get spikeLoadError => 'İstatistikler yüklenemedi';
+
+  @override
+  String get spikeNotScanned => 'Henüz taranmadı';
+
+  @override
+  String get spikeEmpty => 'Öğe bulunamadı';
+
+  @override
+  String get backToParent => 'Geri';
 }

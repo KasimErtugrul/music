@@ -1,9 +1,7 @@
 {
   "@@locale": "en",
   "appName": "Resonance",
-  "@appName": {
-    "description": "Application name"
-  },
+  "@appName": { "description": "Application name" },
   "tabHome": "Home",
   "tabLibrary": "Library",
   "tabPlaylists": "Playlists",
@@ -23,11 +21,12 @@
   "songCount": "{count, plural, =0{No songs} =1{1 song} other{{count} songs}}",
   "@songCount": {
     "description": "Number of songs",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "albumCount": "{count, plural, =0{No albums} =1{1 album} other{{count} albums}}",
+  "@albumCount": {
+    "description": "Number of albums",
+    "placeholders": { "count": { "type": "int" } }
   },
   "debugLanguageToggle": "Switch language (temporary)",
   "@debugLanguageToggle": {
@@ -50,31 +49,51 @@
   "permissionNotificationDescription": "Optional. Shows playback controls on the lock screen and in the notification shade. Playback works without it.",
   "permissionPrivacyTitle": "Privacy and offline promise",
   "permissionPrivacyBody": "Resonance never connects to the internet. Your data stays on this device and is never sent over a network.",
-  "spikeOpenButton": "Raw song list (Day 3 spike)",
-  "@spikeOpenButton": {
-    "description": "Temporary Day 3 button; removed when the real Songs tab lands on Day 5"
-  },
-  "spikeTitle": "Raw song list",
-  "spikeScanButton": "Scan library",
-  "spikeStats": "{count} songs, {ms} ms",
-  "@spikeStats": {
-    "description": "Temporary Day 3 spike statistics",
-    "placeholders": {
-      "count": {"type": "int"},
-      "ms": {"type": "int"}
-    }
-  },
-  "spikeMissingStats": "No artist: {noArtist}, no genre: {noGenre}",
-  "@spikeMissingStats": {
-    "description": "Temporary Day 3 spike statistics",
-    "placeholders": {
-      "noArtist": {"type": "int"},
-      "noGenre": {"type": "int"}
-    }
-  },
-  "spikeNotScanned": "Tap scan to read your library.",
-  "spikeEmpty": "No songs found.",
-  "spikeLoadError": "Couldn't read the library.",
   "unknownArtist": "Unknown artist",
-  "unknownAlbum": "Unknown album"
+  "unknownAlbum": "Unknown album",
+  "unknownGenre": "Unknown genre",
+  "sortBy": "Sort by",
+  "sortFieldTitle": "Title",
+  "sortFieldArtist": "Artist",
+  "sortFieldAlbum": "Album",
+  "sortFieldDateAdded": "Date added",
+  "sortFieldDuration": "Duration",
+  "sortAscending": "Ascending",
+  "sortDescending": "Descending",
+  "libraryEmptySongsTitle": "No songs found",
+  "libraryEmptySongsMessage": "Your library doesn't contain any songs yet. Make sure music files are on this device.",
+  "libraryEmptyAlbumsTitle": "No albums",
+  "libraryEmptyAlbumsMessage": "Albums will appear here once your library has been scanned.",
+  "libraryEmptyArtistsTitle": "No artists",
+  "libraryEmptyArtistsMessage": "Artists will appear here once your library has been scanned.",
+  "libraryEmptyGenresTitle": "No genres",
+  "libraryEmptyGenresMessage": "Genres will appear here once your library has been scanned.",
+  "libraryEmptyFoldersTitle": "No music folders",
+  "libraryEmptyFoldersMessage": "Folders containing music will appear here.",
+  "libraryLoadErrorTitle": "Couldn't load library",
+  "libraryLoadErrorMessage": "An error occurred while reading your library.",
+  "folderRootName": "Storage",
+  "folderSubfoldersTitle": "Subfolders",
+  "folderSongsTitle": "Songs in this folder",
+  "spikeTitle": "Spike Test Page",
+  "spikeOpenButton": "Open Spike Test",
+  "spikeScanButton": "Scan Library",
+  "spikeStats": "Stats: {total} songs ({elapsed} ms)",
+  "@spikeStats": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "elapsed": { "type": "int" }
+    }
+  },
+  "spikeMissingStats": "Missing artist: {noArtist}, missing genre: {noGenre}",
+  "@spikeMissingStats": {
+    "placeholders": {
+      "noArtist": { "type": "int" },
+      "noGenre": { "type": "int" }
+    }
+  },
+  "spikeLoadError": "Failed to load stats",
+  "spikeNotScanned": "Not scanned yet",
+  "spikeEmpty": "No items found",
+  "backToParent": "Back"
 }

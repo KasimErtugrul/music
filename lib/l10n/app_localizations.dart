@@ -206,6 +206,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No songs} =1{1 song} other{{count} songs}}'**
   String songCount(int count);
 
+  /// Number of albums
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No albums} =1{1 album} other{{count} albums}}'**
+  String albumCount(int count);
+
   /// Temporary Day 1 button; removed on Day 17 when the language picker is added
   ///
   /// In en, this message translates to:
@@ -314,54 +320,6 @@ abstract class AppLocalizations {
   /// **'Resonance never connects to the internet. Your data stays on this device and is never sent over a network.'**
   String get permissionPrivacyBody;
 
-  /// Temporary Day 3 button; removed when the real Songs tab lands on Day 5
-  ///
-  /// In en, this message translates to:
-  /// **'Raw song list (Day 3 spike)'**
-  String get spikeOpenButton;
-
-  /// No description provided for @spikeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Raw song list'**
-  String get spikeTitle;
-
-  /// No description provided for @spikeScanButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan library'**
-  String get spikeScanButton;
-
-  /// Temporary Day 3 spike statistics
-  ///
-  /// In en, this message translates to:
-  /// **'{count} songs, {ms} ms'**
-  String spikeStats(int count, int ms);
-
-  /// Temporary Day 3 spike statistics
-  ///
-  /// In en, this message translates to:
-  /// **'No artist: {noArtist}, no genre: {noGenre}'**
-  String spikeMissingStats(int noArtist, int noGenre);
-
-  /// No description provided for @spikeNotScanned.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap scan to read your library.'**
-  String get spikeNotScanned;
-
-  /// No description provided for @spikeEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No songs found.'**
-  String get spikeEmpty;
-
-  /// No description provided for @spikeLoadError.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t read the library.'**
-  String get spikeLoadError;
-
   /// No description provided for @unknownArtist.
   ///
   /// In en, this message translates to:
@@ -373,6 +331,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown album'**
   String get unknownAlbum;
+
+  /// No description provided for @unknownGenre.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown genre'**
+  String get unknownGenre;
+
+  /// No description provided for @sortBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get sortBy;
+
+  /// No description provided for @sortFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get sortFieldTitle;
+
+  /// No description provided for @sortFieldArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist'**
+  String get sortFieldArtist;
+
+  /// No description provided for @sortFieldAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Album'**
+  String get sortFieldAlbum;
+
+  /// No description provided for @sortFieldDateAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Date added'**
+  String get sortFieldDateAdded;
+
+  /// No description provided for @sortFieldDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get sortFieldDuration;
+
+  /// No description provided for @sortAscending.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get sortAscending;
+
+  /// No description provided for @sortDescending.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get sortDescending;
+
+  /// No description provided for @libraryEmptySongsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No songs found'**
+  String get libraryEmptySongsTitle;
+
+  /// No description provided for @libraryEmptySongsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your library doesn\'t contain any songs yet. Make sure music files are on this device.'**
+  String get libraryEmptySongsMessage;
+
+  /// No description provided for @libraryEmptyAlbumsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No albums'**
+  String get libraryEmptyAlbumsTitle;
+
+  /// No description provided for @libraryEmptyAlbumsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Albums will appear here once your library has been scanned.'**
+  String get libraryEmptyAlbumsMessage;
+
+  /// No description provided for @libraryEmptyArtistsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No artists'**
+  String get libraryEmptyArtistsTitle;
+
+  /// No description provided for @libraryEmptyArtistsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Artists will appear here once your library has been scanned.'**
+  String get libraryEmptyArtistsMessage;
+
+  /// No description provided for @libraryEmptyGenresTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No genres'**
+  String get libraryEmptyGenresTitle;
+
+  /// No description provided for @libraryEmptyGenresMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Genres will appear here once your library has been scanned.'**
+  String get libraryEmptyGenresMessage;
+
+  /// No description provided for @libraryEmptyFoldersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No music folders'**
+  String get libraryEmptyFoldersTitle;
+
+  /// No description provided for @libraryEmptyFoldersMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders containing music will appear here.'**
+  String get libraryEmptyFoldersMessage;
+
+  /// No description provided for @libraryLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load library'**
+  String get libraryLoadErrorTitle;
+
+  /// No description provided for @libraryLoadErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while reading your library.'**
+  String get libraryLoadErrorMessage;
+
+  /// No description provided for @folderRootName.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get folderRootName;
+
+  /// No description provided for @folderSubfoldersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subfolders'**
+  String get folderSubfoldersTitle;
+
+  /// No description provided for @folderSongsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs in this folder'**
+  String get folderSongsTitle;
+
+  /// No description provided for @spikeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spike Test Page'**
+  String get spikeTitle;
+
+  /// No description provided for @spikeOpenButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Spike Test'**
+  String get spikeOpenButton;
+
+  /// No description provided for @spikeScanButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Library'**
+  String get spikeScanButton;
+
+  /// No description provided for @spikeStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats: {total} songs ({elapsed} ms)'**
+  String spikeStats(int total, int elapsed);
+
+  /// No description provided for @spikeMissingStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing artist: {noArtist}, missing genre: {noGenre}'**
+  String spikeMissingStats(int noArtist, int noGenre);
+
+  /// No description provided for @spikeLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load stats'**
+  String get spikeLoadError;
+
+  /// No description provided for @spikeNotScanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Not scanned yet'**
+  String get spikeNotScanned;
+
+  /// No description provided for @spikeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No items found'**
+  String get spikeEmpty;
+
+  /// No description provided for @backToParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get backToParent;
 }
 
 class _AppLocalizationsDelegate
