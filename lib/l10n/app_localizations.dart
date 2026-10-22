@@ -697,6 +697,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to clear your play history?'**
   String get clearHistoryConfirm;
+
+  /// No description provided for @smartPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Playlists'**
+  String get smartPlaylists;
+
+  /// No description provided for @recentlyAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Added'**
+  String get recentlyAdded;
+
+  /// No description provided for @mostPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played'**
+  String get mostPlayed;
+
+  /// No description provided for @neverPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Never Played'**
+  String get neverPlayed;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statsTitle;
+
+  /// No description provided for @totalPlays.
+  ///
+  /// In en, this message translates to:
+  /// **'Total plays'**
+  String get totalPlays;
+
+  /// No description provided for @uniqueSongsPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique songs played'**
+  String get uniqueSongsPlayed;
+
+  /// No description provided for @topArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Artists'**
+  String get topArtists;
+
+  /// No description provided for @topGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Genres'**
+  String get topGenres;
+
+  /// No description provided for @noStatsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough listening data yet'**
+  String get noStatsYet;
+
+  /// No description provided for @playCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Played 0 times} =1{Played once} other{Played {count} times}}'**
+  String playCount(int count);
 }
 
 class _AppLocalizationsDelegate

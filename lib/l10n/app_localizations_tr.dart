@@ -344,4 +344,45 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get clearHistoryConfirm =>
       'Çalma geçmişinizi temizlemek istediğinize emin misiniz?';
+
+  @override
+  String get smartPlaylists => 'Akıllı Listeler';
+
+  @override
+  String get recentlyAdded => 'Son Eklenenler';
+
+  @override
+  String get mostPlayed => 'En Çok Çalınanlar';
+
+  @override
+  String get neverPlayed => 'Hiç Çalınmayanlar';
+
+  @override
+  String get statsTitle => 'İstatistikler';
+
+  @override
+  String get totalPlays => 'Toplam çalma';
+
+  @override
+  String get uniqueSongsPlayed => 'Çalınan benzersiz şarkı';
+
+  @override
+  String get topArtists => 'En Çok Dinlenen Sanatçılar';
+
+  @override
+  String get topGenres => 'En Çok Dinlenen Türler';
+
+  @override
+  String get noStatsYet => 'Henüz yeterli dinleme verisi yok';
+
+  @override
+  String playCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kez çalındı',
+      zero: '0 kez çalındı',
+    );
+    return '$_temp0';
+  }
 }

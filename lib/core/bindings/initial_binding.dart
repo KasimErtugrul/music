@@ -17,7 +17,8 @@ import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/history_controller.dart';
 import 'package:resonance/presentation/controllers/permission_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
-
+import 'package:resonance/data/repositories/stats_repository.dart';
+import 'package:resonance/presentation/controllers/stats_controller.dart';
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
@@ -77,7 +78,12 @@ class InitialBinding extends Bindings {
       ),
       permanent: true,
     );
-    
+    Get.put<StatsRepository>(
+      StatsRepositoryImpl(Get.find<HistoryDao>(), Get.find<LibraryRepository>()),
+      permanent: true,
+    );
+    Get.put<StatsController>(StatsController(Get.find<StatsRepository>()), permanent: true);
+
     Get.put<PlaylistDao>(Get.find<AppDatabase>().playlistDao, permanent: true);
 
     // Gün 13: Playlist controller'ı HomePage içindeki PlaylistsPage için hemen hazırla

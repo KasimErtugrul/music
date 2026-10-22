@@ -99,5 +99,16 @@
   "favoritesEmpty": "Henüz favori yok",
   "historyEmpty": "Henüz geçmiş yok",
   "clearHistory": "Geçmişi temizle",
-  "clearHistoryConfirm": "Çalma geçmişinizi temizlemek istediğinize emin misiniz?"
-}
+  "clearHistoryConfirm": "Çalma geçmişinizi temizlemek istediğinize emin misiniz?",
+  "smartPlaylists": "Akıllı Listeler",
+  "recentlyAdded": "Son Eklenenler",
+  "mostPlayed": "En Çok Çalınanlar",
+  "neverPlayed": "Hiç Çalınmayanlar",
+  "statsTitle": "İstatistikler",
+  "totalPlays": "Toplam çalma",
+  "uniqueSongsPlayed": "Çalınan benzersiz şarkı",
+  "topArtists": "En Çok Dinlenen Sanatçılar",
+  "topGenres": "En Çok Dinlenen Türler",
+  "noStatsYet": "Henüz yeterli dinleme verisi yok",
+  "playCount": "{count, plural, =0{0 kez çalındı} other{{count} kez çalındı}}"
+  }

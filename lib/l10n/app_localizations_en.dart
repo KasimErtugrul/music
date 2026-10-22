@@ -345,4 +345,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get clearHistoryConfirm =>
       'Are you sure you want to clear your play history?';
+
+  @override
+  String get smartPlaylists => 'Smart Playlists';
+
+  @override
+  String get recentlyAdded => 'Recently Added';
+
+  @override
+  String get mostPlayed => 'Most Played';
+
+  @override
+  String get neverPlayed => 'Never Played';
+
+  @override
+  String get statsTitle => 'Statistics';
+
+  @override
+  String get totalPlays => 'Total plays';
+
+  @override
+  String get uniqueSongsPlayed => 'Unique songs played';
+
+  @override
+  String get topArtists => 'Top Artists';
+
+  @override
+  String get topGenres => 'Top Genres';
+
+  @override
+  String get noStatsYet => 'Not enough listening data yet';
+
+  @override
+  String playCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Played $count times',
+      one: 'Played once',
+      zero: 'Played 0 times',
+    );
+    return '$_temp0';
+  }
 }

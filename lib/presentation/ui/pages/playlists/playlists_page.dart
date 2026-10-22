@@ -14,31 +14,58 @@ class PlaylistsPage extends GetView<PlaylistController> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.playlistsTitle)),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (controller.playlists.isEmpty) {
-          return EmptyState(
-            icon: Icons.queue_music,
-            title: l10n.noPlaylists,
-            message: l10n.noPlaylistsMessage,
-          );
-        }
-        return ListView.builder(
-          itemCount: controller.playlists.length,
-          itemBuilder: (context, i) {
-            final p = controller.playlists[i];
-            return ListTile(
-              leading: const Icon(Icons.queue_music),
-              title: Text(p.name),
-              subtitle: Text('${p.songCount} şarkı'), // TODO: ARB ekle
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Get.toNamed(AppRoutes.playlistDetail, arguments: p.id),
-            );
-          },
-        );
-      }),
+      body: Column(
+        children: [
+          // Gün 15: Akıllı listeler ve istatistiklere geçici erişim butonları
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton.icon(
+                  onPressed: () => Get.toNamed(AppRoutes.smartPlaylists),
+                  icon: const Icon(Icons.auto_awesome),
+                  label: Text(l10n.smartPlaylists),
+                ),
+                TextButton.icon(
+                  onPressed: () => Get.toNamed(AppRoutes.stats),
+                  icon: const Icon(Icons.bar_chart),
+                  label: Text(l10n.statsTitle),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (controller.playlists.isEmpty) {
+                return EmptyState(
+                  icon: Icons.queue_music,
+                  title: l10n.noPlaylists,
+                  message: l10n.noPlaylistsMessage,
+                );
+              }
+              return ListView.builder(
+                itemCount: controller.playlists.length,
+                itemBuilder: (context, i) {
+                  final p = controller.playlists[i];
+                  return ListTile(
+                    leading: const Icon(Icons.queue_music),
+                    title: Text(p.name),
+                    // TODO düzeltildi: ARB çoğul anahtarına bağlandı.
+                    subtitle: Text(l10n.songCount(p.songCount)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Get.toNamed(AppRoutes.playlistDetail, arguments: p.id),
+                  );
+                },
+              );
+            }),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateDialog(context),
         child: const Icon(Icons.add),

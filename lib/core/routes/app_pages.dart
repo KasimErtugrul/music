@@ -10,10 +10,11 @@ import 'package:resonance/presentation/ui/pages/home_page.dart';
 import 'package:resonance/presentation/ui/pages/permission_page.dart';
 import 'package:resonance/presentation/ui/pages/player/player_page.dart';
 import 'package:resonance/presentation/ui/pages/playlist_detail_page.dart';
+import 'package:resonance/presentation/ui/pages/playlists/smart_playlists_page.dart';
 import 'package:resonance/presentation/ui/pages/queue_page.dart';
 import 'package:resonance/presentation/ui/pages/songs_page.dart';
 import 'package:resonance/presentation/ui/pages/splash_page.dart';
-
+import 'package:resonance/presentation/ui/pages/stats_page.dart';
 abstract final class AppPages {
   static const String initial = AppRoutes.splash;
 
@@ -55,9 +56,11 @@ abstract final class AppPages {
       name: AppRoutes.favorites,
       page: () => const FavoritesPage(),
     ),
-    GetPage<dynamic>(
-      name: AppRoutes.history,
-      page: () => const HistoryPage(),
+    GetPage<dynamic>(name: AppRoutes.history, page: () => const HistoryPage()),
+    GetPage(
+      name: AppRoutes.smartPlaylists,
+      page: () => const SmartPlaylistsPage(),
     ),
+    GetPage(name: AppRoutes.stats, page: () => const StatsPage()),
   ];
 }

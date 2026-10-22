@@ -11,4 +11,6 @@ abstract final class AppRoutes {
   static const String playlistDetail = '/playlist-detail';
   static const String favorites = '/favorites';
   static const String history = '/history';
+  static const String smartPlaylists = '/smart-playlists';
+  static const String stats = '/stats';
 }

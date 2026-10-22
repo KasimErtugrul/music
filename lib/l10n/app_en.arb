@@ -104,5 +104,17 @@
   "favoritesEmpty": "No favorites yet",
   "historyEmpty": "No history yet",
   "clearHistory": "Clear history",
-  "clearHistoryConfirm": "Are you sure you want to clear your play history?"
+  "clearHistoryConfirm": "Are you sure you want to clear your play history?",
+    "smartPlaylists": "Smart Playlists",
+  "recentlyAdded": "Recently Added",
+  "mostPlayed": "Most Played",
+  "neverPlayed": "Never Played",
+  "statsTitle": "Statistics",
+  "totalPlays": "Total plays",
+  "uniqueSongsPlayed": "Unique songs played",
+  "topArtists": "Top Artists",
+  "topGenres": "Top Genres",
+  "noStatsYet": "Not enough listening data yet",
+  "playCount": "{count, plural, =0{Played 0 times} =1{Played once} other{Played {count} times}}",
+  "@playCount": { "placeholders": { "count": { "type": "int" } } }
 }
