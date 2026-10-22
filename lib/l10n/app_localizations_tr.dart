@@ -385,4 +385,49 @@ class AppLocalizationsTr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get searchHint => 'Şarkı, albüm, sanatçı ara...';
+
+  @override
+  String get searchEmptyTitle => 'Sonuç bulunamadı';
+
+  @override
+  String get searchEmptyMessage => 'Farklı bir arama terimi deneyin.';
+
+  @override
+  String get noSearchYet => 'Aramaya başlamak için bir şeyler yazın.';
+
+  @override
+  String get share => 'Paylaş';
+
+  @override
+  String get songInfo => 'Şarkı Bilgisi';
+
+  @override
+  String get infoTitle => 'Ad';
+
+  @override
+  String get infoArtist => 'Sanatçı';
+
+  @override
+  String get infoAlbum => 'Albüm';
+
+  @override
+  String get infoGenre => 'Tür';
+
+  @override
+  String get infoDuration => 'Süre';
+
+  @override
+  String get infoPath => 'Dosya Yolu';
+
+  @override
+  String get infoSize => 'Dosya Boyutu';
+
+  @override
+  String get infoDateAdded => 'Eklenme Tarihi';
+
+  @override
+  String get searchResults => 'Arama Sonuçları';
 }

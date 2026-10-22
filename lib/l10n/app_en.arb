@@ -116,5 +116,20 @@
   "topGenres": "Top Genres",
   "noStatsYet": "Not enough listening data yet",
   "playCount": "{count, plural, =0{Played 0 times} =1{Played once} other{Played {count} times}}",
-  "@playCount": { "placeholders": { "count": { "type": "int" } } }
+  "@playCount": { "placeholders": { "count": { "type": "int" } } },
+    "searchHint": "Search songs, albums, artists...",
+  "searchEmptyTitle": "No results",
+  "searchEmptyMessage": "Try a different search term.",
+  "noSearchYet": "Type something to start searching.",
+  "share": "Share",
+  "songInfo": "Song Info",
+  "infoTitle": "Title",
+  "infoArtist": "Artist",
+  "infoAlbum": "Album",
+  "infoGenre": "Genre",
+  "infoDuration": "Duration",
+  "infoPath": "File Path",
+  "infoSize": "File Size",
+  "infoDateAdded": "Date Added",
+  "searchResults": "Search Results"
 }

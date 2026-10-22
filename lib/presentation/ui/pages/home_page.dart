@@ -4,6 +4,7 @@ import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/ui/layouts/adaptive_scaffold.dart';
 import 'package:resonance/presentation/ui/pages/library_tabs_page.dart';
 import 'package:resonance/presentation/ui/pages/playlists/playlists_page.dart';
+import 'package:resonance/presentation/ui/pages/search_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -53,7 +54,7 @@ class _HomePageState extends State<HomePage> {
           _HomeTabContent(),
           LibraryTabsPage(),
           PlaylistsPage(),
-          _PlaceholderTab(icon: Icons.search),
+          SearchPage(), // <- Burası değişti
           _PlaceholderTab(icon: Icons.settings_outlined),
         ],
       ),

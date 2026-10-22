@@ -387,4 +387,49 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get searchHint => 'Search songs, albums, artists...';
+
+  @override
+  String get searchEmptyTitle => 'No results';
+
+  @override
+  String get searchEmptyMessage => 'Try a different search term.';
+
+  @override
+  String get noSearchYet => 'Type something to start searching.';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get songInfo => 'Song Info';
+
+  @override
+  String get infoTitle => 'Title';
+
+  @override
+  String get infoArtist => 'Artist';
+
+  @override
+  String get infoAlbum => 'Album';
+
+  @override
+  String get infoGenre => 'Genre';
+
+  @override
+  String get infoDuration => 'Duration';
+
+  @override
+  String get infoPath => 'File Path';
+
+  @override
+  String get infoSize => 'File Size';
+
+  @override
+  String get infoDateAdded => 'Date Added';
+
+  @override
+  String get searchResults => 'Search Results';
 }

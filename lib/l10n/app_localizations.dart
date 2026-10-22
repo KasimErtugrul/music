@@ -763,6 +763,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{Played 0 times} =1{Played once} other{Played {count} times}}'**
   String playCount(int count);
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search songs, albums, artists...'**
+  String get searchHint;
+
+  /// No description provided for @searchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get searchEmptyTitle;
+
+  /// No description provided for @searchEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term.'**
+  String get searchEmptyMessage;
+
+  /// No description provided for @noSearchYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Type something to start searching.'**
+  String get noSearchYet;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @songInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Song Info'**
+  String get songInfo;
+
+  /// No description provided for @infoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get infoTitle;
+
+  /// No description provided for @infoArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist'**
+  String get infoArtist;
+
+  /// No description provided for @infoAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Album'**
+  String get infoAlbum;
+
+  /// No description provided for @infoGenre.
+  ///
+  /// In en, this message translates to:
+  /// **'Genre'**
+  String get infoGenre;
+
+  /// No description provided for @infoDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get infoDuration;
+
+  /// No description provided for @infoPath.
+  ///
+  /// In en, this message translates to:
+  /// **'File Path'**
+  String get infoPath;
+
+  /// No description provided for @infoSize.
+  ///
+  /// In en, this message translates to:
+  /// **'File Size'**
+  String get infoSize;
+
+  /// No description provided for @infoDateAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Date Added'**
+  String get infoDateAdded;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Results'**
+  String get searchResults;
 }
 
 class _AppLocalizationsDelegate

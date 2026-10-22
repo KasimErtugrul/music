@@ -110,5 +110,20 @@
   "topArtists": "En Çok Dinlenen Sanatçılar",
   "topGenres": "En Çok Dinlenen Türler",
   "noStatsYet": "Henüz yeterli dinleme verisi yok",
-  "playCount": "{count, plural, =0{0 kez çalındı} other{{count} kez çalındı}}"
+  "playCount": "{count, plural, =0{0 kez çalındı} other{{count} kez çalındı}}",
+    "searchHint": "Şarkı, albüm, sanatçı ara...",
+  "searchEmptyTitle": "Sonuç bulunamadı",
+  "searchEmptyMessage": "Farklı bir arama terimi deneyin.",
+  "noSearchYet": "Aramaya başlamak için bir şeyler yazın.",
+  "share": "Paylaş",
+  "songInfo": "Şarkı Bilgisi",
+  "infoTitle": "Ad",
+  "infoArtist": "Sanatçı",
+  "infoAlbum": "Albüm",
+  "infoGenre": "Tür",
+  "infoDuration": "Süre",
+  "infoPath": "Dosya Yolu",
+  "infoSize": "Dosya Boyutu",
+  "infoDateAdded": "Eklenme Tarihi",
+  "searchResults": "Arama Sonuçları"
   }
