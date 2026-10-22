@@ -1,9 +1,5 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:drift_flutter/drift_flutter.dart';
 import 'package:resonance/data/datasources/local/daos/favorite_dao.dart';
 import 'package:resonance/data/datasources/local/daos/history_dao.dart';
 import 'package:resonance/data/datasources/local/daos/lyrics_dao.dart';
@@ -24,14 +20,10 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
-
-  /// Uygulama için varsayılan dosya tabanlı veritabanı.
-  /// `LazyDatabase`: dosya yolunu asenkron alıp, `NativeDatabase.createInBackground`
-  /// ile **ayrı bir isolate**'te açar. UI thread'i bloklanmaz.
-  AppDatabase.defaults() : super(_open());
+  AppDatabase.defaults() : super(driftDatabase(name: 'resonance'));
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -42,24 +34,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             await m.createTable(queueStates);
           }
-          if (from < 3) {
-            await m.addColumn(playlistSongs, playlistSongs.path);
-            await m.addColumn(playlistSongs, playlistSongs.title);
-            await m.addColumn(playlistSongs, playlistSongs.artist);
-            await m.addColumn(playlistSongs, playlistSongs.durationMs);
-          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
         },
       );
-}
-
-/// `AppDatabase.defaults()` için arka plan isolate'li açıcı.
-QueryExecutor _open() {
-  return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'resonance.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
 }
