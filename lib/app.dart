@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/bindings/initial_binding.dart';
 import 'package:resonance/core/routes/app_pages.dart';
-import 'package:resonance/core/theme/app_theme.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
+import 'package:resonance/presentation/controllers/theme_controller.dart';
 
 class ResonanceApp extends StatelessWidget {
   const ResonanceApp({super.key, this.initialRoute = AppPages.initial});
@@ -14,13 +14,12 @@ class ResonanceApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsCtrl = Get.find<SettingsController>();
+    final themeCtrl = Get.find<ThemeController>(); // Get.put YOK — main'de kayıtlı
 
     return Obx(() {
       if (settingsCtrl.isLoading.value) {
         return const MaterialApp(
-          home: Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
+          home: Scaffold(body: Center(child: CircularProgressIndicator())),
         );
       }
 
@@ -34,9 +33,9 @@ class ResonanceApp extends StatelessWidget {
       return GetMaterialApp(
         onGenerateTitle: (context) => AppLocalizations.of(context).appName,
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
-        themeMode: settingsCtrl.currentThemeMode,
+        theme: themeCtrl.lightTheme,
+        darkTheme: themeCtrl.darkTheme,
+        themeMode: themeCtrl.themeMode,
         locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

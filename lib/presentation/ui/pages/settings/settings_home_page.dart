@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/core/settings/settings_registry.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
@@ -7,7 +8,6 @@ import 'package:resonance/presentation/controllers/settings_search_controller.da
 import 'package:resonance/presentation/ui/pages/settings/about_page.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
-import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
 
 class SettingsHomePage extends StatelessWidget {
   const SettingsHomePage({super.key});
@@ -44,16 +44,10 @@ class SettingsHomePage extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         final settings = ctrl.settings.value;
-        if (settings == null) {
-          return const Center(child: Text('—'));
-        }
+        if (settings == null) return const Center(child: Text('—'));
 
         final general = search.filter(
           SettingsRegistry.byGroup(SettingsGroup.general),
-          l10n,
-        );
-        final appearance = search.filter(
-          SettingsRegistry.byGroup(SettingsGroup.appearance),
           l10n,
         );
 
@@ -63,14 +57,42 @@ class SettingsHomePage extends StatelessWidget {
               SettingsSectionHeader(title: l10n.settingsGroupGeneral),
               ...general.map((e) => _entry(e, l10n, ctrl)),
             ],
-            if (appearance.isNotEmpty) ...<Widget>[
-              SettingsSectionHeader(title: l10n.settingsGroupAppearance),
-              ...appearance.map((e) => _entry(e, l10n, ctrl)),
-            ],
-            const SettingsSectionHeader(title: '—'),
+
+            // Gün 18: Görünüm ayarları — tam tema sistemi
+            SettingsSectionHeader(title: l10n.settingsGroupAppearance),
+            ListTile(
+              leading: const Icon(Icons.palette_outlined),
+              title: Text(l10n.themeGroupColor),
+              subtitle: Text(l10n.themeGroupMode),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.toNamed(AppRoutes.themeSettings),
+            ),
+            ListTile(
+              leading: const Icon(Icons.text_fields),
+              title: Text(l10n.themeFont),
+              subtitle: Text(l10n.themeTextScale),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.toNamed(AppRoutes.fontSettings),
+            ),
+            ListTile(
+              leading: const Icon(Icons.play_circle_outline),
+              title: Text(l10n.themePlayerTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.toNamed(AppRoutes.playerStyle),
+            ),
+            ListTile(
+              leading: const Icon(Icons.list_alt),
+              title: Text(l10n.themeListTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.toNamed(AppRoutes.listStyle),
+            ),
+
+            // Hakkında
+            const Divider(height: 32),
             ListTile(
               leading: const Icon(Icons.info_outline),
               title: Text(l10n.settingsAbout),
+              trailing: const Icon(Icons.chevron_right),
               onTap: () => Get.to(() => const AboutPage()),
             ),
           ],
@@ -92,32 +114,6 @@ class SettingsHomePage extends StatelessWidget {
             _ => l10n.settingsLanguageSystem,
           },
           onChanged: ctrl.setLanguage,
-        );
-      case 'theme_mode':
-        return SettingsChoiceTile<String>(
-          title: l10n.settingsThemeMode,
-          value: ctrl.settings.value!.themeMode,
-          options: const <String>['system', 'light', 'dark'],
-          labelOf: (v) => switch (v) {
-            'light' => l10n.settingsThemeLight,
-            'dark' => l10n.settingsThemeDark,
-            _ => l10n.settingsThemeSystem,
-          },
-          onChanged: ctrl.setThemeMode,
-        );
-      case 'dynamic_color':
-        return SettingsSwitchTile(
-          title: l10n.settingsDynamicColor,
-          subtitle: l10n.settingsDynamicColorDescription,
-          value: ctrl.settings.value!.dynamicColor,
-          onChanged: ctrl.setDynamicColor,
-        );
-      case 'amoled_dark':
-        return SettingsSwitchTile(
-          title: l10n.settingsAmoledDark,
-          subtitle: l10n.settingsAmoledDarkDescription,
-          value: ctrl.settings.value!.amoledDark,
-          onChanged: ctrl.setAmoledDark,
         );
       default:
         return const SizedBox.shrink();

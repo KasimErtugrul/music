@@ -486,4 +486,148 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsLicenses => 'Açık kaynak lisansları';
+
+  @override
+  String get themeDefault => 'Varsayılan';
+
+  @override
+  String themePresetName(String name) {
+    return 'Hazır tema: $name';
+  }
+
+  @override
+  String get themeCustom => 'Özel';
+
+  @override
+  String get themePresetDynamic => 'Dinamik (Material You)';
+
+  @override
+  String get themePresetFromArtwork => 'Kapaktan renk';
+
+  @override
+  String get themePresetSeed => 'Özel tohum rengi';
+
+  @override
+  String get themeAmoledOn => 'AMOLED siyah yüzeyler';
+
+  @override
+  String get themeHighContrast => 'Yüksek kontrast';
+
+  @override
+  String get themeSurfaceTint => 'Yüzey tonlaması';
+
+  @override
+  String get themeRoundedCorners => 'Yuvarlak köşeler';
+
+  @override
+  String get themeDensity => 'Bileşen yoğunluğu';
+
+  @override
+  String get themeDensityCompact => 'Sıkı';
+
+  @override
+  String get themeDensityStandard => 'Normal';
+
+  @override
+  String get themeDensityComfortable => 'Ferah';
+
+  @override
+  String get themeFont => 'Yazı tipi';
+
+  @override
+  String get themeFontDefault => 'Varsayılan';
+
+  @override
+  String get themeTextScale => 'Yazı ölçeği';
+
+  @override
+  String get playerBackgroundSolid => 'Düz renk';
+
+  @override
+  String get playerBackgroundGradient => 'Kapaktan gradyan';
+
+  @override
+  String get playerBackgroundBlur => 'Bulanık kapak';
+
+  @override
+  String get playerArtworkSquare => 'Kare';
+
+  @override
+  String get playerArtworkRounded => 'Yuvarlak köşe';
+
+  @override
+  String get playerArtworkCircle => 'Daire';
+
+  @override
+  String get listViewCompact => 'Sıkı';
+
+  @override
+  String get listViewComfortable => 'Rahat';
+
+  @override
+  String get listViewGrid => 'Izgara';
+
+  @override
+  String get animationsFull => 'Tam';
+
+  @override
+  String get animationsReduced => 'Azaltılmış';
+
+  @override
+  String get animationsNone => 'Kapalı';
+
+  @override
+  String get themeGroupPlayer => 'Oynatıcı';
+
+  @override
+  String get themeGroupList => 'Kütüphane listesi';
+
+  @override
+  String get themeGroupAnimation => 'Animasyonlar';
+
+  @override
+  String get themeGroupFont => 'Yazı tipi';
+
+  @override
+  String get themeGroupShape => 'Şekil ve yoğunluk';
+
+  @override
+  String get themeGroupColor => 'Renk';
+
+  @override
+  String get themeGroupMode => 'Tema modu';
+
+  @override
+  String get themeGroupDarkVariant => 'Koyu varyant';
+
+  @override
+  String get themeDarkNormal => 'Normal koyu';
+
+  @override
+  String get themeDarkAmoled => 'AMOLED siyah';
+
+  @override
+  String get themeSeedColor => 'Tohum rengi';
+
+  @override
+  String get themeResetToDefault => 'Varsayılana sıfırla';
+
+  @override
+  String get themeResetConfirm =>
+      'Tüm görünüm ayarları varsayılana sıfırlansın mı?';
+
+  @override
+  String get themePlayerTitle => 'Oynatıcı görünümü';
+
+  @override
+  String get themeListTitle => 'Kütüphane listesi görünümü';
+
+  @override
+  String get themePreviewTitle => 'Önizleme';
+
+  @override
+  String get themePreviewSongTitle => 'Örnek Şarkı';
+
+  @override
+  String get themePreviewSongArtist => 'Örnek Sanatçı';
 }

@@ -13,4 +13,9 @@ abstract final class AppRoutes {
   static const String history = '/history';
   static const String smartPlaylists = '/smart-playlists';
   static const String stats = '/stats';
+  static const String themeSettings = '/settings/theme';
+  static const String themeGallery = '/settings/theme/gallery';
+  static const String fontSettings = '/settings/font';
+  static const String playerStyle = '/settings/player-style';
+  static const String listStyle = '/settings/list-style';
 }

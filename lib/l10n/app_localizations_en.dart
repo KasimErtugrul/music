@@ -488,4 +488,148 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLicenses => 'Open source licenses';
+
+  @override
+  String get themeDefault => 'Default';
+
+  @override
+  String themePresetName(String name) {
+    return 'Preset: $name';
+  }
+
+  @override
+  String get themeCustom => 'Custom';
+
+  @override
+  String get themePresetDynamic => 'Dynamic (Material You)';
+
+  @override
+  String get themePresetFromArtwork => 'From artwork';
+
+  @override
+  String get themePresetSeed => 'Custom seed color';
+
+  @override
+  String get themeAmoledOn => 'AMOLED black surfaces';
+
+  @override
+  String get themeHighContrast => 'High contrast';
+
+  @override
+  String get themeSurfaceTint => 'Surface elevation tint';
+
+  @override
+  String get themeRoundedCorners => 'Rounded corners';
+
+  @override
+  String get themeDensity => 'Component density';
+
+  @override
+  String get themeDensityCompact => 'Compact';
+
+  @override
+  String get themeDensityStandard => 'Standard';
+
+  @override
+  String get themeDensityComfortable => 'Comfortable';
+
+  @override
+  String get themeFont => 'Font';
+
+  @override
+  String get themeFontDefault => 'Default';
+
+  @override
+  String get themeTextScale => 'Text scale';
+
+  @override
+  String get playerBackgroundSolid => 'Solid color';
+
+  @override
+  String get playerBackgroundGradient => 'Gradient from artwork';
+
+  @override
+  String get playerBackgroundBlur => 'Blurred artwork';
+
+  @override
+  String get playerArtworkSquare => 'Square';
+
+  @override
+  String get playerArtworkRounded => 'Rounded';
+
+  @override
+  String get playerArtworkCircle => 'Circle';
+
+  @override
+  String get listViewCompact => 'Compact';
+
+  @override
+  String get listViewComfortable => 'Comfortable';
+
+  @override
+  String get listViewGrid => 'Grid';
+
+  @override
+  String get animationsFull => 'Full';
+
+  @override
+  String get animationsReduced => 'Reduced';
+
+  @override
+  String get animationsNone => 'None';
+
+  @override
+  String get themeGroupPlayer => 'Player';
+
+  @override
+  String get themeGroupList => 'Library list';
+
+  @override
+  String get themeGroupAnimation => 'Animations';
+
+  @override
+  String get themeGroupFont => 'Typography';
+
+  @override
+  String get themeGroupShape => 'Shape & density';
+
+  @override
+  String get themeGroupColor => 'Color';
+
+  @override
+  String get themeGroupMode => 'Theme mode';
+
+  @override
+  String get themeGroupDarkVariant => 'Dark variant';
+
+  @override
+  String get themeDarkNormal => 'Normal dark';
+
+  @override
+  String get themeDarkAmoled => 'AMOLED black';
+
+  @override
+  String get themeSeedColor => 'Seed color';
+
+  @override
+  String get themeResetToDefault => 'Reset to default';
+
+  @override
+  String get themeResetConfirm =>
+      'Reset all appearance settings to their defaults?';
+
+  @override
+  String get themePlayerTitle => 'Player appearance';
+
+  @override
+  String get themeListTitle => 'Library list appearance';
+
+  @override
+  String get themePreviewTitle => 'Preview';
+
+  @override
+  String get themePreviewSongTitle => 'Sample Song';
+
+  @override
+  String get themePreviewSongArtist => 'Sample Artist';
 }

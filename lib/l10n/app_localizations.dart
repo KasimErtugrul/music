@@ -955,6 +955,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open source licenses'**
   String get settingsLicenses;
+
+  /// No description provided for @themeDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get themeDefault;
+
+  /// No description provided for @themePresetName.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset: {name}'**
+  String themePresetName(String name);
+
+  /// No description provided for @themeCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get themeCustom;
+
+  /// No description provided for @themePresetDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic (Material You)'**
+  String get themePresetDynamic;
+
+  /// No description provided for @themePresetFromArtwork.
+  ///
+  /// In en, this message translates to:
+  /// **'From artwork'**
+  String get themePresetFromArtwork;
+
+  /// No description provided for @themePresetSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom seed color'**
+  String get themePresetSeed;
+
+  /// No description provided for @themeAmoledOn.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED black surfaces'**
+  String get themeAmoledOn;
+
+  /// No description provided for @themeHighContrast.
+  ///
+  /// In en, this message translates to:
+  /// **'High contrast'**
+  String get themeHighContrast;
+
+  /// No description provided for @themeSurfaceTint.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface elevation tint'**
+  String get themeSurfaceTint;
+
+  /// No description provided for @themeRoundedCorners.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounded corners'**
+  String get themeRoundedCorners;
+
+  /// No description provided for @themeDensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Component density'**
+  String get themeDensity;
+
+  /// No description provided for @themeDensityCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact'**
+  String get themeDensityCompact;
+
+  /// No description provided for @themeDensityStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get themeDensityStandard;
+
+  /// No description provided for @themeDensityComfortable.
+  ///
+  /// In en, this message translates to:
+  /// **'Comfortable'**
+  String get themeDensityComfortable;
+
+  /// No description provided for @themeFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Font'**
+  String get themeFont;
+
+  /// No description provided for @themeFontDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get themeFontDefault;
+
+  /// No description provided for @themeTextScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Text scale'**
+  String get themeTextScale;
+
+  /// No description provided for @playerBackgroundSolid.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid color'**
+  String get playerBackgroundSolid;
+
+  /// No description provided for @playerBackgroundGradient.
+  ///
+  /// In en, this message translates to:
+  /// **'Gradient from artwork'**
+  String get playerBackgroundGradient;
+
+  /// No description provided for @playerBackgroundBlur.
+  ///
+  /// In en, this message translates to:
+  /// **'Blurred artwork'**
+  String get playerBackgroundBlur;
+
+  /// No description provided for @playerArtworkSquare.
+  ///
+  /// In en, this message translates to:
+  /// **'Square'**
+  String get playerArtworkSquare;
+
+  /// No description provided for @playerArtworkRounded.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounded'**
+  String get playerArtworkRounded;
+
+  /// No description provided for @playerArtworkCircle.
+  ///
+  /// In en, this message translates to:
+  /// **'Circle'**
+  String get playerArtworkCircle;
+
+  /// No description provided for @listViewCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact'**
+  String get listViewCompact;
+
+  /// No description provided for @listViewComfortable.
+  ///
+  /// In en, this message translates to:
+  /// **'Comfortable'**
+  String get listViewComfortable;
+
+  /// No description provided for @listViewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get listViewGrid;
+
+  /// No description provided for @animationsFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get animationsFull;
+
+  /// No description provided for @animationsReduced.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduced'**
+  String get animationsReduced;
+
+  /// No description provided for @animationsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get animationsNone;
+
+  /// No description provided for @themeGroupPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Player'**
+  String get themeGroupPlayer;
+
+  /// No description provided for @themeGroupList.
+  ///
+  /// In en, this message translates to:
+  /// **'Library list'**
+  String get themeGroupList;
+
+  /// No description provided for @themeGroupAnimation.
+  ///
+  /// In en, this message translates to:
+  /// **'Animations'**
+  String get themeGroupAnimation;
+
+  /// No description provided for @themeGroupFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Typography'**
+  String get themeGroupFont;
+
+  /// No description provided for @themeGroupShape.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape & density'**
+  String get themeGroupShape;
+
+  /// No description provided for @themeGroupColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get themeGroupColor;
+
+  /// No description provided for @themeGroupMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme mode'**
+  String get themeGroupMode;
+
+  /// No description provided for @themeGroupDarkVariant.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark variant'**
+  String get themeGroupDarkVariant;
+
+  /// No description provided for @themeDarkNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal dark'**
+  String get themeDarkNormal;
+
+  /// No description provided for @themeDarkAmoled.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED black'**
+  String get themeDarkAmoled;
+
+  /// No description provided for @themeSeedColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed color'**
+  String get themeSeedColor;
+
+  /// No description provided for @themeResetToDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get themeResetToDefault;
+
+  /// No description provided for @themeResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset all appearance settings to their defaults?'**
+  String get themeResetConfirm;
+
+  /// No description provided for @themePlayerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Player appearance'**
+  String get themePlayerTitle;
+
+  /// No description provided for @themeListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Library list appearance'**
+  String get themeListTitle;
+
+  /// No description provided for @themePreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get themePreviewTitle;
+
+  /// No description provided for @themePreviewSongTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Song'**
+  String get themePreviewSongTitle;
+
+  /// No description provided for @themePreviewSongArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Artist'**
+  String get themePreviewSongArtist;
 }
 
 class _AppLocalizationsDelegate

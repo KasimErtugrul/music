@@ -12,6 +12,11 @@ import 'package:resonance/presentation/ui/pages/player/player_page.dart';
 import 'package:resonance/presentation/ui/pages/playlist_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/playlists/smart_playlists_page.dart';
 import 'package:resonance/presentation/ui/pages/queue_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/appearance/font_settings_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/appearance/list_style_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/appearance/player_style_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/appearance/theme_gallery_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/appearance/theme_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/songs_page.dart';
 import 'package:resonance/presentation/ui/pages/splash_page.dart';
 import 'package:resonance/presentation/ui/pages/stats_page.dart';
@@ -62,5 +67,10 @@ abstract final class AppPages {
       page: () => const SmartPlaylistsPage(),
     ),
     GetPage(name: AppRoutes.stats, page: () => const StatsPage()),
+     GetPage(name: AppRoutes.themeSettings, page: () => const ThemeSettingsPage()),
+    GetPage(name: AppRoutes.themeGallery, page: () => const ThemeGalleryPage()),
+    GetPage(name: AppRoutes.fontSettings, page: () => const FontSettingsPage()),
+    GetPage(name: AppRoutes.playerStyle, page: () => const PlayerStylePage()),
+    GetPage(name: AppRoutes.listStyle, page: () => const ListStylePage()),
   ];
 }
