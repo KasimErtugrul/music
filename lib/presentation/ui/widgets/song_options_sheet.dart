@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/ui/widgets/playlist_picker_sheet.dart';
 
 class SongOptionsSheet extends StatelessWidget {
   const SongOptionsSheet({super.key, required this.song});
@@ -43,6 +44,14 @@ class SongOptionsSheet extends StatelessWidget {
             onTap: () {
               player.addToQueue(song);
               Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.playlist_add),
+            title: Text(l10n.addToPlaylist),
+            onTap: () {
+              Navigator.pop(context);
+              PlaylistPickerSheet.show(context, song);
             },
           ),
         ],

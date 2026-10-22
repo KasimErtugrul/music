@@ -9,6 +9,8 @@ import 'package:resonance/data/repositories/player_repository.dart';
 import 'package:resonance/data/repositories/queue_state_repository.dart';
 import 'package:resonance/presentation/controllers/permission_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/data/datasources/local/daos/playlist_dao.dart';
+import 'package:resonance/presentation/bindings/playlist_binding.dart'; // YENİ EKLENDİ
 
 class InitialBinding extends Bindings {
   @override
@@ -48,5 +50,10 @@ class InitialBinding extends Bindings {
       ),
       permanent: true,
     );
+    
+    Get.put<PlaylistDao>(Get.find<AppDatabase>().playlistDao, permanent: true);
+
+    // Gün 13: Playlist controller'ı HomePage içindeki PlaylistsPage için hemen hazırla
+    PlaylistBinding().dependencies(); // YENİ EKLENDİ
   }
 }

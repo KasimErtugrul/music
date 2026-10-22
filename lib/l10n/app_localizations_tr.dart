@@ -286,5 +286,37 @@ class AppLocalizationsTr extends AppLocalizations {
   String get playerNoSong => 'Şu an çalan bir şarkı yok';
 
   @override
+  String get playlistsTitle => 'Playlist\'ler';
+
+  @override
+  String get createPlaylist => 'Yeni playlist';
+
+  @override
+  String get playlistNameLabel => 'Playlist adı';
+
+  @override
+  String get renamePlaylist => 'Yeniden adlandır';
+
+  @override
+  String get deletePlaylist => 'Playlist\'i sil';
+
+  @override
+  String get deletePlaylistConfirm =>
+      'Bu playlist\'i silmek istediğinize emin misiniz?';
+
+  @override
+  String get addToPlaylist => 'Playlist\'e ekle';
+
+  @override
+  String get noPlaylists => 'Henüz playlist yok';
+
+  @override
+  String get noPlaylistsMessage =>
+      'İlk listenizi oluşturmak için + butonuna dokunun.';
+
+  @override
+  String get playlistEmpty => 'Bu playlist boş';
+
+  @override
   String get backToParent => 'Geri';
 }

@@ -93,5 +93,15 @@
     "nowPlaying": "Şu an çalıyor",
   "playerTitle": "Oynatıcı",
     "playerNoSong": "Şu an çalan bir şarkı yok",
+      "playlistsTitle": "Playlist'ler",
+  "createPlaylist": "Yeni playlist",
+  "playlistNameLabel": "Playlist adı",
+  "renamePlaylist": "Yeniden adlandır",
+  "deletePlaylist": "Playlist'i sil",
+  "deletePlaylistConfirm": "Bu playlist'i silmek istediğinize emin misiniz?",
+  "addToPlaylist": "Playlist'e ekle",
+  "noPlaylists": "Henüz playlist yok",
+  "noPlaylistsMessage": "İlk listenizi oluşturmak için + butonuna dokunun.",
+  "playlistEmpty": "Bu playlist boş",
   "backToParent": "Geri"
 }

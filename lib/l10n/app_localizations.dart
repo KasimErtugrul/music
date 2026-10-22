@@ -584,6 +584,66 @@ abstract class AppLocalizations {
   /// **'Nothing is playing right now'**
   String get playerNoSong;
 
+  /// No description provided for @playlistsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists'**
+  String get playlistsTitle;
+
+  /// No description provided for @createPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'New playlist'**
+  String get createPlaylist;
+
+  /// No description provided for @playlistNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist name'**
+  String get playlistNameLabel;
+
+  /// No description provided for @renamePlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get renamePlaylist;
+
+  /// No description provided for @deletePlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete playlist'**
+  String get deletePlaylist;
+
+  /// No description provided for @deletePlaylistConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this playlist?'**
+  String get deletePlaylistConfirm;
+
+  /// No description provided for @addToPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to playlist'**
+  String get addToPlaylist;
+
+  /// No description provided for @noPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'No playlists yet'**
+  String get noPlaylists;
+
+  /// No description provided for @noPlaylistsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to create your first playlist.'**
+  String get noPlaylistsMessage;
+
+  /// No description provided for @playlistEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This playlist is empty'**
+  String get playlistEmpty;
+
   /// No description provided for @backToParent.
   ///
   /// In en, this message translates to:

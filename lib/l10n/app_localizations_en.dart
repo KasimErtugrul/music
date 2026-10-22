@@ -288,5 +288,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerNoSong => 'Nothing is playing right now';
 
   @override
+  String get playlistsTitle => 'Playlists';
+
+  @override
+  String get createPlaylist => 'New playlist';
+
+  @override
+  String get playlistNameLabel => 'Playlist name';
+
+  @override
+  String get renamePlaylist => 'Rename';
+
+  @override
+  String get deletePlaylist => 'Delete playlist';
+
+  @override
+  String get deletePlaylistConfirm =>
+      'Are you sure you want to delete this playlist?';
+
+  @override
+  String get addToPlaylist => 'Add to playlist';
+
+  @override
+  String get noPlaylists => 'No playlists yet';
+
+  @override
+  String get noPlaylistsMessage => 'Tap + to create your first playlist.';
+
+  @override
+  String get playlistEmpty => 'This playlist is empty';
+
+  @override
   String get backToParent => 'Back';
 }

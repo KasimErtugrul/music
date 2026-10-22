@@ -1,8 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:resonance/data/datasources/local/tables/playlists_table.dart';
 
-/// Playlist ↔ şarkı ilişkisi. Sıralama [position] ile tutulur.
-/// Aynı şarkı aynı playlist'e iki kez eklenemez (composite unique).
 class PlaylistSongs extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get playlistId =>
@@ -10,6 +8,12 @@ class PlaylistSongs extends Table {
   IntColumn get songId => integer()();
   IntColumn get position => integer()();
   DateTimeColumn get addedAt => dateTime().withDefault(currentDateAndTime)();
+
+  // Gün 13: ID değişirse eşleştirme için fallback verileri
+  TextColumn get path => text().nullable()();
+  TextColumn get title => text().nullable()();
+  TextColumn get artist => text().nullable()();
+  IntColumn get durationMs => integer().nullable()();
 
   @override
   List<Set<Column<Object>>> get uniqueKeys => [

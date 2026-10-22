@@ -13,11 +13,15 @@ void main() {
     await db.close();
   });
 
-  test('schemaVersion is 1', () {
-    expect(db.schemaVersion, 1);
-  });
+  test(
+    'schemaVersion is 3 '
+    '(v1: base, v2: queue_states, v3: playlist fallback columns)',
+    () {
+      expect(db.schemaVersion, 3);
+    },
+  );
 
-  test('onCreate creates all five tables', () async {
+  test('onCreate creates all current tables', () async {
     final rows = await db
         .customSelect(
           "SELECT name FROM sqlite_master WHERE type='table' "
@@ -33,6 +37,7 @@ void main() {
         'favorites',
         'play_history',
         'lyrics',
+        'queue_states',
       ]),
     );
   });

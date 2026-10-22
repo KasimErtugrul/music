@@ -105,5 +105,15 @@
     "nowPlaying": "Now playing",
   "playerTitle": "Player",
     "playerNoSong": "Nothing is playing right now",
+      "playlistsTitle": "Playlists",
+  "createPlaylist": "New playlist",
+  "playlistNameLabel": "Playlist name",
+  "renamePlaylist": "Rename",
+  "deletePlaylist": "Delete playlist",
+  "deletePlaylistConfirm": "Are you sure you want to delete this playlist?",
+  "addToPlaylist": "Add to playlist",
+  "noPlaylists": "No playlists yet",
+  "noPlaylistsMessage": "Tap + to create your first playlist.",
+  "playlistEmpty": "This playlist is empty",
   "backToParent": "Back"
 }

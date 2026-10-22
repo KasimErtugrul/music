@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:resonance/data/datasources/local/app_database.dart';
 import 'package:resonance/data/datasources/local/tables/playlist_songs_table.dart';
 import 'package:resonance/data/datasources/local/tables/playlists_table.dart';
+import 'package:resonance/data/models/song_model.dart';
 
 part 'playlist_dao.g.dart';
 
@@ -52,7 +53,7 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase>
     await (delete(playlists)..where((t) => t.id.equals(id))).go();
   }
 
-  Future<void> addSong(int playlistId, int songId) async {
+  Future<void> addSong(int playlistId, SongModel song) async {
     final maxPos = await (selectOnly(playlistSongs)
           ..addColumns([playlistSongs.position.max()])
           ..where(playlistSongs.playlistId.equals(playlistId)))
@@ -65,8 +66,12 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase>
       await into(playlistSongs).insert(
         PlaylistSongsCompanion.insert(
           playlistId: playlistId,
-          songId: songId,
+          songId: song.id,
           position: next,
+          path: Value(song.path),
+          title: Value(song.title),
+          artist: Value(song.artist),
+          durationMs: Value(song.durationMs),
         ),
       );
       await (update(playlists)..where((t) => t.id.equals(playlistId))).write(

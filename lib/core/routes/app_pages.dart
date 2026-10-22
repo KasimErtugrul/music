@@ -7,9 +7,10 @@ import 'package:resonance/presentation/ui/pages/genre_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/home_page.dart';
 import 'package:resonance/presentation/ui/pages/permission_page.dart';
 import 'package:resonance/presentation/ui/pages/player/player_page.dart';
+import 'package:resonance/presentation/ui/pages/playlist_detail_page.dart';
+import 'package:resonance/presentation/ui/pages/queue_page.dart';
 import 'package:resonance/presentation/ui/pages/songs_page.dart';
 import 'package:resonance/presentation/ui/pages/splash_page.dart';
-import 'package:resonance/presentation/ui/pages/queue_page.dart';
 
 abstract final class AppPages {
   static const String initial = AppRoutes.splash;
@@ -25,9 +26,6 @@ abstract final class AppPages {
       page: () => const HomePage(),
       binding: HomeBinding(),
     ),
-    // Tek başına açıldığında da LibraryController gerektiği için
-    // HomeBinding (LibraryController sağlıyor) burada da bağlanıyor.
-    // GetX aynı bağımlılığı iki rotada da kullanabilir; lazyPut bunu yönetir.
     GetPage<dynamic>(
       name: AppRoutes.songs,
       page: () => const SongsPage(),
@@ -45,14 +43,12 @@ abstract final class AppPages {
       name: AppRoutes.genreDetail,
       page: () => const GenreDetailPage(),
     ),
-    // import 'package:resonance/presentation/ui/pages/queue_page.dart';  (en üste ekle)
+    GetPage<dynamic>(name: AppRoutes.queue, page: () => const QueuePage()),
+    GetPage<dynamic>(name: AppRoutes.player, page: () => const PlayerPage()),
     GetPage<dynamic>(
-      name: AppRoutes.queue,
-      page: () => const QueuePage(),
-    ),
-     GetPage<dynamic>(
-      name: AppRoutes.player,
-      page: () => const PlayerPage(),
+      name: AppRoutes.playlistDetail,
+      page: () => const PlaylistDetailPage(),
+      // binding: PlaylistBinding(), KALDIRILDI (InitialBinding'de var)
     ),
   ];
 }
