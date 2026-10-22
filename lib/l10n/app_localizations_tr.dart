@@ -246,28 +246,6 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get queueTitle => 'Kuyruk';
-
-  @override
-  String get playNext => 'Sonra çal';
-
-  @override
-  String get addToQueue => 'Kuyruğa ekle';
-
-  @override
-  String get queueEmpty => 'Kuyruk boş';
-
-  @override
-  String get clearQueue => 'Kuyruğu temizle';
-
-  @override
-  String get clearQueueConfirm =>
-      'Kuyruğu temizlemek istediğinize emin misiniz?';
-
-  @override
-  String get queueCleared => 'Kuyruk temizlendi';
-
-  @override
   String get spikeLoadError => 'İstatistikler yüklenemedi';
 
   @override
@@ -275,6 +253,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get spikeEmpty => 'Öğe bulunamadı';
+
+  @override
+  String get backToParent => 'Geri';
 
   @override
   String get nowPlaying => 'Şu an çalıyor';
@@ -318,5 +299,49 @@ class AppLocalizationsTr extends AppLocalizations {
   String get playlistEmpty => 'Bu playlist boş';
 
   @override
-  String get backToParent => 'Geri';
+  String get queueTitle => 'Kuyruk';
+
+  @override
+  String get playNext => 'Sonra çal';
+
+  @override
+  String get addToQueue => 'Kuyruğa ekle';
+
+  @override
+  String get queueEmpty => 'Kuyruk boş';
+
+  @override
+  String get clearQueue => 'Kuyruğu temizle';
+
+  @override
+  String get clearQueueConfirm =>
+      'Kuyruğu temizlemek istediğinize emin misiniz?';
+
+  @override
+  String get queueCleared => 'Kuyruk temizlendi';
+
+  @override
+  String get favorites => 'Favoriler';
+
+  @override
+  String get history => 'Geçmiş';
+
+  @override
+  String get addToFavorites => 'Favorilere ekle';
+
+  @override
+  String get removeFromFavorites => 'Favorilerden çıkar';
+
+  @override
+  String get favoritesEmpty => 'Henüz favori yok';
+
+  @override
+  String get historyEmpty => 'Henüz geçmiş yok';
+
+  @override
+  String get clearHistory => 'Geçmişi temizle';
+
+  @override
+  String get clearHistoryConfirm =>
+      'Çalma geçmişinizi temizlemek istediğinize emin misiniz?';
 }

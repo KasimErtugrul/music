@@ -3,7 +3,9 @@ import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/presentation/bindings/home_binding.dart';
 import 'package:resonance/presentation/ui/pages/album_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/artist_detail_page.dart';
+import 'package:resonance/presentation/ui/pages/favorites_page.dart';
 import 'package:resonance/presentation/ui/pages/genre_detail_page.dart';
+import 'package:resonance/presentation/ui/pages/history_page.dart';
 import 'package:resonance/presentation/ui/pages/home_page.dart';
 import 'package:resonance/presentation/ui/pages/permission_page.dart';
 import 'package:resonance/presentation/ui/pages/player/player_page.dart';
@@ -48,7 +50,14 @@ abstract final class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.playlistDetail,
       page: () => const PlaylistDetailPage(),
-      // binding: PlaylistBinding(), KALDIRILDI (InitialBinding'de var)
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.favorites,
+      page: () => const FavoritesPage(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.history,
+      page: () => const HistoryPage(),
     ),
   ];
 }

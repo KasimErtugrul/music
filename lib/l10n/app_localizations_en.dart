@@ -249,27 +249,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get queueTitle => 'Queue';
-
-  @override
-  String get playNext => 'Play next';
-
-  @override
-  String get addToQueue => 'Add to queue';
-
-  @override
-  String get queueEmpty => 'The queue is empty';
-
-  @override
-  String get clearQueue => 'Clear queue';
-
-  @override
-  String get clearQueueConfirm => 'Are you sure you want to clear the queue?';
-
-  @override
-  String get queueCleared => 'Queue cleared';
-
-  @override
   String get spikeLoadError => 'Failed to load stats';
 
   @override
@@ -277,6 +256,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spikeEmpty => 'No items found';
+
+  @override
+  String get backToParent => 'Back';
 
   @override
   String get nowPlaying => 'Now playing';
@@ -319,5 +301,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playlistEmpty => 'This playlist is empty';
 
   @override
-  String get backToParent => 'Back';
+  String get queueTitle => 'Queue';
+
+  @override
+  String get playNext => 'Play next';
+
+  @override
+  String get addToQueue => 'Add to queue';
+
+  @override
+  String get queueEmpty => 'The queue is empty';
+
+  @override
+  String get clearQueue => 'Clear queue';
+
+  @override
+  String get clearQueueConfirm => 'Are you sure you want to clear the queue?';
+
+  @override
+  String get queueCleared => 'Queue cleared';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get addToFavorites => 'Add to favorites';
+
+  @override
+  String get removeFromFavorites => 'Remove from favorites';
+
+  @override
+  String get favoritesEmpty => 'No favorites yet';
+
+  @override
+  String get historyEmpty => 'No history yet';
+
+  @override
+  String get clearHistory => 'Clear history';
+
+  @override
+  String get clearHistoryConfirm =>
+      'Are you sure you want to clear your play history?';
 }

@@ -212,7 +212,7 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No albums} =1{1 album} other{{count} albums}}'**
   String albumCount(int count);
 
-  /// Temporary Day 1 button; removed on Day 17 when the language picker is added
+  /// No description provided for @debugLanguageToggle.
   ///
   /// In en, this message translates to:
   /// **'Switch language (temporary)'**
@@ -506,48 +506,6 @@ abstract class AppLocalizations {
   /// **'Missing artist: {noArtist}, missing genre: {noGenre}'**
   String spikeMissingStats(int noArtist, int noGenre);
 
-  /// No description provided for @queueTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue'**
-  String get queueTitle;
-
-  /// No description provided for @playNext.
-  ///
-  /// In en, this message translates to:
-  /// **'Play next'**
-  String get playNext;
-
-  /// No description provided for @addToQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to queue'**
-  String get addToQueue;
-
-  /// No description provided for @queueEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'The queue is empty'**
-  String get queueEmpty;
-
-  /// No description provided for @clearQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear queue'**
-  String get clearQueue;
-
-  /// No description provided for @clearQueueConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to clear the queue?'**
-  String get clearQueueConfirm;
-
-  /// No description provided for @queueCleared.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue cleared'**
-  String get queueCleared;
-
   /// No description provided for @spikeLoadError.
   ///
   /// In en, this message translates to:
@@ -565,6 +523,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No items found'**
   String get spikeEmpty;
+
+  /// No description provided for @backToParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get backToParent;
 
   /// No description provided for @nowPlaying.
   ///
@@ -644,11 +608,95 @@ abstract class AppLocalizations {
   /// **'This playlist is empty'**
   String get playlistEmpty;
 
-  /// No description provided for @backToParent.
+  /// No description provided for @queueTitle.
   ///
   /// In en, this message translates to:
-  /// **'Back'**
-  String get backToParent;
+  /// **'Queue'**
+  String get queueTitle;
+
+  /// No description provided for @playNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Play next'**
+  String get playNext;
+
+  /// No description provided for @addToQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to queue'**
+  String get addToQueue;
+
+  /// No description provided for @queueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The queue is empty'**
+  String get queueEmpty;
+
+  /// No description provided for @clearQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear queue'**
+  String get clearQueue;
+
+  /// No description provided for @clearQueueConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear the queue?'**
+  String get clearQueueConfirm;
+
+  /// No description provided for @queueCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue cleared'**
+  String get queueCleared;
+
+  /// No description provided for @favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get favorites;
+
+  /// No description provided for @history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
+
+  /// No description provided for @addToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get addToFavorites;
+
+  /// No description provided for @removeFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get removeFromFavorites;
+
+  /// No description provided for @favoritesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorites yet'**
+  String get favoritesEmpty;
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get historyEmpty;
+
+  /// No description provided for @clearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear history'**
+  String get clearHistory;
+
+  /// No description provided for @clearHistoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear your play history?'**
+  String get clearHistoryConfirm;
 }
 
 class _AppLocalizationsDelegate

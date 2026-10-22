@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:resonance/core/utils/duration_extensions.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
+import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/song_options_sheet.dart';
@@ -11,7 +12,7 @@ class SongTile extends StatelessWidget {
   const SongTile({
     super.key,
     required this.song,
-    this.queueContext, // Şarkı tıklandığında kuyruğa alınacak liste
+    this.queueContext,
     this.onTap,
     this.trailing,
   });
@@ -25,13 +26,12 @@ class SongTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final player = Get.find<PlayerController>();
+    final favCtrl = Get.find<FavoriteController>();
     final theme = Theme.of(context);
 
-    // Gün 11: Obx ile reaktif hale getirildi. 
-    // currentItem değiştiğinde sadece bu satır rebuild olur.
     return Obx(() {
-      // MediaItem.id bizim repository'de song.uri olarak atanmıştı.
       final isCurrent = player.currentItem.value?.id == song.uri;
+      final isFav = favCtrl.isFavorite(song.id);
 
       final subtitle = <String>[
         song.artist ?? l10n.unknownArtist,
@@ -55,16 +55,22 @@ class SongTile extends StatelessWidget {
             fontWeight: isCurrent ? FontWeight.bold : null,
           ),
         ),
-        subtitle: Text(
-          subtitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: trailing ??
-            Text(
-              song.duration.clock,
-              style: theme.textTheme.bodySmall,
+        subtitle: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+        trailing: trailing ?? Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                isFav ? Icons.favorite : Icons.favorite_border,
+                color: isFav ? theme.colorScheme.error : null,
+                size: 20,
+              ),
+              onPressed: () => favCtrl.toggle(song.id),
             ),
+            const SizedBox(width: 8),
+            Text(song.duration.clock, style: theme.textTheme.bodySmall),
+          ],
+        ),
         onTap: () {
           if (onTap != null) {
             onTap!();

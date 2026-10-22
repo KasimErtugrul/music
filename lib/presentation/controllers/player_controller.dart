@@ -1,18 +1,26 @@
+import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:resonance/data/models/queue_state_model.dart';
 import 'package:resonance/data/models/song_model.dart';
+import 'package:resonance/data/repositories/history_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
 import 'package:resonance/data/repositories/queue_state_repository.dart';
 
 class PlayerController extends GetxController {
-  PlayerController(this._repository, this._libraryRepo, this._stateRepo);
+  PlayerController(
+    this._repository,
+    this._libraryRepo,
+    this._stateRepo,
+    this._historyRepo,
+  );
 
-   final PlayerRepository _repository;
+  final PlayerRepository _repository;
   final LibraryRepository _libraryRepo;
   final QueueStateRepository _stateRepo;
+  final HistoryRepository _historyRepo;
 
   final currentItem = Rxn<MediaItem>();
   final queue = <MediaItem>[].obs;
@@ -24,9 +32,10 @@ class PlayerController extends GetxController {
   final repeatMode = AudioServiceRepeatMode.none.obs;
   final lastError = Rxn<PlayerException>();
 
-  // Gün 11: UI'da dar kapsamlı dinlenmesi için
   final position = Duration.zero.obs;
   final duration = Duration.zero.obs;
+
+  String? _loggedSongUri;
 
   SongModel? get currentSong {
     final id = currentItem.value?.id;
@@ -44,6 +53,9 @@ class PlayerController extends GetxController {
 
   void _bind() {
     _repository.mediaItemStream.listen((item) {
+      if (currentItem.value?.id != item?.id) {
+        _loggedSongUri = null; // Şarkı değişti, geçmiş kaydı sıfırla
+      }
       currentItem.value = item;
       _saveQueueState();
     });
@@ -53,19 +65,36 @@ class PlayerController extends GetxController {
     _repository.playbackStateStream.listen((state) {
       isPlaying.value = state.playing;
       processingState.value = state.processingState;
-      // Duraklatıldığında veya durduğunda kaydet.
       if (!state.playing || state.processingState == AudioProcessingState.idle) {
         _saveQueueState();
       }
     });
 
     _repository.errorStream.listen((error) => lastError.value = error);
-  // Gün 11: Pozisyon ve süre güncellemeleri
-    _repository.positionStream.listen((pos) => position.value = pos);
+
+    _repository.positionStream.listen((pos) {
+      position.value = pos;
+      _checkHistory(pos);
+    });
+    
     _repository.durationStream.listen((dur) {
       if (dur != null) duration.value = dur;
     });
-    
+  }
+
+  void _checkHistory(Duration pos) {
+    final song = currentSong;
+    if (song == null || _loggedSongUri == song.uri) return;
+
+    // Eşik: 30 saniye veya şarkının süresinin yarısı (hangisi daha küçükse)
+    final minDuration = const Duration(seconds: 30);
+    final halfDuration = Duration(milliseconds: song.durationMs ~/ 2);
+    final threshold = minDuration < halfDuration ? minDuration : halfDuration;
+
+    if (pos >= threshold) {
+      _historyRepo.recordPlay(song.id);
+      _loggedSongUri = song.uri;
+    }
   }
 
   Future<void> _restoreQueue() async {
@@ -117,7 +146,7 @@ class PlayerController extends GetxController {
         position: _repository.position,
         shuffleEnabled: shuffleEnabled.value,
         repeatMode: repeatMode.value,
-        shuffleOrder: null, // just_audio 0.10.x dışarıdan sıra enjeksiyonunu desteklemiyor.
+        shuffleOrder: null,
       ));
     } catch (_) {}
   }
@@ -245,6 +274,4 @@ class PlayerController extends GetxController {
   }
 
   void clearError() => lastError.value = null;
-  Stream<Duration> get positionStream => _repository.positionStream;
-  Stream<Duration?> get durationStream => _repository.durationStream;
 }

@@ -8,5 +8,7 @@ abstract final class AppRoutes {
   static const String genreDetail = '/genre';
   static const String queue = '/queue';
   static const String player = '/player';
-    static const String playlistDetail = '/playlist-detail';
+  static const String playlistDetail = '/playlist-detail';
+  static const String favorites = '/favorites';
+  static const String history = '/history';
 }

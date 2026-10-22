@@ -67,33 +67,15 @@
   "spikeOpenButton": "Spike Testini Aç",
   "spikeScanButton": "Kütüphaneyi Tara",
   "spikeStats": "İstatistik: {total} şarkı ({elapsed} ms)",
-  "@spikeStats": {
-    "placeholders": {
-      "total": { "type": "int" },
-      "elapsed": { "type": "int" }
-    }
-  },
   "spikeMissingStats": "Sanatçısı yok: {noArtist}, türü yok: {noGenre}",
-  "@spikeMissingStats": {
-    "placeholders": {
-      "noArtist": { "type": "int" },
-      "noGenre": { "type": "int" }
-    }
-  },
-    "queueTitle": "Kuyruk",
-  "playNext": "Sonra çal",
-  "addToQueue": "Kuyruğa ekle",
-  "queueEmpty": "Kuyruk boş",
-  "clearQueue": "Kuyruğu temizle",
-  "clearQueueConfirm": "Kuyruğu temizlemek istediğinize emin misiniz?",
-  "queueCleared": "Kuyruk temizlendi",
   "spikeLoadError": "İstatistikler yüklenemedi",
   "spikeNotScanned": "Henüz taranmadı",
   "spikeEmpty": "Öğe bulunamadı",
-    "nowPlaying": "Şu an çalıyor",
+  "backToParent": "Geri",
+  "nowPlaying": "Şu an çalıyor",
   "playerTitle": "Oynatıcı",
-    "playerNoSong": "Şu an çalan bir şarkı yok",
-      "playlistsTitle": "Playlist'ler",
+  "playerNoSong": "Şu an çalan bir şarkı yok",
+  "playlistsTitle": "Playlist'ler",
   "createPlaylist": "Yeni playlist",
   "playlistNameLabel": "Playlist adı",
   "renamePlaylist": "Yeniden adlandır",
@@ -103,5 +85,19 @@
   "noPlaylists": "Henüz playlist yok",
   "noPlaylistsMessage": "İlk listenizi oluşturmak için + butonuna dokunun.",
   "playlistEmpty": "Bu playlist boş",
-  "backToParent": "Geri"
+  "queueTitle": "Kuyruk",
+  "playNext": "Sonra çal",
+  "addToQueue": "Kuyruğa ekle",
+  "queueEmpty": "Kuyruk boş",
+  "clearQueue": "Kuyruğu temizle",
+  "clearQueueConfirm": "Kuyruğu temizlemek istediğinize emin misiniz?",
+  "queueCleared": "Kuyruk temizlendi",
+  "favorites": "Favoriler",
+  "history": "Geçmiş",
+  "addToFavorites": "Favorilere ekle",
+  "removeFromFavorites": "Favorilerden çıkar",
+  "favoritesEmpty": "Henüz favori yok",
+  "historyEmpty": "Henüz geçmiş yok",
+  "clearHistory": "Geçmişi temizle",
+  "clearHistoryConfirm": "Çalma geçmişinizi temizlemek istediğinize emin misiniz?"
 }
