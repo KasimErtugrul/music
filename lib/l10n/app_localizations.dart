@@ -853,6 +853,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search Results'**
   String get searchResults;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsLanguageSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsLanguageSystem;
+
+  /// No description provided for @settingsThemeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme mode'**
+  String get settingsThemeMode;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
+
+  /// No description provided for @settingsDynamicColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic color'**
+  String get settingsDynamicColor;
+
+  /// No description provided for @settingsDynamicColorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Android 12+ Material You colors'**
+  String get settingsDynamicColorDescription;
+
+  /// No description provided for @settingsAmoledDark.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED black'**
+  String get settingsAmoledDark;
+
+  /// No description provided for @settingsAmoledDarkDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use pure black surfaces in dark mode'**
+  String get settingsAmoledDarkDescription;
+
+  /// No description provided for @settingsGroupGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get settingsGroupGeneral;
+
+  /// No description provided for @settingsGroupAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsGroupAppearance;
+
+  /// No description provided for @settingsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search settings'**
+  String get settingsSearchHint;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsVersionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String settingsVersionLabel(String version);
+
+  /// No description provided for @settingsAboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Resonance is an offline music player for Android. Your data never leaves this device.'**
+  String get settingsAboutDescription;
+
+  /// No description provided for @settingsLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licenses'**
+  String get settingsLicenses;
 }
 
 class _AppLocalizationsDelegate

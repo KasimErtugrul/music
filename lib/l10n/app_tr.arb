@@ -125,5 +125,22 @@
   "infoPath": "Dosya Yolu",
   "infoSize": "Dosya Boyutu",
   "infoDateAdded": "Eklenme Tarihi",
-  "searchResults": "Arama Sonuçları"
+  "searchResults": "Arama Sonuçları",
+    "settingsLanguage": "Dil",
+  "settingsLanguageSystem": "Sistem",
+  "settingsThemeMode": "Tema modu",
+  "settingsThemeSystem": "Sistem",
+  "settingsThemeLight": "Açık",
+  "settingsThemeDark": "Koyu",
+  "settingsDynamicColor": "Dinamik renk",
+  "settingsDynamicColorDescription": "Android 12+ Material You renklerini kullan",
+  "settingsAmoledDark": "AMOLED siyah",
+  "settingsAmoledDarkDescription": "Koyu modda tam siyah yüzeyler kullan",
+  "settingsGroupGeneral": "Genel",
+  "settingsGroupAppearance": "Görünüm",
+  "settingsSearchHint": "Ayarlarda ara",
+  "settingsAbout": "Hakkında",
+  "settingsVersionLabel": "Sürüm {version}",
+  "settingsAboutDescription": "Resonance, Android için çevrimdışı bir müzik çalardır. Verileriniz bu cihazdan asla ayrılmaz.",
+  "settingsLicenses": "Açık kaynak lisansları"
   }

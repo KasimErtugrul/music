@@ -5,6 +5,7 @@ import 'package:resonance/presentation/ui/layouts/adaptive_scaffold.dart';
 import 'package:resonance/presentation/ui/pages/library_tabs_page.dart';
 import 'package:resonance/presentation/ui/pages/playlists/playlists_page.dart';
 import 'package:resonance/presentation/ui/pages/search_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/settings_home_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
           LibraryTabsPage(),
           PlaylistsPage(),
           SearchPage(), // <- Burası değişti
-          _PlaceholderTab(icon: Icons.settings_outlined),
+          SettingsHomePage(), // değişti
         ],
       ),
     );
@@ -105,21 +106,3 @@ class _HomeTabContent extends StatelessWidget {
   }
 }
 
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({required this.icon});
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Icon(
-          icon,
-          size: 64,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
-    );
-  }
-}

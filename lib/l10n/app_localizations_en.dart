@@ -432,4 +432,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchResults => 'Search Results';
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsLanguageSystem => 'System';
+
+  @override
+  String get settingsThemeMode => 'Theme mode';
+
+  @override
+  String get settingsThemeSystem => 'System';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
+  String get settingsDynamicColor => 'Dynamic color';
+
+  @override
+  String get settingsDynamicColorDescription =>
+      'Use Android 12+ Material You colors';
+
+  @override
+  String get settingsAmoledDark => 'AMOLED black';
+
+  @override
+  String get settingsAmoledDarkDescription =>
+      'Use pure black surfaces in dark mode';
+
+  @override
+  String get settingsGroupGeneral => 'General';
+
+  @override
+  String get settingsGroupAppearance => 'Appearance';
+
+  @override
+  String get settingsSearchHint => 'Search settings';
+
+  @override
+  String get settingsAbout => 'About';
+
+  @override
+  String settingsVersionLabel(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get settingsAboutDescription =>
+      'Resonance is an offline music player for Android. Your data never leaves this device.';
+
+  @override
+  String get settingsLicenses => 'Open source licenses';
 }

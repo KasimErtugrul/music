@@ -430,4 +430,60 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get searchResults => 'Arama Sonuçları';
+
+  @override
+  String get settingsLanguage => 'Dil';
+
+  @override
+  String get settingsLanguageSystem => 'Sistem';
+
+  @override
+  String get settingsThemeMode => 'Tema modu';
+
+  @override
+  String get settingsThemeSystem => 'Sistem';
+
+  @override
+  String get settingsThemeLight => 'Açık';
+
+  @override
+  String get settingsThemeDark => 'Koyu';
+
+  @override
+  String get settingsDynamicColor => 'Dinamik renk';
+
+  @override
+  String get settingsDynamicColorDescription =>
+      'Android 12+ Material You renklerini kullan';
+
+  @override
+  String get settingsAmoledDark => 'AMOLED siyah';
+
+  @override
+  String get settingsAmoledDarkDescription =>
+      'Koyu modda tam siyah yüzeyler kullan';
+
+  @override
+  String get settingsGroupGeneral => 'Genel';
+
+  @override
+  String get settingsGroupAppearance => 'Görünüm';
+
+  @override
+  String get settingsSearchHint => 'Ayarlarda ara';
+
+  @override
+  String get settingsAbout => 'Hakkında';
+
+  @override
+  String settingsVersionLabel(String version) {
+    return 'Sürüm $version';
+  }
+
+  @override
+  String get settingsAboutDescription =>
+      'Resonance, Android için çevrimdışı bir müzik çalardır. Verileriniz bu cihazdan asla ayrılmaz.';
+
+  @override
+  String get settingsLicenses => 'Açık kaynak lisansları';
 }

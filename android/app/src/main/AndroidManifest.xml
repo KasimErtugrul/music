@@ -22,7 +22,7 @@
         android:label="resonance"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-
+        android:localeConfig="@xml/locales_config"
         <!--
             TEK activity: MainActivity.
             Kotlin tarafında AudioServiceActivity'den miras aldığımız için
@@ -30,6 +30,10 @@
             tanımı GEREKSİZDİR; eklenirse ayrı bir FlutterEngine açılır ve
             MainActivity'deki MediaStore MethodChannel o engine'de olmaz.
         -->
+
+        
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
