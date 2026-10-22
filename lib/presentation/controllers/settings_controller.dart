@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:resonance/core/settings/settings_defaults.dart';
 import 'package:resonance/core/settings/settings_keys.dart';
 import 'package:resonance/data/models/app_settings_model.dart';
 import 'package:resonance/data/repositories/settings_repository.dart';
 
+/// Yalnızca dil ayarını yönetir. Tema ayarları `ThemeController`'da.
 class SettingsController extends GetxController {
   SettingsController(this._repo);
   final SettingsRepository _repo;
@@ -39,38 +39,4 @@ class SettingsController extends GetxController {
         Get.updateLocale(const Locale('en'));
     }
   }
-
-  Future<void> setThemeMode(String mode) async {
-    final current = settings.value;
-    if (current == null) return;
-    final next = current.copyWith(themeMode: mode);
-    settings.value = next;
-    await _repo.setString(SettingsKeys.themeMode, mode);
-    Get.changeThemeMode(_themeModeOf(mode));
-  }
-
-  Future<void> setDynamicColor(bool value) async {
-    final current = settings.value;
-    if (current == null) return;
-    final next = current.copyWith(dynamicColor: value);
-    settings.value = next;
-    await _repo.setBool(SettingsKeys.dynamicColor, value);
-  }
-
-  Future<void> setAmoledDark(bool value) async {
-    final current = settings.value;
-    if (current == null) return;
-    final next = current.copyWith(amoledDark: value);
-    settings.value = next;
-    await _repo.setBool(SettingsKeys.amoledDark, value);
-  }
-
-  ThemeMode get currentThemeMode =>
-      _themeModeOf(settings.value?.themeMode ?? SettingsDefaults.themeMode);
-
-  ThemeMode _themeModeOf(String mode) => switch (mode) {
-        'light' => ThemeMode.light,
-        'dark' => ThemeMode.dark,
-        _ => ThemeMode.system,
-      };
 }

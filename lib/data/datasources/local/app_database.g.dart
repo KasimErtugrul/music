@@ -2116,6 +2116,311 @@ class QueueStatesCompanion extends UpdateCompanion<QueueState> {
   }
 }
 
+class $CustomThemesTable extends CustomThemes
+    with TableInfo<$CustomThemesTable, CustomTheme> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CustomThemesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _settingsJsonMeta = const VerificationMeta(
+    'settingsJson',
+  );
+  @override
+  late final GeneratedColumn<String> settingsJson = GeneratedColumn<String>(
+    'settings_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, settingsJson, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'custom_themes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CustomTheme> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('settings_json')) {
+      context.handle(
+        _settingsJsonMeta,
+        settingsJson.isAcceptableOrUnknown(
+          data['settings_json']!,
+          _settingsJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_settingsJsonMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CustomTheme map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CustomTheme(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      settingsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}settings_json'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CustomThemesTable createAlias(String alias) {
+    return $CustomThemesTable(attachedDatabase, alias);
+  }
+}
+
+class CustomTheme extends DataClass implements Insertable<CustomTheme> {
+  final int id;
+  final String name;
+  final String settingsJson;
+  final DateTime createdAt;
+  const CustomTheme({
+    required this.id,
+    required this.name,
+    required this.settingsJson,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['settings_json'] = Variable<String>(settingsJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  CustomThemesCompanion toCompanion(bool nullToAbsent) {
+    return CustomThemesCompanion(
+      id: Value(id),
+      name: Value(name),
+      settingsJson: Value(settingsJson),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory CustomTheme.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CustomTheme(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      settingsJson: serializer.fromJson<String>(json['settingsJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'settingsJson': serializer.toJson<String>(settingsJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  CustomTheme copyWith({
+    int? id,
+    String? name,
+    String? settingsJson,
+    DateTime? createdAt,
+  }) => CustomTheme(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    settingsJson: settingsJson ?? this.settingsJson,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  CustomTheme copyWithCompanion(CustomThemesCompanion data) {
+    return CustomTheme(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      settingsJson: data.settingsJson.present
+          ? data.settingsJson.value
+          : this.settingsJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomTheme(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('settingsJson: $settingsJson, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, settingsJson, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CustomTheme &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.settingsJson == this.settingsJson &&
+          other.createdAt == this.createdAt);
+}
+
+class CustomThemesCompanion extends UpdateCompanion<CustomTheme> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> settingsJson;
+  final Value<DateTime> createdAt;
+  const CustomThemesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.settingsJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  CustomThemesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String settingsJson,
+    this.createdAt = const Value.absent(),
+  }) : name = Value(name),
+       settingsJson = Value(settingsJson);
+  static Insertable<CustomTheme> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? settingsJson,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (settingsJson != null) 'settings_json': settingsJson,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  CustomThemesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? settingsJson,
+    Value<DateTime>? createdAt,
+  }) {
+    return CustomThemesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      settingsJson: settingsJson ?? this.settingsJson,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (settingsJson.present) {
+      map['settings_json'] = Variable<String>(settingsJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomThemesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('settingsJson: $settingsJson, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2125,11 +2430,15 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PlayHistoryTable playHistory = $PlayHistoryTable(this);
   late final $LyricsTable lyrics = $LyricsTable(this);
   late final $QueueStatesTable queueStates = $QueueStatesTable(this);
+  late final $CustomThemesTable customThemes = $CustomThemesTable(this);
   late final PlaylistDao playlistDao = PlaylistDao(this as AppDatabase);
   late final FavoriteDao favoriteDao = FavoriteDao(this as AppDatabase);
   late final HistoryDao historyDao = HistoryDao(this as AppDatabase);
   late final LyricsDao lyricsDao = LyricsDao(this as AppDatabase);
   late final QueueStateDao queueStateDao = QueueStateDao(this as AppDatabase);
+  late final CustomThemeDao customThemeDao = CustomThemeDao(
+    this as AppDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2141,6 +2450,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     playHistory,
     lyrics,
     queueStates,
+    customThemes,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -3565,6 +3875,192 @@ typedef $$QueueStatesTableProcessedTableManager =
       QueueState,
       PrefetchHooks Function()
     >;
+typedef $$CustomThemesTableCreateCompanionBuilder =
+    CustomThemesCompanion Function({
+      Value<int> id,
+      required String name,
+      required String settingsJson,
+      Value<DateTime> createdAt,
+    });
+typedef $$CustomThemesTableUpdateCompanionBuilder =
+    CustomThemesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> settingsJson,
+      Value<DateTime> createdAt,
+    });
+
+class $$CustomThemesTableFilterComposer
+    extends Composer<_$AppDatabase, $CustomThemesTable> {
+  $$CustomThemesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get settingsJson => $composableBuilder(
+    column: $table.settingsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CustomThemesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CustomThemesTable> {
+  $$CustomThemesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get settingsJson => $composableBuilder(
+    column: $table.settingsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CustomThemesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CustomThemesTable> {
+  $$CustomThemesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get settingsJson => $composableBuilder(
+    column: $table.settingsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$CustomThemesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CustomThemesTable,
+          CustomTheme,
+          $$CustomThemesTableFilterComposer,
+          $$CustomThemesTableOrderingComposer,
+          $$CustomThemesTableAnnotationComposer,
+          $$CustomThemesTableCreateCompanionBuilder,
+          $$CustomThemesTableUpdateCompanionBuilder,
+          (
+            CustomTheme,
+            BaseReferences<_$AppDatabase, $CustomThemesTable, CustomTheme>,
+          ),
+          CustomTheme,
+          PrefetchHooks Function()
+        > {
+  $$CustomThemesTableTableManager(_$AppDatabase db, $CustomThemesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CustomThemesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CustomThemesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CustomThemesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> settingsJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => CustomThemesCompanion(
+                id: id,
+                name: name,
+                settingsJson: settingsJson,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String settingsJson,
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => CustomThemesCompanion.insert(
+                id: id,
+                name: name,
+                settingsJson: settingsJson,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CustomThemesTable, CustomTheme>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CustomThemesTable,
+                    CustomTheme
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CustomThemesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CustomThemesTable,
+      CustomTheme,
+      $$CustomThemesTableFilterComposer,
+      $$CustomThemesTableOrderingComposer,
+      $$CustomThemesTableAnnotationComposer,
+      $$CustomThemesTableCreateCompanionBuilder,
+      $$CustomThemesTableUpdateCompanionBuilder,
+      (
+        CustomTheme,
+        BaseReferences<_$AppDatabase, $CustomThemesTable, CustomTheme>,
+      ),
+      CustomTheme,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3581,4 +4077,6 @@ class $AppDatabaseManager {
       $$LyricsTableTableManager(_db, _db.lyrics);
   $$QueueStatesTableTableManager get queueStates =>
       $$QueueStatesTableTableManager(_db, _db.queueStates);
+  $$CustomThemesTableTableManager get customThemes =>
+      $$CustomThemesTableTableManager(_db, _db.customThemes);
 }

@@ -65,7 +65,7 @@ class SettingsHomePage extends StatelessWidget {
               title: Text(l10n.themeGroupColor),
               subtitle: Text(l10n.themeGroupMode),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => Get.toNamed(AppRoutes.themeSettings),
+              onTap: () => Get.toNamed(AppRoutes.themeGallery), // ← galeriye
             ),
             ListTile(
               leading: const Icon(Icons.text_fields),
@@ -101,7 +101,11 @@ class SettingsHomePage extends StatelessWidget {
     );
   }
 
-  Widget _entry(SettingsEntry e, AppLocalizations l10n, SettingsController ctrl) {
+  Widget _entry(
+    SettingsEntry e,
+    AppLocalizations l10n,
+    SettingsController ctrl,
+  ) {
     switch (e.key) {
       case 'language_code':
         return SettingsChoiceTile<String>(

@@ -38,19 +38,58 @@ class ThemeSettingsPage extends StatelessWidget {
               },
               onChanged: themeCtrl.setMode,
             ),
+            if (s.themeMode == ThemeMode.system)
+              ListTile(
+                title: const Text('Scheduled dark mode'),
+                subtitle: Text(
+                  '${s.scheduledDarkStartHour.toString().padLeft(2, '0')}:${s.scheduledDarkStartMinute.toString().padLeft(2, '0')}'
+                  ' - '
+                  '${s.scheduledDarkEndHour.toString().padLeft(2, '0')}:${s.scheduledDarkEndMinute.toString().padLeft(2, '0')}',
+                ),
+                onTap: () async {
+                  final start = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay(hour: s.scheduledDarkStartHour, minute: s.scheduledDarkStartMinute),
+                  );
+                  if (start == null) return;
+                  if (!context.mounted) return;
+                  final end = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay(hour: s.scheduledDarkEndHour, minute: s.scheduledDarkEndMinute),
+                  );
+                  if (end == null) return;
+                  
+                  themeCtrl.setScheduledDark(
+                    start.hour, start.minute, 
+                    end.hour, end.minute
+                  );
+                },
+              ),
 
             // --- Renk ---
             SettingsSectionHeader(title: l10n.themeGroupColor),
             SettingsChoiceTile<String>(
-              title: l10n.themePresetSeed,
-              value: 'default',
-              options: ThemePresets.all.map((p) => p.id).toList(),
-              labelOf: (id) => ThemePresets.find(id)?.name ?? id,
-              onChanged: (id) {
-                final preset = ThemePresets.find(id);
-                if (preset != null) themeCtrl.setSeed(preset.seed);
+              title: 'Color source',
+              value: s.themeSource,
+              options: const ['seed', 'system', 'artwork'],
+              labelOf: (v) => switch (v) {
+                'system' => 'System (Material You)',
+                'artwork' => 'From artwork',
+                _ => 'Custom seed',
               },
+              onChanged: themeCtrl.setThemeSource,
             ),
+            if (s.themeSource == 'seed')
+              SettingsChoiceTile<String>(
+                title: l10n.themePresetSeed,
+                value: 'default',
+                options: ThemePresets.all.map((p) => p.id).toList(),
+                labelOf: (id) => ThemePresets.find(id)?.name ?? id,
+                onChanged: (id) {
+                  final preset = ThemePresets.find(id);
+                  if (preset != null) themeCtrl.setSeed(preset.seed);
+                },
+              ),
             SettingsSwitchTile(
               title: l10n.themeAmoledOn,
               value: s.amoled,

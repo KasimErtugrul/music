@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/routes/app_routes.dart';
+import 'package:resonance/core/theme/extensions/player_theme_extension.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
@@ -13,6 +14,8 @@ class MiniPlayer extends GetView<PlayerController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final playerSettings = Theme.of(context).extension<PlayerThemeExtension>() ?? PlayerThemeExtension.defaults;
+    final isWide = playerSettings.miniPlayerStyle == 'wide';
 
     return Obx(() {
       if (controller.currentSong == null) return const SizedBox.shrink();
@@ -58,7 +61,19 @@ class MiniPlayer extends GetView<PlayerController> {
                       ],
                     ),
                   ),
-                  const PlayerControls(compact: true),
+                  if (isWide) ...[
+                    IconButton(
+                      icon: const Icon(Icons.skip_previous),
+                      onPressed: controller.previous,
+                    ),
+                    const PlayerControls(compact: true),
+                    IconButton(
+                      icon: const Icon(Icons.skip_next),
+                      onPressed: controller.next,
+                    ),
+                  ] else ...[
+                    const PlayerControls(compact: true),
+                  ],
                   const SizedBox(width: 8),
                 ],
               ),

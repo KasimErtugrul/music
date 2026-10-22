@@ -4,6 +4,7 @@ import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
+import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 
@@ -13,6 +14,8 @@ class SongsView extends GetView<LibraryController> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final themeCtrl = Get.find<ThemeController>();
+
     return Obx(() {
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
@@ -47,7 +50,9 @@ class SongsView extends GetView<LibraryController> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
-                if (isWide) {
+                final listMode = themeCtrl.settings.value.listViewMode;
+
+                if (listMode == 'grid' || (isWide && listMode != 'compact')) {
                   return GridView.builder(
                     padding: const EdgeInsets.all(8),
                     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -62,7 +67,17 @@ class SongsView extends GetView<LibraryController> {
                       queueContext: controller.songs,
                     ),
                   );
+                } else if (listMode == 'compact') {
+                  return ListView.builder(
+                    itemExtent: 56, // Sıkı görünüm
+                    itemCount: controller.songs.length,
+                    itemBuilder: (context, i) => SongTile(
+                      song: controller.songs[i],
+                      queueContext: controller.songs,
+                    ),
+                  );
                 }
+
                 return ListView.builder(
                   itemCount: controller.songs.length,
                   itemBuilder: (context, i) => SongTile(

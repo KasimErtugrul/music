@@ -14,11 +14,12 @@ class ResonanceApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsCtrl = Get.find<SettingsController>();
-    final themeCtrl = Get.find<ThemeController>(); // Get.put YOK — main'de kayıtlı
+    final themeCtrl = Get.find<ThemeController>();
 
     return Obx(() {
-      if (settingsCtrl.isLoading.value) {
+      if (settingsCtrl.isLoading.value || themeCtrl.isLoading.value) {
         return const MaterialApp(
+          debugShowCheckedModeBanner: false,
           home: Scaffold(body: Center(child: CircularProgressIndicator())),
         );
       }
@@ -33,8 +34,8 @@ class ResonanceApp extends StatelessWidget {
       return GetMaterialApp(
         onGenerateTitle: (context) => AppLocalizations.of(context).appName,
         debugShowCheckedModeBanner: false,
-        theme: themeCtrl.lightTheme,
-        darkTheme: themeCtrl.darkTheme,
+        theme: themeCtrl.lightTheme(),
+        darkTheme: themeCtrl.darkTheme(),
         themeMode: themeCtrl.themeMode,
         locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
