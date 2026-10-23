@@ -52,6 +52,26 @@ class LibraryController extends GetxController {
     }
   }
 
+  @override
+  Future<void> refresh() async {
+    isLoading.value = true;
+    hasError.value = false;
+    try {
+      await _repository.rescan();
+      final sort = songSort.value;
+      songs.value = await _repository.songs(sort: sort);
+      letterOffsets.value = await _repository.letterOffsets(sort);
+      albums.value = await _repository.albums();
+      artists.value = await _repository.artists();
+      genres.value = await _repository.genres();
+      folders.value = await _repository.folders();
+    } on Object {
+      hasError.value = true;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> setSongSort(SongSort sort) async {
     if (sort == songSort.value) return;
     songSort.value = sort;
@@ -87,6 +107,5 @@ class LibraryController extends GetxController {
   Future<List<SongModel>> songsInFolder(
     String path, {
     bool recursive = false,
-  }) =>
-      _repository.songsInFolder(path, recursive: recursive);
+  }) => _repository.songsInFolder(path, recursive: recursive);
 }

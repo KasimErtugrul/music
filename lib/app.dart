@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:resonance/core/bindings/initial_binding.dart';
 import 'package:resonance/core/routes/app_pages.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
@@ -40,7 +39,7 @@ class ResonanceApp extends StatelessWidget {
         locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        initialBinding: InitialBinding(),
+       
         initialRoute: initialRoute,
         getPages: AppPages.routes,
       );

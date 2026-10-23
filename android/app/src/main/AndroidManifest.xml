@@ -19,10 +19,10 @@
     -->
 
     <application
-        android:label="resonance"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
-        android:localeConfig="@xml/locales_config"
+    android:label="resonance"
+    android:name="${applicationName}"
+    android:icon="@mipmap/ic_launcher"
+    android:localeConfig="@xml/locales_config">
         <!--
             TEK activity: MainActivity.
             Kotlin tarafında AudioServiceActivity'den miras aldığımız için

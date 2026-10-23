@@ -25,23 +25,31 @@ class SongsView extends GetView<LibraryController> {
           icon: Icons.error_outline,
           title: l10n.libraryLoadErrorTitle,
           message: l10n.libraryLoadErrorMessage,
-          action: FilledButton(
-            onPressed: controller.loadAll,
-            child: Text(l10n.commonRetry),
+          action: FilledButton.icon(
+            onPressed: controller.refresh,
+            icon: const Icon(Icons.refresh),
+            label: Text(l10n.commonRetry),
           ),
         );
       }
       if (controller.songs.isEmpty) {
+        // Şarkı yokken "Yenile" butonu görünür.
         return EmptyState(
           icon: Icons.music_off_outlined,
           title: l10n.libraryEmptySongsTitle,
           message: l10n.libraryEmptySongsMessage,
+          action: FilledButton.icon(
+            onPressed: controller.refresh,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Yenile'),
+          ),
         );
       }
       return Column(
         children: <Widget>[
           _SortHeader(
             onSort: controller.setSongSort,
+            onRefresh: controller.refresh,
             current: controller.songSort.value,
             total: controller.songs.length,
           ),
@@ -49,13 +57,15 @@ class SongsView extends GetView<LibraryController> {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isWide = Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
+                final isWide = Responsive.fromWidth(constraints.maxWidth) !=
+                    WindowSize.compact;
                 final listMode = themeCtrl.settings.value.listViewMode;
 
                 if (listMode == 'grid' || (isWide && listMode != 'compact')) {
                   return GridView.builder(
                     padding: const EdgeInsets.all(8),
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 400,
                       mainAxisExtent: 72,
                       crossAxisSpacing: 8,
@@ -69,7 +79,7 @@ class SongsView extends GetView<LibraryController> {
                   );
                 } else if (listMode == 'compact') {
                   return ListView.builder(
-                    itemExtent: 56, // Sıkı görünüm
+                    itemExtent: 56,
                     itemCount: controller.songs.length,
                     itemBuilder: (context, i) => SongTile(
                       song: controller.songs[i],
@@ -110,11 +120,13 @@ class SongsPage extends StatelessWidget {
 class _SortHeader extends StatelessWidget {
   const _SortHeader({
     required this.onSort,
+    required this.onRefresh,
     required this.current,
     required this.total,
   });
 
   final ValueChanged<SongSort> onSort;
+  final VoidCallback onRefresh;
   final SongSort current;
   final int total;
 
@@ -131,6 +143,11 @@ class _SortHeader extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: l10n.commonRetry,
+            onPressed: onRefresh,
+          ),
           PopupMenuButton<SongSort>(
             icon: const Icon(Icons.sort),
             tooltip: l10n.sortBy,
@@ -144,7 +161,8 @@ class _SortHeader extends StatelessWidget {
                       children: <Widget>[
                         SizedBox(
                           width: 20,
-                          child: current == SongSort(field: field, direction: dir)
+                          child: current ==
+                                  SongSort(field: field, direction: dir)
                               ? const Icon(Icons.check, size: 16)
                               : null,
                         ),
@@ -163,11 +181,16 @@ class _SortHeader extends StatelessWidget {
 
   String _fieldLabel(AppLocalizations l10n, SongSortField f) {
     switch (f) {
-      case SongSortField.title: return l10n.sortFieldTitle;
-      case SongSortField.artist: return l10n.sortFieldArtist;
-      case SongSortField.album: return l10n.sortFieldAlbum;
-      case SongSortField.dateAdded: return l10n.sortFieldDateAdded;
-      case SongSortField.duration: return l10n.sortFieldDuration;
+      case SongSortField.title:
+        return l10n.sortFieldTitle;
+      case SongSortField.artist:
+        return l10n.sortFieldArtist;
+      case SongSortField.album:
+        return l10n.sortFieldAlbum;
+      case SongSortField.dateAdded:
+        return l10n.sortFieldDateAdded;
+      case SongSortField.duration:
+        return l10n.sortFieldDuration;
     }
   }
 
