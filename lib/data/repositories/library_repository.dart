@@ -8,6 +8,7 @@ import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/folder_model.dart';
 import 'package:resonance/data/models/genre_model.dart';
 import 'package:resonance/data/models/song_model.dart';
+import 'package:resonance/data/repositories/preferences_repository.dart';
 
 enum SongSortField { title, artist, album, dateAdded, duration }
 
@@ -92,10 +93,11 @@ abstract class LibraryRepository {
 /// gruplar, klasör ağacı) arka plan isolate'inde kurar ve önbellekte tutur.
 class LibraryRepositoryImpl implements LibraryRepository {
   /// [useIsolate] yalnızca testler içindir.
-    LibraryRepositoryImpl(this._source, {this.useIsolate = true});
-
+  LibraryRepositoryImpl(this._source, this._prefs, {this.useIsolate = true});
 
   final DeviceMediaDataSource _source;
+  final PreferencesRepository _prefs; // YENİ
+
   final bool useIsolate;
 
   _LibraryIndex? _index;
@@ -205,14 +207,24 @@ class LibraryRepositoryImpl implements LibraryRepository {
     return order;
   }
 
-  @override
+    @override
   Future<List<SongModel>> songs({SongSort sort = const SongSort()}) async {
     final index = await _ensureIndex();
     final cached = _sorted[sort];
     if (cached != null) return cached;
+    
     final order = _orderFor(index, sort);
+    
+    // YENİ: Minimum süre filtresi
+    final libPrefs = await _prefs.loadLibrary();
+    final minDurMs = libPrefs.minDurationSeconds * 1000;
+
     final result = List<SongModel>.unmodifiable(
-      <SongModel>[for (final i in order) index.songs[i]],
+      <SongModel>[
+        for (final i in order)
+          if (minDurMs == 0 || index.songs[i].durationMs >= minDurMs)
+            index.songs[i]
+      ],
     );
     _sorted[sort] = result;
     return result;
@@ -251,9 +263,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
         final c = index.titleKeys[a].compareTo(index.titleKeys[b]);
         return c != 0 ? c : index.songs[a].id.compareTo(index.songs[b].id);
       });
-    return List<SongModel>.unmodifiable(
-      <SongModel>[for (final i in list) index.songs[i]],
-    );
+    return List<SongModel>.unmodifiable(<SongModel>[
+      for (final i in list) index.songs[i],
+    ]);
   }
 
   // ---- Albüm / sanatçı / tür ----
@@ -262,8 +274,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
   Future<List<AlbumModel>> albums({bool descending = false}) async {
     final index = await _ensureIndex();
     return List<AlbumModel>.unmodifiable(
-      _orderByName<AlbumModel>(index.albums, (a) => a.title,
-          descending: descending),
+      _orderByName<AlbumModel>(
+        index.albums,
+        (a) => a.title,
+        descending: descending,
+      ),
     );
   }
 
@@ -271,8 +286,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
   Future<List<ArtistModel>> artists({bool descending = false}) async {
     final index = await _ensureIndex();
     return List<ArtistModel>.unmodifiable(
-      _orderByName<ArtistModel>(index.artists, (a) => a.name,
-          descending: descending),
+      _orderByName<ArtistModel>(
+        index.artists,
+        (a) => a.name,
+        descending: descending,
+      ),
     );
   }
 
@@ -280,8 +298,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
   Future<List<GenreModel>> genres({bool descending = false}) async {
     final index = await _ensureIndex();
     return List<GenreModel>.unmodifiable(
-      _orderByName<GenreModel>(index.genres, (g) => g.name,
-          descending: descending),
+      _orderByName<GenreModel>(
+        index.genres,
+        (g) => g.name,
+        descending: descending,
+      ),
     );
   }
 
@@ -324,9 +345,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
     final paths = parentPath == null
         ? index.rootFolders
         : (index.childFolders[parentPath] ?? const <String>[]);
-    final models = <FolderModel>[
-      for (final p in paths) index.folders[p]!,
-    ];
+    final models = <FolderModel>[for (final p in paths) index.folders[p]!];
     return List<FolderModel>.unmodifiable(
       _orderByName<FolderModel>(models, (f) => f.name),
     );
@@ -339,8 +358,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }) async {
     final index = await _ensureIndex();
     if (!recursive) {
-      return _songsByTitle(
-          index, index.songsByFolder[path] ?? const <int>[]);
+      return _songsByTitle(index, index.songsByFolder[path] ?? const <int>[]);
     }
     final prefix = '$path/';
     final collected = <int>[];
@@ -464,9 +482,8 @@ class _LibraryIndex {
   final List<String> rootFolders;
 }
 
-int _albumIdOf(SongModel s) => (s.album != null && s.albumId != null)
-    ? s.albumId!
-    : AlbumModel.unknownId;
+int _albumIdOf(SongModel s) =>
+    (s.album != null && s.albumId != null) ? s.albumId! : AlbumModel.unknownId;
 
 int _artistIdOf(SongModel s) => (s.artist != null && s.artistId != null)
     ? s.artistId!

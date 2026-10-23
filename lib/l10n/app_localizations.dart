@@ -1237,6 +1237,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sample Artist'**
   String get themePreviewSongArtist;
+
+  /// No description provided for @settingsPlayback.
+  ///
+  /// In en, this message translates to:
+  /// **'Oynatma'**
+  String get settingsPlayback;
+
+  /// No description provided for @settingsLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Kütüphane'**
+  String get settingsLibrary;
+
+  /// No description provided for @settingsAccessibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Erişilebilirlik'**
+  String get settingsAccessibility;
+
+  /// No description provided for @settingsStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Depolama ve Gelişmiş'**
+  String get settingsStorage;
+
+  /// No description provided for @settingsQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuyruk ve Playlist'**
+  String get settingsQueue;
+
+  /// No description provided for @seekInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Sarma süresi'**
+  String get seekInterval;
+
+  /// No description provided for @seekIntervalValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} seconds'**
+  String seekIntervalValue(int seconds);
+
+  /// No description provided for @autoResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Uygulama açılınca otomatik devam et'**
+  String get autoResume;
+
+  /// No description provided for @pauseOnHeadphone.
+  ///
+  /// In en, this message translates to:
+  /// **'Kulaklık çıkınca duraklat'**
+  String get pauseOnHeadphone;
+
+  /// No description provided for @defaultShuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Varsayılan karıştırma'**
+  String get defaultShuffle;
+
+  /// No description provided for @defaultRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Varsayılan tekrar modu'**
+  String get defaultRepeat;
+
+  /// No description provided for @repeatNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Kapalı'**
+  String get repeatNone;
+
+  /// No description provided for @repeatAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Tümü'**
+  String get repeatAll;
+
+  /// No description provided for @repeatOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Tek'**
+  String get repeatOne;
+
+  /// No description provided for @minDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum şarkı süresi'**
+  String get minDuration;
+
+  /// No description provided for @scanOnStartup.
+  ///
+  /// In en, this message translates to:
+  /// **'Açılışta kütüphaneyi tara'**
+  String get scanOnStartup;
+
+  /// No description provided for @resetGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Grubu varsayılana sıfırla'**
+  String get resetGroup;
+
+  /// No description provided for @resetAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Tüm ayarları sıfırla'**
+  String get resetAll;
+
+  /// No description provided for @resetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Tüm ayarları varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.'**
+  String get resetConfirm;
+
+  /// No description provided for @textScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Yazı ölçeği'**
+  String get textScale;
+
+  /// No description provided for @reduceAnimations.
+  ///
+  /// In en, this message translates to:
+  /// **'Animasyonları azalt'**
+  String get reduceAnimations;
+
+  /// No description provided for @largeTouchTargets.
+  ///
+  /// In en, this message translates to:
+  /// **'Büyük dokunma hedefleri'**
+  String get largeTouchTargets;
 }
 
 class _AppLocalizationsDelegate

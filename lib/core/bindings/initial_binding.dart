@@ -12,6 +12,7 @@ import 'package:resonance/data/repositories/favorite_repository.dart';
 import 'package:resonance/data/repositories/history_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
+import 'package:resonance/data/repositories/preferences_repository.dart';
 import 'package:resonance/data/repositories/queue_state_repository.dart';
 import 'package:resonance/data/repositories/stats_repository.dart';
 import 'package:resonance/presentation/bindings/playlist_binding.dart';
@@ -36,8 +37,11 @@ class InitialBinding extends Bindings {
       () => MediaStoreChannelDataSource(),
       fenix: true,
     );
-    Get.lazyPut<LibraryRepository>(
-      () => LibraryRepositoryImpl(Get.find<DeviceMediaDataSource>()),
+        Get.lazyPut<LibraryRepository>(
+      () => LibraryRepositoryImpl(
+        Get.find<DeviceMediaDataSource>(),
+        Get.find<PreferencesRepository>(), // YENİ
+      ),
       fenix: true,
     );
 

@@ -8,6 +8,8 @@ import 'package:resonance/presentation/controllers/settings_search_controller.da
 import 'package:resonance/presentation/ui/pages/settings/about_page.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
+import 'package:resonance/presentation/ui/pages/settings/playback_settings_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/library_settings_page.dart';
 
 class SettingsHomePage extends StatelessWidget {
   const SettingsHomePage({super.key});
@@ -57,6 +59,19 @@ class SettingsHomePage extends StatelessWidget {
               SettingsSectionHeader(title: l10n.settingsGroupGeneral),
               ...general.map((e) => _entry(e, l10n, ctrl)),
             ],
+
+            ListTile(
+              leading: const Icon(Icons.play_circle_outline),
+              title: Text(l10n.settingsPlayback),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.to(() => const PlaybackSettingsPage()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.library_music_outlined),
+              title: Text(l10n.settingsLibrary),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.to(() => const LibrarySettingsPage()),
+            ),
 
             // Gün 18: Görünüm ayarları — tam tema sistemi
             SettingsSectionHeader(title: l10n.settingsGroupAppearance),

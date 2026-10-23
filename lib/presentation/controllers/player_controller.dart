@@ -8,6 +8,7 @@ import 'package:resonance/data/repositories/history_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
 import 'package:resonance/data/repositories/queue_state_repository.dart';
+import 'package:resonance/presentation/controllers/preferences_controller.dart';
 
 class PlayerController extends GetxController {
   PlayerController(
@@ -34,6 +35,9 @@ class PlayerController extends GetxController {
 
   final position = Duration.zero.obs;
   final duration = Duration.zero.obs;
+
+    final prefCtrl = Get.find<PreferencesController>();
+
 
   String? _loggedSongUri;
 
@@ -97,6 +101,18 @@ class PlayerController extends GetxController {
     }
   }
 
+  Future<void> fastForward() async {
+    final sec = prefCtrl.playback.value.seekIntervalSeconds;
+    final newPos = position.value + Duration(seconds: sec);
+    await _repository.seek(newPos);
+  }
+
+  Future<void> rewind() async {
+    final sec = prefCtrl.playback.value.seekIntervalSeconds;
+    final newPos = position.value - Duration(seconds: sec);
+    await _repository.seek(newPos.isNegative ? Duration.zero : newPos);
+  }
+
   Future<void> _restoreQueue() async {
     try {
       final state = await _stateRepo.loadState();
@@ -158,7 +174,20 @@ class PlayerController extends GetxController {
     return idx < 0 ? 0 : idx;
   }
 
-  Future<void> playSong(SongModel song, {List<SongModel>? queue}) async {
+    Future<void> playSong(SongModel song, {List<SongModel>? queue}) async {
+    // 1. Varsayılan Oynatma Ayarlarını Uygula
+    final pref = prefCtrl.playback.value;
+    
+    await _repository.setShuffleMode(pref.defaultShuffle);
+    
+    final repeatMode = switch (pref.defaultRepeat) {
+      1 => AudioServiceRepeatMode.all,
+      2 => AudioServiceRepeatMode.one,
+      _ => AudioServiceRepeatMode.none,
+    };
+    await _repository.setRepeatMode(repeatMode);
+
+    // 2. Kuyruğu Yükle ve Çal
     final list = queue ?? <SongModel>[song];
     final index = list.indexWhere((s) => s.id == song.id);
 

@@ -630,4 +630,73 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get themePreviewSongArtist => 'Örnek Sanatçı';
+
+  @override
+  String get settingsPlayback => 'Playback';
+
+  @override
+  String get settingsLibrary => 'Library';
+
+  @override
+  String get settingsAccessibility => 'Accessibility';
+
+  @override
+  String get settingsStorage => 'Storage & Advanced';
+
+  @override
+  String get settingsQueue => 'Queue & Playlist';
+
+  @override
+  String get seekInterval => 'Seek interval';
+
+  @override
+  String seekIntervalValue(int seconds) {
+    return '$seconds seconds';
+  }
+
+  @override
+  String get autoResume => 'Auto-resume on app start';
+
+  @override
+  String get pauseOnHeadphone => 'Pause when headphones disconnected';
+
+  @override
+  String get defaultShuffle => 'Default shuffle';
+
+  @override
+  String get defaultRepeat => 'Default repeat mode';
+
+  @override
+  String get repeatNone => 'None';
+
+  @override
+  String get repeatAll => 'All';
+
+  @override
+  String get repeatOne => 'One';
+
+  @override
+  String get minDuration => 'Minimum song duration';
+
+  @override
+  String get scanOnStartup => 'Scan library on startup';
+
+  @override
+  String get resetGroup => 'Reset group to defaults';
+
+  @override
+  String get resetAll => 'Reset all settings';
+
+  @override
+  String get resetConfirm =>
+      'Are you sure you want to reset all settings to their defaults? This cannot be undone.';
+
+  @override
+  String get textScale => 'Text scale';
+
+  @override
+  String get reduceAnimations => 'Reduce animations';
+
+  @override
+  String get largeTouchTargets => 'Large touch targets';
 }

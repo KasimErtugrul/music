@@ -632,4 +632,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themePreviewSongArtist => 'Sample Artist';
+
+  @override
+  String get settingsPlayback => 'Oynatma';
+
+  @override
+  String get settingsLibrary => 'Kütüphane';
+
+  @override
+  String get settingsAccessibility => 'Erişilebilirlik';
+
+  @override
+  String get settingsStorage => 'Depolama ve Gelişmiş';
+
+  @override
+  String get settingsQueue => 'Kuyruk ve Playlist';
+
+  @override
+  String get seekInterval => 'Sarma süresi';
+
+  @override
+  String seekIntervalValue(int seconds) {
+    return '$seconds seconds';
+  }
+
+  @override
+  String get autoResume => 'Uygulama açılınca otomatik devam et';
+
+  @override
+  String get pauseOnHeadphone => 'Kulaklık çıkınca duraklat';
+
+  @override
+  String get defaultShuffle => 'Varsayılan karıştırma';
+
+  @override
+  String get defaultRepeat => 'Varsayılan tekrar modu';
+
+  @override
+  String get repeatNone => 'Kapalı';
+
+  @override
+  String get repeatAll => 'Tümü';
+
+  @override
+  String get repeatOne => 'Tek';
+
+  @override
+  String get minDuration => 'Minimum şarkı süresi';
+
+  @override
+  String get scanOnStartup => 'Açılışta kütüphaneyi tara';
+
+  @override
+  String get resetGroup => 'Grubu varsayılana sıfırla';
+
+  @override
+  String get resetAll => 'Tüm ayarları sıfırla';
+
+  @override
+  String get resetConfirm =>
+      'Tüm ayarları varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.';
+
+  @override
+  String get textScale => 'Yazı ölçeği';
+
+  @override
+  String get reduceAnimations => 'Animasyonları azalt';
+
+  @override
+  String get largeTouchTargets => 'Büyük dokunma hedefleri';
 }

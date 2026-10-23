@@ -1,6 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:resonance/data/repositories/preferences_repository.dart';
+import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/app.dart';
 import 'package:resonance/core/bindings/initial_binding.dart';
@@ -20,19 +22,16 @@ Future<void> main() async {
   try {
     final prefs = await SharedPreferences.getInstance();
 
-    Get.put<SettingsRepository>(
-      SettingsRepositoryImpl(prefs),
-      permanent: true,
-    );
-    Get.put<SettingsController>(
-      SettingsController(Get.find<SettingsRepository>()),
-      permanent: true,
-    );
-    Get.put<ThemeRepository>(
-      ThemeRepositoryImpl(prefs),
-      permanent: true,
-    );
+    // 1. Ayarlar ve Tema
+    Get.put<SettingsRepository>(SettingsRepositoryImpl(prefs), permanent: true);
+    Get.put<SettingsController>(SettingsController(Get.find<SettingsRepository>()), permanent: true);
+    Get.put<ThemeRepository>(ThemeRepositoryImpl(prefs), permanent: true);
 
+    // 2. Yeni: Kütüphane ve Oynatma Tercihleri (InitialBinding'den ÖNCE)
+    Get.put<PreferencesRepository>(PreferencesRepositoryImpl(prefs), permanent: true);
+    Get.put<PreferencesController>(PreferencesController(Get.find<PreferencesRepository>()), permanent: true);
+
+    // 3. Audio Service
     audioHandler = await AudioService.init(
       builder: () => ResonanceAudioHandler(),
       config: const AudioServiceConfig(
@@ -42,14 +41,12 @@ Future<void> main() async {
         androidNotificationOngoing: true,
       ),
     );
+    Get.put<ResonanceAudioHandler>(audioHandler as ResonanceAudioHandler, permanent: true);
 
-    Get.put<ResonanceAudioHandler>(
-      audioHandler as ResonanceAudioHandler,
-      permanent: true,
-    );
-
+    // 4. InitialBinding (LibraryRepository artık PreferencesRepository'yi bulabilir)
     InitialBinding().dependencies();
 
+    // 5. Tema Controller (PlayerController hazır)
     Get.put<ThemeController>(
       ThemeController(
         Get.find<ThemeRepository>(),
@@ -61,15 +58,13 @@ Future<void> main() async {
 
     runApp(const ResonanceApp());
   } catch (e, st) {
-    // Beyaz ekran yerine hatayı göster; bu adım sadece teşhis için.
     runApp(_StartupErrorApp(error: e, stack: st));
   }
 }
 
-/// Başlangıç hatası olduğunda beyaz ekran yerine hatayı gösterir.
+// _StartupErrorApp sınıfı aynı kalıyor...
 class _StartupErrorApp extends StatelessWidget {
   const _StartupErrorApp({required this.error, required this.stack});
-
   final Object error;
   final StackTrace stack;
 
@@ -84,14 +79,7 @@ class _StartupErrorApp extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Uygulama başlatılamadı',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                ),
+                const Text('Uygulama başlatılamadı', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red)),
                 const SizedBox(height: 12),
                 const Text('Hata:', style: TextStyle(fontWeight: FontWeight.bold)),
                 SelectableText('$error'),
