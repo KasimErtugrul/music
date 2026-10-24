@@ -257,5 +257,9 @@
   "replayGainEnableDesc": "Şarkı ses yüksekliği etiketlerine göre sesi normalize eder",
   "tagsArtworkSettings": "Etiket ve Kapak",
   "clearArtworkCache": "Kapak önbelleğini temizle",
-  "artworkCacheCleared": "Kapak önbelleği temizlendi"
+  "artworkCacheCleared": "Kapak önbelleği temizlendi",
+    "seekBarStyle": "Seek Bar Stili",
+  "seekBarClassic": "Klasik",
+  "seekBarThin": "İnce",
+  "seekBarWaveform": "Dalga Formu"
   }

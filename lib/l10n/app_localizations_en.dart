@@ -842,4 +842,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get artworkCacheCleared => 'Artwork cache cleared';
+
+  @override
+  String get seekBarStyle => 'Seek Bar Style';
+
+  @override
+  String get seekBarClassic => 'Classic';
+
+  @override
+  String get seekBarThin => 'Thin';
+
+  @override
+  String get seekBarWaveform => 'Waveform';
 }

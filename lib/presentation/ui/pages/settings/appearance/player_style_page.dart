@@ -46,12 +46,15 @@ class PlayerStylePage extends StatelessWidget {
                   themeCtrl.setPlayer(p.copyWith(artworkShape: v)),
             ),
             SettingsChoiceTile<String>(
-              title: 'Seek bar',
+              title: l10n.seekBarStyle,
               value: p.seekBarStyle,
-              options: const <String>['classic', 'thin'],
-              labelOf: (v) => v == 'thin' ? 'Thin' : 'Classic',
-              onChanged: (v) =>
-                  themeCtrl.setPlayer(p.copyWith(seekBarStyle: v)),
+              options: const <String>['classic', 'thin', 'waveform'],
+              labelOf: (v) => switch (v) {
+                'thin' => l10n.seekBarThin,
+                'waveform' => l10n.seekBarWaveform,
+                _ => l10n.seekBarClassic,
+              },
+              onChanged: (v) => themeCtrl.setPlayer(p.copyWith(seekBarStyle: v)),
             ),
             SettingsChoiceTile<String>(
               title: 'Mini player',

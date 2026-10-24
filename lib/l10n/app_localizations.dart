@@ -1639,6 +1639,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Artwork cache cleared'**
   String get artworkCacheCleared;
+
+  /// No description provided for @seekBarStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seek Bar Style'**
+  String get seekBarStyle;
+
+  /// No description provided for @seekBarClassic.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get seekBarClassic;
+
+  /// No description provided for @seekBarThin.
+  ///
+  /// In en, this message translates to:
+  /// **'Thin'**
+  String get seekBarThin;
+
+  /// No description provided for @seekBarWaveform.
+  ///
+  /// In en, this message translates to:
+  /// **'Waveform'**
+  String get seekBarWaveform;
 }
 
 class _AppLocalizationsDelegate

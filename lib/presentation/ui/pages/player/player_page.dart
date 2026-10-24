@@ -5,13 +5,14 @@ import 'package:resonance/core/theme/extensions/player_theme_extension.dart';
 import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:resonance/presentation/ui/pages/player/player_expanded_view.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/player_controls.dart';
 import 'package:resonance/presentation/ui/widgets/seek_bar.dart';
 import 'package:resonance/presentation/ui/widgets/sleep_timer_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/speed_pitch_sheet.dart';
-
+import 'package:resonance/presentation/ui/widgets/waveform_seek_bar.dart';
 class PlayerPage extends GetView<PlayerController> {
   const PlayerPage({super.key});
 
@@ -125,10 +126,14 @@ class PlayerPage extends GetView<PlayerController> {
                       );
                     }),
                     const Spacer(),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: SeekBar(),
-                    ),
+                                        Obx(() {
+                      final themeCtrl = Get.find<ThemeController>();
+                      final style = themeCtrl.settings.value.player.seekBarStyle;
+                      if (style == 'waveform') {
+                        return const WaveformSeekBar();
+                      }
+                      return const SeekBar();
+                    }),
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                       child: PlayerControls(),

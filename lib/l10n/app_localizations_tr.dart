@@ -840,4 +840,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get artworkCacheCleared => 'Kapak önbelleği temizlendi';
+
+  @override
+  String get seekBarStyle => 'Seek Bar Stili';
+
+  @override
+  String get seekBarClassic => 'Klasik';
+
+  @override
+  String get seekBarThin => 'İnce';
+
+  @override
+  String get seekBarWaveform => 'Dalga Formu';
 }

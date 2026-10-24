@@ -267,5 +267,9 @@
   "replayGainEnableDesc": "Normalizes volume based on track loudness tags",
   "tagsArtworkSettings": "Tags & Artwork",
   "clearArtworkCache": "Clear artwork cache",
-  "artworkCacheCleared": "Artwork cache cleared"
+  "artworkCacheCleared": "Artwork cache cleared",
+    "seekBarStyle": "Seek Bar Style",
+  "seekBarClassic": "Classic",
+  "seekBarThin": "Thin",
+  "seekBarWaveform": "Waveform"
 }
