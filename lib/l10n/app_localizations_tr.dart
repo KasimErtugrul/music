@@ -756,4 +756,44 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get eqGroupCustom => 'Özel Ön Ayarlar';
+
+  @override
+  String get playbackSpeedPitch => 'Hız ve Pitch';
+
+  @override
+  String get playbackSpeed => 'Hız';
+
+  @override
+  String get playbackPitch => 'Pitch';
+
+  @override
+  String get playbackReset => 'Sıfırla';
+
+  @override
+  String get sleepTimer => 'Uyku Zamanlayıcısı';
+
+  @override
+  String get sleepTimerOff => 'Kapalı';
+
+  @override
+  String get sleepTimerEndOfTrack => 'Şarkı bitince';
+
+  @override
+  String sleepTimerSetFor(int minutes) {
+    return 'Zamanlayıcı $minutes dk olarak ayarlandı';
+  }
+
+  @override
+  String get sleepTimerEndOfTrackSet => 'Bu şarkıdan sonra duracak';
+
+  @override
+  String get gaplessPlayback => 'Gapless oynatma';
+
+  @override
+  String get skipSilence => 'Sessizliği atla';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes dk';
+  }
 }

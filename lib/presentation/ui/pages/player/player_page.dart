@@ -9,6 +9,8 @@ import 'package:resonance/presentation/ui/pages/player/player_expanded_view.dart
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/player_controls.dart';
 import 'package:resonance/presentation/ui/widgets/seek_bar.dart';
+import 'package:resonance/presentation/ui/widgets/sleep_timer_sheet.dart';
+import 'package:resonance/presentation/ui/widgets/speed_pitch_sheet.dart';
 
 class PlayerPage extends GetView<PlayerController> {
   const PlayerPage({super.key});
@@ -40,16 +42,12 @@ class PlayerPage extends GetView<PlayerController> {
       ),
       body: Stack(
         children: [
-          // 1. Arka Plan Katmanı
           if (bgStyle == 'gradient')
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.primaryContainer,
-                      theme.colorScheme.surface,
-                    ],
+                    colors: [theme.colorScheme.primaryContainer, theme.colorScheme.surface],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -64,29 +62,20 @@ class PlayerPage extends GetView<PlayerController> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    ArtworkImage(
-                      songId: songId,
-                      fit: BoxFit.cover,
-                    ),
+                    ArtworkImage(songId: songId, fit: BoxFit.cover),
                     BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                      child: Container(
-                        color: theme.colorScheme.surface.withValues(alpha: 0.7),
-                      ),
+                      child: Container(color: theme.colorScheme.surface.withValues(alpha: 0.7)),
                     ),
                   ],
                 ),
               );
             }),
-
-          // 2. İçerik Katmanı
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
-                if (isWide) {
-                  return const PlayerExpandedView();
-                }
+                if (isWide) return const PlayerExpandedView();
 
                 return Column(
                   children: [
@@ -144,7 +133,23 @@ class PlayerPage extends GetView<PlayerController> {
                       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                       child: PlayerControls(),
                     ),
-                    const SizedBox(height: 32),
+                    // İKİNCİL EYLEM SATIRI (Hız/Pitch ve Uyku Zamanlayıcısı)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.speed),
+                          tooltip: l10n.playbackSpeedPitch,
+                          onPressed: () => SpeedPitchSheet.show(context),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.timer_outlined),
+                          tooltip: l10n.sleepTimer,
+                          onPressed: () => SleepTimerSheet.show(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                   ],
                 );
               },

@@ -33,6 +33,26 @@ class PreferencesController extends GetxController {
     _repo.savePlayback(playback.value);
   }
 
+    void setSpeed(double speed) {
+    playback.value = playback.value.copyWith(speed: speed);
+    _repo.savePlayback(playback.value);
+  }
+
+  void setPitch(double pitch) {
+    playback.value = playback.value.copyWith(pitch: pitch);
+    _repo.savePlayback(playback.value);
+  }
+
+  void setGapless(bool v) {
+    playback.value = playback.value.copyWith(gapless: v);
+    _repo.savePlayback(playback.value);
+  }
+
+  void setSkipSilence(bool v) {
+    playback.value = playback.value.copyWith(skipSilence: v);
+    _repo.savePlayback(playback.value);
+  }
+
   void setPauseOnHeadphone(bool v) {
     playback.value = playback.value.copyWith(pauseOnHeadphone: v);
     _repo.savePlayback(playback.value);

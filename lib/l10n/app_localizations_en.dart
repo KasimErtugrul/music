@@ -758,4 +758,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eqGroupCustom => 'Custom Presets';
+
+  @override
+  String get playbackSpeedPitch => 'Speed & Pitch';
+
+  @override
+  String get playbackSpeed => 'Speed';
+
+  @override
+  String get playbackPitch => 'Pitch';
+
+  @override
+  String get playbackReset => 'Reset';
+
+  @override
+  String get sleepTimer => 'Sleep Timer';
+
+  @override
+  String get sleepTimerOff => 'Off';
+
+  @override
+  String get sleepTimerEndOfTrack => 'End of track';
+
+  @override
+  String sleepTimerSetFor(int minutes) {
+    return 'Timer set for $minutes min';
+  }
+
+  @override
+  String get sleepTimerEndOfTrackSet => 'Will stop after this track';
+
+  @override
+  String get gaplessPlayback => 'Gapless playback';
+
+  @override
+  String get skipSilence => 'Skip silence';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes min';
+  }
 }

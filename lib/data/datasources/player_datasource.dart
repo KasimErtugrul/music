@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:just_audio/just_audio.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 
@@ -6,21 +7,27 @@ class PlayerDataSource {
   final AudioPlayer player;
 
   PlayerDataSource(AudioEffectsDatasource effects)
-      : player = AudioPlayer(
-          maxSkipsOnError: 6,
-          audioPipeline: effects.pipeline,
-        );
+    : player = AudioPlayer(maxSkipsOnError: 6, audioPipeline: effects.pipeline);
 
-  Future<void> loadQueue(List<AudioSource> sources, {int initialIndex = 0, Duration? initialPosition}) async {
+  Future<void> loadQueue(
+    List<AudioSource> sources, {
+    int initialIndex = 0,
+    Duration? initialPosition,
+  }) async {
     if (sources.isEmpty) {
       await player.setAudioSources(const <AudioSource>[]);
       return;
     }
     final index = initialIndex.clamp(0, sources.length - 1);
-    await player.setAudioSources(sources, initialIndex: index, initialPosition: initialPosition);
+    await player.setAudioSources(
+      sources,
+      initialIndex: index,
+      initialPosition: initialPosition,
+    );
   }
 
-  Future<void> insertSource(int index, AudioSource source) => player.insertAudioSource(index, source);
+  Future<void> insertSource(int index, AudioSource source) =>
+      player.insertAudioSource(index, source);
   Future<void> removeSource(int index) => player.removeAudioSourceAt(index);
   Future<void> moveSource(int from, int to) => player.moveAudioSource(from, to);
 
@@ -29,9 +36,13 @@ class PlayerDataSource {
   Future<void> stop() => player.stop();
   Future<void> seek(Duration position) => player.seek(position);
   Future<void> setSpeed(double speed) => player.setSpeed(speed);
+  Future<void> setPitch(double pitch) => player.setPitch(pitch);
+  Future<void> setSkipSilenceEnabled(bool enabled) =>
+      player.setSkipSilenceEnabled(enabled);
   Future<void> setVolume(double volume) => player.setVolume(volume);
   Future<void> setLoopMode(LoopMode mode) => player.setLoopMode(mode);
-  Future<void> setShuffleModeEnabled(bool enabled) => player.setShuffleModeEnabled(enabled);
+  Future<void> setShuffleModeEnabled(bool enabled) =>
+      player.setShuffleModeEnabled(enabled);
 
   Future<void> skipToNext() async {
     if (player.hasNext) await player.seekToNext();
@@ -47,7 +58,7 @@ class PlayerDataSource {
   Stream<int?> get currentIndexStream => player.currentIndexStream;
   Stream<PlaybackEvent> get playbackEventStream => player.playbackEventStream;
   Stream<PlayerException> get errorStream => player.errorStream;
-  
+
   Stream<LoopMode> get loopModeStream => player.loopModeStream;
   Stream<bool> get shuffleModeEnabledStream => player.shuffleModeEnabledStream;
 

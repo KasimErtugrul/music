@@ -5,6 +5,10 @@ class PlaybackSettingsModel {
     this.pauseOnHeadphone = true,
     this.defaultShuffle = false,
     this.defaultRepeat = 0, // 0=none, 1=all, 2=one
+    this.speed = 1.0,
+    this.pitch = 1.0,
+    this.gapless = true,
+    this.skipSilence = false,
   });
 
   final int seekIntervalSeconds;
@@ -12,6 +16,10 @@ class PlaybackSettingsModel {
   final bool pauseOnHeadphone;
   final bool defaultShuffle;
   final int defaultRepeat;
+  final double speed;
+  final double pitch;
+  final bool gapless;
+  final bool skipSilence;
 
   PlaybackSettingsModel copyWith({
     int? seekIntervalSeconds,
@@ -19,6 +27,10 @@ class PlaybackSettingsModel {
     bool? pauseOnHeadphone,
     bool? defaultShuffle,
     int? defaultRepeat,
+    double? speed,
+    double? pitch,
+    bool? gapless,
+    bool? skipSilence,
   }) {
     return PlaybackSettingsModel(
       seekIntervalSeconds: seekIntervalSeconds ?? this.seekIntervalSeconds,
@@ -26,6 +38,10 @@ class PlaybackSettingsModel {
       pauseOnHeadphone: pauseOnHeadphone ?? this.pauseOnHeadphone,
       defaultShuffle: defaultShuffle ?? this.defaultShuffle,
       defaultRepeat: defaultRepeat ?? this.defaultRepeat,
+      speed: speed ?? this.speed,
+      pitch: pitch ?? this.pitch,
+      gapless: gapless ?? this.gapless,
+      skipSilence: skipSilence ?? this.skipSilence,
     );
   }
 
@@ -35,6 +51,10 @@ class PlaybackSettingsModel {
     'pauseOnHeadphone': pauseOnHeadphone,
     'defaultShuffle': defaultShuffle,
     'defaultRepeat': defaultRepeat,
+    'speed': speed,
+    'pitch': pitch,
+    'gapless': gapless,
+    'skipSilence': skipSilence,
   };
 
   factory PlaybackSettingsModel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +64,10 @@ class PlaybackSettingsModel {
       pauseOnHeadphone: json['pauseOnHeadphone'] ?? true,
       defaultShuffle: json['defaultShuffle'] ?? false,
       defaultRepeat: json['defaultRepeat'] ?? 0,
+      speed: (json['speed'] ?? 1.0).toDouble(),
+      pitch: (json['pitch'] ?? 1.0).toDouble(),
+      gapless: json['gapless'] ?? true,
+      skipSilence: json['skipSilence'] ?? false,
     );
   }
 }

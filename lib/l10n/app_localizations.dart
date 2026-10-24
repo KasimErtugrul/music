@@ -1483,6 +1483,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom Presets'**
   String get eqGroupCustom;
+
+  /// No description provided for @playbackSpeedPitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed & Pitch'**
+  String get playbackSpeedPitch;
+
+  /// No description provided for @playbackSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get playbackSpeed;
+
+  /// No description provided for @playbackPitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Pitch'**
+  String get playbackPitch;
+
+  /// No description provided for @playbackReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get playbackReset;
+
+  /// No description provided for @sleepTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Timer'**
+  String get sleepTimer;
+
+  /// No description provided for @sleepTimerOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get sleepTimerOff;
+
+  /// No description provided for @sleepTimerEndOfTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'End of track'**
+  String get sleepTimerEndOfTrack;
+
+  /// No description provided for @sleepTimerSetFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer set for {minutes} min'**
+  String sleepTimerSetFor(int minutes);
+
+  /// No description provided for @sleepTimerEndOfTrackSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Will stop after this track'**
+  String get sleepTimerEndOfTrackSet;
+
+  /// No description provided for @gaplessPlayback.
+  ///
+  /// In en, this message translates to:
+  /// **'Gapless playback'**
+  String get gaplessPlayback;
+
+  /// No description provided for @skipSilence.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip silence'**
+  String get skipSilence;
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String minutesShort(int minutes);
 }
 
 class _AppLocalizationsDelegate

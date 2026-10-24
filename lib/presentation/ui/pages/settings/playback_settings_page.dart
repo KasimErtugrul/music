@@ -41,6 +41,16 @@ class PlaybackSettingsPage extends StatelessWidget {
               value: p.defaultShuffle,
               onChanged: ctrl.setDefaultShuffle,
             ),
+            SettingsSwitchTile(
+              title: l10n.gaplessPlayback,
+              value: p.gapless,
+              onChanged: ctrl.setGapless,
+            ),
+            SettingsSwitchTile(
+              title: l10n.skipSilence,
+              value: p.skipSilence,
+              onChanged: ctrl.setSkipSilence,
+            ),
             SettingsChoiceTile<int>(
               title: l10n.defaultRepeat,
               value: p.defaultRepeat,

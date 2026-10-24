@@ -11,15 +11,10 @@ abstract class PlayerRepository {
   Stream<Duration> get positionStream;
   Stream<Duration?> get durationStream;
   Stream<PlayerException> get errorStream;
-
   Duration get position;
   int? get currentIndex;
 
-  Future<void> loadQueue(
-    List<SongModel> songs, {
-    int initialIndex = 0,
-    Duration? initialPosition,
-  });
+  Future<void> loadQueue(List<SongModel> songs, {int initialIndex = 0, Duration? initialPosition});
   Future<void> insertSong(int index, SongModel song);
   Future<void> removeSong(int index);
   Future<void> moveSong(int from, int to);
@@ -32,6 +27,11 @@ abstract class PlayerRepository {
   Future<void> skipToPrevious();
   Future<void> setShuffleMode(bool enabled);
   Future<void> setRepeatMode(AudioServiceRepeatMode mode);
+  
+  Future<void> setVolume(double volume);
+  Future<void> setSpeed(double speed);
+  Future<void> setPitch(double pitch);
+  Future<void> setSkipSilenceEnabled(bool enabled);
 
   bool get hasNext;
   bool get hasPrevious;
@@ -53,7 +53,6 @@ class PlayerRepositoryImpl implements PlayerRepository {
   Stream<Duration?> get durationStream => _handler.durationStream;
   @override
   Stream<PlayerException> get errorStream => _handler.errorStream;
-
   @override
   Duration get position => _handler.position;
   @override
@@ -61,20 +60,13 @@ class PlayerRepositoryImpl implements PlayerRepository {
 
   @override
   Future<void> loadQueue(List<SongModel> songs, {int initialIndex = 0, Duration? initialPosition}) async {
-    // Kapak resmi YÜKLENMEZ! (Lazy load için)
     final items = <MediaItem>[
       for (final s in songs) MediaItem(id: s.uri, title: s.title, artist: s.artist, album: s.album, duration: s.duration)
     ];
     final sources = <AudioSource>[
       for (final s in songs) AudioSource.uri(Uri.parse(s.uri))
     ];
-    
-    await _handler.loadTracks(
-      items: items,
-      sources: sources,
-      initialIndex: initialIndex,
-      initialPosition: initialPosition,
-    );
+    await _handler.loadTracks(items: items, sources: sources, initialIndex: initialIndex, initialPosition: initialPosition);
   }
 
   @override
@@ -86,10 +78,8 @@ class PlayerRepositoryImpl implements PlayerRepository {
 
   @override
   Future<void> removeSong(int index) => _handler.removeTrack(index);
-
   @override
   Future<void> moveSong(int from, int to) => _handler.moveTrack(from, to);
-
   @override
   Future<void> play() => _handler.play();
   @override
@@ -108,6 +98,14 @@ class PlayerRepositoryImpl implements PlayerRepository {
       );
   @override
   Future<void> setRepeatMode(AudioServiceRepeatMode mode) => _handler.setRepeatMode(mode);
+  @override
+  Future<void> setVolume(double volume) => _handler.setVolume(volume);
+  @override
+  Future<void> setSpeed(double speed) => _handler.setSpeed(speed);
+  @override
+  Future<void> setPitch(double pitch) => _handler.setPitch(pitch);
+  @override
+  Future<void> setSkipSilenceEnabled(bool enabled) => _handler.setSkipSilenceEnabled(enabled);
   @override
   bool get hasNext => _handler.hasNext;
   @override

@@ -7,9 +7,9 @@ import 'package:resonance/data/datasources/player_datasource.dart';
 
 class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   ResonanceAudioHandler({
-    required PlayerDataSource source,
+    required this._source,
     required this._artResolver,
-  }) : _source = source {
+  }) {
     AudioSessionDatasource(_source).init();
     _bindStreams();
   }
@@ -138,6 +138,12 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> skipToNext() => _source.skipToNext();
   @override
   Future<void> skipToPrevious() => _source.skipToPrevious();
+  
+  // BaseAudioHandler'da override edilmesi gerekmeyenler
+  Future<void> setVolume(double volume) => _source.setVolume(volume);
+  Future<void> setPitch(double pitch) => _source.setPitch(pitch);
+  Future<void> setSkipSilenceEnabled(bool enabled) => _source.setSkipSilenceEnabled(enabled);
+
   @override
   Future<void> setSpeed(double speed) => _source.setSpeed(speed);
   

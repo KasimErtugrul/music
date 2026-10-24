@@ -239,5 +239,19 @@
   "eqPresetTreble": "Treble Boost",
   "eqPresetVocal": "Vocal",
   "eqGroupBuiltIn": "Built-in Presets",
-  "eqGroupCustom": "Custom Presets"
+  "eqGroupCustom": "Custom Presets",
+    "playbackSpeedPitch": "Speed & Pitch",
+  "playbackSpeed": "Speed",
+  "playbackPitch": "Pitch",
+  "playbackReset": "Reset",
+  "sleepTimer": "Sleep Timer",
+  "sleepTimerOff": "Off",
+  "sleepTimerEndOfTrack": "End of track",
+  "sleepTimerSetFor": "Timer set for {minutes} min",
+  "@sleepTimerSetFor": { "placeholders": { "minutes": { "type": "int" } } },
+  "sleepTimerEndOfTrackSet": "Will stop after this track",
+  "gaplessPlayback": "Gapless playback",
+  "skipSilence": "Skip silence",
+  "minutesShort": "{minutes} min",
+  "@minutesShort": { "placeholders": { "minutes": { "type": "int" } } }
 }

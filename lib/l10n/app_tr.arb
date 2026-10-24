@@ -231,5 +231,17 @@
   "eqPresetTreble": "Tiz Artırıcı",
   "eqPresetVocal": "Vokal",
   "eqGroupBuiltIn": "Hazır Ön Ayarlar",
-  "eqGroupCustom": "Özel Ön Ayarlar"
+  "eqGroupCustom": "Özel Ön Ayarlar",
+    "playbackSpeedPitch": "Hız ve Pitch",
+  "playbackSpeed": "Hız",
+  "playbackPitch": "Pitch",
+  "playbackReset": "Sıfırla",
+  "sleepTimer": "Uyku Zamanlayıcısı",
+  "sleepTimerOff": "Kapalı",
+  "sleepTimerEndOfTrack": "Şarkı bitince",
+  "sleepTimerSetFor": "Zamanlayıcı {minutes} dk olarak ayarlandı",
+  "sleepTimerEndOfTrackSet": "Bu şarkıdan sonra duracak",
+  "gaplessPlayback": "Gapless oynatma",
+  "skipSilence": "Sessizliği atla",
+  "minutesShort": "{minutes} dk"
   }

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
@@ -11,7 +12,12 @@ import 'package:resonance/data/repositories/queue_state_repository.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 
 class PlayerController extends GetxController {
-  PlayerController(this._repository, this._libraryRepo, this._stateRepo, this._historyRepo);
+  PlayerController(
+    this._repository,
+    this._libraryRepo,
+    this._stateRepo,
+    this._historyRepo,
+  );
 
   final PlayerRepository _repository;
   final LibraryRepository _libraryRepo;
@@ -31,6 +37,9 @@ class PlayerController extends GetxController {
 
   final position = Duration.zero.obs;
   final duration = Duration.zero.obs;
+
+   Stream<PlaybackState> get playbackStateStream => _repository.playbackStateStream;
+
 
   String? _loggedSongUri;
   bool _isRestoring = true;
@@ -65,7 +74,9 @@ class PlayerController extends GetxController {
     _repository.playbackStateStream.listen((state) {
       isPlaying.value = state.playing;
       processingState.value = state.processingState;
-      if (!_isRestoring && (!state.playing || state.processingState == AudioProcessingState.idle)) {
+      if (!_isRestoring &&
+          (!state.playing ||
+              state.processingState == AudioProcessingState.idle)) {
         _saveQueueState();
       }
     });
@@ -76,11 +87,13 @@ class PlayerController extends GetxController {
       position.value = pos;
       _checkHistory(pos);
     });
-    
+
     _repository.durationStream.listen((dur) {
       if (dur != null) duration.value = dur;
     });
   }
+
+  void setVolume(double vol) => _repository.setVolume(vol);
 
   void _checkHistory(Duration pos) {
     final song = currentSong;
@@ -132,7 +145,11 @@ class PlayerController extends GetxController {
           // Kayıtlı state'i uygula
           await _repository.setShuffleMode(state.shuffleEnabled);
           await _repository.setRepeatMode(state.repeatMode);
-          await _repository.loadQueue(restored, initialIndex: safeIndex, initialPosition: state.position);
+          await _repository.loadQueue(
+            restored,
+            initialIndex: safeIndex,
+            initialPosition: state.position,
+          );
           return;
         }
       }
@@ -141,7 +158,6 @@ class PlayerController extends GetxController {
       final pref = prefCtrl.playback.value;
       await _repository.setShuffleMode(pref.defaultShuffle);
       await _repository.setRepeatMode(_mapRepeatMode(pref.defaultRepeat));
-      
     } catch (_) {
     } finally {
       _isRestoring = false;
@@ -154,25 +170,35 @@ class PlayerController extends GetxController {
       return;
     }
     try {
-      await _stateRepo.saveState(QueueStateModel(
-        songUris: songQueue.map((s) => s.uri).toList(),
-        currentIndex: _repository.currentIndex ?? 0,
-        position: _repository.position,
-        shuffleEnabled: shuffleEnabled.value,
-        repeatMode: repeatMode.value,
-        shuffleOrder: null,
-      ));
+      await _stateRepo.saveState(
+        QueueStateModel(
+          songUris: songQueue.map((s) => s.uri).toList(),
+          currentIndex: _repository.currentIndex ?? 0,
+          position: _repository.position,
+          shuffleEnabled: shuffleEnabled.value,
+          repeatMode: repeatMode.value,
+          shuffleOrder: null,
+        ),
+      );
     } catch (_) {}
   }
 
   AudioServiceRepeatMode _mapRepeatMode(int val) => switch (val) {
-      1 => AudioServiceRepeatMode.all,
-      2 => AudioServiceRepeatMode.one,
-      _ => AudioServiceRepeatMode.none,
+    1 => AudioServiceRepeatMode.all,
+    2 => AudioServiceRepeatMode.one,
+    _ => AudioServiceRepeatMode.none,
   };
 
   Future<void> playSong(SongModel song, {List<SongModel>? queue}) async {
-    // Varsayılanları BURADA EZME!
+    // Varsayılanları uygula
+    final pref = prefCtrl.playback.value;
+    await _repository.setSpeed(pref.speed);
+    await _repository.setPitch(pref.pitch);
+    await _repository.setSkipSilenceEnabled(pref.skipSilence);
+    // Gapless just_audio'da varsayılan olarak açıktır, kapatmak için kuyruk yönetimi gerekebilir.
+    // just_audio'da gapless kapatma doğrudan bir API değil, setAudioSources ile ilgilidir.
+    // Şimdilik sadece speed/pitch ve skipSilence bağlıyoruz.
+
     final list = queue ?? <SongModel>[song];
     final index = list.indexWhere((s) => s.id == song.id);
 
@@ -181,15 +207,27 @@ class PlayerController extends GetxController {
     await _repository.play();
   }
 
+   Future<void> pause() => _repository.pause();
+  Future<void> setSpeed(double speed) => _repository.setSpeed(speed);
+  Future<void> setPitch(double pitch) => _repository.setPitch(pitch);
+
+
+
   Future<void> playNext(SongModel song) async {
-    if (songQueue.isEmpty) return playSong(song);
+    if (songQueue.isEmpty) {
+      await playSong(song);
+      return;
+    }
     final nextIdx = (_repository.currentIndex ?? 0) + 1;
     songQueue.insert(nextIdx, song);
     await _repository.insertSong(nextIdx, song);
   }
 
   Future<void> addToQueue(SongModel song) async {
-    if (songQueue.isEmpty) return playSong(song);
+    if (songQueue.isEmpty) {
+      await playSong(song);
+      return;
+    }
     songQueue.add(song);
     await _repository.insertSong(songQueue.length - 1, song);
   }
@@ -215,8 +253,10 @@ class PlayerController extends GetxController {
   }
 
   Future<void> togglePlayPause() async {
-    if (isPlaying.value) await _repository.pause();
-    else await _repository.play();
+    if (isPlaying.value)
+      await _repository.pause();
+    else
+      await _repository.play();
   }
 
   Future<void> seek(Duration pos) => _repository.seek(pos);

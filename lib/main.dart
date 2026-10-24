@@ -11,6 +11,7 @@ import 'package:resonance/data/repositories/theme_repository.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
+import 'package:resonance/presentation/controllers/sleep_timer_controller.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
@@ -63,6 +64,9 @@ Future<void> main() async {
     Get.put<ResonanceAudioHandler>(audioHandler as ResonanceAudioHandler, permanent: true);
 
     InitialBinding().dependencies();
+
+        Get.put<SleepTimerController>(SleepTimerController(), permanent: true);
+
 
     Get.put<ThemeController>(
       ThemeController(
