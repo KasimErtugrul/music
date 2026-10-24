@@ -19,10 +19,9 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    // AGP'yi API 37'yi destekleyen bir sürüme yükseltiyoruz.
-    // Flutter'ın kendi şablonları 9.3.1 kullanıyor, en güvenli seçenek budur.
     id("com.android.application") version "9.3.1" apply false
-    id("org.jetbrains.kotlin.android") version "2.4.0" apply false
+    // Flutter'ın minimum gereksinimi: 2.2.20
+    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
 }
 
 include(":app")

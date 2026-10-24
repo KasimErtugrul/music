@@ -16,17 +16,19 @@ import 'package:resonance/data/datasources/local/tables/play_history_table.dart'
 import 'package:resonance/data/datasources/local/tables/playlist_songs_table.dart';
 import 'package:resonance/data/datasources/local/tables/playlists_table.dart';
 import 'package:resonance/data/datasources/local/tables/queue_state_table.dart';
+import 'package:resonance/data/datasources/local/tables/equalizer_presets_table.dart';
+import 'package:resonance/data/datasources/local/daos/equalizer_preset_dao.dart';
 
 part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
     Playlists, PlaylistSongs, Favorites, PlayHistory, Lyrics, QueueStates,
-    CustomThemes, // YENİ
+    CustomThemes, EqualizerPresets, // YENİ
   ],
   daos: [
     PlaylistDao, FavoriteDao, HistoryDao, LyricsDao, QueueStateDao,
-    CustomThemeDao, // YENİ
+    CustomThemeDao, EqualizerPresetDao,// YENİ
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -34,9 +36,9 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(_open());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
-  @override
+ @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async => m.createAll(),
         onUpgrade: (m, from, to) async {
@@ -48,6 +50,17 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(playlistSongs, playlistSongs.durationMs);
           }
           if (from < 4) await m.createTable(customThemes);
+          if (from < 5) {
+            await m.addColumn(favorites, favorites.path);
+            await m.addColumn(favorites, favorites.title);
+            await m.addColumn(favorites, favorites.artist);
+            await m.addColumn(favorites, favorites.durationMs);
+            await m.addColumn(playHistory, playHistory.path);
+            await m.addColumn(playHistory, playHistory.title);
+            await m.addColumn(playHistory, playHistory.artist);
+            await m.addColumn(playHistory, playHistory.durationMs);
+          }
+          if (from < 6) await m.createTable(equalizerPresets); // YENİ
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

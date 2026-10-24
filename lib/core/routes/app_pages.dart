@@ -17,6 +17,7 @@ import 'package:resonance/presentation/ui/pages/settings/appearance/list_style_p
 import 'package:resonance/presentation/ui/pages/settings/appearance/player_style_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/appearance/theme_gallery_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/appearance/theme_settings_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/audio_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/songs_page.dart';
 import 'package:resonance/presentation/ui/pages/splash_page.dart';
 import 'package:resonance/presentation/ui/pages/stats_page.dart';
@@ -72,5 +73,7 @@ abstract final class AppPages {
     GetPage(name: AppRoutes.fontSettings, page: () => const FontSettingsPage()),
     GetPage(name: AppRoutes.playerStyle, page: () => const PlayerStylePage()),
     GetPage(name: AppRoutes.listStyle, page: () => const ListStylePage()),
+    GetPage(name: AppRoutes.audioSettings, page: () => const AudioSettingsPage()),
+
   ];
 }

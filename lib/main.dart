@@ -13,6 +13,8 @@ import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:resonance/data/datasources/audio_effects_datasource.dart';
+import 'package:resonance/data/datasources/player_datasource.dart';
 
 late final AudioHandler audioHandler;
 
@@ -21,16 +23,27 @@ Future<void> main() async {
   try {
     final prefs = await SharedPreferences.getInstance();
 
+    // ÇÖZÜM BURADA: SharedPreferences'ı GetX'e kaydediyoruz
+    Get.put<SharedPreferences>(prefs, permanent: true);
+
     Get.put<SettingsRepository>(SettingsRepositoryImpl(prefs), permanent: true);
     Get.put<SettingsController>(SettingsController(Get.find<SettingsRepository>()), permanent: true);
     Get.put<ThemeRepository>(ThemeRepositoryImpl(prefs), permanent: true);
     Get.put<PreferencesRepository>(PreferencesRepositoryImpl(prefs), permanent: true);
     Get.put<PreferencesController>(PreferencesController(Get.find<PreferencesRepository>()), permanent: true);
 
+    // --- SES EFEKTLERİ VE OYNATICI ---
+    final audioEffects = AudioEffectsDatasource();
+    Get.put<AudioEffectsDatasource>(audioEffects, permanent: true);
+    
+    final playerSource = PlayerDataSource(audioEffects);
+    Get.put<PlayerDataSource>(playerSource, permanent: true);
+    // ---------------------------------
+
     audioHandler = await AudioService.init(
       builder: () => ResonanceAudioHandler(
+        source: playerSource,
         artResolver: (songUri) async {
-          // Kapak çözücü (Lazy)
           final libRepo = Get.find<LibraryRepository>();
           final id = int.tryParse(songUri.split('/').last);
           if (id == null) return null;
@@ -44,7 +57,7 @@ Future<void> main() async {
         androidNotificationChannelName: 'Playback',
         androidNotificationChannelDescription: 'Playback controls',
         androidNotificationOngoing: true,
-        androidNotificationIcon: 'mipmap/ic_launcher', // Eklendi
+        androidNotificationIcon: 'mipmap/ic_launcher',
       ),
     );
     Get.put<ResonanceAudioHandler>(audioHandler as ResonanceAudioHandler, permanent: true);
@@ -54,7 +67,7 @@ Future<void> main() async {
     Get.put<ThemeController>(
       ThemeController(
         Get.find<ThemeRepository>(),
-        Get.find<PlayerController>().currentItem.stream, // Bağımlılık Stream'e çevrildi
+        Get.find<PlayerController>().currentItem.stream,
         Get.find<LibraryRepository>(),
       ),
       permanent: true,
@@ -82,12 +95,25 @@ class _StartupErrorApp extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Uygulama başlatılamadı', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red)),
+                const Text(
+                  'Uygulama başlatılamadı',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
                 const SizedBox(height: 12),
-                const Text('Hata:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Hata:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 SelectableText('$error'),
                 const SizedBox(height: 16),
-                const Text('Stack:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Stack:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 SelectableText('$stack', style: const TextStyle(fontSize: 11)),
               ],
             ),

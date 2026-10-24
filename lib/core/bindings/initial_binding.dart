@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/core/utils/permission_helper.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
 import 'package:resonance/data/datasources/device_media_datasource.dart';
@@ -22,6 +23,11 @@ import 'package:resonance/presentation/controllers/permission_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/search_controller.dart';
 import 'package:resonance/presentation/controllers/stats_controller.dart';
+import 'package:resonance/data/datasources/audio_effects_datasource.dart';
+import 'package:resonance/data/datasources/equalizer_datasource.dart';
+import 'package:resonance/data/datasources/local/daos/equalizer_preset_dao.dart';
+import 'package:resonance/data/repositories/equalizer_repository.dart';
+import 'package:resonance/presentation/controllers/equalizer_controller.dart';
 
 import '../../data/datasources/local/daos/custom_theme_dao.dart';
 
@@ -115,6 +121,24 @@ class InitialBinding extends Bindings {
     CustomThemeRepositoryImpl(Get.find<CustomThemeDao>()),
     permanent: true,
   );
+
+   Get.put<EqualizerPresetDao>(Get.find<AppDatabase>().equalizerPresetDao, permanent: true);
+    
+    Get.put<EqualizerDatasource>(EqualizerDatasource(Get.find<EqualizerPresetDao>()), permanent: true);
+    
+     Get.put<EqualizerRepository>(
+      EqualizerRepositoryImpl(
+        Get.find<AudioEffectsDatasource>(), 
+        Get.find<EqualizerDatasource>(),
+        Get.find<SharedPreferences>(), // EKLENDİ
+      ), 
+      permanent: true
+    );
+    
+    Get.put<EqualizerController>(
+      EqualizerController(Get.find<EqualizerRepository>()),
+      permanent: true,
+    );
     // Gün 13: Playlist controller'ı HomePage içindeki PlaylistsPage için hemen hazırla
     PlaylistBinding().dependencies();
   }

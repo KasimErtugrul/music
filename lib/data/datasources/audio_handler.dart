@@ -7,9 +7,9 @@ import 'package:resonance/data/datasources/player_datasource.dart';
 
 class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   ResonanceAudioHandler({
-    PlayerDataSource? source,
-    required this._artResolver, // Lint düzeltmesi (initializing formal)
-  }) : _source = source ?? PlayerDataSource() {
+    required PlayerDataSource source,
+    required this._artResolver,
+  }) : _source = source {
     AudioSessionDatasource(_source).init();
     _bindStreams();
   }
@@ -27,23 +27,20 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   bool get hasPrevious => _source.hasPrevious;
 
   void _bindStreams() {
-    // Tembel Kapak Yükleme
     _source.currentIndexStream.listen((index) async {
       if (index == null) return;
       final items = queue.value;
       if (index >= 0 && index < items.length) {
         final item = items[index];
-        mediaItem.add(item); // Önce kapağı olmadan hemen göster
+        mediaItem.add(item);
         
         final artUri = await _artResolver(item.id);
-        // Hala aynı şarkı çalıyorsa kapağı güncelle
         if (artUri != null && mediaItem.value?.id == item.id) {
           mediaItem.add(item.copyWith(artUri: artUri));
         }
       }
     });
 
-    // Tip hatasını çözmek için cast<PlaybackEvent> kullanıldı
     Rx.merge([
       _source.playbackEventStream,
       _source.loopModeStream.switchMap((_) => _source.playbackEventStream),
@@ -106,7 +103,6 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
     await _source.loadQueue(sources, initialIndex: initialIndex, initialPosition: initialPosition);
   }
 
-  // Kuyruk API'leri (Önce listeyi güncelle, sonra player'ı)
   Future<void> insertTrack(int index, MediaItem item, AudioSource source) async {
     final newQueue = queue.value.toList()..insert(index, item);
     queue.add(newQueue);

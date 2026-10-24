@@ -699,4 +699,61 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get largeTouchTargets => 'Large touch targets';
+
+  @override
+  String get audioSettingsTitle => 'Ses';
+
+  @override
+  String get equalizerTitle => 'Ekolayzer';
+
+  @override
+  String get equalizerEnable => 'Ekolayzeri Etkinleştir';
+
+  @override
+  String get equalizerPresets => 'Ön Ayarlar';
+
+  @override
+  String get equalizerSavePreset => 'Ön Ayar Kaydet';
+
+  @override
+  String get equalizerPresetName => 'Ön Ayar Adı';
+
+  @override
+  String get loudnessEnhancer => 'Ses Yüksekliği Artırıcı';
+
+  @override
+  String get loudnessGain => 'Kazanç';
+
+  @override
+  String get equalizerNoBands => 'Ekolayzer bu cihazda desteklenmiyor.';
+
+  @override
+  String get eqPresetFlat => 'Nötr';
+
+  @override
+  String get eqPresetRock => 'Rock';
+
+  @override
+  String get eqPresetPop => 'Pop';
+
+  @override
+  String get eqPresetJazz => 'Jazz';
+
+  @override
+  String get eqPresetClassical => 'Klasik';
+
+  @override
+  String get eqPresetBass => 'Bas Artırıcı';
+
+  @override
+  String get eqPresetTreble => 'Tiz Artırıcı';
+
+  @override
+  String get eqPresetVocal => 'Vokal';
+
+  @override
+  String get eqGroupBuiltIn => 'Hazır Ön Ayarlar';
+
+  @override
+  String get eqGroupCustom => 'Özel Ön Ayarlar';
 }

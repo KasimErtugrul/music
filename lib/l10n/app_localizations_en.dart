@@ -701,4 +701,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get largeTouchTargets => 'Büyük dokunma hedefleri';
+
+  @override
+  String get audioSettingsTitle => 'Audio';
+
+  @override
+  String get equalizerTitle => 'Equalizer';
+
+  @override
+  String get equalizerEnable => 'Enable Equalizer';
+
+  @override
+  String get equalizerPresets => 'Presets';
+
+  @override
+  String get equalizerSavePreset => 'Save Preset';
+
+  @override
+  String get equalizerPresetName => 'Preset Name';
+
+  @override
+  String get loudnessEnhancer => 'Loudness Enhancer';
+
+  @override
+  String get loudnessGain => 'Gain';
+
+  @override
+  String get equalizerNoBands => 'Equalizer is not supported on this device.';
+
+  @override
+  String get eqPresetFlat => 'Flat';
+
+  @override
+  String get eqPresetRock => 'Rock';
+
+  @override
+  String get eqPresetPop => 'Pop';
+
+  @override
+  String get eqPresetJazz => 'Jazz';
+
+  @override
+  String get eqPresetClassical => 'Classical';
+
+  @override
+  String get eqPresetBass => 'Bass Boost';
+
+  @override
+  String get eqPresetTreble => 'Treble Boost';
+
+  @override
+  String get eqPresetVocal => 'Vocal';
+
+  @override
+  String get eqGroupBuiltIn => 'Built-in Presets';
+
+  @override
+  String get eqGroupCustom => 'Custom Presets';
 }

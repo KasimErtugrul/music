@@ -1369,6 +1369,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Büyük dokunma hedefleri'**
   String get largeTouchTargets;
+
+  /// No description provided for @audioSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get audioSettingsTitle;
+
+  /// No description provided for @equalizerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Equalizer'**
+  String get equalizerTitle;
+
+  /// No description provided for @equalizerEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Equalizer'**
+  String get equalizerEnable;
+
+  /// No description provided for @equalizerPresets.
+  ///
+  /// In en, this message translates to:
+  /// **'Presets'**
+  String get equalizerPresets;
+
+  /// No description provided for @equalizerSavePreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Preset'**
+  String get equalizerSavePreset;
+
+  /// No description provided for @equalizerPresetName.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset Name'**
+  String get equalizerPresetName;
+
+  /// No description provided for @loudnessEnhancer.
+  ///
+  /// In en, this message translates to:
+  /// **'Loudness Enhancer'**
+  String get loudnessEnhancer;
+
+  /// No description provided for @loudnessGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Gain'**
+  String get loudnessGain;
+
+  /// No description provided for @equalizerNoBands.
+  ///
+  /// In en, this message translates to:
+  /// **'Equalizer is not supported on this device.'**
+  String get equalizerNoBands;
+
+  /// No description provided for @eqPresetFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat'**
+  String get eqPresetFlat;
+
+  /// No description provided for @eqPresetRock.
+  ///
+  /// In en, this message translates to:
+  /// **'Rock'**
+  String get eqPresetRock;
+
+  /// No description provided for @eqPresetPop.
+  ///
+  /// In en, this message translates to:
+  /// **'Pop'**
+  String get eqPresetPop;
+
+  /// No description provided for @eqPresetJazz.
+  ///
+  /// In en, this message translates to:
+  /// **'Jazz'**
+  String get eqPresetJazz;
+
+  /// No description provided for @eqPresetClassical.
+  ///
+  /// In en, this message translates to:
+  /// **'Classical'**
+  String get eqPresetClassical;
+
+  /// No description provided for @eqPresetBass.
+  ///
+  /// In en, this message translates to:
+  /// **'Bass Boost'**
+  String get eqPresetBass;
+
+  /// No description provided for @eqPresetTreble.
+  ///
+  /// In en, this message translates to:
+  /// **'Treble Boost'**
+  String get eqPresetTreble;
+
+  /// No description provided for @eqPresetVocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Vocal'**
+  String get eqPresetVocal;
+
+  /// No description provided for @eqGroupBuiltIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in Presets'**
+  String get eqGroupBuiltIn;
+
+  /// No description provided for @eqGroupCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Presets'**
+  String get eqGroupCustom;
 }
 
 class _AppLocalizationsDelegate

@@ -1,64 +1,61 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
+import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 
 class PlayerDataSource {
-  PlayerDataSource({AudioPlayer? player})
-      : _player = player ?? AudioPlayer(
-          maxSkipsOnError: 6,
-          audioPipeline: AudioPipeline(
-            androidAudioEffects: [], // Gün 22'de doldurulacak
-          ),
-        );
+  final AudioPlayer player;
 
-  final AudioPlayer _player;
-  AudioPlayer get player => _player;
+  PlayerDataSource(AudioEffectsDatasource effects)
+      : player = AudioPlayer(
+          maxSkipsOnError: 6,
+          audioPipeline: effects.pipeline,
+        );
 
   Future<void> loadQueue(List<AudioSource> sources, {int initialIndex = 0, Duration? initialPosition}) async {
     if (sources.isEmpty) {
-      await _player.setAudioSources(const <AudioSource>[]);
+      await player.setAudioSources(const <AudioSource>[]);
       return;
     }
     final index = initialIndex.clamp(0, sources.length - 1);
-    await _player.setAudioSources(sources, initialIndex: index, initialPosition: initialPosition);
+    await player.setAudioSources(sources, initialIndex: index, initialPosition: initialPosition);
   }
 
-  Future<void> insertSource(int index, AudioSource source) => _player.insertAudioSource(index, source);
-  Future<void> removeSource(int index) => _player.removeAudioSourceAt(index);
-  Future<void> moveSource(int from, int to) => _player.moveAudioSource(from, to);
+  Future<void> insertSource(int index, AudioSource source) => player.insertAudioSource(index, source);
+  Future<void> removeSource(int index) => player.removeAudioSourceAt(index);
+  Future<void> moveSource(int from, int to) => player.moveAudioSource(from, to);
 
-  Future<void> play() => _player.play();
-  Future<void> pause() => _player.pause();
-  Future<void> stop() => _player.stop();
-  Future<void> seek(Duration position) => _player.seek(position);
-  Future<void> setSpeed(double speed) => _player.setSpeed(speed);
-  Future<void> setVolume(double volume) => _player.setVolume(volume);
-  Future<void> setLoopMode(LoopMode mode) => _player.setLoopMode(mode);
-  Future<void> setShuffleModeEnabled(bool enabled) => _player.setShuffleModeEnabled(enabled);
+  Future<void> play() => player.play();
+  Future<void> pause() => player.pause();
+  Future<void> stop() => player.stop();
+  Future<void> seek(Duration position) => player.seek(position);
+  Future<void> setSpeed(double speed) => player.setSpeed(speed);
+  Future<void> setVolume(double volume) => player.setVolume(volume);
+  Future<void> setLoopMode(LoopMode mode) => player.setLoopMode(mode);
+  Future<void> setShuffleModeEnabled(bool enabled) => player.setShuffleModeEnabled(enabled);
 
   Future<void> skipToNext() async {
-    if (_player.hasNext) await _player.seekToNext();
+    if (player.hasNext) await player.seekToNext();
   }
 
   Future<void> skipToPrevious() async {
-    if (_player.hasPrevious) await _player.seekToPrevious();
+    if (player.hasPrevious) await player.seekToPrevious();
   }
 
-  Stream<PlayerState> get playerStateStream => _player.playerStateStream;
-  Stream<Duration> get positionStream => _player.positionStream;
-  Stream<Duration?> get durationStream => _player.durationStream;
-  Stream<int?> get currentIndexStream => _player.currentIndexStream;
-  Stream<PlaybackEvent> get playbackEventStream => _player.playbackEventStream;
-  Stream<PlayerException> get errorStream => _player.errorStream;
+  Stream<PlayerState> get playerStateStream => player.playerStateStream;
+  Stream<Duration> get positionStream => player.positionStream;
+  Stream<Duration?> get durationStream => player.durationStream;
+  Stream<int?> get currentIndexStream => player.currentIndexStream;
+  Stream<PlaybackEvent> get playbackEventStream => player.playbackEventStream;
+  Stream<PlayerException> get errorStream => player.errorStream;
   
-  // Eksik olan Stream'ler eklendi
-  Stream<LoopMode> get loopModeStream => _player.loopModeStream;
-  Stream<bool> get shuffleModeEnabledStream => _player.shuffleModeEnabledStream;
+  Stream<LoopMode> get loopModeStream => player.loopModeStream;
+  Stream<bool> get shuffleModeEnabledStream => player.shuffleModeEnabledStream;
 
-  bool get hasNext => _player.hasNext;
-  bool get hasPrevious => _player.hasPrevious;
-  bool get playing => _player.playing;
-  int? get currentIndex => _player.currentIndex;
-  Duration get position => _player.position;
+  bool get hasNext => player.hasNext;
+  bool get hasPrevious => player.hasPrevious;
+  bool get playing => player.playing;
+  int? get currentIndex => player.currentIndex;
+  Duration get position => player.position;
 
-  Future<void> dispose() => _player.dispose();
+  Future<void> dispose() => player.dispose();
 }

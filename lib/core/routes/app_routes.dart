@@ -18,4 +18,6 @@ abstract final class AppRoutes {
   static const String fontSettings = '/settings/font';
   static const String playerStyle = '/settings/player-style';
   static const String listStyle = '/settings/list-style';
+  static const String audioSettings = '/settings/audio';
+
 }
