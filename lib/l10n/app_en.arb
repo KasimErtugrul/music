@@ -253,5 +253,19 @@
   "gaplessPlayback": "Gapless playback",
   "skipSilence": "Skip silence",
   "minutesShort": "{minutes} min",
-  "@minutesShort": { "placeholders": { "minutes": { "type": "int" } } }
+  "@minutesShort": { "placeholders": { "minutes": { "type": "int" } } },
+    "tagViewer": "Tag Info",
+  "tagTitle": "Title",
+  "tagArtist": "Artist",
+  "tagAlbum": "Album",
+  "tagGenre": "Genre",
+  "tagYear": "Year",
+  "tagReadOnlyNote": "Tags are read-only. Use your device's file manager to edit them.",
+  "tagReadError": "Could not read tags.",
+  "replayGain": "ReplayGain",
+  "replayGainEnable": "Apply ReplayGain",
+  "replayGainEnableDesc": "Normalizes volume based on track loudness tags",
+  "tagsArtworkSettings": "Tags & Artwork",
+  "clearArtworkCache": "Clear artwork cache",
+  "artworkCacheCleared": "Artwork cache cleared"
 }

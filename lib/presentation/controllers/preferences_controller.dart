@@ -48,6 +48,11 @@ class PreferencesController extends GetxController {
     _repo.savePlayback(playback.value);
   }
 
+  void setReplayGain(bool v) {
+    playback.value = playback.value.copyWith(replayGain: v);
+    _repo.savePlayback(playback.value);
+  }
+
   void setSkipSilence(bool v) {
     playback.value = playback.value.copyWith(skipSilence: v);
     _repo.savePlayback(playback.value);

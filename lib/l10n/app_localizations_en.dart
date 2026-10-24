@@ -798,4 +798,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String minutesShort(int minutes) {
     return '$minutes min';
   }
+
+  @override
+  String get tagViewer => 'Tag Info';
+
+  @override
+  String get tagTitle => 'Title';
+
+  @override
+  String get tagArtist => 'Artist';
+
+  @override
+  String get tagAlbum => 'Album';
+
+  @override
+  String get tagGenre => 'Genre';
+
+  @override
+  String get tagYear => 'Year';
+
+  @override
+  String get tagReadOnlyNote =>
+      'Tags are read-only. Use your device\'s file manager to edit them.';
+
+  @override
+  String get tagReadError => 'Could not read tags.';
+
+  @override
+  String get replayGain => 'ReplayGain';
+
+  @override
+  String get replayGainEnable => 'Apply ReplayGain';
+
+  @override
+  String get replayGainEnableDesc =>
+      'Normalizes volume based on track loudness tags';
+
+  @override
+  String get tagsArtworkSettings => 'Tags & Artwork';
+
+  @override
+  String get clearArtworkCache => 'Clear artwork cache';
+
+  @override
+  String get artworkCacheCleared => 'Artwork cache cleared';
 }

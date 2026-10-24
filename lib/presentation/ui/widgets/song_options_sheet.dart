@@ -5,6 +5,7 @@ import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/ui/pages/tag_viewer_page.dart';
 import 'package:resonance/presentation/ui/widgets/playlist_picker_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/song_info_sheet.dart';
 
@@ -57,6 +58,14 @@ class SongOptionsSheet extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               PlaylistPickerSheet.show(context, song);
+            },
+          ),
+                    ListTile(
+            leading: const Icon(Icons.text_fields),
+            title: Text(l10n.tagViewer),
+            onTap: () {
+              Navigator.pop(context);
+              Get.to(() => TagViewerPage(song: song));
             },
           ),
           Obx(() {

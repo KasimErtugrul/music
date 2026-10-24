@@ -7,6 +7,7 @@ import 'package:resonance/presentation/controllers/settings_controller.dart';
 import 'package:resonance/presentation/controllers/settings_search_controller.dart';
 import 'package:resonance/presentation/ui/pages/settings/about_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/audio_settings_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/tags_artwork_settings_page.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
 import 'package:resonance/presentation/ui/pages/settings/playback_settings_page.dart';
@@ -79,6 +80,13 @@ class SettingsHomePage extends StatelessWidget {
               title: Text(l10n.audioSettingsTitle),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Get.to(() => const AudioSettingsPage()),
+            ),
+
+                        ListTile(
+              leading: const Icon(Icons.image_outlined),
+              title: Text(l10n.tagsArtworkSettings),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.to(() => const TagsArtworkSettingsPage()),
             ),
 
             // Gün 18: Görünüm ayarları — tam tema sistemi

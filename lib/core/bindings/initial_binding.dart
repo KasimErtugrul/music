@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:resonance/data/datasources/metadata_datasource.dart';
+import 'package:resonance/data/repositories/tag_editor_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/core/utils/permission_helper.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
@@ -137,6 +139,12 @@ class InitialBinding extends Bindings {
     
     Get.put<EqualizerController>(
       EqualizerController(Get.find<EqualizerRepository>()),
+      permanent: true,
+    );
+
+     Get.put<MetadataDatasource>(MetadataDatasource(), permanent: true);
+    Get.put<TagEditorRepository>(
+      TagEditorRepositoryImpl(Get.find<MetadataDatasource>()),
       permanent: true,
     );
     // Gün 13: Playlist controller'ı HomePage içindeki PlaylistsPage için hemen hazırla

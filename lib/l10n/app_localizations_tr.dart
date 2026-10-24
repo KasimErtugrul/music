@@ -796,4 +796,48 @@ class AppLocalizationsTr extends AppLocalizations {
   String minutesShort(int minutes) {
     return '$minutes dk';
   }
+
+  @override
+  String get tagViewer => 'Etiket Bilgisi';
+
+  @override
+  String get tagTitle => 'Başlık';
+
+  @override
+  String get tagArtist => 'Sanatçı';
+
+  @override
+  String get tagAlbum => 'Albüm';
+
+  @override
+  String get tagGenre => 'Tür';
+
+  @override
+  String get tagYear => 'Yıl';
+
+  @override
+  String get tagReadOnlyNote =>
+      'Etiketler salt-okunurdur. Düzenlemek için cihazınızın dosya yöneticisini kullanın.';
+
+  @override
+  String get tagReadError => 'Etiketler okunamadı.';
+
+  @override
+  String get replayGain => 'ReplayGain';
+
+  @override
+  String get replayGainEnable => 'ReplayGain Uygula';
+
+  @override
+  String get replayGainEnableDesc =>
+      'Şarkı ses yüksekliği etiketlerine göre sesi normalize eder';
+
+  @override
+  String get tagsArtworkSettings => 'Etiket ve Kapak';
+
+  @override
+  String get clearArtworkCache => 'Kapak önbelleğini temizle';
+
+  @override
+  String get artworkCacheCleared => 'Kapak önbelleği temizlendi';
 }

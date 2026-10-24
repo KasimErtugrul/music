@@ -9,6 +9,7 @@ class PlaybackSettingsModel {
     this.pitch = 1.0,
     this.gapless = true,
     this.skipSilence = false,
+    this.replayGain = false,
   });
 
   final int seekIntervalSeconds;
@@ -20,6 +21,7 @@ class PlaybackSettingsModel {
   final double pitch;
   final bool gapless;
   final bool skipSilence;
+  final bool replayGain;
 
   PlaybackSettingsModel copyWith({
     int? seekIntervalSeconds,
@@ -31,6 +33,7 @@ class PlaybackSettingsModel {
     double? pitch,
     bool? gapless,
     bool? skipSilence,
+    bool? replayGain,
   }) {
     return PlaybackSettingsModel(
       seekIntervalSeconds: seekIntervalSeconds ?? this.seekIntervalSeconds,
@@ -42,6 +45,7 @@ class PlaybackSettingsModel {
       pitch: pitch ?? this.pitch,
       gapless: gapless ?? this.gapless,
       skipSilence: skipSilence ?? this.skipSilence,
+      replayGain: replayGain ?? this.replayGain,
     );
   }
 
@@ -55,6 +59,7 @@ class PlaybackSettingsModel {
     'pitch': pitch,
     'gapless': gapless,
     'skipSilence': skipSilence,
+    'replayGain': replayGain,
   };
 
   factory PlaybackSettingsModel.fromJson(Map<String, dynamic> json) {
@@ -68,6 +73,7 @@ class PlaybackSettingsModel {
       pitch: (json['pitch'] ?? 1.0).toDouble(),
       gapless: json['gapless'] ?? true,
       skipSilence: json['skipSilence'] ?? false,
+      replayGain: json['replayGain'] ?? false,
     );
   }
 }

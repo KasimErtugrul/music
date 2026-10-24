@@ -1555,6 +1555,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{minutes} min'**
   String minutesShort(int minutes);
+
+  /// No description provided for @tagViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Info'**
+  String get tagViewer;
+
+  /// No description provided for @tagTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get tagTitle;
+
+  /// No description provided for @tagArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist'**
+  String get tagArtist;
+
+  /// No description provided for @tagAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Album'**
+  String get tagAlbum;
+
+  /// No description provided for @tagGenre.
+  ///
+  /// In en, this message translates to:
+  /// **'Genre'**
+  String get tagGenre;
+
+  /// No description provided for @tagYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get tagYear;
+
+  /// No description provided for @tagReadOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags are read-only. Use your device\'s file manager to edit them.'**
+  String get tagReadOnlyNote;
+
+  /// No description provided for @tagReadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read tags.'**
+  String get tagReadError;
+
+  /// No description provided for @replayGain.
+  ///
+  /// In en, this message translates to:
+  /// **'ReplayGain'**
+  String get replayGain;
+
+  /// No description provided for @replayGainEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply ReplayGain'**
+  String get replayGainEnable;
+
+  /// No description provided for @replayGainEnableDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Normalizes volume based on track loudness tags'**
+  String get replayGainEnableDesc;
+
+  /// No description provided for @tagsArtworkSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags & Artwork'**
+  String get tagsArtworkSettings;
+
+  /// No description provided for @clearArtworkCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear artwork cache'**
+  String get clearArtworkCache;
+
+  /// No description provided for @artworkCacheCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Artwork cache cleared'**
+  String get artworkCacheCleared;
 }
 
 class _AppLocalizationsDelegate

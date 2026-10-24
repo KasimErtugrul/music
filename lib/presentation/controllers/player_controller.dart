@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
@@ -44,6 +43,8 @@ class PlayerController extends GetxController {
   String? _loggedSongUri;
   bool _isRestoring = true;
 
+
+
   SongModel? get currentSong {
     final id = currentItem.value?.id;
     if (id == null) return null;
@@ -61,6 +62,7 @@ class PlayerController extends GetxController {
   }
 
   void _bind() {
+
     _repository.mediaItemStream.listen((item) {
       if (currentItem.value?.id != item?.id) {
         _loggedSongUri = null;
@@ -109,6 +111,8 @@ class PlayerController extends GetxController {
       _loggedSongUri = song.uri;
     }
   }
+
+  
 
   Future<void> fastForward() async {
     final sec = prefCtrl.playback.value.seekIntervalSeconds;

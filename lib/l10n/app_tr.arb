@@ -243,5 +243,19 @@
   "sleepTimerEndOfTrackSet": "Bu şarkıdan sonra duracak",
   "gaplessPlayback": "Gapless oynatma",
   "skipSilence": "Sessizliği atla",
-  "minutesShort": "{minutes} dk"
+  "minutesShort": "{minutes} dk",
+    "tagViewer": "Etiket Bilgisi",
+  "tagTitle": "Başlık",
+  "tagArtist": "Sanatçı",
+  "tagAlbum": "Albüm",
+  "tagGenre": "Tür",
+  "tagYear": "Yıl",
+  "tagReadOnlyNote": "Etiketler salt-okunurdur. Düzenlemek için cihazınızın dosya yöneticisini kullanın.",
+  "tagReadError": "Etiketler okunamadı.",
+  "replayGain": "ReplayGain",
+  "replayGainEnable": "ReplayGain Uygula",
+  "replayGainEnableDesc": "Şarkı ses yüksekliği etiketlerine göre sesi normalize eder",
+  "tagsArtworkSettings": "Etiket ve Kapak",
+  "clearArtworkCache": "Kapak önbelleğini temizle",
+  "artworkCacheCleared": "Kapak önbelleği temizlendi"
   }
