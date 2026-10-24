@@ -11,6 +11,8 @@ import 'package:resonance/data/models/playback_settings_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/preferences_repository.dart';
+import 'package:resonance/data/models/excluded_folder_model.dart';
+import 'package:resonance/data/repositories/excluded_folder_repository.dart';
 
 class FakeDataSource implements DeviceMediaDataSource {
   FakeDataSource(this.songs);
@@ -37,6 +39,8 @@ class FakeDataSource implements DeviceMediaDataSource {
 /// Testler için varsayılan ayarlarla dönen basit sahte PreferencesRepository.
 /// `minDurationSeconds = 0` → filtreleme yapmaz, tüm şarkılar geçer.
 class _FakePreferencesRepository implements PreferencesRepository {
+ 
+ 
   @override
   Future<LibrarySettingsModel> loadLibrary() async =>
       const LibrarySettingsModel();
@@ -53,6 +57,17 @@ class _FakePreferencesRepository implements PreferencesRepository {
 
   @override
   Future<void> savePlayback(PlaybackSettingsModel settings) async {}
+}
+
+class _FakeExcludedFolderRepository implements ExcludedFolderRepository {
+  @override
+  Future<List<ExcludedFolderModel>> getExcludedFolders() async => [];
+
+  @override
+  Future<void> addFolder(String path) async {}
+
+  @override
+  Future<void> removeFolder(String path) async {}
 }
 
 SongModel song(
@@ -110,9 +125,10 @@ void main() {
 
   setUp(() {
     source = FakeDataSource(fixture());
-    repo = LibraryRepositoryImpl(
+     repo = LibraryRepositoryImpl(
       source,
       _FakePreferencesRepository(),
+      _FakeExcludedFolderRepository(), // ← EKLENDİ
       useIsolate: false,
     );
   });
@@ -447,6 +463,7 @@ void main() {
       final big = LibraryRepositoryImpl(
         FakeDataSource(bigLibrary(10000)),
         _FakePreferencesRepository(),
+        _FakeExcludedFolderRepository(), // ← EKLENDİ
       );
       final watch = Stopwatch()..start();
 

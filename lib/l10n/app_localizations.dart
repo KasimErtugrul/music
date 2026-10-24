@@ -1663,6 +1663,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waveform'**
   String get seekBarWaveform;
+
+  /// No description provided for @excludedFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden Folders'**
+  String get excludedFolders;
+
+  /// No description provided for @excludedFoldersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders excluded from the library'**
+  String get excludedFoldersDesc;
+
+  /// No description provided for @addExcludedFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Folder'**
+  String get addExcludedFolder;
+
+  /// No description provided for @noExcludedFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'No hidden folders.'**
+  String get noExcludedFolders;
+
+  /// No description provided for @externalOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the external file.'**
+  String get externalOpenError;
+
+  /// No description provided for @externalOpenNoPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'File permission denied. Cannot play external file.'**
+  String get externalOpenNoPermission;
+
+  /// No description provided for @waveformViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Waveform View'**
+  String get waveformViewer;
+
+  /// No description provided for @waveformPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing waveform…'**
+  String get waveformPreparing;
+
+  /// No description provided for @waveformFirstTimeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing the track for the first time. Subsequent openings are instant.'**
+  String get waveformFirstTimeNote;
+
+  /// No description provided for @waveformUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Waveform could not be generated for this track.'**
+  String get waveformUnavailable;
+
+  /// No description provided for @waveformNoFilePath.
+  ///
+  /// In en, this message translates to:
+  /// **'This track has no local file path. Waveform is only available for local files.'**
+  String get waveformNoFilePath;
 }
 
 class _AppLocalizationsDelegate

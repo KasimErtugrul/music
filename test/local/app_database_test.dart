@@ -14,10 +14,11 @@ void main() {
   });
 
   test(
-    'schemaVersion is 5 '
-    '(v1: base, v2: queue_states, v3: playlist fallback, v4: custom_themes, v5: favorites/history fallback)',
+    'schemaVersion is 7 '
+    '(v1: base, v2: queue_states, v3: playlist fallback, v4: custom_themes, '
+    'v5: favorites/history fallback, v6: equalizer_presets, v7: excluded_folders)',
     () {
-      expect(db.schemaVersion, 5);
+      expect(db.schemaVersion, 7);
     },
   );
 
@@ -39,6 +40,8 @@ void main() {
         'lyrics',
         'queue_states',
         'custom_themes',
+        'equalizer_presets',
+        'excluded_folders',
       ]),
     );
   });

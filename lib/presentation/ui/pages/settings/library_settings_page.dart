@@ -4,6 +4,7 @@ import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
+import 'package:resonance/presentation/ui/pages/settings/excluded_folders_page.dart';
 
 class LibrarySettingsPage extends StatelessWidget {
   const LibrarySettingsPage({super.key});
@@ -30,6 +31,12 @@ class LibrarySettingsPage extends StatelessWidget {
               options: const [0, 30, 60],
               labelOf: (v) => v == 0 ? 'Yok / None' : '$v s',
               onChanged: ctrl.setMinDuration,
+            ),
+              ListTile(
+              leading: const Icon(Icons.folder_off_outlined),
+              title: Text(l10n.excludedFolders),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.to(() => const ExcludedFoldersPage()),
             ),
           ],
         );

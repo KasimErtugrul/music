@@ -18,7 +18,14 @@ class _MockQueueStateRepository extends Mock implements QueueStateRepository {}
 class _MockHistoryRepository extends Mock implements HistoryRepository {}
 class _MockPreferencesRepository extends Mock implements PreferencesRepository {}
 
-SongModel _song(int id) => SongModel(id: id, uri: 'uri/$id', path: '/path/$id.mp3', title: 'Song $id', durationMs: 1000, sizeBytes: 100);
+SongModel _song(int id) => SongModel(
+      id: id,
+      uri: 'uri/$id',
+      path: '/path/$id.mp3',
+      title: 'Song $id',
+      durationMs: 1000,
+      sizeBytes: 100,
+    );
 
 void main() {
   late _MockPlayerRepository repo;
@@ -32,7 +39,7 @@ void main() {
     registerFallbackValue(<SongModel>[]);
     registerFallbackValue(Duration.zero);
     registerFallbackValue(_song(1));
-    registerFallbackValue(const SongSort()); // EKLENDİ
+    registerFallbackValue(const SongSort());
     registerFallbackValue(const PlaybackSettingsModel());
     registerFallbackValue(const LibrarySettingsModel());
   });
@@ -47,7 +54,7 @@ void main() {
 
     when(() => prefRepo.loadPlayback()).thenAnswer((_) async => const PlaybackSettingsModel());
     when(() => prefRepo.loadLibrary()).thenAnswer((_) async => const LibrarySettingsModel());
-    
+
     prefCtrl = PreferencesController(prefRepo);
     Get.put<PreferencesController>(prefCtrl);
 
@@ -70,6 +77,11 @@ void main() {
     when(() => repo.moveSong(any(), any())).thenAnswer((_) async {});
     when(repo.play).thenAnswer((_) async {});
 
+    // Gün 23'te playSong'a eklendi → mock şart
+    when(() => repo.setSpeed(any())).thenAnswer((_) async {});
+    when(() => repo.setPitch(any())).thenAnswer((_) async {});
+    when(() => repo.setSkipSilenceEnabled(any())).thenAnswer((_) async {});
+
     controller = PlayerController(repo, libRepo, stateRepo, historyRepo);
     controller.onInit();
   });
@@ -82,8 +94,8 @@ void main() {
     final c = _song(3);
 
     await controller.playSong(a, queue: [a, b]);
-    when(() => repo.currentIndex).thenReturn(0); 
-    
+    when(() => repo.currentIndex).thenReturn(0);
+
     await controller.playNext(c);
 
     expect(controller.songQueue.map((s) => s.id), [1, 3, 2]);

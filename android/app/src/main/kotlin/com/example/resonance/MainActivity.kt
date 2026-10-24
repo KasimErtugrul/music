@@ -2,7 +2,7 @@ package com.example.resonance
 
 import android.content.ContentResolver
 import android.content.ContentUris
-import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
@@ -26,36 +26,59 @@ import java.util.concurrent.Executors
 class MainActivity : AudioServiceActivity() {
     private val executor: ExecutorService = Executors.newFixedThreadPool(2)
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var methodChannel: MethodChannel? = null
+    private var pendingIntentUri: String? = null
 
-    override fun provideFlutterEngine(context: Context): FlutterEngine? {
+    override fun provideFlutterEngine(context: android.content.Context): FlutterEngine? {
         return AudioServicePlugin.getFlutterEngine(context)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        // Sızıntıyı önlemek için applicationContext kullanıyoruz
         val resolver = applicationContext.contentResolver
         
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
-            .setMethodCallHandler { call, result ->
-                when (call.method) {
-                    "querySongs" -> runAsync(result) { querySongs(resolver) }
-                    "queryArtwork" -> {
-                        val id = call.argument<Number>("id")?.toLong()
-                        val size = call.argument<Number>("size")?.toInt() ?: 200
-                        if (id == null) {
-                            result.error("bad_args", "id is required", null)
-                        } else {
-                            runAsync(result) { queryArtwork(resolver, id, size) }
-                        }
-                    }
-                    else -> result.notImplemented()
+        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        methodChannel?.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "querySongs" -> runAsync(result) { querySongs(resolver) }
+                "queryArtwork" -> {
+                    val id = call.argument<Number>("id")?.toLong()
+                    val size = call.argument<Number>("size")?.toInt() ?: 200
+                    if (id == null) result.error("bad_args", "id is required", null)
+                    else runAsync(result) { queryArtwork(resolver, id, size) }
                 }
+                "getExternalUri" -> {
+                    result.success(pendingIntentUri)
+                    pendingIntentUri = null
+                }
+                else -> result.notImplemented()
             }
+        }
+        
+        // Uygulama soğuk başlatma (cold start) ile intent ile açıldıysa
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.action == Intent.ACTION_VIEW) {
+            val uri = intent.dataString
+            if (uri != null) {
+                pendingIntentUri = uri
+                // Flutter tarafına haber ver (eğer UI hazırsa)
+                methodChannel?.invokeMethod("onExternalIntent", uri)
+            }
+        }
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler(null)
+        methodChannel?.setMethodCallHandler(null)
+        methodChannel = null
         super.cleanUpFlutterEngine(flutterEngine)
     }
 

@@ -8,102 +8,74 @@ import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/folder_model.dart';
 import 'package:resonance/data/models/genre_model.dart';
 import 'package:resonance/data/models/song_model.dart';
+import 'package:resonance/data/repositories/excluded_folder_repository.dart';
 import 'package:resonance/data/repositories/preferences_repository.dart';
 
 enum SongSortField { title, artist, album, dateAdded, duration }
-
 enum SortDirection { ascending, descending }
 
-/// Şarkı listesi sıralaması (ad, sanatçı, albüm, tarih, süre; artan/azalan).
 class SongSort {
   const SongSort({
     this.field = SongSortField.title,
     this.direction = SortDirection.ascending,
   });
-
   final SongSortField field;
   final SortDirection direction;
-
   bool get isDescending => direction == SortDirection.descending;
-
   @override
   bool operator ==(Object other) =>
       other is SongSort && other.field == field && other.direction == direction;
-
   @override
   int get hashCode => Object.hash(field, direction);
 }
 
-/// Arama sonuçları (şarkılar, albümler, sanatçılar).
 class LibrarySearchResult {
   const LibrarySearchResult({
     this.songs = const <SongModel>[],
     this.albums = const <AlbumModel>[],
     this.artists = const <ArtistModel>[],
   });
-
   static const LibrarySearchResult empty = LibrarySearchResult();
-
   final List<SongModel> songs;
   final List<AlbumModel> albums;
   final List<ArtistModel> artists;
-
   bool get isEmpty => songs.isEmpty && albums.isEmpty && artists.isEmpty;
 }
 
-/// Kütüphane verisi (şarkılar, albümler, sanatçılar, türler, klasörler).
-///
-/// Controller'lar yalnızca bu soyuta bağlanır. Albüm/sanatçı/tür/klasör
-/// MediaStore'dan ayrıca okunmaz; tek şarkı sorgusundan türetilir.
 abstract class LibraryRepository {
-  /// Tüm şarkılar, istenen sıralamayla (Türkçe duyarlı). Sonuç değiştirilemez.
   Future<List<SongModel>> songs({SongSort sort = const SongSort()});
-
-  /// Alfabetik indeks: harf → listedeki ilk konum. Yalnızca ad/sanatçı/albüm
-  /// sıralamalarında anlamlıdır; tarih ve süre sıralamasında boş döner.
   Future<Map<String, int>> letterOffsets(SongSort sort);
-
-  /// Ada göre sıralı; bilinmeyen her zaman sonda.
   Future<List<AlbumModel>> albums({bool descending = false});
   Future<List<ArtistModel>> artists({bool descending = false});
   Future<List<GenreModel>> genres({bool descending = false});
-
-  /// [parentPath] null ise depolama kökleri; değilse doğrudan alt klasörler.
   Future<List<FolderModel>> folders({String? parentPath});
-
-  /// Şarkılar ada göre sıralıdır (parça numarası henüz okunmuyor).
   Future<List<SongModel>> songsInAlbum(int albumId);
   Future<List<SongModel>> songsOfArtist(int artistId);
   Future<List<AlbumModel>> albumsOfArtist(int artistId);
   Future<List<SongModel>> songsInGenre(String genreKey);
   Future<List<SongModel>> songsInFolder(String path, {bool recursive = false});
-
-  /// Büyük/küçük harf, Türkçe harf ve aksan duyarsız; birden çok kelime
-  /// verilirse hepsi geçmelidir.
   Future<LibrarySearchResult> search(String query, {int limitPerGroup = 100});
-
-  /// Kütüphaneyi cihazdan yeniden okur (önbelleği atar).
   Future<void> rescan();
-
-  /// Şarkının kapağı (JPEG) veya null.
   Future<Uint8List?> artwork(int songId, {int size = 200});
 }
 
-/// [LibraryRepository] gerçeklemesi: şarkıları bir kez okur, indeksi (anahtarlar,
-/// gruplar, klasör ağacı) arka plan isolate'inde kurar ve önbellekte tutur.
 class LibraryRepositoryImpl implements LibraryRepository {
-  /// [useIsolate] yalnızca testler içindir.
-  LibraryRepositoryImpl(this._source, this._prefs, {this.useIsolate = true});
+  LibraryRepositoryImpl(
+    this._source,
+    this._prefs,
+    this._excludedRepo, {
+    this.useIsolate = true,
+  });
 
   final DeviceMediaDataSource _source;
-  final PreferencesRepository _prefs; // YENİ
-
+  final PreferencesRepository _prefs;
+  final ExcludedFolderRepository _excludedRepo;  // YENİ
   final bool useIsolate;
 
   _LibraryIndex? _index;
   Future<_LibraryIndex>? _loading;
-  final Map<SongSort, List<int>> _orders = <SongSort, List<int>>{};
-  final Map<SongSort, List<SongModel>> _sorted = <SongSort, List<SongModel>>{};
+  final Map<SongSort, List<int>> _orders = {};
+  final Map<SongSort, List<SongModel>> _sorted = {};
 
   Future<_LibraryIndex> _ensureIndex() {
     final ready = _index;
@@ -114,9 +86,14 @@ class LibraryRepositoryImpl implements LibraryRepository {
   Future<_LibraryIndex> _load() async {
     try {
       final songs = await _source.querySongs();
+
+      // YENİ: Gizli klasörleri DB'den çek
+      final excludedFolders = await _excludedRepo.getExcludedFolders();
+      final excludedPaths = excludedFolders.map((f) => f.path).toList();
+
       final index = useIsolate
-          ? await _buildIndexInIsolate(songs)
-          : _buildIndex(songs);
+          ? await _buildIndexInIsolate(songs, excludedPaths)
+          : _buildIndex(songs, excludedPaths);
       _orders.clear();
       _sorted.clear();
       _index = index;
@@ -133,20 +110,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
     _sorted.clear();
     final pending = _loading;
     if (pending != null) {
-      // Süren okuma eski veriyle bitebilir; bitmesini bekleyip baştan oku.
       try {
         await pending;
-      } on Object {
-        // Hata yeni okumada yeniden denenir.
-      }
+      } on Object {}
       _index = null;
       _orders.clear();
       _sorted.clear();
     }
     await _ensureIndex();
   }
-
-  // ---- Şarkılar ----
 
   List<int> _orderFor(_LibraryIndex index, SongSort sort) {
     final cached = _orders[sort];
@@ -161,7 +133,6 @@ class LibraryRepositoryImpl implements LibraryRepository {
       return c != 0 ? c : songs[a].id.compareTo(songs[b].id);
     }
 
-    // Bilinmeyen (null) her zaman sonda; yön yalnızca bilinenleri çevirir.
     int nullable(String? a, String? b, int d) {
       if (a == null) return b == null ? 0 : 1;
       if (b == null) return -1;
@@ -207,25 +178,21 @@ class LibraryRepositoryImpl implements LibraryRepository {
     return order;
   }
 
-    @override
+  @override
   Future<List<SongModel>> songs({SongSort sort = const SongSort()}) async {
     final index = await _ensureIndex();
     final cached = _sorted[sort];
     if (cached != null) return cached;
-    
+
     final order = _orderFor(index, sort);
-    
-    // YENİ: Minimum süre filtresi
     final libPrefs = await _prefs.loadLibrary();
     final minDurMs = libPrefs.minDurationSeconds * 1000;
 
-    final result = List<SongModel>.unmodifiable(
-      <SongModel>[
-        for (final i in order)
-          if (minDurMs == 0 || index.songs[i].durationMs >= minDurMs)
-            index.songs[i]
-      ],
-    );
+    final result = List<SongModel>.unmodifiable(<SongModel>[
+      for (final i in order)
+        if (minDurMs == 0 || index.songs[i].durationMs >= minDurMs)
+          index.songs[i]
+    ]);
     _sorted[sort] = result;
     return result;
   }
@@ -263,59 +230,41 @@ class LibraryRepositoryImpl implements LibraryRepository {
         final c = index.titleKeys[a].compareTo(index.titleKeys[b]);
         return c != 0 ? c : index.songs[a].id.compareTo(index.songs[b].id);
       });
-    return List<SongModel>.unmodifiable(<SongModel>[
-      for (final i in list) index.songs[i],
-    ]);
+    return List<SongModel>.unmodifiable(
+        [for (final i in list) index.songs[i]]);
   }
-
-  // ---- Albüm / sanatçı / tür ----
 
   @override
   Future<List<AlbumModel>> albums({bool descending = false}) async {
     final index = await _ensureIndex();
-    return List<AlbumModel>.unmodifiable(
-      _orderByName<AlbumModel>(
-        index.albums,
-        (a) => a.title,
-        descending: descending,
-      ),
-    );
+    return List.unmodifiable(_orderByName<AlbumModel>(
+        index.albums, (a) => a.title, descending: descending));
   }
 
   @override
   Future<List<ArtistModel>> artists({bool descending = false}) async {
     final index = await _ensureIndex();
-    return List<ArtistModel>.unmodifiable(
-      _orderByName<ArtistModel>(
-        index.artists,
-        (a) => a.name,
-        descending: descending,
-      ),
-    );
+    return List.unmodifiable(_orderByName<ArtistModel>(
+        index.artists, (a) => a.name, descending: descending));
   }
 
   @override
   Future<List<GenreModel>> genres({bool descending = false}) async {
     final index = await _ensureIndex();
-    return List<GenreModel>.unmodifiable(
-      _orderByName<GenreModel>(
-        index.genres,
-        (g) => g.name,
-        descending: descending,
-      ),
-    );
+    return List.unmodifiable(_orderByName<GenreModel>(
+        index.genres, (g) => g.name, descending: descending));
   }
 
   @override
   Future<List<SongModel>> songsInAlbum(int albumId) async {
     final index = await _ensureIndex();
-    return _songsByTitle(index, index.songsByAlbum[albumId] ?? const <int>[]);
+    return _songsByTitle(index, index.songsByAlbum[albumId] ?? const []);
   }
 
   @override
   Future<List<SongModel>> songsOfArtist(int artistId) async {
     final index = await _ensureIndex();
-    return _songsByTitle(index, index.songsByArtist[artistId] ?? const <int>[]);
+    return _songsByTitle(index, index.songsByArtist[artistId] ?? const []);
   }
 
   @override
@@ -324,20 +273,17 @@ class LibraryRepositoryImpl implements LibraryRepository {
     final ids = index.albumIdsByArtist[artistId] ?? const <int>[];
     final models = <AlbumModel>[
       for (final id in ids)
-        if (index.albumById[id] != null) index.albumById[id]!,
+        if (index.albumById[id] != null) index.albumById[id]!
     ];
-    return List<AlbumModel>.unmodifiable(
-      _orderByName<AlbumModel>(models, (a) => a.title),
-    );
+    return List.unmodifiable(
+        _orderByName<AlbumModel>(models, (a) => a.title));
   }
 
   @override
   Future<List<SongModel>> songsInGenre(String genreKey) async {
     final index = await _ensureIndex();
-    return _songsByTitle(index, index.songsByGenre[genreKey] ?? const <int>[]);
+    return _songsByTitle(index, index.songsByGenre[genreKey] ?? const []);
   }
-
-  // ---- Klasörler ----
 
   @override
   Future<List<FolderModel>> folders({String? parentPath}) async {
@@ -346,19 +292,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
         ? index.rootFolders
         : (index.childFolders[parentPath] ?? const <String>[]);
     final models = <FolderModel>[for (final p in paths) index.folders[p]!];
-    return List<FolderModel>.unmodifiable(
-      _orderByName<FolderModel>(models, (f) => f.name),
-    );
+    return List.unmodifiable(
+        _orderByName<FolderModel>(models, (f) => f.name));
   }
 
   @override
-  Future<List<SongModel>> songsInFolder(
-    String path, {
-    bool recursive = false,
-  }) async {
+  Future<List<SongModel>> songsInFolder(String path, {bool recursive = false}) async {
     final index = await _ensureIndex();
     if (!recursive) {
-      return _songsByTitle(index, index.songsByFolder[path] ?? const <int>[]);
+      return _songsByTitle(index, index.songsByFolder[path] ?? const []);
     }
     final prefix = '$path/';
     final collected = <int>[];
@@ -368,13 +310,8 @@ class LibraryRepositoryImpl implements LibraryRepository {
     return _songsByTitle(index, collected);
   }
 
-  // ---- Arama ----
-
   @override
-  Future<LibrarySearchResult> search(
-    String query, {
-    int limitPerGroup = 100,
-  }) async {
+  Future<LibrarySearchResult> search(String query, {int limitPerGroup = 100}) async {
     final key = LocaleSorter.searchKey(query.trim());
     final tokens = key
         .split(RegExp(r'\s+'))
@@ -392,7 +329,6 @@ class LibraryRepositoryImpl implements LibraryRepository {
         if (songs.length >= limitPerGroup) break;
       }
     }
-
     final albums = <AlbumModel>[];
     for (var i = 0; i < index.albums.length; i++) {
       if (index.albums[i].isUnknown) continue;
@@ -401,7 +337,6 @@ class LibraryRepositoryImpl implements LibraryRepository {
         if (albums.length >= limitPerGroup) break;
       }
     }
-
     final artists = <ArtistModel>[];
     for (var i = 0; i < index.artists.length; i++) {
       if (index.artists[i].isUnknown) continue;
@@ -410,11 +345,10 @@ class LibraryRepositoryImpl implements LibraryRepository {
         if (artists.length >= limitPerGroup) break;
       }
     }
-
     return LibrarySearchResult(
-      songs: List<SongModel>.unmodifiable(songs),
-      albums: List<AlbumModel>.unmodifiable(albums),
-      artists: List<ArtistModel>.unmodifiable(artists),
+      songs: List.unmodifiable(songs),
+      albums: List.unmodifiable(albums),
+      artists: List.unmodifiable(artists),
     );
   }
 
@@ -423,13 +357,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
       _source.queryArtwork(songId, size: size);
 }
 
-// ===========================================================================
-// İndeks (isolate içinde kurulur; yalnızca gönderilebilir veri tutar)
-// ===========================================================================
+// ---------- Isolate ----------
 
-/// `this` yakalanmasın diye üst düzey işlev.
-Future<_LibraryIndex> _buildIndexInIsolate(List<SongModel> songs) =>
-    Isolate.run<_LibraryIndex>(() => _buildIndex(songs));
+Future<_LibraryIndex> _buildIndexInIsolate(
+        List<SongModel> songs, List<String> excludedPaths) =>
+    Isolate.run<_LibraryIndex>(() => _buildIndex(songs, excludedPaths));
 
 class _LibraryIndex {
   _LibraryIndex({
@@ -454,28 +386,21 @@ class _LibraryIndex {
     required this.rootFolders,
   });
 
-  /// MediaStore sırası.
   final List<SongModel> songs;
-
-  /// `songs` ile aynı sıradaki sıralama anahtarları (null: bilinmeyen).
   final List<String> titleKeys;
   final List<String?> artistKeys;
   final List<String?> albumKeys;
   final List<String> searchKeys;
-
   final List<AlbumModel> albums;
   final List<String> albumSearchKeys;
   final Map<int, AlbumModel> albumById;
   final List<ArtistModel> artists;
   final List<String> artistSearchKeys;
   final List<GenreModel> genres;
-
-  /// Gruplar: şarkı indeksleri (`songs` içindeki konum).
   final Map<int, List<int>> songsByAlbum;
   final Map<int, List<int>> songsByArtist;
   final Map<String, List<int>> songsByGenre;
   final Map<int, List<int>> albumIdsByArtist;
-
   final Map<String, FolderModel> folders;
   final Map<String, List<int>> songsByFolder;
   final Map<String, List<String>> childFolders;
@@ -486,12 +411,10 @@ int _albumIdOf(SongModel s) =>
     (s.album != null && s.albumId != null) ? s.albumId! : AlbumModel.unknownId;
 
 int _artistIdOf(SongModel s) => (s.artist != null && s.artistId != null)
-    ? s.artistId!
-    : ArtistModel.unknownId;
+    ? s.artistId! : ArtistModel.unknownId;
 
 final RegExp _volumeRe = RegExp(r'^/storage/(?:emulated/\d+|[^/]+)');
 
-/// `/storage/emulated/0`, `/storage/1234-ABCD`; tanınmazsa ilk yol parçası.
 String _volumeRootOf(String dir) {
   final m = _volumeRe.firstMatch(dir);
   if (m != null) return m.group(0)!;
@@ -511,7 +434,6 @@ String? _mostFrequent(Map<String, int> counts) {
   return best;
 }
 
-/// Ada göre Türkçe sıralar; adı olmayanlar (null) her zaman sonda.
 List<T> _orderByName<T>(
   Iterable<T> items,
   String? Function(T item) name, {
@@ -531,10 +453,20 @@ List<T> _orderByName<T>(
     final c = a.$1.compareTo(b.$1);
     return descending ? -c : c;
   });
-  return <T>[for (final e in known) e.$2, ...unknown];
+  return [for (final e in known) e.$2, ...unknown];
 }
 
-_LibraryIndex _buildIndex(List<SongModel> songs) {
+_LibraryIndex _buildIndex(List<SongModel> songs, List<String> excludedPaths) {
+  // YENİ: Gizli klasör filtresi
+  if (excludedPaths.isNotEmpty) {
+    songs = songs.where((s) {
+      for (final p in excludedPaths) {
+        if (s.path.startsWith(p)) return false;
+      }
+      return true;
+    }).toList(growable: false);
+  }
+
   final n = songs.length;
   final titleKeys = List<String>.filled(n, '');
   final artistKeys = List<String?>.filled(n, null);
@@ -569,7 +501,6 @@ _LibraryIndex _buildIndex(List<SongModel> songs) {
     (byGenre[genreKey] ??= <int>[]).add(i);
     if (genre != null) genreNames.putIfAbsent(genreKey, () => genre);
 
-    // Klasör: doğrudan klasör + depolama köküne kadar tüm üst klasörler.
     final path = s.path;
     final slash = path.lastIndexOf('/');
     if (slash > 0) {
@@ -588,7 +519,6 @@ _LibraryIndex _buildIndex(List<SongModel> songs) {
     }
   }
 
-  // Albümler
   final albumModels = <AlbumModel>[];
   byAlbum.forEach((id, idxs) {
     var duration = 0;
@@ -599,16 +529,14 @@ _LibraryIndex _buildIndex(List<SongModel> songs) {
       if (a != null) artistCounts[a] = (artistCounts[a] ?? 0) + 1;
     }
     final unknown = id == AlbumModel.unknownId;
-    albumModels.add(
-      AlbumModel(
-        id: id,
-        title: unknown ? null : songs[idxs.first].album,
-        artist: _mostFrequent(artistCounts),
-        songCount: idxs.length,
-        totalDurationMs: duration,
-        artworkSongId: unknown ? null : songs[idxs.first].id,
-      ),
-    );
+    albumModels.add(AlbumModel(
+      id: id,
+      title: unknown ? null : songs[idxs.first].album,
+      artist: _mostFrequent(artistCounts),
+      songCount: idxs.length,
+      totalDurationMs: duration,
+      artworkSongId: unknown ? null : songs[idxs.first].id,
+    ));
   });
   final albums = _orderByName<AlbumModel>(albumModels, (a) => a.title);
   final albumById = <int, AlbumModel>{for (final a in albums) a.id: a};
@@ -617,7 +545,6 @@ _LibraryIndex _buildIndex(List<SongModel> songs) {
       LocaleSorter.searchKey('${a.title ?? ''}\u0001${a.artist ?? ''}'),
   ];
 
-  // Sanatçılar
   final albumIdsByArtist = <int, List<int>>{};
   final artistModels = <ArtistModel>[];
   byArtist.forEach((id, idxs) {
@@ -630,42 +557,36 @@ _LibraryIndex _buildIndex(List<SongModel> songs) {
     }
     albumIdsByArtist[id] = albumIds.toList(growable: false);
     final unknown = id == ArtistModel.unknownId;
-    artistModels.add(
-      ArtistModel(
-        id: id,
-        name: unknown ? null : songs[idxs.first].artist,
-        songCount: idxs.length,
-        albumCount: albumIds.length,
-        totalDurationMs: duration,
-        artworkSongId: unknown ? null : songs[idxs.first].id,
-      ),
-    );
+    artistModels.add(ArtistModel(
+      id: id,
+      name: unknown ? null : songs[idxs.first].artist,
+      songCount: idxs.length,
+      albumCount: albumIds.length,
+      totalDurationMs: duration,
+      artworkSongId: unknown ? null : songs[idxs.first].id,
+    ));
   });
   final artists = _orderByName<ArtistModel>(artistModels, (a) => a.name);
   final artistSearchKeys = <String>[
     for (final a in artists) LocaleSorter.searchKey(a.name ?? ''),
   ];
 
-  // Türler
   final genreModels = <GenreModel>[];
   byGenre.forEach((key, idxs) {
     var duration = 0;
     for (final i in idxs) {
       duration += songs[i].durationMs;
     }
-    genreModels.add(
-      GenreModel(
-        key: key,
-        name: genreNames[key],
-        songCount: idxs.length,
-        totalDurationMs: duration,
-        artworkSongId: key.isEmpty ? null : songs[idxs.first].id,
-      ),
-    );
+    genreModels.add(GenreModel(
+      key: key,
+      name: genreNames[key],
+      songCount: idxs.length,
+      totalDurationMs: duration,
+      artworkSongId: key.isEmpty ? null : songs[idxs.first].id,
+    ));
   });
   final genres = _orderByName<GenreModel>(genreModels, (g) => g.name);
 
-  // Klasörler
   final folders = <String, FolderModel>{};
   final childFolders = <String, List<String>>{};
   final rootFolders = <String>[];

@@ -42,7 +42,7 @@ void main() {
     registerFallbackValue(Duration.zero);
     registerFallbackValue(AudioServiceRepeatMode.none);
     registerFallbackValue(_song(1, 'Fallback'));
-    registerFallbackValue(const SongSort()); // EKLENDİ
+    registerFallbackValue(const SongSort());
     registerFallbackValue(const PlaybackSettingsModel());
     registerFallbackValue(const LibrarySettingsModel());
   });
@@ -55,10 +55,9 @@ void main() {
     historyRepo = _MockHistoryRepository();
     final prefRepo = _MockPreferencesRepository();
 
-    // Mock Preferences Repository methods
     when(() => prefRepo.loadPlayback()).thenAnswer((_) async => const PlaybackSettingsModel());
     when(() => prefRepo.loadLibrary()).thenAnswer((_) async => const LibrarySettingsModel());
-    
+
     prefCtrl = PreferencesController(prefRepo);
     Get.put<PreferencesController>(prefCtrl);
 
@@ -77,6 +76,11 @@ void main() {
 
     when(() => repo.loadQueue(any(), initialIndex: any(named: 'initialIndex'), initialPosition: any(named: 'initialPosition'))).thenAnswer((_) async {});
     when(repo.play).thenAnswer((_) async {});
+
+    // Gün 23'te playSong'a eklendi → mock şart
+    when(() => repo.setSpeed(any())).thenAnswer((_) async {});
+    when(() => repo.setPitch(any())).thenAnswer((_) async {});
+    when(() => repo.setSkipSilenceEnabled(any())).thenAnswer((_) async {});
 
     controller = PlayerController(repo, libRepo, stateRepo, historyRepo);
     controller.onInit();

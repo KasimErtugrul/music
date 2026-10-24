@@ -852,4 +852,40 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get seekBarWaveform => 'Dalga Formu';
+
+  @override
+  String get excludedFolders => 'Gizli Klasörler';
+
+  @override
+  String get excludedFoldersDesc => 'Kütüphaneden hariç tutulan klasörler';
+
+  @override
+  String get addExcludedFolder => 'Klasör Ekle';
+
+  @override
+  String get noExcludedFolders => 'Gizli klasör yok.';
+
+  @override
+  String get externalOpenError => 'Harici dosya açılamadı.';
+
+  @override
+  String get externalOpenNoPermission =>
+      'Dosya izni reddedildi. Harici dosya oynatılamıyor.';
+
+  @override
+  String get waveformViewer => 'Dalga Formu Görünümü';
+
+  @override
+  String get waveformPreparing => 'Dalga formu hazırlanıyor…';
+
+  @override
+  String get waveformFirstTimeNote =>
+      'Şarkı ilk kez analiz ediliyor. Sonraki açılışlar anlık olur.';
+
+  @override
+  String get waveformUnavailable => 'Bu şarkı için dalga formu oluşturulamadı.';
+
+  @override
+  String get waveformNoFilePath =>
+      'Bu şarkının yerel dosya yolu yok. Dalga formu yalnızca yerel dosyalar için kullanılabilir.';
 }

@@ -4,31 +4,33 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:resonance/data/datasources/local/daos/custom_theme_dao.dart';
+import 'package:resonance/data/datasources/local/daos/equalizer_preset_dao.dart';
+import 'package:resonance/data/datasources/local/daos/excluded_folder_dao.dart';
 import 'package:resonance/data/datasources/local/daos/favorite_dao.dart';
 import 'package:resonance/data/datasources/local/daos/history_dao.dart';
 import 'package:resonance/data/datasources/local/daos/lyrics_dao.dart';
 import 'package:resonance/data/datasources/local/daos/playlist_dao.dart';
 import 'package:resonance/data/datasources/local/daos/queue_state_dao.dart';
 import 'package:resonance/data/datasources/local/tables/custom_themes_table.dart';
+import 'package:resonance/data/datasources/local/tables/equalizer_presets_table.dart';
+import 'package:resonance/data/datasources/local/tables/excluded_folders_table.dart';
 import 'package:resonance/data/datasources/local/tables/favorites_table.dart';
 import 'package:resonance/data/datasources/local/tables/lyrics_table.dart';
 import 'package:resonance/data/datasources/local/tables/play_history_table.dart';
 import 'package:resonance/data/datasources/local/tables/playlist_songs_table.dart';
 import 'package:resonance/data/datasources/local/tables/playlists_table.dart';
 import 'package:resonance/data/datasources/local/tables/queue_state_table.dart';
-import 'package:resonance/data/datasources/local/tables/equalizer_presets_table.dart';
-import 'package:resonance/data/datasources/local/daos/equalizer_preset_dao.dart';
 
 part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
     Playlists, PlaylistSongs, Favorites, PlayHistory, Lyrics, QueueStates,
-    CustomThemes, EqualizerPresets, // YENİ
+    CustomThemes, EqualizerPresets, ExcludedFolders, // YENİ
   ],
   daos: [
     PlaylistDao, FavoriteDao, HistoryDao, LyricsDao, QueueStateDao,
-    CustomThemeDao, EqualizerPresetDao,// YENİ
+    CustomThemeDao, EqualizerPresetDao, ExcludedFolderDao, // YENİ
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -36,9 +38,9 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(_open());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
- @override
+  @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async => m.createAll(),
         onUpgrade: (m, from, to) async {
@@ -60,7 +62,8 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(playHistory, playHistory.artist);
             await m.addColumn(playHistory, playHistory.durationMs);
           }
-          if (from < 6) await m.createTable(equalizerPresets); // YENİ
+          if (from < 6) await m.createTable(equalizerPresets);
+          if (from < 7) await m.createTable(excludedFolders); // YENİ
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

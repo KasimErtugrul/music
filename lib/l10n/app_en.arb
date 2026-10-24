@@ -271,5 +271,16 @@
     "seekBarStyle": "Seek Bar Style",
   "seekBarClassic": "Classic",
   "seekBarThin": "Thin",
-  "seekBarWaveform": "Waveform"
+  "seekBarWaveform": "Waveform",
+    "excludedFolders": "Hidden Folders",
+  "excludedFoldersDesc": "Folders excluded from the library",
+  "addExcludedFolder": "Add Folder",
+  "noExcludedFolders": "No hidden folders.",
+  "externalOpenError": "Could not open the external file.",
+  "externalOpenNoPermission": "File permission denied. Cannot play external file.",
+    "waveformViewer": "Waveform View",
+  "waveformPreparing": "Preparing waveform…",
+  "waveformFirstTimeNote": "Analyzing the track for the first time. Subsequent openings are instant.",
+  "waveformUnavailable": "Waveform could not be generated for this track.",
+  "waveformNoFilePath": "This track has no local file path. Waveform is only available for local files."
 }

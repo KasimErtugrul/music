@@ -854,4 +854,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get seekBarWaveform => 'Waveform';
+
+  @override
+  String get excludedFolders => 'Hidden Folders';
+
+  @override
+  String get excludedFoldersDesc => 'Folders excluded from the library';
+
+  @override
+  String get addExcludedFolder => 'Add Folder';
+
+  @override
+  String get noExcludedFolders => 'No hidden folders.';
+
+  @override
+  String get externalOpenError => 'Could not open the external file.';
+
+  @override
+  String get externalOpenNoPermission =>
+      'File permission denied. Cannot play external file.';
+
+  @override
+  String get waveformViewer => 'Waveform View';
+
+  @override
+  String get waveformPreparing => 'Preparing waveform…';
+
+  @override
+  String get waveformFirstTimeNote =>
+      'Analyzing the track for the first time. Subsequent openings are instant.';
+
+  @override
+  String get waveformUnavailable =>
+      'Waveform could not be generated for this track.';
+
+  @override
+  String get waveformNoFilePath =>
+      'This track has no local file path. Waveform is only available for local files.';
 }

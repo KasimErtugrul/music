@@ -5,14 +5,14 @@ import 'package:resonance/core/theme/extensions/player_theme_extension.dart';
 import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
-import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:resonance/presentation/ui/pages/player/player_expanded_view.dart';
+import 'package:resonance/presentation/ui/pages/waveform_viewer_page.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/player_controls.dart';
 import 'package:resonance/presentation/ui/widgets/seek_bar.dart';
 import 'package:resonance/presentation/ui/widgets/sleep_timer_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/speed_pitch_sheet.dart';
-import 'package:resonance/presentation/ui/widgets/waveform_seek_bar.dart';
+ 
 class PlayerPage extends GetView<PlayerController> {
   const PlayerPage({super.key});
 
@@ -20,7 +20,8 @@ class PlayerPage extends GetView<PlayerController> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final playerSettings = Theme.of(context).extension<PlayerThemeExtension>() ?? PlayerThemeExtension.defaults;
+    final playerSettings = Theme.of(context).extension<PlayerThemeExtension>() ??
+        PlayerThemeExtension.defaults;
     final bgStyle = playerSettings.backgroundStyle;
     final artworkShape = playerSettings.artworkShape;
 
@@ -48,7 +49,10 @@ class PlayerPage extends GetView<PlayerController> {
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [theme.colorScheme.primaryContainer, theme.colorScheme.surface],
+                    colors: [
+                      theme.colorScheme.primaryContainer,
+                      theme.colorScheme.surface,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -66,7 +70,9 @@ class PlayerPage extends GetView<PlayerController> {
                     ArtworkImage(songId: songId, fit: BoxFit.cover),
                     BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                      child: Container(color: theme.colorScheme.surface.withValues(alpha: 0.7)),
+                      child: Container(
+                        color: theme.colorScheme.surface.withValues(alpha: 0.7),
+                      ),
                     ),
                   ],
                 ),
@@ -75,7 +81,8 @@ class PlayerPage extends GetView<PlayerController> {
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isWide = Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
+                final isWide =
+                    Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
                 if (isWide) return const PlayerExpandedView();
 
                 return Column(
@@ -126,22 +133,23 @@ class PlayerPage extends GetView<PlayerController> {
                       );
                     }),
                     const Spacer(),
-                                        Obx(() {
-                      final themeCtrl = Get.find<ThemeController>();
-                      final style = themeCtrl.settings.value.player.seekBarStyle;
-                      if (style == 'waveform') {
-                        return const WaveformSeekBar();
-                      }
-                      return const SeekBar();
-                    }),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: SeekBar(),
+                    ),
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                       child: PlayerControls(),
                     ),
-                    // İKİNCİL EYLEM SATIRI (Hız/Pitch ve Uyku Zamanlayıcısı)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
+                        IconButton(
+                          icon: const Icon(Icons.graphic_eq),
+                          tooltip: l10n.waveformViewer,
+                          onPressed: () =>
+                              Get.to(() => const WaveformViewerPage()),
+                        ),
                         IconButton(
                           icon: const Icon(Icons.speed),
                           tooltip: l10n.playbackSpeedPitch,
