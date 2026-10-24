@@ -11,17 +11,13 @@ import 'package:resonance/data/repositories/queue_state_repository.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 
 class PlayerController extends GetxController {
-  PlayerController(
-    this._repository,
-    this._libraryRepo,
-    this._stateRepo,
-    this._historyRepo,
-  );
+  PlayerController(this._repository, this._libraryRepo, this._stateRepo, this._historyRepo);
 
   final PlayerRepository _repository;
   final LibraryRepository _libraryRepo;
   final QueueStateRepository _stateRepo;
   final HistoryRepository _historyRepo;
+  final prefCtrl = Get.find<PreferencesController>();
 
   final currentItem = Rxn<MediaItem>();
   final queue = <MediaItem>[].obs;
@@ -36,16 +32,16 @@ class PlayerController extends GetxController {
   final position = Duration.zero.obs;
   final duration = Duration.zero.obs;
 
-    final prefCtrl = Get.find<PreferencesController>();
-
-
   String? _loggedSongUri;
+  bool _isRestoring = true;
 
   SongModel? get currentSong {
     final id = currentItem.value?.id;
     if (id == null) return null;
-    final idx = songQueue.indexWhere((s) => s.uri == id);
-    return idx >= 0 ? songQueue[idx] : null;
+    // Aynı şarkı kuyrukta iki kez olsa bile doğru index'ten al
+    final idx = _repository.currentIndex;
+    if (idx == null || idx < 0 || idx >= songQueue.length) return null;
+    return songQueue[idx];
   }
 
   @override
@@ -58,10 +54,10 @@ class PlayerController extends GetxController {
   void _bind() {
     _repository.mediaItemStream.listen((item) {
       if (currentItem.value?.id != item?.id) {
-        _loggedSongUri = null; // Şarkı değişti, geçmiş kaydı sıfırla
+        _loggedSongUri = null;
       }
       currentItem.value = item;
-      _saveQueueState();
+      if (!_isRestoring) _saveQueueState();
     });
 
     _repository.queueStream.listen((items) => queue.assignAll(items));
@@ -69,7 +65,7 @@ class PlayerController extends GetxController {
     _repository.playbackStateStream.listen((state) {
       isPlaying.value = state.playing;
       processingState.value = state.processingState;
-      if (!state.playing || state.processingState == AudioProcessingState.idle) {
+      if (!_isRestoring && (!state.playing || state.processingState == AudioProcessingState.idle)) {
         _saveQueueState();
       }
     });
@@ -90,13 +86,13 @@ class PlayerController extends GetxController {
     final song = currentSong;
     if (song == null || _loggedSongUri == song.uri) return;
 
-    // Eşik: 30 saniye veya şarkının süresinin yarısı (hangisi daha küçükse)
     final minDuration = const Duration(seconds: 30);
     final halfDuration = Duration(milliseconds: song.durationMs ~/ 2);
     final threshold = minDuration < halfDuration ? minDuration : halfDuration;
 
     if (pos >= threshold) {
-      _historyRepo.recordPlay(song.id);
+      // Uzman Çözümü: DAO'ya şarkıyı (metadata ile) gönder
+      _historyRepo.recordPlay(song);
       _loggedSongUri = song.uri;
     }
   }
@@ -116,38 +112,40 @@ class PlayerController extends GetxController {
   Future<void> _restoreQueue() async {
     try {
       final state = await _stateRepo.loadState();
-      if (state == null || state.songUris.isEmpty) return;
+      if (state != null && state.songUris.isNotEmpty) {
+        // Kayıtlı state varsa onu yükle
+        final allSongs = await _libraryRepo.songs();
+        final songMap = {for (var s in allSongs) s.uri: s};
 
-      final allSongs = await _libraryRepo.songs();
-      final songMap = {for (var s in allSongs) s.uri: s};
+        final restored = <SongModel>[];
+        for (final uri in state.songUris) {
+          final song = songMap[uri];
+          if (song != null) restored.add(song);
+        }
 
-      final restored = <SongModel>[];
-      for (final uri in state.songUris) {
-        final song = songMap[uri];
-        if (song != null) restored.add(song);
+        if (restored.isNotEmpty) {
+          int safeIndex = state.currentIndex.clamp(0, restored.length - 1);
+          songQueue.assignAll(restored);
+          shuffleEnabled.value = state.shuffleEnabled;
+          repeatMode.value = state.repeatMode;
+
+          // Kayıtlı state'i uygula
+          await _repository.setShuffleMode(state.shuffleEnabled);
+          await _repository.setRepeatMode(state.repeatMode);
+          await _repository.loadQueue(restored, initialIndex: safeIndex, initialPosition: state.position);
+          return;
+        }
       }
 
-      if (restored.isEmpty) {
-        await _stateRepo.clearState();
-        return;
-      }
-
-      int safeIndex = state.currentIndex.clamp(0, restored.length - 1);
-
-      songQueue.assignAll(restored);
-      shuffleEnabled.value = state.shuffleEnabled;
-      repeatMode.value = state.repeatMode;
-
-      await _repository.loadQueue(
-        restored,
-        initialIndex: safeIndex,
-        initialPosition: state.position,
-      );
-
-      if (state.shuffleEnabled) {
-        await _repository.setShuffleMode(true);
-      }
-    } catch (_) {}
+      // Kayıtlı state yoksa veya boşsa Varsayılanları uygula
+      final pref = prefCtrl.playback.value;
+      await _repository.setShuffleMode(pref.defaultShuffle);
+      await _repository.setRepeatMode(_mapRepeatMode(pref.defaultRepeat));
+      
+    } catch (_) {
+    } finally {
+      _isRestoring = false;
+    }
   }
 
   Future<void> _saveQueueState() async {
@@ -158,7 +156,7 @@ class PlayerController extends GetxController {
     try {
       await _stateRepo.saveState(QueueStateModel(
         songUris: songQueue.map((s) => s.uri).toList(),
-        currentIndex: _getCurrentIndex(),
+        currentIndex: _repository.currentIndex ?? 0,
         position: _repository.position,
         shuffleEnabled: shuffleEnabled.value,
         repeatMode: repeatMode.value,
@@ -167,27 +165,14 @@ class PlayerController extends GetxController {
     } catch (_) {}
   }
 
-  int _getCurrentIndex() {
-    final id = currentItem.value?.id;
-    if (id == null) return 0;
-    final idx = songQueue.indexWhere((s) => s.uri == id);
-    return idx < 0 ? 0 : idx;
-  }
-
-    Future<void> playSong(SongModel song, {List<SongModel>? queue}) async {
-    // 1. Varsayılan Oynatma Ayarlarını Uygula
-    final pref = prefCtrl.playback.value;
-    
-    await _repository.setShuffleMode(pref.defaultShuffle);
-    
-    final repeatMode = switch (pref.defaultRepeat) {
+  AudioServiceRepeatMode _mapRepeatMode(int val) => switch (val) {
       1 => AudioServiceRepeatMode.all,
       2 => AudioServiceRepeatMode.one,
       _ => AudioServiceRepeatMode.none,
-    };
-    await _repository.setRepeatMode(repeatMode);
+  };
 
-    // 2. Kuyruğu Yükle ve Çal
+  Future<void> playSong(SongModel song, {List<SongModel>? queue}) async {
+    // Varsayılanları BURADA EZME!
     final list = queue ?? <SongModel>[song];
     final index = list.indexWhere((s) => s.id == song.id);
 
@@ -196,56 +181,24 @@ class PlayerController extends GetxController {
     await _repository.play();
   }
 
-  Future<void> _reloadQueue({int? newIndex, Duration? position}) async {
-    if (songQueue.isEmpty) return;
-    int targetIndex = newIndex ?? _getCurrentIndex();
-    if (targetIndex < 0) targetIndex = 0;
-    final targetPos = position ?? _repository.position;
-
-    await _repository.loadQueue(
-      songQueue,
-      initialIndex: targetIndex,
-      initialPosition: targetPos,
-    );
-  }
-
   Future<void> playNext(SongModel song) async {
-    if (songQueue.isEmpty) {
-      await playSong(song);
-      return;
-    }
-    final currentIndex = _getCurrentIndex();
-    songQueue.insert(currentIndex + 1, song);
-    if (currentItem.value?.id == songQueue[currentIndex].uri) {
-      await _reloadQueue(newIndex: currentIndex);
-    }
+    if (songQueue.isEmpty) return playSong(song);
+    final nextIdx = (_repository.currentIndex ?? 0) + 1;
+    songQueue.insert(nextIdx, song);
+    await _repository.insertSong(nextIdx, song);
   }
 
   Future<void> addToQueue(SongModel song) async {
-    if (songQueue.isEmpty) {
-      await playSong(song);
-      return;
-    }
+    if (songQueue.isEmpty) return playSong(song);
     songQueue.add(song);
-    if (currentItem.value != null) {
-      await _reloadQueue(newIndex: _getCurrentIndex());
-    }
+    await _repository.insertSong(songQueue.length - 1, song);
   }
 
   Future<void> removeFromQueue(int index) async {
     if (index < 0 || index >= songQueue.length) return;
-    final isCurrent = index == _getCurrentIndex();
     songQueue.removeAt(index);
-
-    if (songQueue.isEmpty) {
-      await _repository.stop();
-    } else if (isCurrent) {
-      await _reloadQueue(newIndex: index.clamp(0, songQueue.length - 1), position: Duration.zero);
-    } else if (index < _getCurrentIndex()) {
-      await _reloadQueue(newIndex: _getCurrentIndex() - 1);
-    } else {
-      await _reloadQueue(newIndex: _getCurrentIndex());
-    }
+    await _repository.removeSong(index);
+    if (songQueue.isEmpty) await _repository.stop();
   }
 
   Future<void> clearQueue() async {
@@ -256,32 +209,17 @@ class PlayerController extends GetxController {
 
   Future<void> reorderQueue(int oldIndex, int newIndex) async {
     if (newIndex > oldIndex) newIndex -= 1;
-    final currentIdx = _getCurrentIndex();
-
     final song = songQueue.removeAt(oldIndex);
     songQueue.insert(newIndex, song);
-
-    int targetIndex = currentIdx;
-    if (oldIndex == currentIdx) {
-      targetIndex = newIndex;
-    } else if (oldIndex < currentIdx && newIndex >= currentIdx) {
-      targetIndex -= 1;
-    } else if (oldIndex > currentIdx && newIndex <= currentIdx) {
-      targetIndex += 1;
-    }
-
-    await _reloadQueue(newIndex: targetIndex);
+    await _repository.moveSong(oldIndex, newIndex);
   }
 
   Future<void> togglePlayPause() async {
-    if (isPlaying.value) {
-      await _repository.pause();
-    } else {
-      await _repository.play();
-    }
+    if (isPlaying.value) await _repository.pause();
+    else await _repository.play();
   }
 
-  Future<void> seek(Duration position) => _repository.seek(position);
+  Future<void> seek(Duration pos) => _repository.seek(pos);
   Future<void> next() => _repository.skipToNext();
   Future<void> previous() => _repository.skipToPrevious();
 

@@ -6,8 +6,11 @@ import 'package:resonance/core/errors/app_exception.dart';
 import 'package:resonance/core/utils/locale_sorter.dart';
 import 'package:resonance/data/datasources/device_media_datasource.dart';
 import 'package:resonance/data/models/album_model.dart';
+import 'package:resonance/data/models/library_settings_model.dart';
+import 'package:resonance/data/models/playback_settings_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
+import 'package:resonance/data/repositories/preferences_repository.dart';
 
 class FakeDataSource implements DeviceMediaDataSource {
   FakeDataSource(this.songs);
@@ -29,6 +32,27 @@ class FakeDataSource implements DeviceMediaDataSource {
 
   @override
   Future<Uint8List?> queryArtwork(int songId, {int size = 200}) async => null;
+}
+
+/// Testler için varsayılan ayarlarla dönen basit sahte PreferencesRepository.
+/// `minDurationSeconds = 0` → filtreleme yapmaz, tüm şarkılar geçer.
+class _FakePreferencesRepository implements PreferencesRepository {
+  @override
+  Future<LibrarySettingsModel> loadLibrary() async =>
+      const LibrarySettingsModel();
+
+  @override
+  Future<PlaybackSettingsModel> loadPlayback() async =>
+      const PlaybackSettingsModel();
+
+  @override
+  Future<void> resetAll() async {}
+
+  @override
+  Future<void> saveLibrary(LibrarySettingsModel settings) async {}
+
+  @override
+  Future<void> savePlayback(PlaybackSettingsModel settings) async {}
 }
 
 SongModel song(
@@ -86,7 +110,11 @@ void main() {
 
   setUp(() {
     source = FakeDataSource(fixture());
-    repo = LibraryRepositoryImpl(source, useIsolate: false);
+    repo = LibraryRepositoryImpl(
+      source,
+      _FakePreferencesRepository(),
+      useIsolate: false,
+    );
   });
 
   group('şarkı sıralaması', () {
@@ -96,8 +124,8 @@ void main() {
     });
 
     test('ad azalan', () async {
-      final list =
-          await repo.songs(sort: const SongSort(direction: SortDirection.descending));
+      final list = await repo
+          .songs(sort: const SongSort(direction: SortDirection.descending));
       expect(ids(list), <int>[1, 6, 5, 4, 2, 3]);
     });
 
@@ -153,7 +181,8 @@ void main() {
   group('A–Z indeksi', () {
     test('ad sıralaması: harf → ilk konum', () async {
       final offsets = await repo.letterOffsets(const SongSort());
-      expect(offsets, <String, int>{'A': 0, 'Ç': 1, 'I': 2, 'Ş': 4, 'Z': 5});
+      expect(offsets,
+          <String, int>{'A': 0, 'Ç': 1, 'I': 2, 'Ş': 4, 'Z': 5});
       expect(offsets.keys.toList(), <String>['A', 'Ç', 'I', 'Ş', 'Z']);
     });
 
@@ -166,7 +195,8 @@ void main() {
 
     test('tarih ve süre sıralamasında boş', () async {
       expect(
-        await repo.letterOffsets(const SongSort(field: SongSortField.duration)),
+        await repo
+            .letterOffsets(const SongSort(field: SongSortField.duration)),
         isEmpty,
       );
     });
@@ -175,7 +205,8 @@ void main() {
   group('albümler, sanatçılar, türler', () {
     test('albümler gruplanır; bilinmeyen sonda', () async {
       final albums = await repo.albums();
-      expect(albums.map((a) => a.id).toList(), <int>[11, 10, AlbumModel.unknownId]);
+      expect(albums.map((a) => a.id).toList(),
+          <int>[11, 10, AlbumModel.unknownId]);
 
       final kiyi = albums[1];
       expect(kiyi.title, 'Kıyı');
@@ -186,20 +217,22 @@ void main() {
       final unknown = albums.last;
       expect(unknown.isUnknown, isTrue);
       expect(unknown.title, isNull);
-      expect(unknown.songCount, 2); // şarkı 4 ve albümü olmayan şarkı 6
+      expect(unknown.songCount, 2);
       expect(unknown.artworkSongId, isNull);
     });
 
     test('albümler azalan: bilinmeyen yine sonda', () async {
       final albums = await repo.albums(descending: true);
-      expect(albums.map((a) => a.id).toList(), <int>[10, 11, AlbumModel.unknownId]);
+      expect(albums.map((a) => a.id).toList(),
+          <int>[10, 11, AlbumModel.unknownId]);
     });
 
     test('sanatçılar: şarkı/albüm sayısı, bilinmeyen sonda', () async {
       final artists = await repo.artists();
-      expect(artists.map((a) => a.name).toList(), <String?>['Ayşe', 'Ege', null]);
+      expect(artists.map((a) => a.name).toList(),
+          <String?>['Ayşe', 'Ege', null]);
       expect(artists[1].songCount, 3);
-      expect(artists[1].albumCount, 1); // bilinmeyen albüm sayılmaz
+      expect(artists[1].albumCount, 1);
       expect(artists[0].albumCount, 1);
       expect(artists[2].albumCount, 0);
     });
@@ -207,7 +240,7 @@ void main() {
     test('türler: büyük/küçük yazım birleşir, bilinmeyen sonda', () async {
       final genres = await repo.genres();
       expect(genres.map((g) => g.key).toList(), <String>['pop', 'rock', '']);
-      expect(genres[0].name, 'pop'); // ilk görülen yazım
+      expect(genres[0].name, 'pop');
       expect(genres[0].songCount, 2);
       expect(genres[1].songCount, 2);
       expect(genres[2].songCount, 2);
@@ -270,17 +303,18 @@ void main() {
       );
       expect(ids(await repo.songsInFolder('/storage/emulated/0/Music')), isEmpty);
       expect(
-        ids(await repo.songsInFolder('/storage/emulated/0/Music', recursive: true)),
+        ids(await repo
+            .songsInFolder('/storage/emulated/0/Music', recursive: true)),
         <int>[3, 2, 1],
       );
-      // "Music" öneki "MusicOld" klasörünü yakalamamalı.
       source.songs = <SongModel>[
         ...source.songs,
         song(7, 'Eski', path: '/storage/emulated/0/MusicOld/x.mp3'),
       ];
       await repo.rescan();
       expect(
-        ids(await repo.songsInFolder('/storage/emulated/0/Music', recursive: true)),
+        ids(await repo
+            .songsInFolder('/storage/emulated/0/Music', recursive: true)),
         <int>[3, 2, 1],
       );
     });
@@ -383,7 +417,7 @@ void main() {
       final rnd = Random(42);
       const words = <String>[
         'Aşk', 'Gece', 'Ömür', 'Işık', 'Deniz', 'Yağmur', 'Şehir', 'Ülke',
-        'Çocuk', 'Rüzgar', 'Love', 'Night', 'Dream', 'Road', 'Fire', 'Sky', //
+        'Çocuk', 'Rüzgar', 'Love', 'Night', 'Dream', 'Road', 'Fire', 'Sky',
       ];
       const genres = <String>['Pop', 'Rock', 'Jazz', 'Arabesk', 'Türk Halk'];
       return <SongModel>[
@@ -401,7 +435,8 @@ void main() {
               albumId: 1 + albumNo,
               genre: genres[rnd.nextInt(genres.length)],
               durationMs: 60000 + rnd.nextInt(300000),
-              dateAdded: DateTime(2020).add(Duration(hours: rnd.nextInt(50000))),
+              dateAdded: DateTime(2020)
+                  .add(Duration(hours: rnd.nextInt(50000))),
               path: '/storage/emulated/0/Music/k${rnd.nextInt(200)}/$i.mp3',
             );
           }(),
@@ -411,6 +446,7 @@ void main() {
     test('isolate ile indeks kurulur; sorgular tutarlı ve hızlı', () async {
       final big = LibraryRepositoryImpl(
         FakeDataSource(bigLibrary(10000)),
+        _FakePreferencesRepository(),
       );
       final watch = Stopwatch()..start();
 
@@ -443,7 +479,8 @@ void main() {
       final found = await big.search('gece ask');
       expect(found.songs, isNotEmpty);
       for (final s in found.songs) {
-        final key = LocaleSorter.searchKey('${s.title} ${s.artist} ${s.album}');
+        final key =
+            LocaleSorter.searchKey('${s.title} ${s.artist} ${s.album}');
         expect(key, allOf(contains('gece'), contains('ask')));
       }
 

@@ -3,27 +3,28 @@ import 'package:just_audio/just_audio.dart';
 
 class PlayerDataSource {
   PlayerDataSource({AudioPlayer? player})
-      : _player = player ?? AudioPlayer(maxSkipsOnError: 6);
+      : _player = player ?? AudioPlayer(
+          maxSkipsOnError: 6,
+          audioPipeline: AudioPipeline(
+            androidAudioEffects: [], // Gün 22'de doldurulacak
+          ),
+        );
 
   final AudioPlayer _player;
   AudioPlayer get player => _player;
 
-  Future<void> loadQueue(
-    List<AudioSource> sources, {
-    int initialIndex = 0,
-    Duration? initialPosition,
-  }) async {
+  Future<void> loadQueue(List<AudioSource> sources, {int initialIndex = 0, Duration? initialPosition}) async {
     if (sources.isEmpty) {
       await _player.setAudioSources(const <AudioSource>[]);
       return;
     }
     final index = initialIndex.clamp(0, sources.length - 1);
-    await _player.setAudioSources(
-      sources,
-      initialIndex: index,
-      initialPosition: initialPosition,
-    );
+    await _player.setAudioSources(sources, initialIndex: index, initialPosition: initialPosition);
   }
+
+  Future<void> insertSource(int index, AudioSource source) => _player.insertAudioSource(index, source);
+  Future<void> removeSource(int index) => _player.removeAudioSourceAt(index);
+  Future<void> moveSource(int from, int to) => _player.moveAudioSource(from, to);
 
   Future<void> play() => _player.play();
   Future<void> pause() => _player.pause();
@@ -48,6 +49,10 @@ class PlayerDataSource {
   Stream<int?> get currentIndexStream => _player.currentIndexStream;
   Stream<PlaybackEvent> get playbackEventStream => _player.playbackEventStream;
   Stream<PlayerException> get errorStream => _player.errorStream;
+  
+  // Eksik olan Stream'ler eklendi
+  Stream<LoopMode> get loopModeStream => _player.loopModeStream;
+  Stream<bool> get shuffleModeEnabledStream => _player.shuffleModeEnabledStream;
 
   bool get hasNext => _player.hasNext;
   bool get hasPrevious => _player.hasPrevious;

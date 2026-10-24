@@ -14,10 +14,10 @@ void main() {
   });
 
   test(
-    'schemaVersion is 3 '
-    '(v1: base, v2: queue_states, v3: playlist fallback columns)',
+    'schemaVersion is 5 '
+    '(v1: base, v2: queue_states, v3: playlist fallback, v4: custom_themes, v5: favorites/history fallback)',
     () {
-      expect(db.schemaVersion, 3);
+      expect(db.schemaVersion, 5);
     },
   );
 
@@ -38,6 +38,7 @@ void main() {
         'play_history',
         'lyrics',
         'queue_states',
+        'custom_themes',
       ]),
     );
   });

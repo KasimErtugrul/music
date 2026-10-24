@@ -65,7 +65,7 @@ class SongTile extends StatelessWidget {
                 color: isFav ? theme.colorScheme.error : null,
                 size: 20,
               ),
-              onPressed: () => favCtrl.toggle(song.id),
+              onPressed: () => favCtrl.toggle(song)
             ),
             const SizedBox(width: 8),
             Text(song.duration.clock, style: theme.textTheme.bodySmall),

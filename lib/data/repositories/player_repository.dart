@@ -13,12 +13,17 @@ abstract class PlayerRepository {
   Stream<PlayerException> get errorStream;
 
   Duration get position;
+  int? get currentIndex;
 
   Future<void> loadQueue(
     List<SongModel> songs, {
     int initialIndex = 0,
     Duration? initialPosition,
   });
+  Future<void> insertSong(int index, SongModel song);
+  Future<void> removeSong(int index);
+  Future<void> moveSong(int from, int to);
+
   Future<void> play();
   Future<void> pause();
   Future<void> stop();
@@ -48,17 +53,21 @@ class PlayerRepositoryImpl implements PlayerRepository {
   Stream<Duration?> get durationStream => _handler.durationStream;
   @override
   Stream<PlayerException> get errorStream => _handler.errorStream;
-  @override
-  Duration get position => _handler.position;
 
   @override
-  Future<void> loadQueue(
-    List<SongModel> songs, {
-    int initialIndex = 0,
-    Duration? initialPosition,
-  }) async {
-    final items = <MediaItem>[for (final s in songs) _toMediaItem(s)];
-    final sources = <AudioSource>[for (final s in songs) AudioSource.uri(Uri.parse(s.uri))];
+  Duration get position => _handler.position;
+  @override
+  int? get currentIndex => _handler.currentIndex;
+
+  @override
+  Future<void> loadQueue(List<SongModel> songs, {int initialIndex = 0, Duration? initialPosition}) async {
+    // Kapak resmi YÜKLENMEZ! (Lazy load için)
+    final items = <MediaItem>[
+      for (final s in songs) MediaItem(id: s.uri, title: s.title, artist: s.artist, album: s.album, duration: s.duration)
+    ];
+    final sources = <AudioSource>[
+      for (final s in songs) AudioSource.uri(Uri.parse(s.uri))
+    ];
     
     await _handler.loadTracks(
       items: items,
@@ -68,22 +77,18 @@ class PlayerRepositoryImpl implements PlayerRepository {
     );
   }
 
-  MediaItem _toMediaItem(SongModel song) {
-    return MediaItem(
-      id: song.uri,
-      title: song.title,
-      artist: song.artist,
-      album: song.album,
-      duration: song.duration,
-      artUri: _artUri(song),
-    );
+  @override
+  Future<void> insertSong(int index, SongModel song) async {
+    final item = MediaItem(id: song.uri, title: song.title, artist: song.artist, album: song.album, duration: song.duration);
+    final source = AudioSource.uri(Uri.parse(song.uri));
+    await _handler.insertTrack(index, item, source);
   }
 
-  Uri? _artUri(SongModel song) {
-    final albumId = song.albumId;
-    if (albumId == null) return null;
-    return Uri.parse('content://media/external/audio/albumart/$albumId');
-  }
+  @override
+  Future<void> removeSong(int index) => _handler.removeTrack(index);
+
+  @override
+  Future<void> moveSong(int from, int to) => _handler.moveTrack(from, to);
 
   @override
   Future<void> play() => _handler.play();

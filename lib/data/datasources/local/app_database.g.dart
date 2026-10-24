@@ -882,6 +882,44 @@ class $FavoritesTable extends Favorites
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _artistMeta = const VerificationMeta('artist');
+  @override
+  late final GeneratedColumn<String> artist = GeneratedColumn<String>(
+    'artist',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _durationMsMeta = const VerificationMeta(
+    'durationMs',
+  );
+  @override
+  late final GeneratedColumn<int> durationMs = GeneratedColumn<int>(
+    'duration_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _addedAtMeta = const VerificationMeta(
     'addedAt',
   );
@@ -895,7 +933,15 @@ class $FavoritesTable extends Favorites
     defaultValue: currentDateAndTime,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, songId, addedAt];
+  List<GeneratedColumn> get $columns => [
+    id,
+    songId,
+    path,
+    title,
+    artist,
+    durationMs,
+    addedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -918,6 +964,30 @@ class $FavoritesTable extends Favorites
       );
     } else if (isInserting) {
       context.missing(_songIdMeta);
+    }
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    }
+    if (data.containsKey('artist')) {
+      context.handle(
+        _artistMeta,
+        artist.isAcceptableOrUnknown(data['artist']!, _artistMeta),
+      );
+    }
+    if (data.containsKey('duration_ms')) {
+      context.handle(
+        _durationMsMeta,
+        durationMs.isAcceptableOrUnknown(data['duration_ms']!, _durationMsMeta),
+      );
     }
     if (data.containsKey('added_at')) {
       context.handle(
@@ -946,6 +1016,22 @@ class $FavoritesTable extends Favorites
         DriftSqlType.int,
         data['${effectivePrefix}song_id'],
       )!,
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      ),
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      artist: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}artist'],
+      ),
+      durationMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_ms'],
+      ),
       addedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}added_at'],
@@ -962,10 +1048,18 @@ class $FavoritesTable extends Favorites
 class Favorite extends DataClass implements Insertable<Favorite> {
   final int id;
   final int songId;
+  final String? path;
+  final String? title;
+  final String? artist;
+  final int? durationMs;
   final DateTime addedAt;
   const Favorite({
     required this.id,
     required this.songId,
+    this.path,
+    this.title,
+    this.artist,
+    this.durationMs,
     required this.addedAt,
   });
   @override
@@ -973,6 +1067,18 @@ class Favorite extends DataClass implements Insertable<Favorite> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['song_id'] = Variable<int>(songId);
+    if (!nullToAbsent || path != null) {
+      map['path'] = Variable<String>(path);
+    }
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    if (!nullToAbsent || artist != null) {
+      map['artist'] = Variable<String>(artist);
+    }
+    if (!nullToAbsent || durationMs != null) {
+      map['duration_ms'] = Variable<int>(durationMs);
+    }
     map['added_at'] = Variable<DateTime>(addedAt);
     return map;
   }
@@ -981,6 +1087,16 @@ class Favorite extends DataClass implements Insertable<Favorite> {
     return FavoritesCompanion(
       id: Value(id),
       songId: Value(songId),
+      path: path == null && nullToAbsent ? const Value.absent() : Value(path),
+      title: title == null && nullToAbsent
+          ? const Value.absent()
+          : Value(title),
+      artist: artist == null && nullToAbsent
+          ? const Value.absent()
+          : Value(artist),
+      durationMs: durationMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationMs),
       addedAt: Value(addedAt),
     );
   }
@@ -993,6 +1109,10 @@ class Favorite extends DataClass implements Insertable<Favorite> {
     return Favorite(
       id: serializer.fromJson<int>(json['id']),
       songId: serializer.fromJson<int>(json['songId']),
+      path: serializer.fromJson<String?>(json['path']),
+      title: serializer.fromJson<String?>(json['title']),
+      artist: serializer.fromJson<String?>(json['artist']),
+      durationMs: serializer.fromJson<int?>(json['durationMs']),
       addedAt: serializer.fromJson<DateTime>(json['addedAt']),
     );
   }
@@ -1002,19 +1122,41 @@ class Favorite extends DataClass implements Insertable<Favorite> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'songId': serializer.toJson<int>(songId),
+      'path': serializer.toJson<String?>(path),
+      'title': serializer.toJson<String?>(title),
+      'artist': serializer.toJson<String?>(artist),
+      'durationMs': serializer.toJson<int?>(durationMs),
       'addedAt': serializer.toJson<DateTime>(addedAt),
     };
   }
 
-  Favorite copyWith({int? id, int? songId, DateTime? addedAt}) => Favorite(
+  Favorite copyWith({
+    int? id,
+    int? songId,
+    Value<String?> path = const Value.absent(),
+    Value<String?> title = const Value.absent(),
+    Value<String?> artist = const Value.absent(),
+    Value<int?> durationMs = const Value.absent(),
+    DateTime? addedAt,
+  }) => Favorite(
     id: id ?? this.id,
     songId: songId ?? this.songId,
+    path: path.present ? path.value : this.path,
+    title: title.present ? title.value : this.title,
+    artist: artist.present ? artist.value : this.artist,
+    durationMs: durationMs.present ? durationMs.value : this.durationMs,
     addedAt: addedAt ?? this.addedAt,
   );
   Favorite copyWithCompanion(FavoritesCompanion data) {
     return Favorite(
       id: data.id.present ? data.id.value : this.id,
       songId: data.songId.present ? data.songId.value : this.songId,
+      path: data.path.present ? data.path.value : this.path,
+      title: data.title.present ? data.title.value : this.title,
+      artist: data.artist.present ? data.artist.value : this.artist,
+      durationMs: data.durationMs.present
+          ? data.durationMs.value
+          : this.durationMs,
       addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
     );
   }
@@ -1024,44 +1166,73 @@ class Favorite extends DataClass implements Insertable<Favorite> {
     return (StringBuffer('Favorite(')
           ..write('id: $id, ')
           ..write('songId: $songId, ')
+          ..write('path: $path, ')
+          ..write('title: $title, ')
+          ..write('artist: $artist, ')
+          ..write('durationMs: $durationMs, ')
           ..write('addedAt: $addedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, songId, addedAt);
+  int get hashCode =>
+      Object.hash(id, songId, path, title, artist, durationMs, addedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Favorite &&
           other.id == this.id &&
           other.songId == this.songId &&
+          other.path == this.path &&
+          other.title == this.title &&
+          other.artist == this.artist &&
+          other.durationMs == this.durationMs &&
           other.addedAt == this.addedAt);
 }
 
 class FavoritesCompanion extends UpdateCompanion<Favorite> {
   final Value<int> id;
   final Value<int> songId;
+  final Value<String?> path;
+  final Value<String?> title;
+  final Value<String?> artist;
+  final Value<int?> durationMs;
   final Value<DateTime> addedAt;
   const FavoritesCompanion({
     this.id = const Value.absent(),
     this.songId = const Value.absent(),
+    this.path = const Value.absent(),
+    this.title = const Value.absent(),
+    this.artist = const Value.absent(),
+    this.durationMs = const Value.absent(),
     this.addedAt = const Value.absent(),
   });
   FavoritesCompanion.insert({
     this.id = const Value.absent(),
     required int songId,
+    this.path = const Value.absent(),
+    this.title = const Value.absent(),
+    this.artist = const Value.absent(),
+    this.durationMs = const Value.absent(),
     this.addedAt = const Value.absent(),
   }) : songId = Value(songId);
   static Insertable<Favorite> custom({
     Expression<int>? id,
     Expression<int>? songId,
+    Expression<String>? path,
+    Expression<String>? title,
+    Expression<String>? artist,
+    Expression<int>? durationMs,
     Expression<DateTime>? addedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (songId != null) 'song_id': songId,
+      if (path != null) 'path': path,
+      if (title != null) 'title': title,
+      if (artist != null) 'artist': artist,
+      if (durationMs != null) 'duration_ms': durationMs,
       if (addedAt != null) 'added_at': addedAt,
     });
   }
@@ -1069,11 +1240,19 @@ class FavoritesCompanion extends UpdateCompanion<Favorite> {
   FavoritesCompanion copyWith({
     Value<int>? id,
     Value<int>? songId,
+    Value<String?>? path,
+    Value<String?>? title,
+    Value<String?>? artist,
+    Value<int?>? durationMs,
     Value<DateTime>? addedAt,
   }) {
     return FavoritesCompanion(
       id: id ?? this.id,
       songId: songId ?? this.songId,
+      path: path ?? this.path,
+      title: title ?? this.title,
+      artist: artist ?? this.artist,
+      durationMs: durationMs ?? this.durationMs,
       addedAt: addedAt ?? this.addedAt,
     );
   }
@@ -1087,6 +1266,18 @@ class FavoritesCompanion extends UpdateCompanion<Favorite> {
     if (songId.present) {
       map['song_id'] = Variable<int>(songId.value);
     }
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (artist.present) {
+      map['artist'] = Variable<String>(artist.value);
+    }
+    if (durationMs.present) {
+      map['duration_ms'] = Variable<int>(durationMs.value);
+    }
     if (addedAt.present) {
       map['added_at'] = Variable<DateTime>(addedAt.value);
     }
@@ -1098,6 +1289,10 @@ class FavoritesCompanion extends UpdateCompanion<Favorite> {
     return (StringBuffer('FavoritesCompanion(')
           ..write('id: $id, ')
           ..write('songId: $songId, ')
+          ..write('path: $path, ')
+          ..write('title: $title, ')
+          ..write('artist: $artist, ')
+          ..write('durationMs: $durationMs, ')
           ..write('addedAt: $addedAt')
           ..write(')'))
         .toString();
@@ -1132,6 +1327,44 @@ class $PlayHistoryTable extends PlayHistory
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _artistMeta = const VerificationMeta('artist');
+  @override
+  late final GeneratedColumn<String> artist = GeneratedColumn<String>(
+    'artist',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _durationMsMeta = const VerificationMeta(
+    'durationMs',
+  );
+  @override
+  late final GeneratedColumn<int> durationMs = GeneratedColumn<int>(
+    'duration_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _playedAtMeta = const VerificationMeta(
     'playedAt',
   );
@@ -1145,7 +1378,15 @@ class $PlayHistoryTable extends PlayHistory
     defaultValue: currentDateAndTime,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, songId, playedAt];
+  List<GeneratedColumn> get $columns => [
+    id,
+    songId,
+    path,
+    title,
+    artist,
+    durationMs,
+    playedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1168,6 +1409,30 @@ class $PlayHistoryTable extends PlayHistory
       );
     } else if (isInserting) {
       context.missing(_songIdMeta);
+    }
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    }
+    if (data.containsKey('artist')) {
+      context.handle(
+        _artistMeta,
+        artist.isAcceptableOrUnknown(data['artist']!, _artistMeta),
+      );
+    }
+    if (data.containsKey('duration_ms')) {
+      context.handle(
+        _durationMsMeta,
+        durationMs.isAcceptableOrUnknown(data['duration_ms']!, _durationMsMeta),
+      );
     }
     if (data.containsKey('played_at')) {
       context.handle(
@@ -1192,6 +1457,22 @@ class $PlayHistoryTable extends PlayHistory
         DriftSqlType.int,
         data['${effectivePrefix}song_id'],
       )!,
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      ),
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      artist: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}artist'],
+      ),
+      durationMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_ms'],
+      ),
       playedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}played_at'],
@@ -1208,10 +1489,18 @@ class $PlayHistoryTable extends PlayHistory
 class PlayHistoryData extends DataClass implements Insertable<PlayHistoryData> {
   final int id;
   final int songId;
+  final String? path;
+  final String? title;
+  final String? artist;
+  final int? durationMs;
   final DateTime playedAt;
   const PlayHistoryData({
     required this.id,
     required this.songId,
+    this.path,
+    this.title,
+    this.artist,
+    this.durationMs,
     required this.playedAt,
   });
   @override
@@ -1219,6 +1508,18 @@ class PlayHistoryData extends DataClass implements Insertable<PlayHistoryData> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['song_id'] = Variable<int>(songId);
+    if (!nullToAbsent || path != null) {
+      map['path'] = Variable<String>(path);
+    }
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    if (!nullToAbsent || artist != null) {
+      map['artist'] = Variable<String>(artist);
+    }
+    if (!nullToAbsent || durationMs != null) {
+      map['duration_ms'] = Variable<int>(durationMs);
+    }
     map['played_at'] = Variable<DateTime>(playedAt);
     return map;
   }
@@ -1227,6 +1528,16 @@ class PlayHistoryData extends DataClass implements Insertable<PlayHistoryData> {
     return PlayHistoryCompanion(
       id: Value(id),
       songId: Value(songId),
+      path: path == null && nullToAbsent ? const Value.absent() : Value(path),
+      title: title == null && nullToAbsent
+          ? const Value.absent()
+          : Value(title),
+      artist: artist == null && nullToAbsent
+          ? const Value.absent()
+          : Value(artist),
+      durationMs: durationMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationMs),
       playedAt: Value(playedAt),
     );
   }
@@ -1239,6 +1550,10 @@ class PlayHistoryData extends DataClass implements Insertable<PlayHistoryData> {
     return PlayHistoryData(
       id: serializer.fromJson<int>(json['id']),
       songId: serializer.fromJson<int>(json['songId']),
+      path: serializer.fromJson<String?>(json['path']),
+      title: serializer.fromJson<String?>(json['title']),
+      artist: serializer.fromJson<String?>(json['artist']),
+      durationMs: serializer.fromJson<int?>(json['durationMs']),
       playedAt: serializer.fromJson<DateTime>(json['playedAt']),
     );
   }
@@ -1248,20 +1563,41 @@ class PlayHistoryData extends DataClass implements Insertable<PlayHistoryData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'songId': serializer.toJson<int>(songId),
+      'path': serializer.toJson<String?>(path),
+      'title': serializer.toJson<String?>(title),
+      'artist': serializer.toJson<String?>(artist),
+      'durationMs': serializer.toJson<int?>(durationMs),
       'playedAt': serializer.toJson<DateTime>(playedAt),
     };
   }
 
-  PlayHistoryData copyWith({int? id, int? songId, DateTime? playedAt}) =>
-      PlayHistoryData(
-        id: id ?? this.id,
-        songId: songId ?? this.songId,
-        playedAt: playedAt ?? this.playedAt,
-      );
+  PlayHistoryData copyWith({
+    int? id,
+    int? songId,
+    Value<String?> path = const Value.absent(),
+    Value<String?> title = const Value.absent(),
+    Value<String?> artist = const Value.absent(),
+    Value<int?> durationMs = const Value.absent(),
+    DateTime? playedAt,
+  }) => PlayHistoryData(
+    id: id ?? this.id,
+    songId: songId ?? this.songId,
+    path: path.present ? path.value : this.path,
+    title: title.present ? title.value : this.title,
+    artist: artist.present ? artist.value : this.artist,
+    durationMs: durationMs.present ? durationMs.value : this.durationMs,
+    playedAt: playedAt ?? this.playedAt,
+  );
   PlayHistoryData copyWithCompanion(PlayHistoryCompanion data) {
     return PlayHistoryData(
       id: data.id.present ? data.id.value : this.id,
       songId: data.songId.present ? data.songId.value : this.songId,
+      path: data.path.present ? data.path.value : this.path,
+      title: data.title.present ? data.title.value : this.title,
+      artist: data.artist.present ? data.artist.value : this.artist,
+      durationMs: data.durationMs.present
+          ? data.durationMs.value
+          : this.durationMs,
       playedAt: data.playedAt.present ? data.playedAt.value : this.playedAt,
     );
   }
@@ -1271,44 +1607,73 @@ class PlayHistoryData extends DataClass implements Insertable<PlayHistoryData> {
     return (StringBuffer('PlayHistoryData(')
           ..write('id: $id, ')
           ..write('songId: $songId, ')
+          ..write('path: $path, ')
+          ..write('title: $title, ')
+          ..write('artist: $artist, ')
+          ..write('durationMs: $durationMs, ')
           ..write('playedAt: $playedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, songId, playedAt);
+  int get hashCode =>
+      Object.hash(id, songId, path, title, artist, durationMs, playedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PlayHistoryData &&
           other.id == this.id &&
           other.songId == this.songId &&
+          other.path == this.path &&
+          other.title == this.title &&
+          other.artist == this.artist &&
+          other.durationMs == this.durationMs &&
           other.playedAt == this.playedAt);
 }
 
 class PlayHistoryCompanion extends UpdateCompanion<PlayHistoryData> {
   final Value<int> id;
   final Value<int> songId;
+  final Value<String?> path;
+  final Value<String?> title;
+  final Value<String?> artist;
+  final Value<int?> durationMs;
   final Value<DateTime> playedAt;
   const PlayHistoryCompanion({
     this.id = const Value.absent(),
     this.songId = const Value.absent(),
+    this.path = const Value.absent(),
+    this.title = const Value.absent(),
+    this.artist = const Value.absent(),
+    this.durationMs = const Value.absent(),
     this.playedAt = const Value.absent(),
   });
   PlayHistoryCompanion.insert({
     this.id = const Value.absent(),
     required int songId,
+    this.path = const Value.absent(),
+    this.title = const Value.absent(),
+    this.artist = const Value.absent(),
+    this.durationMs = const Value.absent(),
     this.playedAt = const Value.absent(),
   }) : songId = Value(songId);
   static Insertable<PlayHistoryData> custom({
     Expression<int>? id,
     Expression<int>? songId,
+    Expression<String>? path,
+    Expression<String>? title,
+    Expression<String>? artist,
+    Expression<int>? durationMs,
     Expression<DateTime>? playedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (songId != null) 'song_id': songId,
+      if (path != null) 'path': path,
+      if (title != null) 'title': title,
+      if (artist != null) 'artist': artist,
+      if (durationMs != null) 'duration_ms': durationMs,
       if (playedAt != null) 'played_at': playedAt,
     });
   }
@@ -1316,11 +1681,19 @@ class PlayHistoryCompanion extends UpdateCompanion<PlayHistoryData> {
   PlayHistoryCompanion copyWith({
     Value<int>? id,
     Value<int>? songId,
+    Value<String?>? path,
+    Value<String?>? title,
+    Value<String?>? artist,
+    Value<int?>? durationMs,
     Value<DateTime>? playedAt,
   }) {
     return PlayHistoryCompanion(
       id: id ?? this.id,
       songId: songId ?? this.songId,
+      path: path ?? this.path,
+      title: title ?? this.title,
+      artist: artist ?? this.artist,
+      durationMs: durationMs ?? this.durationMs,
       playedAt: playedAt ?? this.playedAt,
     );
   }
@@ -1334,6 +1707,18 @@ class PlayHistoryCompanion extends UpdateCompanion<PlayHistoryData> {
     if (songId.present) {
       map['song_id'] = Variable<int>(songId.value);
     }
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (artist.present) {
+      map['artist'] = Variable<String>(artist.value);
+    }
+    if (durationMs.present) {
+      map['duration_ms'] = Variable<int>(durationMs.value);
+    }
     if (playedAt.present) {
       map['played_at'] = Variable<DateTime>(playedAt.value);
     }
@@ -1345,6 +1730,10 @@ class PlayHistoryCompanion extends UpdateCompanion<PlayHistoryData> {
     return (StringBuffer('PlayHistoryCompanion(')
           ..write('id: $id, ')
           ..write('songId: $songId, ')
+          ..write('path: $path, ')
+          ..write('title: $title, ')
+          ..write('artist: $artist, ')
+          ..write('durationMs: $durationMs, ')
           ..write('playedAt: $playedAt')
           ..write(')'))
         .toString();
@@ -3134,11 +3523,19 @@ typedef $$PlaylistSongsTableProcessedTableManager =
 typedef $$FavoritesTableCreateCompanionBuilder = FavoritesCompanion Function({
   Value<int> id,
   required int songId,
+  Value<String?> path,
+  Value<String?> title,
+  Value<String?> artist,
+  Value<int?> durationMs,
   Value<DateTime> addedAt,
 });
 typedef $$FavoritesTableUpdateCompanionBuilder = FavoritesCompanion Function({
   Value<int> id,
   Value<int> songId,
+  Value<String?> path,
+  Value<String?> title,
+  Value<String?> artist,
+  Value<int?> durationMs,
   Value<DateTime> addedAt,
 });
 
@@ -3158,6 +3555,26 @@ class $$FavoritesTableFilterComposer
 
   ColumnFilters<int> get songId => $composableBuilder(
     column: $table.songId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get artist => $composableBuilder(
+    column: $table.artist,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3186,6 +3603,26 @@ class $$FavoritesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get artist => $composableBuilder(
+    column: $table.artist,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get addedAt => $composableBuilder(
     column: $table.addedAt,
     builder: (column) => ColumnOrderings(column),
@@ -3206,6 +3643,20 @@ class $$FavoritesTableAnnotationComposer
 
   GeneratedColumn<int> get songId =>
       $composableBuilder(column: $table.songId, builder: (column) => column);
+
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get artist =>
+      $composableBuilder(column: $table.artist, builder: (column) => column);
+
+  GeneratedColumn<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get addedAt =>
       $composableBuilder(column: $table.addedAt, builder: (column) => column);
@@ -3237,19 +3688,40 @@ class $$FavoritesTableTableManager
               $$FavoritesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$FavoritesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<int> songId = const Value.absent(),
-            Value<DateTime> addedAt = const Value.absent(),
-          }) => FavoritesCompanion(id: id, songId: songId, addedAt: addedAt),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> songId = const Value.absent(),
+                Value<String?> path = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<String?> artist = const Value.absent(),
+                Value<int?> durationMs = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+              }) => FavoritesCompanion(
+                id: id,
+                songId: songId,
+                path: path,
+                title: title,
+                artist: artist,
+                durationMs: durationMs,
+                addedAt: addedAt,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required int songId,
+                Value<String?> path = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<String?> artist = const Value.absent(),
+                Value<int?> durationMs = const Value.absent(),
                 Value<DateTime> addedAt = const Value.absent(),
               }) => FavoritesCompanion.insert(
                 id: id,
                 songId: songId,
+                path: path,
+                title: title,
+                artist: artist,
+                durationMs: durationMs,
                 addedAt: addedAt,
               ),
           withReferenceMapper: (p0) => p0
@@ -3287,12 +3759,20 @@ typedef $$PlayHistoryTableCreateCompanionBuilder =
     PlayHistoryCompanion Function({
       Value<int> id,
       required int songId,
+      Value<String?> path,
+      Value<String?> title,
+      Value<String?> artist,
+      Value<int?> durationMs,
       Value<DateTime> playedAt,
     });
 typedef $$PlayHistoryTableUpdateCompanionBuilder =
     PlayHistoryCompanion Function({
       Value<int> id,
       Value<int> songId,
+      Value<String?> path,
+      Value<String?> title,
+      Value<String?> artist,
+      Value<int?> durationMs,
       Value<DateTime> playedAt,
     });
 
@@ -3312,6 +3792,26 @@ class $$PlayHistoryTableFilterComposer
 
   ColumnFilters<int> get songId => $composableBuilder(
     column: $table.songId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get artist => $composableBuilder(
+    column: $table.artist,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3340,6 +3840,26 @@ class $$PlayHistoryTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get artist => $composableBuilder(
+    column: $table.artist,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get playedAt => $composableBuilder(
     column: $table.playedAt,
     builder: (column) => ColumnOrderings(column),
@@ -3360,6 +3880,20 @@ class $$PlayHistoryTableAnnotationComposer
 
   GeneratedColumn<int> get songId =>
       $composableBuilder(column: $table.songId, builder: (column) => column);
+
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get artist =>
+      $composableBuilder(column: $table.artist, builder: (column) => column);
+
+  GeneratedColumn<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get playedAt =>
       $composableBuilder(column: $table.playedAt, builder: (column) => column);
@@ -3398,20 +3932,36 @@ class $$PlayHistoryTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int> songId = const Value.absent(),
+                Value<String?> path = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<String?> artist = const Value.absent(),
+                Value<int?> durationMs = const Value.absent(),
                 Value<DateTime> playedAt = const Value.absent(),
               }) => PlayHistoryCompanion(
                 id: id,
                 songId: songId,
+                path: path,
+                title: title,
+                artist: artist,
+                durationMs: durationMs,
                 playedAt: playedAt,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required int songId,
+                Value<String?> path = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<String?> artist = const Value.absent(),
+                Value<int?> durationMs = const Value.absent(),
                 Value<DateTime> playedAt = const Value.absent(),
               }) => PlayHistoryCompanion.insert(
                 id: id,
                 songId: songId,
+                path: path,
+                title: title,
+                artist: artist,
+                durationMs: durationMs,
                 playedAt: playedAt,
               ),
           withReferenceMapper: (p0) => p0

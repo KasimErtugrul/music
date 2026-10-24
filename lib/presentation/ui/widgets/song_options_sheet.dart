@@ -68,7 +68,7 @@ class SongOptionsSheet extends StatelessWidget {
               ),
               title: Text(isFav ? l10n.removeFromFavorites : l10n.addToFavorites),
               onTap: () {
-                favCtrl.toggle(song.id);
+                favCtrl.toggle(song);
                 Navigator.pop(context);
               },
             );

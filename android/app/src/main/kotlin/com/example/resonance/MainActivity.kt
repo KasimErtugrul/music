@@ -1,5 +1,6 @@
 package com.example.resonance
 
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
@@ -9,7 +10,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.util.Size
-// DEĞİŞİKLİK 1: FlutterActivity yerine AudioServiceActivity import edildi.
 import com.ryanheise.audioservice.AudioServiceActivity
 import com.ryanheise.audioservice.AudioServicePlugin
 import io.flutter.embedding.engine.FlutterEngine
@@ -23,36 +23,40 @@ import java.nio.charset.CodingErrorAction
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-// DEĞİŞİKLİK 2: Miras alınan sınıf AudioServiceActivity olarak değiştirildi.
 class MainActivity : AudioServiceActivity() {
     private val executor: ExecutorService = Executors.newFixedThreadPool(2)
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    // DEĞİŞİKLİK 3: audio_service'in beklediği paylaşılan FlutterEngine'i sağla.
-    // Bu sayede Activity ve arka plan servisi aynı Dart isolate'ini kullanır.
     override fun provideFlutterEngine(context: Context): FlutterEngine? {
         return AudioServicePlugin.getFlutterEngine(context)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        // Mevcut MethodChannel kodun aynen korunuyor.
+        // Sızıntıyı önlemek için applicationContext kullanıyoruz
+        val resolver = applicationContext.contentResolver
+        
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "querySongs" -> runAsync(result) { querySongs() }
+                    "querySongs" -> runAsync(result) { querySongs(resolver) }
                     "queryArtwork" -> {
                         val id = call.argument<Number>("id")?.toLong()
                         val size = call.argument<Number>("size")?.toInt() ?: 200
                         if (id == null) {
                             result.error("bad_args", "id is required", null)
                         } else {
-                            runAsync(result) { queryArtwork(id, size) }
+                            runAsync(result) { queryArtwork(resolver, id, size) }
                         }
                     }
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler(null)
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 
     override fun onDestroy() {
@@ -72,7 +76,7 @@ class MainActivity : AudioServiceActivity() {
     }
 
     @Suppress("DEPRECATION")
-    private fun querySongs(): List<Map<String, Any?>> {
+    private fun querySongs(resolver: ContentResolver): List<Map<String, Any?>> {
         val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         } else {
@@ -97,8 +101,11 @@ class MainActivity : AudioServiceActivity() {
         )
         if (hasGenre) projection.add(MediaStore.Audio.Media.GENRE)
 
+        // IS_MUSIC filtresi eklendi
+        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+
         val songs = ArrayList<Map<String, Any?>>()
-        contentResolver.query(collection, projection.toTypedArray(), null, null, null)?.use { c ->
+        resolver.query(collection, projection.toTypedArray(), selection, null, null)?.use { c ->
             val iId = c.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val iTitle = c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val iArtist = c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
@@ -140,16 +147,16 @@ class MainActivity : AudioServiceActivity() {
         return songs
     }
 
-    private fun queryArtwork(songId: Long, size: Int): ByteArray? {
+    private fun queryArtwork(resolver: ContentResolver, songId: Long, size: Int): ByteArray? {
         val loaded: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId)
             try {
-                contentResolver.loadThumbnail(uri, Size(size, size), null)
+                resolver.loadThumbnail(uri, Size(size, size), null)
             } catch (e: Exception) {
                 null
             }
         } else {
-            legacyAlbumArt(songId, size)
+            legacyAlbumArt(resolver, songId, size)
         }
         val bitmap = loaded ?: return null
         val out = ByteArrayOutputStream()
@@ -159,15 +166,15 @@ class MainActivity : AudioServiceActivity() {
     }
 
     @Suppress("DEPRECATION")
-    private fun legacyAlbumArt(songId: Long, size: Int): Bitmap? {
-        val albumId = contentResolver.query(
+    private fun legacyAlbumArt(resolver: ContentResolver, songId: Long, size: Int): Bitmap? {
+        val albumId = resolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             arrayOf(MediaStore.Audio.Media.ALBUM_ID),
             "${MediaStore.Audio.Media._ID}=?",
             arrayOf(songId.toString()),
             null,
         )?.use { if (it.moveToFirst()) it.getLong(0) else null } ?: return null
-        val artPath = contentResolver.query(
+        val artPath = resolver.query(
             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
             arrayOf(MediaStore.Audio.Albums.ALBUM_ART),
             "${MediaStore.Audio.Albums._ID}=?",

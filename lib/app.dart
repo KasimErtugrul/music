@@ -7,7 +7,6 @@ import 'package:resonance/presentation/controllers/theme_controller.dart';
 
 class ResonanceApp extends StatelessWidget {
   const ResonanceApp({super.key, this.initialRoute = AppPages.initial});
-
   final String initialRoute;
 
   @override
@@ -17,6 +16,7 @@ class ResonanceApp extends StatelessWidget {
 
     return Obx(() {
       if (settingsCtrl.isLoading.value || themeCtrl.isLoading.value) {
+        // Yükleme sırasında Navigator'ı yıkmamak için sadece boş bir ekran dönüyoruz
         return const MaterialApp(
           debugShowCheckedModeBanner: false,
           home: Scaffold(body: Center(child: CircularProgressIndicator())),
@@ -39,9 +39,9 @@ class ResonanceApp extends StatelessWidget {
         locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-       
         initialRoute: initialRoute,
         getPages: AppPages.routes,
+        // initialBinding KALDIRILDI (main.dart'ta var)
       );
     });
   }

@@ -2,6 +2,17 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:resonance/data/datasources/local/app_database.dart';
 import 'package:resonance/data/datasources/local/daos/history_dao.dart';
+import 'package:resonance/data/models/song_model.dart';
+
+// Test için sahte SongModel üreticisi
+SongModel _song(int id) => SongModel(
+      id: id,
+      uri: 'uri/$id',
+      path: '/path/$id.mp3',
+      title: 'Song $id',
+      durationMs: 1000,
+      sizeBytes: 100,
+    );
 
 void main() {
   late AppDatabase db;
@@ -17,7 +28,7 @@ void main() {
   });
 
   test('recordPlay inserts a row', () async {
-    await dao.recordPlay(7);
+    await dao.recordPlay(_song(7)); // _song(7) kullanıldı
     final recent = await dao.watchRecent().first;
     expect(recent.length, 1);
     expect(recent.first.songId, 7);
@@ -25,12 +36,12 @@ void main() {
 
   test('getMostPlayed aggregates by songId and orders by count', () async {
     for (var i = 0; i < 3; i++) {
-      await dao.recordPlay(1);
+      await dao.recordPlay(_song(1)); // _song(1) kullanıldı
     }
     for (var i = 0; i < 2; i++) {
-      await dao.recordPlay(2);
+      await dao.recordPlay(_song(2)); // _song(2) kullanıldı
     }
-    await dao.recordPlay(3);
+    await dao.recordPlay(_song(3)); // _song(3) kullanıldı
 
     final most = await dao.getMostPlayed();
     expect(most.map((e) => e.songId).toList(), <int>[1, 2, 3]);
@@ -38,7 +49,7 @@ void main() {
   });
 
   test('clear removes all rows', () async {
-    await dao.recordPlay(1);
+    await dao.recordPlay(_song(1)); // _song(1) kullanıldı
     await dao.clear();
     expect(await dao.watchRecent().first, isEmpty);
   });

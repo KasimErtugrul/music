@@ -1,56 +1,60 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:resonance/data/repositories/preferences_repository.dart';
-import 'package:resonance/presentation/controllers/preferences_controller.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/app.dart';
 import 'package:resonance/core/bindings/initial_binding.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
+import 'package:resonance/data/repositories/preferences_repository.dart';
 import 'package:resonance/data/repositories/settings_repository.dart';
 import 'package:resonance/data/repositories/theme_repository.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 late final AudioHandler audioHandler;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   try {
     final prefs = await SharedPreferences.getInstance();
 
-    // 1. Ayarlar ve Tema
     Get.put<SettingsRepository>(SettingsRepositoryImpl(prefs), permanent: true);
     Get.put<SettingsController>(SettingsController(Get.find<SettingsRepository>()), permanent: true);
     Get.put<ThemeRepository>(ThemeRepositoryImpl(prefs), permanent: true);
-
-    // 2. Yeni: Kütüphane ve Oynatma Tercihleri (InitialBinding'den ÖNCE)
     Get.put<PreferencesRepository>(PreferencesRepositoryImpl(prefs), permanent: true);
     Get.put<PreferencesController>(PreferencesController(Get.find<PreferencesRepository>()), permanent: true);
 
-    // 3. Audio Service
     audioHandler = await AudioService.init(
-      builder: () => ResonanceAudioHandler(),
+      builder: () => ResonanceAudioHandler(
+        artResolver: (songUri) async {
+          // Kapak çözücü (Lazy)
+          final libRepo = Get.find<LibraryRepository>();
+          final id = int.tryParse(songUri.split('/').last);
+          if (id == null) return null;
+          final bytes = await libRepo.artwork(id);
+          if (bytes == null) return null;
+          return Uri.dataFromBytes(bytes); 
+        },
+      ),
       config: const AudioServiceConfig(
         androidNotificationChannelId: 'com.example.resonance.channel.audio',
         androidNotificationChannelName: 'Playback',
-        androidNotificationChannelDescription: 'Playback controls for Resonance',
+        androidNotificationChannelDescription: 'Playback controls',
         androidNotificationOngoing: true,
+        androidNotificationIcon: 'mipmap/ic_launcher', // Eklendi
       ),
     );
     Get.put<ResonanceAudioHandler>(audioHandler as ResonanceAudioHandler, permanent: true);
 
-    // 4. InitialBinding (LibraryRepository artık PreferencesRepository'yi bulabilir)
     InitialBinding().dependencies();
 
-    // 5. Tema Controller (PlayerController hazır)
     Get.put<ThemeController>(
       ThemeController(
         Get.find<ThemeRepository>(),
-        Get.find<PlayerController>(),
+        Get.find<PlayerController>().currentItem.stream, // Bağımlılık Stream'e çevrildi
         Get.find<LibraryRepository>(),
       ),
       permanent: true,
@@ -67,7 +71,6 @@ class _StartupErrorApp extends StatelessWidget {
   const _StartupErrorApp({required this.error, required this.stack});
   final Object error;
   final StackTrace stack;
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

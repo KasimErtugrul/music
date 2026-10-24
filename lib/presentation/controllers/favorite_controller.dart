@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/favorite_repository.dart';
 
 class FavoriteController extends GetxController {
@@ -10,20 +11,17 @@ class FavoriteController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _repo.watchFavoriteIds().listen((ids) {
-      favoriteIds.assignAll(ids);
-    });
+    _repo.watchFavoriteIds().listen((ids) => favoriteIds.assignAll(ids));
   }
 
   bool isFavorite(int songId) => favoriteIds.contains(songId);
 
-  Future<void> toggle(int songId) async {
-    // UI'ı anında güncelle (optimistic update)
-    if (favoriteIds.contains(songId)) {
-      favoriteIds.remove(songId);
+  Future<void> toggle(SongModel song) async {
+    if (favoriteIds.contains(song.id)) {
+      favoriteIds.remove(song.id);
     } else {
-      favoriteIds.add(songId);
+      favoriteIds.add(song.id);
     }
-    await _repo.toggleFavorite(songId);
+    await _repo.toggleFavorite(song);
   }
 }
