@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Resonance</string>
+
+    <!-- Widget -->
+    <string name="widget_name">Resonance Player</string>
     <string name="widget_description">Music player controls</string>
     <string name="widget_not_playing">Not playing</string>
     <string name="widget_play_pause">Play / pause</string>
     <string name="widget_next">Next</string>
+    <string name="widget_pin_unsupported">This launcher does not support adding widgets this way. Long-press the home screen and add it from the Widgets section.</string>
+
+    <!-- Uygulama kısayolları (ikona uzun basınca) -->
+    <string name="shortcut_add_widget_short">Add widget</string>
+    <string name="shortcut_add_widget_long">Add widget to home screen</string>
 </resources>

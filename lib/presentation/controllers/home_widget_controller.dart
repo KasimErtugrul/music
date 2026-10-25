@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:resonance/data/datasources/home_widget_datasource.dart';
@@ -7,6 +9,14 @@ import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Oynatıcı durumunu ana ekran widget'ına yansıtır.
+///
+/// Tasarım kararları:
+/// * Başlık/sanatçı `currentSong` yerine `currentItem` (MediaItem) üzerinden okunur.
+///   `ResonanceAudioHandler.loadTracks` MediaItem'ı, just_audio kuyruğu yüklenmeden ÖNCE
+///   yayınlar; o anda `currentSong` (just_audio indeksine bağlı) eski/null şarkıyı döndürür.
+/// * Güncellemeler tek bir döngüde birleştirilir (coalescing). Böylece kapak çekilirken
+///   gelen yeni olaylar eski sonucu üzerine yazamaz; her turda EN GÜNCEL durum okunur.
 class HomeWidgetController extends GetxController {
   final HomeWidgetRepository _repo;
   final HomeWidgetDatasource _datasource;
@@ -22,58 +32,82 @@ class HomeWidgetController extends GetxController {
     this._prefs,
   );
 
-  StreamSubscription? _stateSub;
-  StreamSubscription? _songSub;
+  StreamSubscription<dynamic>? _itemSub;
+  StreamSubscription<dynamic>? _playingSub;
+
+  bool _running = false;
+  bool _dirty = false;
+
+  /// Kapağı en son hangi parça için yazdık. `null` = henüz hiç yazılmadı.
+  /// Boş string = "şarkı yok" durumu için kapak temizlendi.
+  String? _syncedArtworkFor;
 
   @override
   void onInit() {
     super.onInit();
-    _listenToPlayer();
+    _itemSub = _player.currentItem.listen((_) => _requestSync());
+    _playingSub = _player.isPlaying.listen((_) => _requestSync());
+    // Açılışta mevcut durumu bir kez yaz: işlem öldürülmüşse widget'ta kalan eski
+    // "çalıyor" bilgisi böylece düzelir.
+    _requestSync();
   }
 
-  void _listenToPlayer() {
-    // Şarkı değiştiğinde kapak da değişir → artwork'u yeniden kaydet
-    _songSub = _player.currentItem.listen((item) {
-      if (item != null) _updateWidget(updateArtwork: true);
-    });
-
-    // Sadece play/pause → artwork değişmez, sadece veriyi güncelle
-    _stateSub = _player.isPlaying.listen((_) {
-      _updateWidget(updateArtwork: false);
-    });
-  }
-
-  Future<void> _updateWidget({required bool updateArtwork}) async {
+  Future<void> _requestSync() async {
+    _dirty = true;
+    if (_running) return; // çalışan döngü bir sonraki turda yeni durumu okuyacak
+    _running = true;
     try {
-      final song = _player.currentSong;
-      final isTransparent = _prefs.getBool('widget_transparent') ?? false;
+      while (_dirty) {
+        _dirty = false;
+        await _sync();
+      }
+    } finally {
+      _running = false;
+    }
+  }
 
-      if (updateArtwork) {
-        final bytes =
-            song == null ? null : await _libraryRepo.artwork(song.id, size: 200);
+  Future<void> _sync() async {
+    try {
+      final item = _player.currentItem.value;
+      final itemId = item?.id ?? '';
+
+      if (_syncedArtworkFor != itemId) {
+        Uint8List? bytes;
+        final songId = item == null ? null : _songIdFromUri(item.id);
+        if (songId != null && songId >= 0) {
+          bytes = await _libraryRepo.artwork(songId, size: 200);
+        }
+        // Kapak beklenirken şarkı değiştiyse bu sonucu yazma; döngü yeniden çalışacak.
+        if ((_player.currentItem.value?.id ?? '') != itemId) return;
         await _datasource.saveArtwork(bytes);
+        _syncedArtworkFor = itemId;
       }
 
+      final current = _player.currentItem.value;
       await _repo.updateWidget(
-        title: song?.title ?? '',
-        artist: song?.artist ?? '',
-        isPlaying: _player.isPlaying.value,
-        isTransparent: isTransparent,
+        title: current?.title ?? '',
+        artist: current?.artist ?? '',
+        isPlaying: current != null && _player.isPlaying.value,
+        isTransparent: _prefs.getBool('widget_transparent') ?? false,
       );
     } catch (e, st) {
       debugPrint('Widget güncelleme hatası: $e\n$st');
     }
   }
 
+  /// `content://media/external/audio/media/123` -> 123. main.dart içindeki bildirim kapağı
+  /// çözücüsüyle aynı kural. Harici (file://) dosyalarda null döner.
+  int? _songIdFromUri(String uri) => int.tryParse(uri.split('/').last);
+
   Future<void> setTransparency(bool value) async {
     await _prefs.setBool('widget_transparent', value);
-    await _updateWidget(updateArtwork: false);
+    await _requestSync();
   }
 
   @override
   void onClose() {
-    _stateSub?.cancel();
-    _songSub?.cancel();
+    _itemSub?.cancel();
+    _playingSub?.cancel();
     super.onClose();
   }
 }

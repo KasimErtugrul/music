@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Resonance</string>
+
+    <!-- Widget -->
+    <string name="widget_name">Resonance Oynatıcı</string>
     <string name="widget_description">Müzik çalar kontrolleri</string>
     <string name="widget_not_playing">Çalmıyor</string>
     <string name="widget_play_pause">Oynat / duraklat</string>
     <string name="widget_next">Sonraki</string>
+    <string name="widget_pin_unsupported">Bu launcher widget eklemeyi desteklemiyor. Ana ekrana uzun basıp Widget\'lar bölümünden ekleyin.</string>
+
+    <!-- Uygulama kısayolları (ikona uzun basınca) -->
+    <string name="shortcut_add_widget_short">Widget ekle</string>
+    <string name="shortcut_add_widget_long">Ana ekrana widget ekle</string>
 </resources>

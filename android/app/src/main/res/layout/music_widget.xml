@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 1 hücre yükseklik ≈ 70dp: 48dp kapak + 2×8dp dolgu = 64dp (öncekinde 56+24=80dp taşıyordu). -->
+<!-- 1 hücre: launcher'a göre ~40-70dp. 48dp kapak + 2×4dp dolgu = 56dp (64dp bazı launcher'larda kırpılabiliyordu). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:padding="8dp"
+    android:padding="4dp"
     android:gravity="center_vertical"
     android:background="#1C1B1F">
 

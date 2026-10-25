@@ -23,6 +23,7 @@ import java.nio.CharBuffer
 import java.nio.charset.CharacterCodingException
 import java.nio.charset.Charset
 import java.nio.charset.CodingErrorAction
+import java.util.UUID
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -97,17 +98,36 @@ object MediaStoreChannel {
         } catch (e: Exception) {
             null
         } ?: "audio"
-        val safeName = name.replace(Regex("[\\/:*?\"<>|]"), "_")
+        val safeName = sanitizeFileName(name)
 
         val root = File(ctx.cacheDir, "external").apply { mkdirs() }
-        // Eski kopyaları temizle (en yeni 2 klasör kalsın).
-        root.listFiles()?.sortedByDescending { it.lastModified() }?.drop(2)
-            ?.forEach { it.deleteRecursively() }
-        val dir = File(root, System.currentTimeMillis().toString()).apply { mkdirs() }
+        val dir = File(root, UUID.randomUUID().toString()).apply { mkdirs() }
         val out = File(dir, safeName)
-        val input = resolver.openInputStream(uri) ?: return uriString
-        input.use { src -> out.outputStream().use { dst -> src.copyTo(dst) } }
+        try {
+            val input = resolver.openInputStream(uri)
+            if (input == null) {
+                dir.deleteRecursively()
+                return uriString
+            }
+            input.use { src -> out.outputStream().use { dst -> src.copyTo(dst) } }
+        } catch (e: Exception) {
+            // Yarım kalan kopya cache'te çöp olarak kalmasın; özgün adresle devam edilir.
+            dir.deleteRecursively()
+            return uriString
+        }
+        // Başarılı kopyadan SONRA eskileri temizle: en yeni 3 klasör (yenisi dahil) kalır.
+        root.listFiles()?.sortedByDescending { it.lastModified() }?.drop(3)
+            ?.forEach { it.deleteRecursively() }
         return Uri.fromFile(out).toString()
+    }
+
+    /** Yol ayracı/kontrol karakterlerini temizler; boş ya da yalnız noktaysa "audio" döner. */
+    private fun sanitizeFileName(name: String): String {
+        val cleaned = name
+            .replace(Regex("[\\\\/:*?\"<>|\\u0000-\\u001F]"), "_")
+            .trim()
+            .trimStart('.')
+        return cleaned.ifEmpty { "audio" }.takeLast(120) // takeLast: uzantı korunur
     }
 
     /** Ana thread'den çağrılmalı. Dart onayı (true) gelmezse URI bekleyen olarak kalır. */
