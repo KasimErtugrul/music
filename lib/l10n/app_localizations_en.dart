@@ -891,4 +891,79 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get waveformNoFilePath =>
       'This track has no local file path. Waveform is only available for local files.';
+
+  @override
+  String get widgetSettings => 'Home Screen Widget';
+
+  @override
+  String get widgetTheme => 'Widget Theme';
+
+  @override
+  String get widgetThemeSystem => 'Follow system';
+
+  @override
+  String get widgetThemeLight => 'Light';
+
+  @override
+  String get widgetThemeDark => 'Dark';
+
+  @override
+  String get widgetTransparency => 'Transparent background';
+
+  @override
+  String get widgetTransparencyDesc =>
+      'Use a semi-transparent background instead of solid color';
+
+  @override
+  String get addWidgetHint =>
+      'Add the Resonance widget from your home screen\'s widget menu.';
+
+  @override
+  String get homeGoodMorning => 'Good morning';
+
+  @override
+  String get homeGoodAfternoon => 'Good afternoon';
+
+  @override
+  String get homeGoodEvening => 'Good evening';
+
+  @override
+  String get homeGoodNight => 'Good night';
+
+  @override
+  String get homeNowPlaying => 'Now playing';
+
+  @override
+  String get homeSeeAll => 'See all';
+
+  @override
+  String get homeEmptyTitle => 'Your library is empty';
+
+  @override
+  String get homeEmptyMessage =>
+      'No songs found on this device. Make sure music files are in a scanned folder.';
+
+  @override
+  String get homeScanNow => 'Scan library';
+
+  @override
+  String get homeTagline => 'What shall we play tonight?';
+
+  @override
+  String get homeDiscoverAlbums => 'Explore albums';
+
+  @override
+  String get homeYourArtists => 'Your artists';
+
+  @override
+  String get homeFeatured => 'Featured';
+
+  @override
+  String get homeRecentlyPlayed => 'Recently played';
+
+  @override
+  String get homeDiscover => 'Discover something new';
+
+  @override
+  String get homePlayAlbum => 'Play album';
 }

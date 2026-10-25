@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/data/models/song_model.dart';
@@ -9,37 +11,67 @@ class ExternalOpenController extends GetxController {
   final PlayerController _player;
   ExternalOpenController(this._repo, this._player);
 
+  final pendingUri = Rxn<String>();
+  bool _hasHandledInitial = false;
+
   @override
   void onInit() {
     super.onInit();
-    _handleInitial();
     _listen();
+    _handleInitial();
   }
 
   Future<void> _handleInitial() async {
+    if (_hasHandledInitial) return;
+    _hasHandledInitial = true;
+
+    // Splash + permission + home akışının tamamlanmasını bekle
+    await Future.delayed(const Duration(milliseconds: 1500));
+
     final uri = await _repo.getInitialUri();
-    if (uri != null) _playUri(uri);
+    if (uri != null && uri.isNotEmpty) {
+      _schedulePlay(uri);
+    }
   }
 
   void _listen() {
-    _repo.listenForNewIntents(_playUri);
+    _repo.listenForNewIntents((uri) {
+      if (uri.isNotEmpty) _schedulePlay(uri);
+    });
   }
 
-  void _playUri(String uri) async {
-    // Harici dosya kütüphanede olmadığı için geçici bir SongModel oluşturuyoruz
-    final tempSong = SongModel(
-      id: uri.hashCode, // Geçici ID
-      uri: uri,
-      path: '', // Path yok, URI var
-      title: 'External File',
-      durationMs: 0,
-      sizeBytes: 0,
-    );
+  /// Splash / home navigasyonunun tamamlanmasını bekleyip
+  /// oynatıcı sayfasına geç. `offAllNamed` ile tekrar/çakışma riski yok.
+  void _schedulePlay(String uri) async {
+    try {
+      // Navigator'ın hazır olduğundan emin ol
+      await Future.delayed(const Duration(milliseconds: 600));
 
-    // PlayerController'a tek şarkı çalmasını söylüyoruz
-    await _player.playSong(tempSong);
-    
-    // Oynatıcı sayfasına yönlendir
-    Get.toNamed(AppRoutes.player);
+      // Harici dosya kütüphanede yok → geçici SongModel.
+      // ID'yi negatif yapıyoruz; MediaStore ID'leri (pozitif) ile çakışmaz.
+      final tempSong = SongModel(
+        id: -(uri.hashCode.abs() + 1),
+        uri: uri,
+        path: '',
+        title: 'Harici dosya',
+        durationMs: 0,
+        sizeBytes: 0,
+      );
+
+      await _player.playSong(tempSong);
+
+      // PlayerPage'in gerçekten açıldığını doğrula
+      if (Get.currentRoute != AppRoutes.player) {
+        Get.offAllNamed(AppRoutes.player);
+      }
+    } catch (e, st) {
+      debugPrint('Harici dosya açılamadı: $e\n$st');
+      Get.snackbar(
+        'Hata',
+        'Harici dosya açılamadı. Bu dosya için izin verilmemiş olabilir.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
+      );
+    }
   }
 }

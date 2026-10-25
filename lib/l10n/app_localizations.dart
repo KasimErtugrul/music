@@ -1729,6 +1729,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This track has no local file path. Waveform is only available for local files.'**
   String get waveformNoFilePath;
+
+  /// No description provided for @widgetSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Screen Widget'**
+  String get widgetSettings;
+
+  /// No description provided for @widgetTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget Theme'**
+  String get widgetTheme;
+
+  /// No description provided for @widgetThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow system'**
+  String get widgetThemeSystem;
+
+  /// No description provided for @widgetThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get widgetThemeLight;
+
+  /// No description provided for @widgetThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get widgetThemeDark;
+
+  /// No description provided for @widgetTransparency.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent background'**
+  String get widgetTransparency;
+
+  /// No description provided for @widgetTransparencyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a semi-transparent background instead of solid color'**
+  String get widgetTransparencyDesc;
+
+  /// No description provided for @addWidgetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the Resonance widget from your home screen\'s widget menu.'**
+  String get addWidgetHint;
+
+  /// No description provided for @homeGoodMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get homeGoodMorning;
+
+  /// No description provided for @homeGoodAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get homeGoodAfternoon;
+
+  /// No description provided for @homeGoodEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get homeGoodEvening;
+
+  /// No description provided for @homeGoodNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Good night'**
+  String get homeGoodNight;
+
+  /// No description provided for @homeNowPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Now playing'**
+  String get homeNowPlaying;
+
+  /// No description provided for @homeSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get homeSeeAll;
+
+  /// No description provided for @homeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your library is empty'**
+  String get homeEmptyTitle;
+
+  /// No description provided for @homeEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No songs found on this device. Make sure music files are in a scanned folder.'**
+  String get homeEmptyMessage;
+
+  /// No description provided for @homeScanNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan library'**
+  String get homeScanNow;
+
+  /// No description provided for @homeTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'What shall we play tonight?'**
+  String get homeTagline;
+
+  /// No description provided for @homeDiscoverAlbums.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore albums'**
+  String get homeDiscoverAlbums;
+
+  /// No description provided for @homeYourArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Your artists'**
+  String get homeYourArtists;
+
+  /// No description provided for @homeFeatured.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get homeFeatured;
+
+  /// No description provided for @homeRecentlyPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently played'**
+  String get homeRecentlyPlayed;
+
+  /// No description provided for @homeDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover something new'**
+  String get homeDiscover;
+
+  /// No description provided for @homePlayAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Play album'**
+  String get homePlayAlbum;
 }
 
 class _AppLocalizationsDelegate

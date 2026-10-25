@@ -888,4 +888,79 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get waveformNoFilePath =>
       'Bu şarkının yerel dosya yolu yok. Dalga formu yalnızca yerel dosyalar için kullanılabilir.';
+
+  @override
+  String get widgetSettings => 'Ana Ekran Widget\'ı';
+
+  @override
+  String get widgetTheme => 'Widget Teması';
+
+  @override
+  String get widgetThemeSystem => 'Sistemi takip et';
+
+  @override
+  String get widgetThemeLight => 'Açık';
+
+  @override
+  String get widgetThemeDark => 'Koyu';
+
+  @override
+  String get widgetTransparency => 'Şeffaf arka plan';
+
+  @override
+  String get widgetTransparencyDesc =>
+      'Düz renk yerine yarı saydam arka plan kullan';
+
+  @override
+  String get addWidgetHint =>
+      'Ana ekranınızın widget menüsünden Resonance widget\'ını ekleyin.';
+
+  @override
+  String get homeGoodMorning => 'İyi sabahlar';
+
+  @override
+  String get homeGoodAfternoon => 'İyi günler';
+
+  @override
+  String get homeGoodEvening => 'İyi akşamlar';
+
+  @override
+  String get homeGoodNight => 'İyi geceler';
+
+  @override
+  String get homeNowPlaying => 'Şu an çalıyor';
+
+  @override
+  String get homeSeeAll => 'Tümünü gör';
+
+  @override
+  String get homeEmptyTitle => 'Kütüphanen boş';
+
+  @override
+  String get homeEmptyMessage =>
+      'Cihazında hiç şarkı bulunamadı. Müzik dosyalarının taranan bir klasörde olduğundan emin ol.';
+
+  @override
+  String get homeScanNow => 'Kütüphaneyi tara';
+
+  @override
+  String get homeTagline => 'Bu akşam ne dinleyelim?';
+
+  @override
+  String get homeDiscoverAlbums => 'Albümlerini keşfet';
+
+  @override
+  String get homeYourArtists => 'Sanatçıların';
+
+  @override
+  String get homeFeatured => 'Öne çıkanlar';
+
+  @override
+  String get homeRecentlyPlayed => 'Son çalınanlar';
+
+  @override
+  String get homeDiscover => 'Yeni bir şeyler keşfet';
+
+  @override
+  String get homePlayAlbum => 'Albümü çal';
 }

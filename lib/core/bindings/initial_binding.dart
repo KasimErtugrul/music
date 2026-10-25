@@ -5,6 +5,7 @@ import 'package:resonance/data/datasources/audio_handler.dart';
 import 'package:resonance/data/datasources/device_media_datasource.dart';
 import 'package:resonance/data/datasources/equalizer_datasource.dart';
 import 'package:resonance/data/datasources/external_intent_datasource.dart';
+import 'package:resonance/data/datasources/home_widget_datasource.dart';
 import 'package:resonance/data/datasources/local/app_database.dart';
 import 'package:resonance/data/datasources/local/daos/custom_theme_dao.dart';
 import 'package:resonance/data/datasources/local/daos/equalizer_preset_dao.dart';
@@ -21,6 +22,7 @@ import 'package:resonance/data/repositories/excluded_folder_repository.dart'; //
 import 'package:resonance/data/repositories/external_intent_repository.dart';
 import 'package:resonance/data/repositories/favorite_repository.dart';
 import 'package:resonance/data/repositories/history_repository.dart';
+import 'package:resonance/data/repositories/home_widget_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
 import 'package:resonance/data/repositories/preferences_repository.dart';
@@ -34,6 +36,7 @@ import 'package:resonance/presentation/controllers/excluded_folders_controller.d
 import 'package:resonance/presentation/controllers/external_open_controller.dart'; // YENİ
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/history_controller.dart';
+import 'package:resonance/presentation/controllers/home_widget_controller.dart';
 import 'package:resonance/presentation/controllers/permission_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/search_controller.dart';
@@ -67,18 +70,9 @@ class InitialBinding extends Bindings {
       Get.find<AppDatabase>().queueStateDao,
       permanent: true,
     );
-    Get.put<FavoriteDao>(
-      Get.find<AppDatabase>().favoriteDao,
-      permanent: true,
-    );
-    Get.put<HistoryDao>(
-      Get.find<AppDatabase>().historyDao,
-      permanent: true,
-    );
-    Get.put<PlaylistDao>(
-      Get.find<AppDatabase>().playlistDao,
-      permanent: true,
-    );
+    Get.put<FavoriteDao>(Get.find<AppDatabase>().favoriteDao, permanent: true);
+    Get.put<HistoryDao>(Get.find<AppDatabase>().historyDao, permanent: true);
+    Get.put<PlaylistDao>(Get.find<AppDatabase>().playlistDao, permanent: true);
     Get.put<CustomThemeDao>(
       Get.find<AppDatabase>().customThemeDao,
       permanent: true,
@@ -197,7 +191,10 @@ class InitialBinding extends Bindings {
     );
 
     // --- EXTERNAL INTENT (DIŞARIDAN AÇMA) ---
-    Get.put<ExternalIntentDatasource>(ExternalIntentDatasource(), permanent: true);
+    Get.put<ExternalIntentDatasource>(
+      ExternalIntentDatasource(),
+      permanent: true,
+    );
     Get.put<ExternalIntentRepository>(
       ExternalIntentRepositoryImpl(Get.find<ExternalIntentDatasource>()),
       permanent: true,
@@ -206,6 +203,22 @@ class InitialBinding extends Bindings {
       ExternalOpenController(
         Get.find<ExternalIntentRepository>(),
         Get.find<PlayerController>(),
+      ),
+      permanent: true,
+    );
+
+     Get.put<HomeWidgetDatasource>(HomeWidgetDatasource(), permanent: true);
+    Get.put<HomeWidgetRepository>(
+      HomeWidgetRepositoryImpl(Get.find<HomeWidgetDatasource>()),
+      permanent: true,
+    );
+    Get.put<HomeWidgetController>(
+      HomeWidgetController(
+        Get.find<HomeWidgetRepository>(),
+        Get.find<HomeWidgetDatasource>(),   // YENİ
+        Get.find<PlayerController>(),
+        Get.find<LibraryRepository>(),      // YENİ
+        Get.find<SharedPreferences>(),
       ),
       permanent: true,
     );

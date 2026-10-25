@@ -97,16 +97,18 @@ class PlayerController extends GetxController {
 
   void setVolume(double vol) => _repository.setVolume(vol);
 
-  void _checkHistory(Duration pos) {
+    void _checkHistory(Duration pos) {
     final song = currentSong;
     if (song == null || _loggedSongUri == song.uri) return;
+
+    // Harici dosyalar (id < 0) geçmişe yazılmaz
+    if (song.id < 0) return;
 
     final minDuration = const Duration(seconds: 30);
     final halfDuration = Duration(milliseconds: song.durationMs ~/ 2);
     final threshold = minDuration < halfDuration ? minDuration : halfDuration;
 
     if (pos >= threshold) {
-      // Uzman Çözümü: DAO'ya şarkıyı (metadata ile) gönder
       _historyRepo.recordPlay(song);
       _loggedSongUri = song.uri;
     }

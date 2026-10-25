@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/ui/layouts/adaptive_scaffold.dart';
 import 'package:resonance/presentation/ui/pages/library_tabs_page.dart';
 import 'package:resonance/presentation/ui/pages/playlists/playlists_page.dart';
 import 'package:resonance/presentation/ui/pages/search_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/settings_home_page.dart';
+import 'package:resonance/presentation/ui/pages/home_tab_content.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
       body: IndexedStack(
         index: _index,
         children: const <Widget>[
-          _HomeTabContent(),
+          HomeTabContent(),   // ← DEĞİŞTİ (önce _HomeTabContent'ti)
           LibraryTabsPage(),
           PlaylistsPage(),
           SearchPage(), // <- Burası değişti
@@ -63,46 +63,5 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _HomeTabContent extends StatelessWidget {
-  const _HomeTabContent();
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final isTurkish = Localizations.localeOf(context).languageCode == 'tr';
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.appName)),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              l10n.songCount(1842),
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                Chip(label: Text(l10n.libraryTabSongs)),
-                Chip(label: Text(l10n.libraryTabAlbums)),
-                Chip(label: Text(l10n.libraryTabArtists)),
-                Chip(label: Text(l10n.libraryTabGenres)),
-                Chip(label: Text(l10n.libraryTabFolders)),
-              ],
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () =>
-                  Get.updateLocale(Locale(isTurkish ? 'en' : 'tr')),
-              child: Text(l10n.debugLanguageToggle),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
