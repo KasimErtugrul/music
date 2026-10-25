@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Resonance</string>
+    <string name="widget_description">Müzik çalar kontrolleri</string>
+    <string name="widget_not_playing">Çalmıyor</string>
+    <string name="widget_play_pause">Oynat / duraklat</string>
+    <string name="widget_next">Sonraki</string>
+</resources>

@@ -43,7 +43,9 @@ import 'package:resonance/presentation/controllers/search_controller.dart';
 import 'package:resonance/presentation/controllers/stats_controller.dart';
 import 'package:resonance/presentation/controllers/waveform_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:resonance/data/datasources/backup_datasource.dart';
+import 'package:resonance/data/repositories/backup_repository.dart';
+import 'package:resonance/presentation/controllers/backup_controller.dart';
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
@@ -222,7 +224,9 @@ class InitialBinding extends Bindings {
       ),
       permanent: true,
     );
-
+Get.put<BackupDatasource>(BackupDatasource(Get.find<AppDatabase>(), Get.find<SharedPreferences>()), permanent: true);
+    Get.put<BackupRepository>(BackupRepositoryImpl(Get.find<BackupDatasource>()), permanent: true);
+    Get.put<BackupController>(BackupController(Get.find<BackupRepository>(), Get.find<LibraryRepository>()), permanent: true);
     // --- PLAYLIST ---
     PlaylistBinding().dependencies();
   }

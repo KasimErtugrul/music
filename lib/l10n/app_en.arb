@@ -306,5 +306,18 @@
     "homeFeatured": "Featured",
   "homeRecentlyPlayed": "Recently played",
   "homeDiscover": "Discover something new",
-  "homePlayAlbum": "Play album"
+  "homePlayAlbum": "Play album",
+    "backupTitle": "Backup & Restore",
+  "backupDesc": "Export your playlists, favorites, custom themes, equalizer presets and settings to a JSON file.",
+  "backupExport": "Export Data",
+  "backupImport": "Import Data",
+  "backupExportSuccess": "Backup exported successfully.",
+  "backupExportError": "Failed to export backup.",
+  "backupImportSuccess": "Backup imported successfully.",
+  "backupImportError": "Invalid or corrupted backup file.",
+  "backupImportConfirmTitle": "Overwrite data?",
+  "backupImportConfirmMessage": "This will overwrite existing playlists, favorites, themes, equalizer presets, and settings. This cannot be undone.",
+  "backupOverwrite": "Import & Overwrite",
+  "backupCancel": "Cancel",
+  "backupVersionMismatch": "Backup version mismatch. Some data may not import."
 }

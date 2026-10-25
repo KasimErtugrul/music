@@ -1873,6 +1873,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Play album'**
   String get homePlayAlbum;
+
+  /// No description provided for @backupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & Restore'**
+  String get backupTitle;
+
+  /// No description provided for @backupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Export your playlists, favorites, custom themes, equalizer presets and settings to a JSON file.'**
+  String get backupDesc;
+
+  /// No description provided for @backupExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Data'**
+  String get backupExport;
+
+  /// No description provided for @backupImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Data'**
+  String get backupImport;
+
+  /// No description provided for @backupExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup exported successfully.'**
+  String get backupExportSuccess;
+
+  /// No description provided for @backupExportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export backup.'**
+  String get backupExportError;
+
+  /// No description provided for @backupImportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup imported successfully.'**
+  String get backupImportSuccess;
+
+  /// No description provided for @backupImportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or corrupted backup file.'**
+  String get backupImportError;
+
+  /// No description provided for @backupImportConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite data?'**
+  String get backupImportConfirmTitle;
+
+  /// No description provided for @backupImportConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will overwrite existing playlists, favorites, themes, equalizer presets, and settings. This cannot be undone.'**
+  String get backupImportConfirmMessage;
+
+  /// No description provided for @backupOverwrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Import & Overwrite'**
+  String get backupOverwrite;
+
+  /// No description provided for @backupCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get backupCancel;
+
+  /// No description provided for @backupVersionMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup version mismatch. Some data may not import.'**
+  String get backupVersionMismatch;
 }
 
 class _AppLocalizationsDelegate

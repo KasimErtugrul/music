@@ -3,6 +3,7 @@ import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/presentation/bindings/home_binding.dart';
 import 'package:resonance/presentation/ui/pages/album_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/artist_detail_page.dart';
+import 'package:resonance/presentation/ui/pages/backup_page.dart';
 import 'package:resonance/presentation/ui/pages/favorites_page.dart';
 import 'package:resonance/presentation/ui/pages/genre_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/history_page.dart';
@@ -74,6 +75,7 @@ abstract final class AppPages {
     GetPage(name: AppRoutes.playerStyle, page: () => const PlayerStylePage()),
     GetPage(name: AppRoutes.listStyle, page: () => const ListStylePage()),
     GetPage(name: AppRoutes.audioSettings, page: () => const AudioSettingsPage()),
-
+// import 'package:resonance/presentation/ui/pages/settings/backup_page.dart';
+    GetPage(name: AppRoutes.backup, page: () => const BackupPage()),
   ];
 }

@@ -1,39 +1,28 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Gün 2: kütüphane izinleri -->
+    <!-- Kütüphane izinleri -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Gün 7: audio_service arka plan oynatma -->
+    <!-- audio_service arka plan oynatma -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!--
-        Kural 4: INTERNET İZNİ KULLANILMAZ.
-        <uses-permission android:name="android.permission.INTERNET" />
-    -->
+    <!-- Kural 4: INTERNET izni kullanılmaz (yalnızca debug manifest'te, hot reload için). -->
 
     <application
-    android:label="resonance"
-    android:name="${applicationName}"
-    android:icon="@mipmap/ic_launcher"
-    android:localeConfig="@xml/locales_config">
-        <!--
-            TEK activity: MainActivity.
-            Kotlin tarafında AudioServiceActivity'den miras aldığımız için
-            ayrı bir `com.ryanheise.audioservice.AudioServiceActivity`
-            tanımı GEREKSİZDİR; eklenirse ayrı bir FlutterEngine açılır ve
-            MainActivity'deki MediaStore MethodChannel o engine'de olmaz.
-        -->
+        android:label="@string/app_name"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:localeConfig="@xml/locales_config">
 
-        
-
-
+        <!-- TEK activity. AudioServiceActivity'den miras alındığı için ayrıca
+             AudioServiceActivity tanımlanmaz (ikinci bir FlutterEngine açılırdı). -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -45,22 +34,30 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
+            <!-- Varsayılan "true": "Bununla aç" ile gelen content://... adresinin yolu Flutter'a
+                 başlangıç sayfası olarak verilir ve eşleşen sayfa olmadığı için ekran boş kalır.
+                 Dosya açma kendi kanalımızla (MediaStoreChannel) yapılıyor. -->
+            <meta-data
+                android:name="flutter_deeplinking_enabled"
+                android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- .MainActivity içindeki mevcut LAUNCHER intent-filter'ın hemen altına ekle: -->
+            <!-- "Bununla aç" (dosya yöneticisi). BROWSABLE bilerek yok: web bağlantılarından
+                 tetiklenmesi gerekmez. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="content" android:mimeType="audio/*" />
-                <data android:scheme="file" android:mimeType="audio/*" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
             </intent-filter>
         </activity>
 
-        <!-- Gün 7: audio_service arka plan servisi -->
+        <!-- audio_service servisi (paket dokümantasyonundaki tanımla aynı) -->
         <service
             android:name="com.ryanheise.audioservice.AudioService"
             android:foregroundServiceType="mediaPlayback"
@@ -71,9 +68,7 @@
             </intent-filter>
         </service>
 
-        
-
-        <!-- Gün 7: kulaklık medya tuşları -->
+        <!-- Kulaklık / medya tuşları -->
         <receiver
             android:name="com.ryanheise.audioservice.MediaButtonReceiver"
             android:exported="true"
@@ -83,7 +78,8 @@
             </intent-filter>
         </receiver>
 
-                <receiver
+        <!-- Ana ekran widget'ı -->
+        <receiver
             android:name=".widget.MusicWidgetProvider"
             android:exported="false">
             <intent-filter>

@@ -966,4 +966,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homePlayAlbum => 'Play album';
+
+  @override
+  String get backupTitle => 'Backup & Restore';
+
+  @override
+  String get backupDesc =>
+      'Export your playlists, favorites, custom themes, equalizer presets and settings to a JSON file.';
+
+  @override
+  String get backupExport => 'Export Data';
+
+  @override
+  String get backupImport => 'Import Data';
+
+  @override
+  String get backupExportSuccess => 'Backup exported successfully.';
+
+  @override
+  String get backupExportError => 'Failed to export backup.';
+
+  @override
+  String get backupImportSuccess => 'Backup imported successfully.';
+
+  @override
+  String get backupImportError => 'Invalid or corrupted backup file.';
+
+  @override
+  String get backupImportConfirmTitle => 'Overwrite data?';
+
+  @override
+  String get backupImportConfirmMessage =>
+      'This will overwrite existing playlists, favorites, themes, equalizer presets, and settings. This cannot be undone.';
+
+  @override
+  String get backupOverwrite => 'Import & Overwrite';
+
+  @override
+  String get backupCancel => 'Cancel';
+
+  @override
+  String get backupVersionMismatch =>
+      'Backup version mismatch. Some data may not import.';
 }

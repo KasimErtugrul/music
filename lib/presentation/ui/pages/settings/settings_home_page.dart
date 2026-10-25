@@ -98,6 +98,14 @@ class SettingsHomePage extends StatelessWidget {
               onTap: () => Get.to(() => const WidgetSettingsPage()),
             ),
 
+            // ListView children'ına ekle:
+            ListTile(
+              leading: const Icon(Icons.backup),
+              title: Text(l10n.backupTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.toNamed(AppRoutes.backup),
+            ),
+
             // Gün 18: Görünüm ayarları — tam tema sistemi
             SettingsSectionHeader(title: l10n.settingsGroupAppearance),
             ListTile(

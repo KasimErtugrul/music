@@ -296,5 +296,18 @@
     "homeFeatured": "Öne çıkanlar",
   "homeRecentlyPlayed": "Son çalınanlar",
   "homeDiscover": "Yeni bir şeyler keşfet",
-  "homePlayAlbum": "Albümü çal"
+  "homePlayAlbum": "Albümü çal",
+    "backupTitle": "Yedekleme ve Geri Yükleme",
+  "backupDesc": "Çalma listelerinizi, favorilerinizi, özel temalarınızı, ekolayzer ön ayarlarınızı ve ayarlarınızı JSON dosyası olarak dışa aktarın.",
+  "backupExport": "Verileri Dışa Aktar",
+  "backupImport": "Verileri İçe Aktar",
+  "backupExportSuccess": "Yedek başarıyla dışa aktarıldı.",
+  "backupExportError": "Yedek dışa aktarılamadı.",
+  "backupImportSuccess": "Yedek başarıyla içe aktarıldı.",
+  "backupImportError": "Geçersiz veya bozuk yedek dosyası.",
+  "backupImportConfirmTitle": "Verilerin üzerine yazılsın mı?",
+  "backupImportConfirmMessage": "Bu işlem mevcut çalma listelerinizin, favorilerinizin, temalarınızın, ekolayzer ön ayarlarınızın ve ayarlarınızın üzerine yazacaktır. Bu işlem geri alınamaz.",
+  "backupOverwrite": "İçe Aktar ve Üzerine Yaz",
+  "backupCancel": "İptal",
+  "backupVersionMismatch": "Yedek sürümü uyuşmuyor. Bazı veriler içe aktarılamayabilir."
   }

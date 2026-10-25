@@ -48,14 +48,15 @@ class HomeWidgetController extends GetxController {
       final song = _player.currentSong;
       final isTransparent = _prefs.getBool('widget_transparent') ?? false;
 
-      if (updateArtwork && song != null) {
-        final bytes = await _libraryRepo.artwork(song.id, size: 200);
+      if (updateArtwork) {
+        final bytes =
+            song == null ? null : await _libraryRepo.artwork(song.id, size: 200);
         await _datasource.saveArtwork(bytes);
       }
 
       await _repo.updateWidget(
-        title: song?.title ?? 'Not playing',
-        artist: song?.artist ?? 'Resonance',
+        title: song?.title ?? '',
+        artist: song?.artist ?? '',
         isPlaying: _player.isPlaying.value,
         isTransparent: isTransparent,
       );

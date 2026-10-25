@@ -963,4 +963,46 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get homePlayAlbum => 'Albümü çal';
+
+  @override
+  String get backupTitle => 'Yedekleme ve Geri Yükleme';
+
+  @override
+  String get backupDesc =>
+      'Çalma listelerinizi, favorilerinizi, özel temalarınızı, ekolayzer ön ayarlarınızı ve ayarlarınızı JSON dosyası olarak dışa aktarın.';
+
+  @override
+  String get backupExport => 'Verileri Dışa Aktar';
+
+  @override
+  String get backupImport => 'Verileri İçe Aktar';
+
+  @override
+  String get backupExportSuccess => 'Yedek başarıyla dışa aktarıldı.';
+
+  @override
+  String get backupExportError => 'Yedek dışa aktarılamadı.';
+
+  @override
+  String get backupImportSuccess => 'Yedek başarıyla içe aktarıldı.';
+
+  @override
+  String get backupImportError => 'Geçersiz veya bozuk yedek dosyası.';
+
+  @override
+  String get backupImportConfirmTitle => 'Verilerin üzerine yazılsın mı?';
+
+  @override
+  String get backupImportConfirmMessage =>
+      'Bu işlem mevcut çalma listelerinizin, favorilerinizin, temalarınızın, ekolayzer ön ayarlarınızın ve ayarlarınızın üzerine yazacaktır. Bu işlem geri alınamaz.';
+
+  @override
+  String get backupOverwrite => 'İçe Aktar ve Üzerine Yaz';
+
+  @override
+  String get backupCancel => 'İptal';
+
+  @override
+  String get backupVersionMismatch =>
+      'Yedek sürümü uyuşmuyor. Bazı veriler içe aktarılamayabilir.';
 }

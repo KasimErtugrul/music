@@ -1,1 +1,8 @@
-<string name="app_name">Resonance</string>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Resonance</string>
+    <string name="widget_description">Music player controls</string>
+    <string name="widget_not_playing">Not playing</string>
+    <string name="widget_play_pause">Play / pause</string>
+    <string name="widget_next">Next</string>
+</resources>

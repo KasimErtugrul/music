@@ -127,6 +127,15 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> play() => _source.play();
   @override
   Future<void> pause() => _source.pause();
+  /// Uygulama son uygulamalardan kapatıldığında çağrılır (BaseAudioHandler'da varsayılanı
+  /// boştur, bu yüzden kart sonsuza dek kalıyordu). Müzik çalıyorsa devam eder; duraklatılmış
+  /// ya da durmuşsa servis ve bildirim kapanır. Her durumda kapatmak için koşulu kaldırıp
+  /// doğrudan `await stop();` yazın.
+  @override
+  Future<void> onTaskRemoved() async {
+    if (!_player.playing) await stop();
+  }
+
   @override
   Future<void> stop() async {
     await _source.stop();

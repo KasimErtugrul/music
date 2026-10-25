@@ -4,6 +4,7 @@ import 'package:resonance/core/routes/app_pages.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
+import 'package:resonance/presentation/ui/pages/splash_page.dart';
 
 class ResonanceApp extends StatelessWidget {
   const ResonanceApp({super.key, this.initialRoute = AppPages.initial});
@@ -41,6 +42,11 @@ class ResonanceApp extends StatelessWidget {
         supportedLocales: AppLocalizations.supportedLocales,
         initialRoute: initialRoute,
         getPages: AppPages.routes,
+        // Tanımsız bir yol gelirse (ör. dış intent) boş ekran yerine açılış sayfası.
+        unknownRoute: GetPage<dynamic>(
+          name: '/not-found',
+          page: () => const SplashPage(),
+        ),
         // initialBinding KALDIRILDI (main.dart'ta var)
       );
     });

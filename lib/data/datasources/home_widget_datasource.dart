@@ -30,8 +30,12 @@ class HomeWidgetDatasource {
   /// (launcher) bu dosyayı doğrudan okumaz; `onUpdate` içinde
   /// uygulama süreci okur ve RemoteViews'a `Bitmap` olarak koyar.
   Future<void> saveArtwork(Uint8List? bytes) async {
-    if (bytes == null || bytes.isEmpty) return;
     try {
+      if (bytes == null || bytes.isEmpty) {
+        // Kapaksuz şarkıda önceki şarkının kapağı kalmasın.
+        await HomeWidget.saveWidgetData<String>('artwork_path', '');
+        return;
+      }
       final dir = await getApplicationDocumentsDirectory();
       final file = File('${dir.path}/widget_artwork.jpg');
       await file.writeAsBytes(bytes, flush: true);

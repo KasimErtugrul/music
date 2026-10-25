@@ -16,10 +16,16 @@ class ExternalIntentDatasource {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'onExternalIntent') {
         final uri = call.arguments as String?;
-        if (uri != null && uri.isNotEmpty) {
-          _callback?.call(uri);
+        final cb = _callback;
+        if (uri != null && uri.isNotEmpty && cb != null) {
+          cb(uri);
+          // Kotlin tarafı yalnızca `true` alırsa bekleyen URI'yi siler; dinleyici henüz
+          // yoksa URI bekletilir ve getInitialIntent() ile alınır.
+          return true;
         }
+        return false;
       }
+      return null;
     });
   }
 

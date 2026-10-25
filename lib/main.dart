@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,6 +17,7 @@ import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
 import 'package:resonance/presentation/controllers/sleep_timer_controller.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 late final AudioHandler audioHandler;
@@ -51,21 +54,32 @@ Future<void> main() async {
     audioHandler = await AudioService.init(
       builder: () => ResonanceAudioHandler(
         source: playerSource,
+        // audio_service yalnızca file:// ve content:// artUri'yi yerel okur; diğer şemaları
+        // HTTP indirici (flutter_cache_manager) ile almaya çalışır. `data:` URI bildirimde
+        // kapak göstermez (ve INTERNET izni de yok). Bu yüzden JPEG dosyaya yazılır.
         artResolver: (songUri) async {
-          final libRepo = Get.find<LibraryRepository>();
           final id = int.tryParse(songUri.split('/').last);
           if (id == null) return null;
-          final bytes = await libRepo.artwork(id);
-          if (bytes == null) return null;
-          return Uri.dataFromBytes(bytes);
+          final dir = Directory('${(await getTemporaryDirectory()).path}/notif_art');
+          final file = File('${dir.path}/$id.jpg');
+          if (await file.exists() && await file.length() > 0) {
+            return Uri.file(file.path);
+          }
+          final bytes = await Get.find<LibraryRepository>().artwork(id, size: 512);
+          if (bytes == null || bytes.isEmpty) return null;
+          await dir.create(recursive: true);
+          await file.writeAsBytes(bytes, flush: true);
+          return Uri.file(file.path);
         },
       ),
       config: const AudioServiceConfig(
         androidNotificationChannelId: 'com.example.resonance.channel.audio',
         androidNotificationChannelName: 'Playback',
         androidNotificationChannelDescription: 'Playback controls',
-        androidNotificationOngoing: true,
-        androidNotificationIcon: 'mipmap/ic_launcher',
+        // false: duraklatılınca bildirim kaydırılıp kapatılabilir. `true` iken
+        // duraklatılmış kart bile kaldırılamıyordu.
+        androidNotificationOngoing: false,
+        androidNotificationIcon: 'drawable/ic_notification',
       ),
     );
     Get.put<ResonanceAudioHandler>(
