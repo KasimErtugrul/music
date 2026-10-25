@@ -22,11 +22,15 @@
         android:localeConfig="@xml/locales_config">
 
         <!-- TEK activity. AudioServiceActivity'den miras alındığı için ayrıca
-             AudioServiceActivity tanımlanmaz (ikinci bir FlutterEngine açılırdı). -->
+             AudioServiceActivity tanımlanmaz (ikinci bir FlutterEngine açılırdı).
+             launchMode=singleTask: "Bununla aç" dosya yöneticisinin görevinde İKİNCİ bir
+             MainActivity açardı (singleTop yalnızca aynı görevde işe yarar). İki Activity
+             aynı paylaşımlı engine'e bağlanınca eskisi durduğunda engine "paused" olur ve
+             yeni ekran siyah kalır. singleTask mevcut Activity'yi öne alır, onNewIntent çağırır. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
