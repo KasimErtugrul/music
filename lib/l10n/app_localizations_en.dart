@@ -634,22 +634,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themePreviewSongArtist => 'Sample Artist';
 
   @override
-  String get settingsPlayback => 'Oynatma';
+  String get settingsPlayback => 'Playback';
 
   @override
-  String get settingsLibrary => 'Kütüphane';
+  String get settingsLibrary => 'Library';
 
   @override
-  String get settingsAccessibility => 'Erişilebilirlik';
+  String get settingsAccessibility => 'Accessibility';
 
   @override
-  String get settingsStorage => 'Depolama ve Gelişmiş';
+  String get settingsStorage => 'Storage & Advanced';
 
   @override
-  String get settingsQueue => 'Kuyruk ve Playlist';
+  String get settingsQueue => 'Queue & Playlist';
 
   @override
-  String get seekInterval => 'Sarma süresi';
+  String get seekInterval => 'Seek interval';
 
   @override
   String seekIntervalValue(int seconds) {
@@ -657,50 +657,50 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get autoResume => 'Uygulama açılınca otomatik devam et';
+  String get autoResume => 'Auto-resume on app start';
 
   @override
-  String get pauseOnHeadphone => 'Kulaklık çıkınca duraklat';
+  String get pauseOnHeadphone => 'Pause when headphones disconnected';
 
   @override
-  String get defaultShuffle => 'Varsayılan karıştırma';
+  String get defaultShuffle => 'Default shuffle';
 
   @override
-  String get defaultRepeat => 'Varsayılan tekrar modu';
+  String get defaultRepeat => 'Default repeat mode';
 
   @override
-  String get repeatNone => 'Kapalı';
+  String get repeatNone => 'None';
 
   @override
-  String get repeatAll => 'Tümü';
+  String get repeatAll => 'All';
 
   @override
-  String get repeatOne => 'Tek';
+  String get repeatOne => 'One';
 
   @override
-  String get minDuration => 'Minimum şarkı süresi';
+  String get minDuration => 'Minimum song duration';
 
   @override
-  String get scanOnStartup => 'Açılışta kütüphaneyi tara';
+  String get scanOnStartup => 'Scan library on startup';
 
   @override
-  String get resetGroup => 'Grubu varsayılana sıfırla';
+  String get resetGroup => 'Reset group to defaults';
 
   @override
-  String get resetAll => 'Tüm ayarları sıfırla';
+  String get resetAll => 'Reset all settings';
 
   @override
   String get resetConfirm =>
-      'Tüm ayarları varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.';
+      'Are you sure you want to reset all settings to their defaults? This cannot be undone.';
 
   @override
-  String get textScale => 'Yazı ölçeği';
+  String get textScale => 'Text scale';
 
   @override
-  String get reduceAnimations => 'Animasyonları azalt';
+  String get reduceAnimations => 'Reduce animations';
 
   @override
-  String get largeTouchTargets => 'Büyük dokunma hedefleri';
+  String get largeTouchTargets => 'Large touch targets';
 
   @override
   String get audioSettingsTitle => 'Audio';

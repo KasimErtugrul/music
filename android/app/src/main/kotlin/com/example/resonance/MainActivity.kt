@@ -1,9 +1,15 @@
 package com.example.resonance
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
+import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import com.example.resonance.widget.MusicWidgetProvider
 import com.ryanheise.audioservice.AudioServiceActivity
@@ -12,6 +18,13 @@ import io.flutter.embedding.engine.FlutterEngine
 class MainActivity : AudioServiceActivity() {
 
     private var pendingPinWidget = false
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var pinReceiver: BroadcastReceiver? = null
+    private val pinTimeout = Runnable {
+        unregisterPinReceiver()
+        Toast.makeText(this, R.string.widget_pin_failed, Toast.LENGTH_LONG).show()
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -27,11 +40,16 @@ class MainActivity : AudioServiceActivity() {
 
     override fun onPostResume() {
         super.onPostResume()
-        // Activity tamamen öne geldikten sonra iste; soğuk başlatmada daha güvenilir.
         if (pendingPinWidget) {
             pendingPinWidget = false
             requestPinWidget()
         }
+    }
+
+    override fun onDestroy() {
+        mainHandler.removeCallbacks(pinTimeout)
+        unregisterPinReceiver()
+        super.onDestroy()
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -57,16 +75,61 @@ class MainActivity : AudioServiceActivity() {
         val manager = AppWidgetManager.getInstance(this)
         val supported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             manager.isRequestPinAppWidgetSupported
-        if (supported) {
-            manager.requestPinAppWidget(
-                ComponentName(this, MusicWidgetProvider::class.java), null, null,
-            )
-        } else {
+        if (!supported) {
             Toast.makeText(this, R.string.widget_pin_unsupported, Toast.LENGTH_LONG).show()
+            return
         }
+
+        // Launcher widget'ı gerçekten eklediğinde bu yayın gelir.
+        unregisterPinReceiver()
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                mainHandler.removeCallbacks(pinTimeout)
+                unregisterPinReceiver()
+            }
+        }
+        val filter = IntentFilter(ACTION_WIDGET_PINNED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            registerReceiver(receiver, filter)
+        }
+        pinReceiver = receiver
+
+        val callback = PendingIntent.getBroadcast(
+            this, 0,
+            Intent(ACTION_WIDGET_PINNED).setPackage(packageName),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
+        val accepted = manager.requestPinAppWidget(
+            ComponentName(this, MusicWidgetProvider::class.java), null, callback,
+        )
+        if (accepted) {
+            // Pencere açılır ve kullanıcı onaylarsa receiver tetiklenir; 3 sn içinde hiçbir
+            // şey olmazsa (ör. MIUI isteği sessizce yuttuysa) kullanıcıya yol gösterilir.
+            mainHandler.postDelayed(pinTimeout, PIN_TIMEOUT_MS)
+        } else {
+            unregisterPinReceiver()
+            Toast.makeText(this, R.string.widget_pin_failed, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun unregisterPinReceiver() {
+        pinReceiver?.let {
+            try {
+                unregisterReceiver(it)
+            } catch (e: IllegalArgumentException) {
+                // zaten kayıtlı değil
+            }
+        }
+        pinReceiver = null
     }
 
     private companion object {
         const val ACTION_ADD_WIDGET = "com.example.resonance.ADD_WIDGET"
+        const val ACTION_WIDGET_PINNED = "com.example.resonance.WIDGET_PINNED"
+        const val PIN_TIMEOUT_MS = 3000L
     }
 }

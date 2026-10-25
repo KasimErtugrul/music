@@ -1241,37 +1241,37 @@ abstract class AppLocalizations {
   /// No description provided for @settingsPlayback.
   ///
   /// In en, this message translates to:
-  /// **'Oynatma'**
+  /// **'Playback'**
   String get settingsPlayback;
 
   /// No description provided for @settingsLibrary.
   ///
   /// In en, this message translates to:
-  /// **'Kütüphane'**
+  /// **'Library'**
   String get settingsLibrary;
 
   /// No description provided for @settingsAccessibility.
   ///
   /// In en, this message translates to:
-  /// **'Erişilebilirlik'**
+  /// **'Accessibility'**
   String get settingsAccessibility;
 
   /// No description provided for @settingsStorage.
   ///
   /// In en, this message translates to:
-  /// **'Depolama ve Gelişmiş'**
+  /// **'Storage & Advanced'**
   String get settingsStorage;
 
   /// No description provided for @settingsQueue.
   ///
   /// In en, this message translates to:
-  /// **'Kuyruk ve Playlist'**
+  /// **'Queue & Playlist'**
   String get settingsQueue;
 
   /// No description provided for @seekInterval.
   ///
   /// In en, this message translates to:
-  /// **'Sarma süresi'**
+  /// **'Seek interval'**
   String get seekInterval;
 
   /// No description provided for @seekIntervalValue.
@@ -1283,91 +1283,91 @@ abstract class AppLocalizations {
   /// No description provided for @autoResume.
   ///
   /// In en, this message translates to:
-  /// **'Uygulama açılınca otomatik devam et'**
+  /// **'Auto-resume on app start'**
   String get autoResume;
 
   /// No description provided for @pauseOnHeadphone.
   ///
   /// In en, this message translates to:
-  /// **'Kulaklık çıkınca duraklat'**
+  /// **'Pause when headphones disconnected'**
   String get pauseOnHeadphone;
 
   /// No description provided for @defaultShuffle.
   ///
   /// In en, this message translates to:
-  /// **'Varsayılan karıştırma'**
+  /// **'Default shuffle'**
   String get defaultShuffle;
 
   /// No description provided for @defaultRepeat.
   ///
   /// In en, this message translates to:
-  /// **'Varsayılan tekrar modu'**
+  /// **'Default repeat mode'**
   String get defaultRepeat;
 
   /// No description provided for @repeatNone.
   ///
   /// In en, this message translates to:
-  /// **'Kapalı'**
+  /// **'None'**
   String get repeatNone;
 
   /// No description provided for @repeatAll.
   ///
   /// In en, this message translates to:
-  /// **'Tümü'**
+  /// **'All'**
   String get repeatAll;
 
   /// No description provided for @repeatOne.
   ///
   /// In en, this message translates to:
-  /// **'Tek'**
+  /// **'One'**
   String get repeatOne;
 
   /// No description provided for @minDuration.
   ///
   /// In en, this message translates to:
-  /// **'Minimum şarkı süresi'**
+  /// **'Minimum song duration'**
   String get minDuration;
 
   /// No description provided for @scanOnStartup.
   ///
   /// In en, this message translates to:
-  /// **'Açılışta kütüphaneyi tara'**
+  /// **'Scan library on startup'**
   String get scanOnStartup;
 
   /// No description provided for @resetGroup.
   ///
   /// In en, this message translates to:
-  /// **'Grubu varsayılana sıfırla'**
+  /// **'Reset group to defaults'**
   String get resetGroup;
 
   /// No description provided for @resetAll.
   ///
   /// In en, this message translates to:
-  /// **'Tüm ayarları sıfırla'**
+  /// **'Reset all settings'**
   String get resetAll;
 
   /// No description provided for @resetConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Tüm ayarları varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.'**
+  /// **'Are you sure you want to reset all settings to their defaults? This cannot be undone.'**
   String get resetConfirm;
 
   /// No description provided for @textScale.
   ///
   /// In en, this message translates to:
-  /// **'Yazı ölçeği'**
+  /// **'Text scale'**
   String get textScale;
 
   /// No description provided for @reduceAnimations.
   ///
   /// In en, this message translates to:
-  /// **'Animasyonları azalt'**
+  /// **'Reduce animations'**
   String get reduceAnimations;
 
   /// No description provided for @largeTouchTargets.
   ///
   /// In en, this message translates to:
-  /// **'Büyük dokunma hedefleri'**
+  /// **'Large touch targets'**
   String get largeTouchTargets;
 
   /// No description provided for @audioSettingsTitle.

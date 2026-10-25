@@ -13,4 +13,5 @@
     <!-- Uygulama kısayolları (ikona uzun basınca) -->
     <string name="shortcut_add_widget_short">Add widget</string>
     <string name="shortcut_add_widget_long">Add widget to home screen</string>
+    <string name="widget_pin_failed">Widget eklenemedi. Ana ekrana uzun basıp Widgets bölümünden Resonance Player\'ı ekleyin.</string>
 </resources>

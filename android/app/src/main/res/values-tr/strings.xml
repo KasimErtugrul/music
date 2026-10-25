@@ -13,4 +13,5 @@
     <!-- Uygulama kısayolları (ikona uzun basınca) -->
     <string name="shortcut_add_widget_short">Widget ekle</string>
     <string name="shortcut_add_widget_long">Ana ekrana widget ekle</string>
+    <string name="widget_pin_failed">Widget eklenemedi. Ana ekrana uzun basıp Widget\'lar bölümünden Resonance Oynatıcı\'yı ekleyin.</string>
 </resources>

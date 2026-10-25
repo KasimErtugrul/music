@@ -632,73 +632,73 @@ class AppLocalizationsTr extends AppLocalizations {
   String get themePreviewSongArtist => 'Örnek Sanatçı';
 
   @override
-  String get settingsPlayback => 'Playback';
+  String get settingsPlayback => 'Oynatma';
 
   @override
-  String get settingsLibrary => 'Library';
+  String get settingsLibrary => 'Kütüphane';
 
   @override
-  String get settingsAccessibility => 'Accessibility';
+  String get settingsAccessibility => 'Erişilebilirlik';
 
   @override
-  String get settingsStorage => 'Storage & Advanced';
+  String get settingsStorage => 'Depolama ve Gelişmiş';
 
   @override
-  String get settingsQueue => 'Queue & Playlist';
+  String get settingsQueue => 'Kuyruk ve Playlist';
 
   @override
-  String get seekInterval => 'Seek interval';
+  String get seekInterval => 'Sarma süresi';
 
   @override
   String seekIntervalValue(int seconds) {
-    return '$seconds seconds';
+    return '$seconds saniye';
   }
 
   @override
-  String get autoResume => 'Auto-resume on app start';
+  String get autoResume => 'Uygulama açılınca otomatik devam et';
 
   @override
-  String get pauseOnHeadphone => 'Pause when headphones disconnected';
+  String get pauseOnHeadphone => 'Kulaklık çıkınca duraklat';
 
   @override
-  String get defaultShuffle => 'Default shuffle';
+  String get defaultShuffle => 'Varsayılan karıştırma';
 
   @override
-  String get defaultRepeat => 'Default repeat mode';
+  String get defaultRepeat => 'Varsayılan tekrar modu';
 
   @override
-  String get repeatNone => 'None';
+  String get repeatNone => 'Kapalı';
 
   @override
-  String get repeatAll => 'All';
+  String get repeatAll => 'Tümü';
 
   @override
-  String get repeatOne => 'One';
+  String get repeatOne => 'Tek';
 
   @override
-  String get minDuration => 'Minimum song duration';
+  String get minDuration => 'Minimum şarkı süresi';
 
   @override
-  String get scanOnStartup => 'Scan library on startup';
+  String get scanOnStartup => 'Açılışta kütüphaneyi tara';
 
   @override
-  String get resetGroup => 'Reset group to defaults';
+  String get resetGroup => 'Grubu varsayılana sıfırla';
 
   @override
-  String get resetAll => 'Reset all settings';
+  String get resetAll => 'Tüm ayarları sıfırla';
 
   @override
   String get resetConfirm =>
-      'Are you sure you want to reset all settings to their defaults? This cannot be undone.';
+      'Tüm ayarları varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.';
 
   @override
-  String get textScale => 'Text scale';
+  String get textScale => 'Yazı ölçeği';
 
   @override
-  String get reduceAnimations => 'Reduce animations';
+  String get reduceAnimations => 'Animasyonları azalt';
 
   @override
-  String get largeTouchTargets => 'Large touch targets';
+  String get largeTouchTargets => 'Büyük dokunma hedefleri';
 
   @override
   String get audioSettingsTitle => 'Ses';
@@ -758,13 +758,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get eqGroupCustom => 'Özel Ön Ayarlar';
 
   @override
-  String get playbackSpeedPitch => 'Hız ve Pitch';
+  String get playbackSpeedPitch => 'Hız ve Perde';
 
   @override
   String get playbackSpeed => 'Hız';
 
   @override
-  String get playbackPitch => 'Pitch';
+  String get playbackPitch => 'Perde';
 
   @override
   String get playbackReset => 'Sıfırla';
@@ -787,7 +787,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sleepTimerEndOfTrackSet => 'Bu şarkıdan sonra duracak';
 
   @override
-  String get gaplessPlayback => 'Gapless oynatma';
+  String get gaplessPlayback => 'Kesintisiz oynatma';
 
   @override
   String get skipSilence => 'Sessizliği atla';
@@ -842,7 +842,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get artworkCacheCleared => 'Kapak önbelleği temizlendi';
 
   @override
-  String get seekBarStyle => 'Seek Bar Stili';
+  String get seekBarStyle => 'Sarma Çubuğu Stili';
 
   @override
   String get seekBarClassic => 'Klasik';
