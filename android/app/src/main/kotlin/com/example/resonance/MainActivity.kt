@@ -32,7 +32,7 @@ class MainActivity : AudioServiceActivity() {
             (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0
         intent.action = Intent.ACTION_MAIN
         if (uri != null && !fromHistory) {
-            MediaStoreChannel.deliverExternalUri(uri)
+            MediaStoreChannel.handleExternalUri(uri)
         }
     }
 }

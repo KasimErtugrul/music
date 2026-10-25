@@ -5,16 +5,19 @@ import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Size
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.nio.ByteBuffer
 import java.nio.CharBuffer
 import java.nio.charset.CharacterCodingException
@@ -57,6 +60,54 @@ object MediaStoreChannel {
             it.setMethodCallHandler { call, result -> onMethodCall(call, result) }
         }
         attachedMessenger = messenger
+    }
+
+    /**
+     * "Bununla aç" ile gelen adresi işler. Ana thread'den çağrılır.
+     *
+     * Dosya yöneticisinin `content://` adresine okuma izni geçici ve Activity'ye bağlıdır;
+     * oynatıcı onu sonradan açmaya çalışınca başarısız olabilir. Bu yüzden MediaStore dışı
+     * `content://` adreslerinde dosya, izin hâlâ geçerliyken uygulamanın önbelleğine kopyalanır
+     * ve `file://` adresi iletilir. Kopyalama başarısız olursa özgün adres iletilir.
+     */
+    fun handleExternalUri(uriString: String) {
+        val ctx = appContext
+        if (ctx == null) {
+            deliverExternalUri(uriString)
+            return
+        }
+        executor.execute {
+            val resolved = try {
+                resolveExternal(ctx, uriString)
+            } catch (e: Throwable) {
+                uriString
+            }
+            mainHandler.post { deliverExternalUri(resolved) }
+        }
+    }
+
+    private fun resolveExternal(ctx: Context, uriString: String): String {
+        val uri = Uri.parse(uriString)
+        if (uri.scheme != "content") return uriString          // file:// olduğu gibi
+        if (uri.authority == MediaStore.AUTHORITY) return uriString // MediaStore: izinle okunur
+        val resolver = ctx.contentResolver
+        val name = try {
+            resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                ?.use { if (it.moveToFirst()) it.getString(0) else null }
+        } catch (e: Exception) {
+            null
+        } ?: "audio"
+        val safeName = name.replace(Regex("[\\/:*?\"<>|]"), "_")
+
+        val root = File(ctx.cacheDir, "external").apply { mkdirs() }
+        // Eski kopyaları temizle (en yeni 2 klasör kalsın).
+        root.listFiles()?.sortedByDescending { it.lastModified() }?.drop(2)
+            ?.forEach { it.deleteRecursively() }
+        val dir = File(root, System.currentTimeMillis().toString()).apply { mkdirs() }
+        val out = File(dir, safeName)
+        val input = resolver.openInputStream(uri) ?: return uriString
+        input.use { src -> out.outputStream().use { dst -> src.copyTo(dst) } }
+        return Uri.fromFile(out).toString()
     }
 
     /** Ana thread'den çağrılmalı. Dart onayı (true) gelmezse URI bekleyen olarak kalır. */

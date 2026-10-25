@@ -40,6 +40,15 @@ class ExternalOpenController extends GetxController {
     });
   }
 
+  /// Adresin son parçasından (uzantısız) başlık üretir; anlamlı değilse genel ad.
+  String _titleFromUri(String uri) {
+    final segs = Uri.tryParse(uri)?.pathSegments ?? const <String>[];
+    final last = segs.isEmpty ? '' : segs.last;
+    final dot = last.lastIndexOf('.');
+    final base = dot > 0 ? last.substring(0, dot) : last;
+    return (base.isEmpty || int.tryParse(base) != null) ? 'Harici dosya' : base;
+  }
+
   /// Splash / home navigasyonunun tamamlanmasını bekleyip
   /// oynatıcı sayfasına geç. `offAllNamed` ile tekrar/çakışma riski yok.
   void _schedulePlay(String uri) async {
@@ -53,7 +62,7 @@ class ExternalOpenController extends GetxController {
         id: -(uri.hashCode.abs() + 1),
         uri: uri,
         path: '',
-        title: 'Harici dosya',
+        title: _titleFromUri(uri),
         durationMs: 0,
         sizeBytes: 0,
       );
@@ -68,7 +77,7 @@ class ExternalOpenController extends GetxController {
       debugPrint('Harici dosya açılamadı: $e\n$st');
       Get.snackbar(
         'Hata',
-        'Harici dosya açılamadı. Bu dosya için izin verilmemiş olabilir.',
+        'Harici dosya açılamadı. Bu dosya için izin verilmemiş olabilir.\n$e',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 4),
       );
