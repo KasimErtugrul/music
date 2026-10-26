@@ -10,8 +10,9 @@ class PlayerControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<PlayerController>();
+    final theme = Theme.of(context);
     final iconSize = compact ? 24.0 : 32.0;
-    final playIconSize = compact ? 32.0 : 64.0;
+    final playIconSize = compact ? 32.0 : 40.0;
 
     return Obx(() {
       final playing = controller.isPlaying.value;
@@ -26,32 +27,55 @@ class PlayerControls extends StatelessWidget {
       };
       
       final repeatColor = repeat != AudioServiceRepeatMode.none 
-          ? Theme.of(context).colorScheme.primary 
-          : null;
+          ? theme.colorScheme.primary 
+          : theme.colorScheme.onSurfaceVariant;
+      
+      final shuffleColor = shuffle 
+          ? theme.colorScheme.primary 
+          : theme.colorScheme.onSurfaceVariant;
 
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           if (!compact)
             IconButton(
-              icon: Icon(Icons.shuffle, color: shuffle ? Theme.of(context).colorScheme.primary : null),
+              icon: Icon(Icons.shuffle, color: shuffleColor),
               iconSize: iconSize,
               onPressed: controller.toggleShuffle,
             ),
           IconButton(
             icon: const Icon(Icons.skip_previous),
-            iconSize: iconSize,
+            iconSize: iconSize + 4,
+            color: theme.colorScheme.onSurface,
             onPressed: controller.previous,
           ),
-          IconButton(
-            icon: Icon(playing ? Icons.pause_circle_filled : Icons.play_circle_filled),
-            iconSize: playIconSize,
-            color: Theme.of(context).colorScheme.primary,
-            onPressed: controller.togglePlayPause,
+          
+          // Tasarımdaki dolgulu (Filled) Büyük Buton
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: Icon(playing ? Icons.pause : Icons.play_arrow),
+              iconSize: playIconSize,
+              color: theme.colorScheme.onPrimary,
+              padding: const EdgeInsets.all(12),
+              onPressed: controller.togglePlayPause,
+            ),
           ),
+
           IconButton(
             icon: const Icon(Icons.skip_next),
-            iconSize: iconSize,
+            iconSize: iconSize + 4,
+            color: theme.colorScheme.onSurface,
             onPressed: controller.next,
           ),
           if (!compact)

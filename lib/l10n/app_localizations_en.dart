@@ -937,14 +937,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSeeAll => 'See all';
 
   @override
-  String get homeEmptyTitle => 'Your library is empty';
+  String get homeEmptyTitle => 'Your music is silent';
 
   @override
   String get homeEmptyMessage =>
-      'No songs found on this device. Make sure music files are in a scanned folder.';
+      'Hi-res songs, tapes and studio masters on this device will appear here.';
 
   @override
-  String get homeScanNow => 'Scan library';
+  String get homeScanNow => 'Scan & start';
 
   @override
   String get homeTagline => 'What shall we play tonight?';
@@ -1008,4 +1008,109 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get backupVersionMismatch =>
       'Backup version mismatch. Some data may not import.';
+
+  @override
+  String get rewind10 => 'Rewind 10s';
+
+  @override
+  String get forward10 => 'Forward 10s';
+
+  @override
+  String get queue => 'Queue';
+
+  @override
+  String get lyrics => 'Lyrics';
+
+  @override
+  String get speed => 'Speed';
+
+  @override
+  String get homeMaster => 'Master 24-Bit';
+
+  @override
+  String get homeFeaturedSelection => 'Featured Selection';
+
+  @override
+  String get homeOfflineEngine => 'Offline Hi-Res Engine Active';
+
+  @override
+  String get homeLoadingTitle => 'Resolving collection';
+
+  @override
+  String get homeLoadingMessage => 'Scanning lossless metadata…';
+
+  @override
+  String get homeLucky => 'Lucky';
+
+  @override
+  String get homeRandom10 => 'Random 10';
+
+  @override
+  String get homeLocalRecords => 'Local records';
+
+  @override
+  String homeFollowCount(int count) {
+    return '$count Following';
+  }
+
+  @override
+  String homePlayCountBadge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plays',
+      one: '1 play',
+      zero: '0 plays',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeScanAndStart => 'Scan & start';
+
+  @override
+  String get libraryLocal => 'Local';
+
+  @override
+  String libraryTracksCount(int count) {
+    return '$count Tracks';
+  }
+
+  @override
+  String get libraryLosslessHint => 'Lossless (FLAC/MP3)';
+
+  @override
+  String get shuffleAll => 'Shuffle All';
+
+  @override
+  String get playInOrder => 'Play in Order';
+
+  @override
+  String get nowPlayingBadge => 'Playing';
+
+  @override
+  String searchInLibraryHint(int count) {
+    return 'Search in $count audio files...';
+  }
+
+  @override
+  String get rescanStorage => 'Rescan Storage';
+
+  @override
+  String get libraryOptions => 'Library Options';
+
+  @override
+  String get sortByTitleAsc => 'Title (A-Z)';
+
+  @override
+  String get sortByArtist => 'Artist Name';
+
+  @override
+  String get sortByAlbum => 'Album Name';
+
+  @override
+  String get sortByDateAdded => 'Date Added (New)';
+
+  @override
+  String get sortByDuration => 'Duration (Long-Short)';
 }

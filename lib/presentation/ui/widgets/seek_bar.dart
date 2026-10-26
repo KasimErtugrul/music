@@ -23,22 +23,27 @@ class _SeekBarState extends State<SeekBar> {
       final totalMs = controller.duration.value.inMilliseconds;
       final currentMs = _dragValue?.toInt() ?? controller.position.value.inMilliseconds;
       
-      // Eğer süre 0 ise (henüz yüklenmediyse) barı boş göster
       final max = totalMs > 0 ? totalMs.toDouble() : 1.0;
       final value = currentMs.clamp(0, max).toDouble();
+      
+      // Kalan süre hesabı
+      final remainingMs = totalMs > 0 ? (totalMs - currentMs).clamp(0, totalMs) : 0;
 
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              trackHeight: widget.compact ? 2.0 : 4.0,
+              trackHeight: widget.compact ? 2.0 : 3.0,
               thumbShape: RoundSliderThumbShape(
-                enabledThumbRadius: widget.compact ? 4.0 : 6.0,
+                enabledThumbRadius: widget.compact ? 4.0 : 5.0,
               ),
               overlayShape: RoundSliderOverlayShape(
                 overlayRadius: widget.compact ? 8.0 : 12.0,
               ),
+              activeTrackColor: theme.colorScheme.primary,
+              inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
+              thumbColor: theme.colorScheme.primary,
             ),
             child: Slider(
               value: value,
@@ -58,11 +63,17 @@ class _SeekBarState extends State<SeekBar> {
                 children: [
                   Text(
                     Duration(milliseconds: currentMs).clock,
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   Text(
-                    Duration(milliseconds: totalMs).clock,
-                    style: theme.textTheme.bodySmall,
+                    '-${Duration(milliseconds: remainingMs).clock}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),

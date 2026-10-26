@@ -29,11 +29,13 @@ class HomeController extends GetxController {
   final favoriteCount = 0.obs;
   final isLoading = true.obs;
 
-  // Yeni bölümler
   final featuredAlbums = <AlbumModel>[].obs;
   final recentlyPlayedAlbums = <AlbumModel>[].obs;
   final favoriteSongs = <SongModel>[].obs;
   final randomDiscoveries = <SongModel>[].obs;
+
+  /// Şarkı başına toplam çalınma sayısı (En Çok Çalınanlar rozetleri için).
+  final mostPlayedCounts = <int, int>{}.obs;
 
   final _random = Random();
   StreamSubscription<List<int>>? _favSub;
@@ -57,6 +59,7 @@ class HomeController extends GetxController {
         _statsRepo.getSmartPlaylist(SmartPlaylistKeys.neverPlayed),
         _libraryRepo.albums(),
         _libraryRepo.songs(),
+        _statsRepo.getMostPlayedCounts(limit: 100),
       ]);
 
       final recent = results[0] as List<SongModel>;
@@ -64,16 +67,16 @@ class HomeController extends GetxController {
       final never = results[2] as List<SongModel>;
       final allAlbums = results[3] as List<AlbumModel>;
       final allSongs = results[4] as List<SongModel>;
+      final counts = results[5] as Map<int, int>;
 
       recentlyAdded.assignAll(recent.take(10));
       mostPlayed.assignAll(most.take(10));
       neverPlayed.assignAll(never.take(10));
+      mostPlayedCounts.assignAll(counts);
 
-      // Her açılışta farklı featured albümler
       final shuffledAlbums = List<AlbumModel>.from(allAlbums)..shuffle(_random);
       featuredAlbums.assignAll(shuffledAlbums.take(8));
 
-      // Keşfet: hiç çalınmayanlardan rastgele
       final shuffledNever = List<SongModel>.from(never)..shuffle(_random);
       randomDiscoveries.assignAll(shuffledNever.take(10));
 

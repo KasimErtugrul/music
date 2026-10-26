@@ -24,10 +24,24 @@ class HomeTabContent extends StatelessWidget {
     final homeCtrl = Get.find<HomeController>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appName)),
+      appBar: AppBar(
+        titleSpacing: 20,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.graphic_eq,
+                color: Theme.of(context).colorScheme.primary, size: 24),
+            const SizedBox(width: 8),
+            Text(
+              l10n.appName,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+      ),
       body: Obx(() {
         if (libCtrl.isLoading.value || homeCtrl.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const _LoadingView();
         }
         if (libCtrl.songs.isEmpty) {
           return _EmptyState(libCtrl: libCtrl);
@@ -66,6 +80,7 @@ class HomeTabContent extends StatelessWidget {
                 return SliverToBoxAdapter(
                   child: _AlbumCarousel(
                     title: l10n.homeRecentlyPlayed,
+                    subtitle: l10n.homeLocalRecords,
                     albums: homeCtrl.recentlyPlayedAlbums.toList(),
                   ),
                 );
@@ -78,6 +93,7 @@ class HomeTabContent extends StatelessWidget {
                   child: _SongRowSection(
                     title: l10n.recentlyAdded,
                     songs: homeCtrl.recentlyAdded.toList(),
+                    style: SongRowStyle.regular,
                     onSeeAll: () => Get.to(
                       () => SmartPlaylistDetailPage(
                         keyValue: SmartPlaylistKeys.recentlyAdded,
@@ -94,7 +110,10 @@ class HomeTabContent extends StatelessWidget {
                 return SliverToBoxAdapter(
                   child: _SongRowSection(
                     title: l10n.favorites,
+                    leadingIcon: Icons.favorite,
+                    leadingIconColor: Theme.of(context).colorScheme.tertiary,
                     songs: homeCtrl.favoriteSongs.toList(),
+                    style: SongRowStyle.favorite,
                     onSeeAll: () => Get.toNamed(AppRoutes.favorites),
                   ),
                 );
@@ -106,7 +125,10 @@ class HomeTabContent extends StatelessWidget {
                 return SliverToBoxAdapter(
                   child: _SongRowSection(
                     title: l10n.homeDiscover,
+                    leadingIcon: Icons.shuffle,
+                    subtitleBadge: l10n.homeRandom10,
                     songs: homeCtrl.randomDiscoveries.toList(),
+                    style: SongRowStyle.lucky,
                   ),
                 );
               }),
@@ -118,6 +140,8 @@ class HomeTabContent extends StatelessWidget {
                   child: _SongRowSection(
                     title: l10n.mostPlayed,
                     songs: homeCtrl.mostPlayed.toList(),
+                    style: SongRowStyle.mostPlayed,
+                    playCounts: homeCtrl.mostPlayedCounts,
                     onSeeAll: () => Get.to(
                       () => SmartPlaylistDetailPage(
                         keyValue: SmartPlaylistKeys.mostPlayed,
@@ -131,9 +155,42 @@ class HomeTabContent extends StatelessWidget {
                 SliverToBoxAdapter(
                   child: _ArtistCarousel(
                     artists: libCtrl.artists.take(12).toList(),
+                    totalFollow: libCtrl.artists.length,
                   ),
                 ),
-              const SliverToBoxAdapter(child: SizedBox(height: 32)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.headphones,
+                          size: 16,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.homeOfflineEngine,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withValues(alpha: 0.5),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         );
@@ -147,6 +204,50 @@ class HomeTabContent extends StatelessWidget {
     if (h < 12) return l10n.homeGoodMorning;
     if (h < 18) return l10n.homeGoodAfternoon;
     return l10n.homeGoodEvening;
+  }
+}
+
+// ========== LOADING ==========
+
+class _LoadingView extends StatelessWidget {
+  const _LoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 64,
+            height: 64,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                const CircularProgressIndicator(strokeWidth: 3),
+                Icon(
+                  Icons.graphic_eq,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            l10n.homeLoadingTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.homeLoadingMessage,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -166,14 +267,14 @@ class _GreetingHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            greeting,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            greeting.toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
-              letterSpacing: 0.5,
-              fontWeight: FontWeight.w500,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             tagline,
             style: theme.textTheme.headlineSmall?.copyWith(
@@ -205,7 +306,7 @@ class _FeaturedCarouselState extends State<_FeaturedCarousel> {
   @override
   void initState() {
     super.initState();
-    _controller = PageController(viewportFraction: 0.88);
+    _controller = PageController(viewportFraction: 0.9);
     _startAutoScroll();
   }
 
@@ -239,7 +340,7 @@ class _FeaturedCarouselState extends State<_FeaturedCarousel> {
       child: Column(
         children: [
           SizedBox(
-            height: 260,
+            height: 268,
             child: PageView.builder(
               controller: _controller,
               onPageChanged: (i) {
@@ -247,7 +348,8 @@ class _FeaturedCarouselState extends State<_FeaturedCarousel> {
                 _startAutoScroll();
               },
               itemCount: widget.albums.length,
-              itemBuilder: (context, i) => _FeaturedCard(album: widget.albums[i]),
+              itemBuilder: (context, i) =>
+                  _FeaturedCard(album: widget.albums[i]),
             ),
           ),
           const SizedBox(height: 12),
@@ -265,8 +367,8 @@ class _FeaturedCarouselState extends State<_FeaturedCarousel> {
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(context)
                           .colorScheme
-                          .onSurfaceVariant
-                          .withValues(alpha: 0.3),
+                          .primary
+                          .withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -296,7 +398,7 @@ class _FeaturedCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -312,16 +414,57 @@ class _FeaturedCard extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.85),
+                    Colors.black.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.9),
                   ],
-                  stops: const [0.35, 1.0],
+                  stops: const [0.2, 0.55, 1.0],
                 ),
               ),
             ),
+            // Audiophile badge
+            Positioned(
+              top: 14,
+              right: 14,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFB8F1D1),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      l10n.homeMaster.toUpperCase(),
+                      style: const TextStyle(
+                        color: Color(0xFFB8F1D1),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Bottom meta
             Positioned(
               left: 20,
               right: 20,
-              bottom: 20,
+              bottom: 18,
               child: Row(
                 children: [
                   Expanded(
@@ -329,6 +472,16 @@ class _FeaturedCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        Text(
+                          l10n.homeFeaturedSelection.toUpperCase(),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
                         Text(
                           album.title ?? l10n.unknownAlbum,
                           style: const TextStyle(
@@ -340,11 +493,11 @@ class _FeaturedCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
                           album.artist ?? l10n.unknownArtist,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: Colors.white.withValues(alpha: 0.75),
                             fontSize: 13,
                           ),
                           maxLines: 1,
@@ -354,16 +507,19 @@ class _FeaturedCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  FilledButton(
-                    onPressed: _playAlbum,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(14),
-                      minimumSize: const Size(52, 52),
+                  Material(
+                    color: Colors.white,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: _playAlbum,
+                      child: const SizedBox(
+                        width: 52,
+                        height: 52,
+                        child: Icon(Icons.play_arrow_rounded,
+                            color: Colors.black, size: 28),
+                      ),
                     ),
-                    child: const Icon(Icons.play_arrow_rounded, size: 26),
                   ),
                 ],
               ),
@@ -380,6 +536,12 @@ class _FeaturedCard extends StatelessWidget {
 class _HeroNowPlaying extends StatelessWidget {
   const _HeroNowPlaying();
 
+  String _fmt(Duration d) {
+    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
   @override
   Widget build(BuildContext context) {
     final playerCtrl = Get.find<PlayerController>();
@@ -390,104 +552,127 @@ class _HeroNowPlaying extends StatelessWidget {
       final song = playerCtrl.currentSong;
       if (song == null) return const SizedBox.shrink();
 
-      final progress = playerCtrl.duration.value.inMilliseconds > 0
-          ? (playerCtrl.position.value.inMilliseconds /
-                  playerCtrl.duration.value.inMilliseconds)
-              .clamp(0.0, 1.0)
-          : 0.0;
+      final totalMs = playerCtrl.duration.value.inMilliseconds;
+      final currentMs = playerCtrl.position.value.inMilliseconds;
+      final progress =
+          totalMs > 0 ? (currentMs / totalMs).clamp(0.0, 1.0) : 0.0;
 
       return Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: Material(
           borderRadius: BorderRadius.circular(20),
           clipBehavior: Clip.antiAlias,
-          color: theme.colorScheme.primaryContainer,
+          color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.85),
           child: InkWell(
             onTap: () => Get.toNamed(AppRoutes.player),
             child: Padding(
               padding: const EdgeInsets.all(14),
-              child: Row(
+              child: Column(
                 children: [
-                  SizedBox(
-                    width: 72,
-                    height: 72,
-                    child: ArtworkImage(
-                      songId: song.id,
-                      borderRadius: BorderRadius.circular(12),
-                      fallbackIcon: Icons.music_note,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 72,
+                        height: 72,
+                        child: ArtworkImage(
+                          songId: song.id,
+                          borderRadius: BorderRadius.circular(12),
+                          fallbackIcon: Icons.music_note,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.graphic_eq,
-                              size: 12,
-                              color: theme.colorScheme.onPrimaryContainer
-                                  .withValues(alpha: 0.7),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.equalizer,
+                                  size: 13,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  l10n.homeNowPlaying.toUpperCase(),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.0,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              l10n.homeNowPlaying,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer
-                                    .withValues(alpha: 0.7),
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.6,
+                              song.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            Text(
+                              '${song.artist ?? l10n.unknownArtist}${song.album != null ? " • ${song.album}" : ""}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSecondaryContainer
+                                    .withValues(alpha: 0.75),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          song.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                          ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        iconSize: 42,
+                        color: theme.colorScheme.primary,
+                        style: IconButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          minimumSize: const Size(42, 42),
+                          padding: EdgeInsets.zero,
                         ),
-                        Text(
-                          song.artist ?? l10n.unknownArtist,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer
-                                .withValues(alpha: 0.75),
-                          ),
+                        icon: Icon(
+                          playerCtrl.isPlaying.value
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          size: 24,
                         ),
-                        const SizedBox(height: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
+                        onPressed: playerCtrl.togglePlayPause,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(2),
                           child: LinearProgressIndicator(
                             value: progress,
                             minHeight: 3,
-                            backgroundColor: theme.colorScheme.onPrimaryContainer
-                                .withValues(alpha: 0.2),
+                            backgroundColor:
+                                theme.colorScheme.onSurface.withValues(alpha: 0.12),
                             valueColor: AlwaysStoppedAnimation(
-                                theme.colorScheme.onPrimaryContainer),
+                                theme.colorScheme.primary),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    iconSize: 42,
-                    color: theme.colorScheme.onPrimaryContainer,
-                    icon: Icon(
-                      playerCtrl.isPlaying.value
-                          ? Icons.pause_circle_filled
-                          : Icons.play_circle_filled,
-                    ),
-                    onPressed: playerCtrl.togglePlayPause,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '${_fmt(Duration(milliseconds: currentMs))} / ${_fmt(Duration(milliseconds: totalMs))}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSecondaryContainer
+                              .withValues(alpha: 0.7),
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -511,30 +696,30 @@ class _StatsRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
         children: [
           Expanded(
             child: _StatCard(
-              icon: Icons.music_note_rounded,
+              icon: Icons.music_note,
               count: libCtrl.songs.length,
               label: l10n.libraryTabSongs,
               color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: _StatCard(
-              icon: Icons.album_rounded,
+              icon: Icons.album,
               count: libCtrl.albums.length,
               label: l10n.libraryTabAlbums,
               color: theme.colorScheme.tertiary,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: _StatCard(
-              icon: Icons.person_rounded,
+              icon: Icons.mic,
               count: libCtrl.artists.length,
               label: l10n.libraryTabArtists,
               color: theme.colorScheme.secondary,
@@ -563,13 +748,12 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(height: 6),
@@ -577,7 +761,7 @@ class _StatCard extends StatelessWidget {
             '$count',
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w800,
-              color: color,
+              color: theme.colorScheme.onSurface,
               letterSpacing: -0.5,
             ),
           ),
@@ -595,11 +779,98 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ========== ALBUM CAROUSEL (reusable) ==========
+// ========== SECTION HEADER ==========
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    this.leadingIcon,
+    this.leadingIconColor,
+    this.subtitle,
+    this.subtitleBadge,
+    this.onSeeAll,
+  });
+
+  final String title;
+  final IconData? leadingIcon;
+  final Color? leadingIconColor;
+  final String? subtitle;
+  final String? subtitleBadge;
+  final VoidCallback? onSeeAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 12, 12),
+      child: Row(
+        children: [
+          if (leadingIcon != null) ...[
+            Icon(leadingIcon,
+                size: 20,
+                color: leadingIconColor ?? theme.colorScheme.primary),
+            const SizedBox(width: 6),
+          ],
+          Expanded(
+            child: Text(
+              title,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ),
+          if (subtitle != null)
+            Text(
+              subtitle!,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          if (subtitleBadge != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                subtitleBadge!,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          if (onSeeAll != null)
+            TextButton.icon(
+              onPressed: onSeeAll,
+              iconAlignment: IconAlignment.end,
+              icon: const Icon(Icons.arrow_forward, size: 16),
+              label: Text(l10n.homeSeeAll),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                foregroundColor: theme.colorScheme.primary,
+                textStyle: theme.textTheme.labelMedium,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ========== ALBUM CAROUSEL ==========
 
 class _AlbumCarousel extends StatelessWidget {
-  const _AlbumCarousel({required this.title, required this.albums});
+  const _AlbumCarousel({
+    required this.title,
+    required this.albums,
+    this.subtitle,
+  });
   final String title;
+  final String? subtitle;
   final List<AlbumModel> albums;
 
   @override
@@ -610,16 +881,7 @@ class _AlbumCarousel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-          child: Text(
-            title,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
-            ),
-          ),
-        ),
+        _SectionHeader(title: title, subtitle: subtitle),
         SizedBox(
           height: 210,
           child: ListView.separated(
@@ -641,10 +903,29 @@ class _AlbumCarousel extends StatelessWidget {
                       SizedBox(
                         width: 148,
                         height: 148,
-                        child: ArtworkImage(
-                          songId: album.artworkSongId,
-                          borderRadius: BorderRadius.circular(12),
-                          fallbackIcon: Icons.album_rounded,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ArtworkImage(
+                              songId: album.artworkSongId,
+                              borderRadius: BorderRadius.circular(16),
+                              fallbackIcon: Icons.album_rounded,
+                            ),
+                            Positioned(
+                              right: 6,
+                              bottom: 6,
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.65),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.play_arrow,
+                                    color: Colors.white, size: 18),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -652,7 +933,7 @@ class _AlbumCarousel extends StatelessWidget {
                         album.title ?? l10n.unknownAlbum,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -678,42 +959,40 @@ class _AlbumCarousel extends StatelessWidget {
 
 // ========== SONG ROW ==========
 
+enum SongRowStyle { regular, favorite, lucky, mostPlayed }
+
 class _SongRowSection extends StatelessWidget {
   const _SongRowSection({
     required this.title,
     required this.songs,
+    this.style = SongRowStyle.regular,
+    this.leadingIcon,
+    this.leadingIconColor,
+    this.subtitleBadge,
     this.onSeeAll,
+    this.playCounts,
   });
 
   final String title;
   final List<SongModel> songs;
+  final SongRowStyle style;
+  final IconData? leadingIcon;
+  final Color? leadingIconColor;
+  final String? subtitleBadge;
   final VoidCallback? onSeeAll;
+  final Map<int, int>? playCounts;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 8, 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-              ),
-              if (onSeeAll != null)
-                TextButton(onPressed: onSeeAll, child: Text(l10n.homeSeeAll)),
-            ],
-          ),
+        _SectionHeader(
+          title: title,
+          leadingIcon: leadingIcon,
+          leadingIconColor: leadingIconColor,
+          subtitleBadge: subtitleBadge,
+          onSeeAll: onSeeAll,
         ),
         SizedBox(
           height: 200,
@@ -722,8 +1001,12 @@ class _SongRowSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: songs.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, i) =>
-                _SongCard(song: songs[i], queue: songs),
+            itemBuilder: (context, i) => _SongCard(
+              song: songs[i],
+              queue: songs,
+              style: style,
+              playCount: playCounts?[songs[i].id],
+            ),
           ),
         ),
       ],
@@ -732,14 +1015,30 @@ class _SongRowSection extends StatelessWidget {
 }
 
 class _SongCard extends StatelessWidget {
-  const _SongCard({required this.song, required this.queue});
+  const _SongCard({
+    required this.song,
+    required this.queue,
+    required this.style,
+    this.playCount,
+  });
+
   final SongModel song;
   final List<SongModel> queue;
+  final SongRowStyle style;
+  final int? playCount;
+
+  String? _formatBadge() {
+    if (song.path.isEmpty) return null;
+    final ext = song.path.split('.').last.toUpperCase();
+    const known = {'FLAC', 'MP3', 'M4A', 'OGG', 'WAV', 'AAC', 'OPUS', 'AIFF'};
+    return known.contains(ext) && ext.length <= 4 ? ext : null;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
+    final format = _formatBadge();
 
     return SizedBox(
       width: 148,
@@ -752,10 +1051,102 @@ class _SongCard extends StatelessWidget {
             SizedBox(
               width: 148,
               height: 148,
-              child: ArtworkImage(
-                songId: song.id,
-                borderRadius: BorderRadius.circular(12),
-                fallbackIcon: Icons.music_note,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ArtworkImage(
+                    songId: song.id,
+                    borderRadius: BorderRadius.circular(16),
+                    fallbackIcon: Icons.music_note,
+                  ),
+                  if (style == SongRowStyle.regular && format != null)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          format,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (style == SongRowStyle.favorite)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.65),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.favorite,
+                            color: theme.colorScheme.tertiary, size: 14),
+                      ),
+                    ),
+                  if (style == SongRowStyle.mostPlayed && playCount != null)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          l10n.homePlayCountBadge(playCount!),
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (style == SongRowStyle.lucky)
+                    Positioned(
+                      bottom: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.casino,
+                                color: theme.colorScheme.primary, size: 11),
+                            const SizedBox(width: 3),
+                            Text(
+                              l10n.homeLucky,
+                              style: TextStyle(
+                                color: theme.colorScheme.primary,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(height: 8),
@@ -763,7 +1154,7 @@ class _SongCard extends StatelessWidget {
               song.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -785,8 +1176,9 @@ class _SongCard extends StatelessWidget {
 // ========== ARTIST CAROUSEL ==========
 
 class _ArtistCarousel extends StatelessWidget {
-  const _ArtistCarousel({required this.artists});
+  const _ArtistCarousel({required this.artists, this.totalFollow});
   final List<ArtistModel> artists;
+  final int? totalFollow;
 
   @override
   Widget build(BuildContext context) {
@@ -796,15 +1188,11 @@ class _ArtistCarousel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-          child: Text(
-            l10n.homeYourArtists,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
-            ),
-          ),
+        _SectionHeader(
+          title: l10n.homeYourArtists,
+          subtitle: totalFollow != null
+              ? l10n.homeFollowCount(totalFollow!)
+              : null,
         ),
         SizedBox(
           height: 140,
@@ -840,7 +1228,7 @@ class _ArtistCarousel extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -876,13 +1264,13 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.25),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.library_music_rounded,
+                Icons.album,
                 size: 64,
-                color: theme.colorScheme.onPrimaryContainer,
+                color: theme.colorScheme.primary,
               ),
             ),
             const SizedBox(height: 24),
@@ -890,6 +1278,7 @@ class _EmptyState extends StatelessWidget {
               l10n.homeEmptyTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
+                letterSpacing: -0.6,
               ),
               textAlign: TextAlign.center,
             ),
@@ -904,8 +1293,12 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: libCtrl.refresh,
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.homeScanNow),
+              icon: const Icon(Icons.folder_open),
+              label: Text(l10n.homeScanAndStart),
+              style: FilledButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              ),
             ),
           ],
         ),

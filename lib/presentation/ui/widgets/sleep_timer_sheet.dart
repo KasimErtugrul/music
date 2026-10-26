@@ -24,13 +24,16 @@ class SleepTimerSheet extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(l10n.sleepTimer, style: Theme.of(context).textTheme.titleLarge),
+            child: Text(
+              l10n.sleepTimer,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
           ),
           Obx(() {
             if (ctrl.isActive.value) {
               final min = (ctrl.remainingSeconds.value / 60).ceil();
-              final text = ctrl.isEndOfTrackMode.value 
-                  ? l10n.sleepTimerEndOfTrackSet 
+              final text = ctrl.isEndOfTrackMode.value
+                  ? l10n.sleepTimerEndOfTrackSet
                   : l10n.sleepTimerSetFor(min);
               return Column(
                 children: [

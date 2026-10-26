@@ -1817,19 +1817,19 @@ abstract class AppLocalizations {
   /// No description provided for @homeEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your library is empty'**
+  /// **'Your music is silent'**
   String get homeEmptyTitle;
 
   /// No description provided for @homeEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'No songs found on this device. Make sure music files are in a scanned folder.'**
+  /// **'Hi-res songs, tapes and studio masters on this device will appear here.'**
   String get homeEmptyMessage;
 
   /// No description provided for @homeScanNow.
   ///
   /// In en, this message translates to:
-  /// **'Scan library'**
+  /// **'Scan & start'**
   String get homeScanNow;
 
   /// No description provided for @homeTagline.
@@ -1951,6 +1951,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Backup version mismatch. Some data may not import.'**
   String get backupVersionMismatch;
+
+  /// No description provided for @rewind10.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewind 10s'**
+  String get rewind10;
+
+  /// No description provided for @forward10.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward 10s'**
+  String get forward10;
+
+  /// No description provided for @queue.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue'**
+  String get queue;
+
+  /// No description provided for @lyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics'**
+  String get lyrics;
+
+  /// No description provided for @speed.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get speed;
+
+  /// No description provided for @homeMaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Master 24-Bit'**
+  String get homeMaster;
+
+  /// No description provided for @homeFeaturedSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured Selection'**
+  String get homeFeaturedSelection;
+
+  /// No description provided for @homeOfflineEngine.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Hi-Res Engine Active'**
+  String get homeOfflineEngine;
+
+  /// No description provided for @homeLoadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolving collection'**
+  String get homeLoadingTitle;
+
+  /// No description provided for @homeLoadingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning lossless metadata…'**
+  String get homeLoadingMessage;
+
+  /// No description provided for @homeLucky.
+  ///
+  /// In en, this message translates to:
+  /// **'Lucky'**
+  String get homeLucky;
+
+  /// No description provided for @homeRandom10.
+  ///
+  /// In en, this message translates to:
+  /// **'Random 10'**
+  String get homeRandom10;
+
+  /// No description provided for @homeLocalRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Local records'**
+  String get homeLocalRecords;
+
+  /// No description provided for @homeFollowCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Following'**
+  String homeFollowCount(int count);
+
+  /// No description provided for @homePlayCountBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 plays} =1{1 play} other{{count} plays}}'**
+  String homePlayCountBadge(int count);
+
+  /// No description provided for @homeScanAndStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan & start'**
+  String get homeScanAndStart;
+
+  /// No description provided for @libraryLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get libraryLocal;
+
+  /// No description provided for @libraryTracksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Tracks'**
+  String libraryTracksCount(int count);
+
+  /// No description provided for @libraryLosslessHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Lossless (FLAC/MP3)'**
+  String get libraryLosslessHint;
+
+  /// No description provided for @shuffleAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle All'**
+  String get shuffleAll;
+
+  /// No description provided for @playInOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Play in Order'**
+  String get playInOrder;
+
+  /// No description provided for @nowPlayingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing'**
+  String get nowPlayingBadge;
+
+  /// No description provided for @searchInLibraryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in {count} audio files...'**
+  String searchInLibraryHint(int count);
+
+  /// No description provided for @rescanStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescan Storage'**
+  String get rescanStorage;
+
+  /// No description provided for @libraryOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Library Options'**
+  String get libraryOptions;
+
+  /// No description provided for @sortByTitleAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (A-Z)'**
+  String get sortByTitleAsc;
+
+  /// No description provided for @sortByArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist Name'**
+  String get sortByArtist;
+
+  /// No description provided for @sortByAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Album Name'**
+  String get sortByAlbum;
+
+  /// No description provided for @sortByDateAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Date Added (New)'**
+  String get sortByDateAdded;
+
+  /// No description provided for @sortByDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (Long-Short)'**
+  String get sortByDuration;
 }
 
 class _AppLocalizationsDelegate

@@ -934,14 +934,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get homeSeeAll => 'Tümünü gör';
 
   @override
-  String get homeEmptyTitle => 'Kütüphanen boş';
+  String get homeEmptyTitle => 'Müziğin Henüz Sessiz';
 
   @override
   String get homeEmptyMessage =>
-      'Cihazında hiç şarkı bulunamadı. Müzik dosyalarının taranan bir klasörde olduğundan emin ol.';
+      'Cihazındaki yüksek çözünürlüklü şarkılar, kasetler ve stüdyo kayıtları buraya yansıyacak.';
 
   @override
-  String get homeScanNow => 'Kütüphaneyi tara';
+  String get homeScanNow => 'Tara ve Başlat';
 
   @override
   String get homeTagline => 'Bu akşam ne dinleyelim?';
@@ -1005,4 +1005,108 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get backupVersionMismatch =>
       'Yedek sürümü uyuşmuyor. Bazı veriler içe aktarılamayabilir.';
+
+  @override
+  String get rewind10 => '10sn Geri';
+
+  @override
+  String get forward10 => '10sn İleri';
+
+  @override
+  String get queue => 'Kuyruk';
+
+  @override
+  String get lyrics => 'Sözler';
+
+  @override
+  String get speed => 'Hız';
+
+  @override
+  String get homeMaster => 'Master 24-Bit';
+
+  @override
+  String get homeFeaturedSelection => 'Öne Çıkan Seçki';
+
+  @override
+  String get homeOfflineEngine => 'Çevrimdışı Yüksek Çözünürlüklü Motor Aktif';
+
+  @override
+  String get homeLoadingTitle => 'Koleksiyon Çözümleniyor';
+
+  @override
+  String get homeLoadingMessage => 'Kayıpsız meta verileri taranıyor…';
+
+  @override
+  String get homeLucky => 'Şansına';
+
+  @override
+  String get homeRandom10 => 'Rastgele 10';
+
+  @override
+  String get homeLocalRecords => 'Yerel Kayıtlar';
+
+  @override
+  String homeFollowCount(int count) {
+    return '$count Takip';
+  }
+
+  @override
+  String homePlayCountBadge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kez',
+      zero: '0 kez',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeScanAndStart => 'Tara ve Başlat';
+
+  @override
+  String get libraryLocal => 'Yerel';
+
+  @override
+  String libraryTracksCount(int count) {
+    return '$count Parça';
+  }
+
+  @override
+  String get libraryLosslessHint => 'Kayıpsız (FLAC/MP3)';
+
+  @override
+  String get shuffleAll => 'Tümünü Karıştır';
+
+  @override
+  String get playInOrder => 'Sırayla Çal';
+
+  @override
+  String get nowPlayingBadge => 'Çalıyor';
+
+  @override
+  String searchInLibraryHint(int count) {
+    return '$count ses dosyası içinde ara...';
+  }
+
+  @override
+  String get rescanStorage => 'Depolamayı Yeniden Tara';
+
+  @override
+  String get libraryOptions => 'Kütüphane Seçenekleri';
+
+  @override
+  String get sortByTitleAsc => 'Başlık (A-Z)';
+
+  @override
+  String get sortByArtist => 'Sanatçı Adı';
+
+  @override
+  String get sortByAlbum => 'Albüm Adı';
+
+  @override
+  String get sortByDateAdded => 'Eklenme Tarihi (Yeni)';
+
+  @override
+  String get sortByDuration => 'Süre (Uzun-Kısa)';
 }

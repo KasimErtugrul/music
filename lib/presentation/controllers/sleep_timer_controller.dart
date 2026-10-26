@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'package:audio_service/audio_service.dart'; // EKLENDİ
 import 'package:get/get.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 
 class SleepTimerController extends GetxController {
   final _player = Get.find<PlayerController>();
-  
+
   final isActive = false.obs;
   final isEndOfTrackMode = false.obs;
   final remainingSeconds = 0.obs;
@@ -13,8 +12,8 @@ class SleepTimerController extends GetxController {
   Timer? _timer;
   StreamSubscription? _playerStateSub;
 
-  void startTimer(int minutes) {
-    cancelTimer();
+  void startTimer(int minutes, {bool resetVolume = false}) {
+    cancelTimer(resetVolume: resetVolume);
     isActive.value = true;
     isEndOfTrackMode.value = false;
     remainingSeconds.value = minutes * 60;
@@ -22,40 +21,65 @@ class SleepTimerController extends GetxController {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (remainingSeconds.value > 0) {
         remainingSeconds.value--;
-        // Son 10 saniye kala sesi kıs (Fade out)
         if (remainingSeconds.value <= 10) {
           final vol = remainingSeconds.value / 10.0;
-          _player.setVolume(vol);
+          _player.setVolume(vol.clamp(0.0, 1.0));
         }
       } else {
+        _timer?.cancel();
+        _timer = null;
         _player.pause();
-        _player.setVolume(1.0); // Normale dön
-        cancelTimer();
+        _player.setVolume(1.0);
+        isActive.value = false;
+        isEndOfTrackMode.value = false;
       }
     });
   }
 
   void startEndOfTrack() {
-    cancelTimer();
+    cancelTimer(resetVolume: true);
     isActive.value = true;
     isEndOfTrackMode.value = true;
     remainingSeconds.value = 0;
 
-    _playerStateSub = _player.playbackStateStream.listen((state) {
-      if (state.processingState == AudioProcessingState.completed) {
-        _player.pause();
-        cancelTimer();
+    bool hasPaused = false;
+
+    Future<void> handleEnd() async {
+      if (hasPaused) return;
+      hasPaused = true;
+      await _player.pause();
+      _player.setVolume(1.0);
+      isActive.value = false;
+      isEndOfTrackMode.value = false;
+      await _playerStateSub?.cancel();
+      _playerStateSub = null;
+    }
+
+    // `PlayerController`'da `positionStream` getter'ı yok ama
+    // `position` bir `Rx<Duration>` ve altında `_repository.positionStream`
+    // dinleniyor. Aynı frekansta (200 ms) güncelleme alırız.
+    _playerStateSub = _player.position.listen((pos) {
+      if (!isEndOfTrackMode.value) return;
+      final dur = _player.duration.value;
+      if (dur.inMilliseconds <= 0) return;
+      final remainingMs = dur.inMilliseconds - pos.inMilliseconds;
+      if (remainingMs > 0 && remainingMs <= 300) {
+        handleEnd();
       }
     });
   }
 
-  void cancelTimer() {
+  void cancelTimer({bool resetVolume = true}) {
     _timer?.cancel();
+    _timer = null;
     _playerStateSub?.cancel();
+    _playerStateSub = null;
     isActive.value = false;
     isEndOfTrackMode.value = false;
     remainingSeconds.value = 0;
-    _player.setVolume(1.0);
+    if (resetVolume) {
+      _player.setVolume(1.0);
+    }
   }
 
   @override
