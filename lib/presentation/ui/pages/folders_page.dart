@@ -7,7 +7,6 @@ import 'package:resonance/presentation/controllers/library_controller.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 
-/// Klasörler sekmesi: köklerden başlar, içine iner, breadcrumb ile geri.
 class FoldersPage extends StatefulWidget {
   const FoldersPage({super.key});
 
@@ -55,21 +54,6 @@ class _FoldersPageState extends State<FoldersPage> {
     }
   }
 
-  void _navigateUp() {
-    final p = _currentPath;
-    if (p == null) return;
-    if (_isVolumeRoot(p)) {
-      _load(null);
-      return;
-    }
-    final slash = p.lastIndexOf('/');
-    if (slash <= 0) {
-      _load(null);
-      return;
-    }
-    _load(p.substring(0, slash));
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -95,7 +79,7 @@ class _FoldersPageState extends State<FoldersPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         if (_currentPath != null)
-          _Breadcrumb(path: _currentPath!, onUp: _navigateUp),
+          _Breadcrumb(path: _currentPath!, onTap: _load),
         const Divider(height: 1),
         Expanded(
           child: isEmpty
@@ -105,33 +89,31 @@ class _FoldersPageState extends State<FoldersPage> {
                   message: l10n.libraryEmptyFoldersMessage,
                 )
               : ListView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   children: <Widget>[
                     if (_folders.isNotEmpty) ...<Widget>[
                       if (_currentPath != null)
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                          padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
                           child: Text(
                             l10n.folderSubfoldersTitle,
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                         ),
                       for (final f in _folders)
-                        ListTile(
-                          leading: const Icon(Icons.folder_outlined),
-                          title: Text(
-                            _displayName(f, l10n),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Text(l10n.songCount(f.songCount)),
-                          trailing: const Icon(Icons.chevron_right),
+                        _FolderTile(
+                          folder: f,
+                          displayName: _displayName(f, l10n),
                           onTap: () => _load(f.path),
                         ),
                     ],
                     if (_songs.isNotEmpty) ...<Widget>[
                       if (_currentPath != null)
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                          padding: const EdgeInsets.fromLTRB(8, 12, 8, 6),
                           child: Text(
                             l10n.folderSongsTitle,
                             style: Theme.of(context).textTheme.titleSmall,
@@ -148,37 +130,205 @@ class _FoldersPageState extends State<FoldersPage> {
 
   String _displayName(FolderModel f, AppLocalizations l10n) =>
       f.isVolumeRoot ? l10n.folderRootName : f.name;
-
-  bool _isVolumeRoot(String path) {
-    final re = RegExp(r'^/storage/(?:emulated/\d+|[^/]+)$');
-    return re.hasMatch(path);
-  }
 }
 
-class _Breadcrumb extends StatelessWidget {
-  const _Breadcrumb({required this.path, required this.onUp});
+class _FolderTile extends StatelessWidget {
+  const _FolderTile({
+    required this.folder,
+    required this.displayName,
+    required this.onTap,
+  });
 
-  final String path;
-  final VoidCallback onUp;
+  final FolderModel folder;
+  final String displayName;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                folder.isVolumeRoot ? Icons.storage : Icons.folder,
+                color: theme.colorScheme.primary,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.songCount(folder.songCount),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Tıklanabilir segment'lerle breadcrumb.
+/// `/storage/emulated/0` → "Depolama" olarak gösterilir (tıklanınca köke döner).
+class _Breadcrumb extends StatelessWidget {
+  const _Breadcrumb({required this.path, required this.onTap});
+
+  final String path;
+  final ValueChanged<String?> onTap;
+
+  static final RegExp _volumeRe = RegExp(r'^/storage/(?:emulated/\d+|[^/]+)');
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final match = _volumeRe.firstMatch(path);
+
+    final List<Widget> segments = [];
+
+    if (match == null) {
+      segments.add(
+        Flexible(
+          child: Text(
+            path,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelMedium,
+          ),
+        ),
+      );
+    } else {
+      final root = match.group(0)!;
+      final rest = path
+          .substring(root.length)
+          .split('/')
+          .where((p) => p.isNotEmpty)
+          .toList();
+
+      // Kök segment
+      segments.add(
+        GestureDetector(
+          onTap: rest.isEmpty ? null : () => onTap(root),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.storage, size: 14, color: theme.colorScheme.primary),
+              const SizedBox(width: 4),
+              Text(
+                l10n.folderRootName,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: rest.isEmpty
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
+                  fontWeight: rest.isEmpty ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      var currentPath = root;
+      for (var i = 0; i < rest.length; i++) {
+        currentPath += '/${rest[i]}';
+        final isLast = i == rest.length - 1;
+        final segmentPath = currentPath;
+        segments.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              '/',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.5,
+                ),
+              ),
+            ),
+          ),
+        );
+        segments.add(
+          GestureDetector(
+            onTap: isLast ? null : () => onTap(segmentPath),
+            child: Text(
+              rest[i],
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: isLast
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface,
+                fontWeight: isLast ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
-        children: <Widget>[
+        children: [
           IconButton(
-            icon: const Icon(Icons.arrow_upward),
+            icon: const Icon(Icons.arrow_upward, size: 18),
             tooltip: l10n.backToParent,
-            onPressed: onUp,
+            onPressed: () {
+              final p = path;
+              if (_volumeRe.hasMatch(p) &&
+                  _volumeRe.firstMatch(p)!.group(0) == p) {
+                onTap(null);
+                return;
+              }
+              final slash = p.lastIndexOf('/');
+              if (slash <= 0) {
+                onTap(null);
+                return;
+              }
+              onTap(p.substring(0, slash));
+            },
+            visualDensity: VisualDensity.compact,
           ),
           Expanded(
-            child: Text(
-              path,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              child: Row(children: segments),
             ),
           ),
         ],
