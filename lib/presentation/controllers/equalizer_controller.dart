@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:resonance/data/models/equalizer_model.dart';
 import 'package:resonance/data/repositories/equalizer_repository.dart';
+import 'package:resonance/presentation/controllers/preferences_controller.dart';
 
 class BuiltInPreset {
   final String id;
@@ -17,6 +18,11 @@ class EqualizerController extends GetxController {
   final isEnabled = false.obs;
   final params = Rxn<AndroidEqualizerParameters>();
   final presets = <EqualizerPresetModel>[].obs;
+
+  /// Manuel loudness hedefi. Görev 2.3 birim düzeltmesi: değer artık
+  /// doğrudan dB cinsindendir (eski sürüm mB varsayıp arayüzde /100 ile
+  /// gösteriyordu; just_audio dB beklediği için kaydırıcı devasa bir
+  /// kazanç uyguluyordu).
   final loudnessGain = 0.0.obs;
 
   List<AndroidEqualizerBand> get bands => params.value?.bands ?? [];
@@ -60,7 +66,32 @@ class EqualizerController extends GetxController {
       }
 
       presets.assignAll(await _repo.getPresets());
-      
+
+      // Görev 2.4: kalıcı bant kazançlarını geri yükle. Bant sayısı cihaza
+      // göre değişebileceğinden en fazla yazılan uzunluk uygulanır; fazla
+      // değerler yok sayılır.
+      final savedGains = _repo.loadGains();
+      if (savedGains != null && savedGains.isNotEmpty) {
+        final bandList = params.value!.bands;
+        for (var i = 0; i < bandList.length && i < savedGains.length; i++) {
+          await bandList[i].setGain(savedGains[i]);
+        }
+        params.refresh();
+      }
+
+      // Görev 2.4: kalıcı loudness değerini (dB) geri yükle.
+      final savedLoudness = _repo.loadLoudness();
+      if (savedLoudness != null) loudnessGain.value = savedLoudness;
+
+      // Görev 2.3: loudness kanalının durumu artık EQ anahtarından
+      // bağımsız türetilir. ReplayGain açıksa kanal PlayerController
+      // tarafından da kullanılır, açık tutulur; kapalıysa eski davranış
+      // korunur (kanal ekolayzer anahtarını izler).
+      final replayGainOn =
+          Get.find<PreferencesController>().playback.value.replayGain;
+      await _repo.setLoudnessEnabled(isEnabled.value || replayGainOn);
+      await _repo.setLoudnessGain(loudnessGain.value);
+
       // Kullanıcının önceki tercihini geri yükle
       await _repo.setEnabled(isEnabled.value);
     } catch (e) {
@@ -73,6 +104,12 @@ class EqualizerController extends GetxController {
   Future<void> toggleEnabled(bool value) async {
     isEnabled.value = value;
     await _repo.setEnabled(value);
+    // Görev 2.3: kanallar ayrıldı. ReplayGain kapalıyken eski davranış
+    // korunur (loudness kanalı EQ anahtarını izler); açıkken kanalın
+    // sahibi ReplayGain'dir ve burada dokunulmaz.
+    if (!Get.find<PreferencesController>().playback.value.replayGain) {
+      await _repo.setLoudnessEnabled(value);
+    }
   }
 
   Future<void> updateBand(int index, double gain) async {
@@ -80,11 +117,16 @@ class EqualizerController extends GetxController {
     await params.value!.bands[index].setGain(gain);
     params.refresh();
     await _repo.setBandGain(index, gain);
+    // Görev 2.4: kazanç eğrisini kalıcı hale getir. Preset uygulaması da
+    // updateBand üzerinden geçtiği için otomatik olarak kaydedilir.
+    await _repo.saveGains(params.value!.bands.map((b) => b.gain).toList());
   }
 
   Future<void> setLoudness(double gain) async {
     loudnessGain.value = gain;
-    await _repo.setLoudnessGain(gain);
+    await _repo.setLoudnessGain(gain); // birim: dB (görev 2.3 düzeltmesi)
+    // Görev 2.4: değeri kalıcı hale getir.
+    await _repo.saveLoudness(gain);
   }
 
   Future<void> applyPreset(EqualizerPresetModel preset) async {
@@ -95,7 +137,7 @@ class EqualizerController extends GetxController {
 
   Future<void> applyBuiltInPreset(BuiltInPreset preset) async {
     if (params.value == null) return;
-    
+
     final newGains = bands.map((band) {
       // Bas (<250Hz), Orta (250-4000Hz), Tiz (>4000Hz)
       double val;

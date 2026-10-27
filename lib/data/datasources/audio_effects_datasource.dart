@@ -23,20 +23,40 @@ class AudioEffectsDatasource {
     }
   }
 
+  /// Yalnızca ekolayzer kanalını aç/kapat.
+  ///
+  /// Görev 2.3 (kullanıcı incelemesi sonucu): Eski sürüm bu metotta
+  /// LoudnessEnhancer'ı da birlikte açıp kapatıyordu; sonuçta ekolayzer
+  /// kapalıyken ReplayGain tamamen etkisiz kalıyordu. Kanallar artık
+  /// bağımsızdır: loudness kanalı [setLoudnessEnabled] ile yönetilir.
   Future<void> setEnabled(bool enabled) async {
     await equalizer.setEnabled(enabled);
+  }
+
+  /// Yalnızca LoudnessEnhancer kanalını aç/kapat.
+  ///
+  /// Sahiplik: PlayerController (ReplayGain, Görev 2.3) ve
+  /// EqualizerController (manuel loudness, Görev 2.4) bu kanalı kendi
+  /// tercihlerine göre yönetir.
+  Future<void> setLoudnessEnabled(bool enabled) async {
     try {
-      // Ses yükselticiyi de aç/kapat
       await loudnessEnhancer.setEnabled(enabled);
     } catch (_) {
       // Bazı cihazlar LoudnessEnhancer'ı desteklemeyebilir, çökmeyi engelle.
     }
   }
 
-  Future<void> setLoudnessGain(double gain) async {
+  /// Hedef kazancı uygular.
+  ///
+  /// Birim notu (plan incelemesinde doğrulandı): just_audio'nun Dart API'si
+  /// decibel (dB) bekler; Android'e geçişte Java katmanı değeri x100 ile
+  /// milibele çevirir. Depodaki eski "just_audio milibel (mB) bekler"
+  /// yorumu hatalıydı; ekolayzer sayfasındaki /100 gösterimiyle birleşince
+  /// kullanıcı +15 dB isterken çok daha büyük bir kazanç oluşuyordu.
+  /// Tüm katmanlarda birim artık dB'dir.
+  Future<void> setLoudnessGain(double gainDb) async {
     try {
-      // just_audio milibel (mB) bekler. 100 mB = 1 dB.
-      await loudnessEnhancer.setTargetGain(gain);
+      await loudnessEnhancer.setTargetGain(gainDb);
     } catch (_) {}
   }
 }

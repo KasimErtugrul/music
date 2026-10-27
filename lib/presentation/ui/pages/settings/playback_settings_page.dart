@@ -42,14 +42,20 @@ class PlaybackSettingsPage extends StatelessWidget {
               onChanged: ctrl.setDefaultShuffle,
             ),
             SettingsSwitchTile(
-              title: l10n.gaplessPlayback,
-              value: p.gapless,
-              onChanged: ctrl.setGapless,
-            ),
-            SettingsSwitchTile(
               title: l10n.skipSilence,
               value: p.skipSilence,
               onChanged: ctrl.setSkipSilence,
+            ),
+            // Görev 2.3: ReplayGain anahtarı. just_audio setAudioSources ile
+            // yüklenen kuyruklarda kesintisiz geçişi zaten varsayılan olarak
+            // sağladığından, hiçbir şey yapmayan "Kesintisiz oynatma"
+            // anahtarı (Görev 2.2) bu sayfadan kaldırıldı; modeldeki gapless
+            // alanı eski JSON'ların uyumluluğu için korunuyor.
+            SettingsSwitchTile(
+              title: l10n.replayGain,
+              subtitle: l10n.replayGainEnableDesc,
+              value: p.replayGain,
+              onChanged: ctrl.setReplayGain,
             ),
             SettingsChoiceTile<int>(
               title: l10n.defaultRepeat,

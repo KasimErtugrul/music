@@ -150,14 +150,22 @@ class EqualizerPage extends StatelessWidget {
                         const Icon(Icons.volume_up, size: 20),
                         Expanded(
                           child: Slider(
-                            value: ctrl.loudnessGain.value,
+                            // Görev 2.3 birim düzeltmesi: değer artık doğrudan
+                            // dB cinsindendir (0-15 dB). Eski kod kaydırıcıyı
+                            // mB varsayıp /100 ile gösteriyordu; oysa
+                            // just_audio Dart tarafında dB bekliyor, Android'e
+                            // Java katmanı x100 ile milibele çeviriyor. Sonuç:
+                            // "15 dB" diye gösterilen değer ~1500 dB'lik
+                            // anlamsız bir kazanca dönüşüyordu.
+                            value: ctrl.loudnessGain.value.clamp(0.0, 15.0),
                             min: 0,
-                            max: 1500, // Maksimum 15 dB
+                            max: 15,
+                            divisions: 30,
+                            label: '${ctrl.loudnessGain.value.toStringAsFixed(1)} dB',
                             onChanged: ctrl.isEnabled.value ? (v) => ctrl.setLoudness(v) : null,
                           ),
                         ),
-                        // mB'yi dB'ye çevirip göster
-                        Text('${(ctrl.loudnessGain.value / 100).toStringAsFixed(1)} dB'),
+                        Text('${ctrl.loudnessGain.value.toStringAsFixed(1)} dB'),
                       ],
                     )
                   ],

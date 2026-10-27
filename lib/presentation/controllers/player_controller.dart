@@ -2,8 +2,11 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:resonance/data/datasources/audio_effects_datasource.dart';
+import 'package:resonance/data/datasources/metadata_datasource.dart';
 import 'package:resonance/data/models/queue_state_model.dart';
 import 'package:resonance/data/models/song_model.dart';
+import 'package:resonance/data/repositories/equalizer_repository.dart';
 import 'package:resonance/data/repositories/history_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
@@ -47,6 +50,12 @@ class PlayerController extends GetxController {
   String? _loggedSongUri;
   bool _isRestoring = true;
 
+  // Görev 2.3: ReplayGain kazancı en son hangi parçaya uygulandı? playSong,
+  // oturum geri yükleme ve doğal (otomatik) parça geçişleri aynı yardımcıyı
+  // kullanır; bu işaretçi çift etiket okumasını ve çift kazanç yazmasını
+  // engeller.
+  String? _replayGainAppliedUri;
+
 
 
   SongModel? get currentSong {
@@ -72,6 +81,24 @@ class PlayerController extends GetxController {
         _loggedSongUri = null;
       }
       currentItem.value = item;
+
+      // Görev 2.3: kuyruk kendi ilerleyince (otomatik geçiş) playSong
+      // çağrılmaz; kazancın parça başına güncellenmesi için doğal geçişler
+      // burada yakalanır. playSong ve geri yükleme akışı uri'yi önceden
+      // işaretlediği için bu dinleyici o durumda tekrar okumaz.
+      // Not: MediaItem.id, PlayerRepositoryImpl tarafından song.uri'ye
+      // eşittir; eşleşme index zamanlamasına değil uri'ye bakar.
+      if (!_isRestoring && item != null && item.id != _replayGainAppliedUri) {
+        SongModel? naturalSong;
+        for (final s in songQueue) {
+          if (s.uri == item.id) {
+            naturalSong = s;
+            break;
+          }
+        }
+        if (naturalSong != null) _applyReplayGain(naturalSong);
+      }
+
       if (!_isRestoring) _saveQueueState();
     });
 
@@ -119,7 +146,7 @@ class PlayerController extends GetxController {
     }
   }
 
-  
+
 
   Future<void> fastForward() async {
     final sec = prefCtrl.playback.value.seekIntervalSeconds;
@@ -156,11 +183,32 @@ class PlayerController extends GetxController {
           // Kayıtlı state'i uygula
           await _repository.setShuffleMode(state.shuffleEnabled);
           await _repository.setRepeatMode(state.repeatMode);
+
+          // Görev 2.1: oturum geri yüklemede ses tercihlerini uygula.
+          // Eski akış kuyruğu hız/pitch/sessizlik-atla tercihleri olmadan
+          // yüklüyordu; otomatik-devam tercihi ise hiç okunmuyordu.
+          // PreferencesController'ın Completer tabanlı ready yardımcısı
+          // (Görev 1.5) tercihlerin diskten yüklendiğini garanti eder;
+          // hata durumunda da tamamlanır, akış kilitlenmez.
+          await prefCtrl.ready;
+          final pref = prefCtrl.playback.value;
+          await _repository.setSpeed(pref.speed);
+          await _repository.setPitch(pref.pitch);
+          await _repository.setSkipSilenceEnabled(pref.skipSilence);
+
+          // Görev 2.3: geri yüklenen ilk parçaya ReplayGain uygula.
+          await _applyReplayGain(restored[safeIndex]);
+
           await _repository.loadQueue(
             restored,
             initialIndex: safeIndex,
             initialPosition: state.position,
           );
+
+          // Görev 2.1: tercih açıksa kaldığı yerden oynatmaya devam et.
+          // loadQueue hataya düşerse play satırına ulaşılmaz; bozuk bir
+          // geri yükleme asla beklenmedik oynatma başlatmaz.
+          if (pref.autoResume) await _repository.play();
           return;
         }
       }
@@ -206,9 +254,9 @@ class PlayerController extends GetxController {
     await _repository.setSpeed(pref.speed);
     await _repository.setPitch(pref.pitch);
     await _repository.setSkipSilenceEnabled(pref.skipSilence);
-    // Gapless just_audio'da varsayılan olarak açıktır, kapatmak için kuyruk yönetimi gerekebilir.
-    // just_audio'da gapless kapatma doğrudan bir API değil, setAudioSources ile ilgilidir.
-    // Şimdilik sadece speed/pitch ve skipSilence bağlıyoruz.
+
+    // Görev 2.3: parça başına ReplayGain (etiket yoksa kazanç 0 dB).
+    await _applyReplayGain(song);
 
     final list = queue ?? <SongModel>[song];
     final index = list.indexWhere((s) => s.id == song.id);
@@ -216,6 +264,50 @@ class PlayerController extends GetxController {
     songQueue.assignAll(list);
     await _repository.loadQueue(list, initialIndex: index < 0 ? 0 : index);
     await _repository.play();
+  }
+
+  /// Görev 2.3: ReplayGain uygulaması.
+  ///
+  /// - Tercih açık: parçanın REPLAYGAIN_TRACK_GAIN etiketi okunur ve hedef
+  ///   kazanç olarak uygulanır (etiket yoksa 0 dB). LoudnessEnhancer kanalı
+  ///   bu akışta etkinleştirilir; ekolayzer anahtarının açık olmasına gerek
+  ///   yoktur (Görev 2.3 kanal ayrımı).
+  /// - Tercih kapalı: kanal kontrolü ekolayzer tarafına döner; kalıcı manuel
+  ///   loudness değeri (Görev 2.4 anahtarı) geri yüklenir. Böylece önceki
+  ///   parçadan kalan ReplayGain kazancı sonraki parçalara sızmaz.
+  /// - Otomatik parça geçişi: mediaItem dinleyicisi işaretçi sayesinde
+  ///   yalnızca doğal geçişlerde bu yardımcıyı çağırır; kullanıcı
+  ///   başlatmalı çalmalarda playSong zaten uygulamıştır.
+  ///
+  /// Birim: her iki kanal da dB cinsindendir. just_audio'nun Dart API'si dB
+  /// bekler; Android'e geçişte Java katmanı değeri x100 ile milibele çevirir.
+  ///
+  /// Bilinen sınırlama (yol haritası): manuel loudness ile ReplayGain
+  /// kazancı toplanmaz (kaskad); tercih açıkken parça kazancı son sözü
+  /// söyler.
+  Future<void> _applyReplayGain(SongModel song) async {
+    _replayGainAppliedUri = song.uri; // hem başarı hem hata yolunda işaretle
+    try {
+      final effects = Get.find<AudioEffectsDatasource>();
+      final pref = prefCtrl.playback.value;
+      if (pref.replayGain) {
+        final gainDb = await Get.find<MetadataDatasource>().replayGainDb(song);
+        await effects.setLoudnessEnabled(true);
+        await effects.setLoudnessGain(gainDb ?? 0.0);
+      } else {
+        final eqRepo = Get.find<EqualizerRepository>();
+        final manualLoudness = eqRepo.loadLoudness() ?? 0.0;
+        if (manualLoudness != 0.0 && await eqRepo.isEnabled()) {
+          await effects.setLoudnessEnabled(true);
+          await effects.setLoudnessGain(manualLoudness);
+        } else {
+          await effects.setLoudnessEnabled(false);
+          await effects.setLoudnessGain(0.0);
+        }
+      }
+    } catch (_) {
+      // Kazanç uygulaması ses akışını asla bozmamalıdır.
+    }
   }
 
    Future<void> pause() => _repository.pause();
