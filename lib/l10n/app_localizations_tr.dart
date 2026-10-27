@@ -1109,4 +1109,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get sortByDuration => 'Süre (Uzun-Kısa)';
+
+  @override
+  String offlineCoreBadge(String version) {
+    return 'v$version • Çevrimdışı Çekirdek';
+  }
 }

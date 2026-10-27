@@ -1113,4 +1113,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sortByDuration => 'Duration (Long-Short)';
+
+  @override
+  String offlineCoreBadge(String version) {
+    return 'v$version • Offline Core';
+  }
 }

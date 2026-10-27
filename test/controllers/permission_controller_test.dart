@@ -175,7 +175,7 @@ void main() {
       stubStatuses(media: AppPermissionStatus.granted);
       final c = build();
       await c.refresh();
-      c.dismissNotification();
+      //c.dismissNotification();
       expect(c.showNotificationCard, isFalse);
       expect(navigated, [AppRoutes.home]);
     });

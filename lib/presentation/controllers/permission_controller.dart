@@ -6,9 +6,6 @@ import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/core/utils/permission_helper.dart';
 
 /// Medya (zorunlu) ve bildirim (isteğe bağlı) izin akışı.
-///
-/// Bildirim izni reddedilse bile çalma etkilenmez; yalnızca medya izni
-/// uygulamanın ana ekranına geçişi belirler.
 class PermissionController extends GetxController with WidgetsBindingObserver {
   PermissionController(
     this._helper, {
@@ -24,18 +21,12 @@ class PermissionController extends GetxController with WidgetsBindingObserver {
   final Rx<AppPermissionStatus> media = AppPermissionStatus.denied.obs;
   final Rx<AppPermissionStatus> notification = AppPermissionStatus.denied.obs;
 
-  /// Bu oturumda medya izni en az bir kez istendi mi (reddedildi mesajı için).
   final RxBool mediaRequested = false.obs;
   final RxBool notificationRequired = false.obs;
-
-  /// Bildirim kartı kapatıldı veya bir kez soruldu (yalnızca bellekte tutulur).
-  final RxBool notificationDismissed = false.obs;
   final RxBool busy = false.obs;
 
   bool get showNotificationCard =>
-      notificationRequired.value &&
-      !notification.value.isGranted &&
-      !notificationDismissed.value;
+      notificationRequired.value && !notification.value.isGranted;
 
   @override
   void onInit() {
@@ -61,7 +52,6 @@ class PermissionController extends GetxController with WidgetsBindingObserver {
     _leaveIfDone();
   }
 
-  /// Splash: durumu oku, ana sayfaya veya izin sayfasına git.
   Future<void> checkAndRoute() async {
     await refresh();
     _navigate(media.value.isGranted ? AppRoutes.home : AppRoutes.permission);
@@ -76,14 +66,10 @@ class PermissionController extends GetxController with WidgetsBindingObserver {
       notificationRequired.value = required;
       notification.value = _merge(notification.value, freshNotification);
     } on Exception {
-      // Durum okunamadı: önceki değerler korunur. Hata günlüğü Gün 31'de.
+      // Durum okunamadı: önceki değerler korunur.
     }
   }
 
-  /// Eklenti, "bir daha sorma" durumunu `request()` sonucunda bildirir; sonraki
-  /// `status` okuması yalnızca `denied` dönebilir. Kalıcı reddi yanlışlıkla
-  /// geri almamak için `denied` okuması `permanentlyDenied`'ı ezmez.
-  /// DOĞRULANMADI: gerçek cihaz davranışı.
   AppPermissionStatus _merge(
     AppPermissionStatus current,
     AppPermissionStatus fresh,
@@ -119,13 +105,6 @@ class PermissionController extends GetxController with WidgetsBindingObserver {
     } finally {
       busy.value = false;
     }
-    // Bir kez soruldu: kart gizlenir. Tekrar deneme İzinler ayarından (Gün 21).
-    notificationDismissed.value = true;
-    _leaveIfDone();
-  }
-
-  void dismissNotification() {
-    notificationDismissed.value = true;
     _leaveIfDone();
   }
 
@@ -133,7 +112,6 @@ class PermissionController extends GetxController with WidgetsBindingObserver {
     await _helper.openSettings();
   }
 
-  /// "Devam et": medya izni verilmiş ve bildirim kartı hâlâ bekliyorsa.
   void continueToApp() {
     if (media.value.isGranted) _navigate(AppRoutes.home);
   }

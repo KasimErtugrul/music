@@ -2131,6 +2131,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Duration (Long-Short)'**
   String get sortByDuration;
+
+  /// No description provided for @offlineCoreBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'v{version} • Offline Core'**
+  String offlineCoreBadge(String version);
 }
 
 class _AppLocalizationsDelegate

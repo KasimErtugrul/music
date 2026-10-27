@@ -353,5 +353,7 @@
   "sortByArtist": "Artist Name",
   "sortByAlbum": "Album Name",
   "sortByDateAdded": "Date Added (New)",
-  "sortByDuration": "Duration (Long-Short)"
+  "sortByDuration": "Duration (Long-Short)",
+    "offlineCoreBadge": "v{version} • Offline Core",
+  "@offlineCoreBadge": { "placeholders": { "version": { "type": "String" } } }
 }

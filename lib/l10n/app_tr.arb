@@ -339,5 +339,6 @@
   "sortByArtist": "Sanatçı Adı",
   "sortByAlbum": "Albüm Adı",
   "sortByDateAdded": "Eklenme Tarihi (Yeni)",
-  "sortByDuration": "Süre (Uzun-Kısa)"
+  "sortByDuration": "Süre (Uzun-Kısa)",
+    "offlineCoreBadge": "v{version} • Çevrimdışı Çekirdek"
 }
