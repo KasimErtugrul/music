@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/l10n/app_localizations.dart';
+import 'package:resonance/presentation/controllers/library_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
@@ -30,7 +31,13 @@ class LibrarySettingsPage extends StatelessWidget {
               value: lib.minDurationSeconds,
               options: const [0, 30, 60],
               labelOf: (v) => v == 0 ? 'Yok / None' : '$v s',
-              onChanged: ctrl.setMinDuration,
+              onChanged: (v) {
+                ctrl.setMinDuration(v);
+                // Ek-A: Filtre anında uygulansın. Repository, değişen filtre
+                // değerini görüp sıralı liste önbelleğini geçersiz kılar;
+                // liste mevcut indeksten yeniden süzülür (rescan GEREKMEZ).
+                Get.find<LibraryController>().reloadSongs();
+              },
             ),
               ListTile(
               leading: const Icon(Icons.folder_off_outlined),

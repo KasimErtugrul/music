@@ -83,6 +83,20 @@ class LibraryController extends GetxController {
     }
   }
 
+  /// Ek-A: Min. süre filtresi gibi sıralamayı bozmayan değişikliklerde
+  /// MediaStore'a dokunmadan (rescan'siz) şarkı listesini taze sorgular.
+  /// Filtre değerinin değiştiğini repository kendisi görür ve sıralı liste
+  /// önbelleğini geçersiz kılar; mevcut indeks üzerinden yeniden süzer.
+  Future<void> reloadSongs() async {
+    try {
+      final sort = songSort.value;
+      songs.value = await _repository.songs(sort: sort);
+      letterOffsets.value = await _repository.letterOffsets(sort);
+    } on Object {
+      hasError.value = true;
+    }
+  }
+
   Future<void> rescan() async {
     await _repository.rescan();
     await loadAll();

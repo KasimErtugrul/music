@@ -34,6 +34,10 @@ class PlayerController extends GetxController {
   final repeatMode = AudioServiceRepeatMode.none.obs;
   final lastError = Rxn<PlayerException>();
 
+  // Ek-B: Oynatma hızı. playbackState'ten canlı beslenir; oynatıcı sayfasındaki
+  // hız çipi artık sabit '1.0x' yerine bu değeri gösterir.
+  final speed = 1.0.obs;
+
   final position = Duration.zero.obs;
   final duration = Duration.zero.obs;
 
@@ -76,6 +80,7 @@ class PlayerController extends GetxController {
     _repository.playbackStateStream.listen((state) {
       isPlaying.value = state.playing;
       processingState.value = state.processingState;
+      speed.value = state.speed; // Ek-B: hız çipi için canlı değer
       if (!_isRestoring &&
           (!state.playing ||
               state.processingState == AudioProcessingState.idle)) {

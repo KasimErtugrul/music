@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:resonance/data/models/playback_settings_model.dart';
 import 'package:resonance/data/models/library_settings_model.dart';
@@ -11,6 +13,19 @@ class PreferencesController extends GetxController {
   final library = const LibrarySettingsModel().obs;
   final isLoading = true.obs;
 
+  /// Tercihlerin diskten yüklenme işleminin bittiğini bildiren hazır (ready)
+  /// yardımcısı. Revize notu (kullanıcı incelemesi sonrası): koşullu açılış
+  /// taraması, indeks kalıcılığı sağlanmadan doğru semantik veremez
+  /// (_ensureIndex zaten ilk erişimde taze MediaStore sorgusu atıyor; kapalı
+  /// senaryosu içinse indeksin kalıcılaştırılması gerekir). Bu yüzden bu
+  /// yardımcının Aşama 1'deki tek tüketicisi yoktur; Aşama 2'deki oturum
+  /// geri yükleme görevinin (2.1 autoResume) ön koşulu olarak tutulur.
+  ///
+  /// Yükleme hata verse bile completer tamamlanır; aksi halde bozuk bir
+  /// SharedPreferences durumunda açılış akışı sonsuza dek kilitlenirdi.
+  final Completer<void> _ready = Completer<void>();
+  Future<void> get ready => _ready.future;
+
   @override
   void onInit() {
     super.onInit();
@@ -18,9 +33,16 @@ class PreferencesController extends GetxController {
   }
 
   Future<void> _load() async {
-    playback.value = await _repo.loadPlayback();
-    library.value = await _repo.loadLibrary();
-    isLoading.value = false;
+    try {
+      playback.value = await _repo.loadPlayback();
+      library.value = await _repo.loadLibrary();
+    } on Object {
+      // Yüklenemezse model varsayılanları geçerli kalır;
+      // ready yine de tamamlanır (açılış akışı kilitlenmez).
+    } finally {
+      isLoading.value = false;
+      if (!_ready.isCompleted) _ready.complete();
+    }
   }
 
   void setSeekInterval(int seconds) {

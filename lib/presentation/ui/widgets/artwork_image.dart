@@ -26,6 +26,12 @@ class ArtworkImage extends StatefulWidget {
   final BoxFit fit;
   final IconData fallbackIcon;
 
+  /// Görev 1.4: "Kapak önbelleğini temizle" düğmesinin gerçek temizliği için
+  /// statik boşaltma noktası. Bayt LRU'su [_ArtworkImageState._cache] içinde
+  /// yaşadığından temizlik ona delege edilir (aynı kütüphanede olduğundan
+  /// private sınıfa erişim serbesttir).
+  static void clearCache() => _ArtworkImageState.clearCache();
+
   @override
   State<ArtworkImage> createState() => _ArtworkImageState();
 }
@@ -33,6 +39,11 @@ class ArtworkImage extends StatefulWidget {
 class _ArtworkImageState extends State<ArtworkImage> {
   static final Map<(int, int), Uint8List?> _cache = <(int, int), Uint8List?>{};
   static const int _maxCache = 200;
+
+  /// Görev 1.4: Bayt LRU önbelleğini boşaltır. Widget'lar yeniden çizimde
+  /// veriyi [LibraryRepository.artwork] üzerinden taze çeker. Dışarıdan
+  /// çağrı [ArtworkImage.clearCache] üzerinden yapılır.
+  static void clearCache() => _cache.clear();
 
   Uint8List? _data;
   bool _loading = true;

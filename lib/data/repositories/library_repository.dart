@@ -77,6 +77,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
   final Map<SongSort, List<int>> _orders = {};
   final Map<SongSort, List<SongModel>> _sorted = {};
 
+  // Ek-A: Şarkı listesinin süzülmesinde kullanılan son min. süre (ms).
+  // Filtre ayarı değiştiğinde _sorted önbelleği geçersiz kılınmalıdır;
+  // aksi halde yeni filtre rescan/yeniden başlatmaya kadar etkisiz kalır.
+  int? _filterMinDurMs;
+
   Future<_LibraryIndex> _ensureIndex() {
     final ready = _index;
     if (ready != null) return Future<_LibraryIndex>.value(ready);
@@ -181,12 +186,21 @@ class LibraryRepositoryImpl implements LibraryRepository {
   @override
   Future<List<SongModel>> songs({SongSort sort = const SongSort()}) async {
     final index = await _ensureIndex();
+
+    // Ek-A: Güncel filtre değerini ÖNBELLEK kontrolünden ÖNCE oku; ayar
+    // değiştiyse sıralı liste önbelleğini geçersiz kıl. Böylece "Min. süre"
+    // tercihi rescan/yeniden başlatma beklemeden bir sonraki sorguda etkilidir.
+    final libPrefs = await _prefs.loadLibrary();
+    final minDurMs = libPrefs.minDurationSeconds * 1000;
+    if (_filterMinDurMs != null && _filterMinDurMs != minDurMs) {
+      _sorted.clear();
+    }
+    _filterMinDurMs = minDurMs;
+
     final cached = _sorted[sort];
     if (cached != null) return cached;
 
     final order = _orderFor(index, sort);
-    final libPrefs = await _prefs.loadLibrary();
-    final minDurMs = libPrefs.minDurationSeconds * 1000;
 
     final result = List<SongModel>.unmodifiable(<SongModel>[
       for (final i in order)

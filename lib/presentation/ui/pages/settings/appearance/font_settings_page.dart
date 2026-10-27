@@ -4,6 +4,13 @@ import 'package:resonance/core/theme/font_registry.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
 
+/// Yazı tipi ve yazı ölçeği ayarları.
+///
+/// Görev 1.6: Ölçek kaydırıcısı eklendi (0.80x–1.40x aralığı, 12 adım).
+/// Eski sayfada yalnızca yazı tipi listesi vardı; textScale değeri hiçbir
+/// arayüzden değiştirilemiyordu. Değer active_theme_settings JSON'unda
+/// saklandığından ek kalıcılık gerekmez; değişim, ThemeController.setTextScale
+/// → app.dart'taki MediaQuery.textScaler zinciri üzerinden anında yansır.
 class FontSettingsPage extends StatelessWidget {
   const FontSettingsPage({super.key});
 
@@ -16,26 +23,61 @@ class FontSettingsPage extends StatelessWidget {
       appBar: AppBar(title: Text(l10n.themeFont)),
       body: Obx(() {
         final current = themeCtrl.settings.value.fontFamily;
+        final scale = themeCtrl.settings.value.textScale;
 
         return ListView(
-          children: FontRegistry.fonts.map((font) {
-            //final isSelected = current == font.family;
-            return RadioListTile<String>(
-              title: Text(
-                font.label,
-                style: TextStyle(fontFamily: font.family),
+          children: [
+            ...FontRegistry.fonts.map((font) {
+              return RadioListTile<String>(
+                title: Text(
+                  font.label,
+                  style: TextStyle(fontFamily: font.family),
+                ),
+                subtitle: Text(
+                  'ç ğ ı İ ö ş ü — 0123456789',
+                  style: TextStyle(fontFamily: font.family),
+                ),
+                value: font.family,
+                groupValue: current,
+                onChanged: (v) {
+                  if (v != null) themeCtrl.setFont(v);
+                },
+              );
+            }),
+            const Divider(height: 32),
+            // --- Yazı ölçeği (Görev 1.6) ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.themeTextScale,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  Text(
+                    '${scale.toStringAsFixed(2)}x',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ],
               ),
-              subtitle: Text(
-                'ç ğ ı İ ö ş ü — 0123456789',
-                style: TextStyle(fontFamily: font.family),
-              ),
-              value: font.family,
-              groupValue: current,
-              onChanged: (v) {
-                if (v != null) themeCtrl.setFont(v);
-              },
-            );
-          }).toList(),
+            ),
+            Slider(
+              // Kayıtlı değer aralık dışıysa (eski sürüm verisi) korumalı oku;
+              // kaydırıcı 0.80x–1.40x aralığında 0.05'lik adımlarla çalışır.
+              value: scale.clamp(0.8, 1.4).toDouble(),
+              min: 0.8,
+              max: 1.4,
+              divisions: 12,
+              label: '${scale.toStringAsFixed(2)}x',
+              onChanged: themeCtrl.setTextScale,
+            ),
+            const SizedBox(height: 16),
+          ],
         );
       }),
     );

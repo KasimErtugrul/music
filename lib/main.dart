@@ -54,6 +54,12 @@ Future<void> main() async {
     audioHandler = await AudioService.init(
       builder: () => ResonanceAudioHandler(
         source: playerSource,
+        // Görev 1.2: "Kulaklık çıkınca duraklat" kararı olay anında canlı
+        // tercihten okunur. PreferencesController bu noktadan ÖNCE kalıcı
+        // olarak kaydedildiği için getter güvenle bağlanabilir; ayar
+        // değiştiğinde handler'ın yeniden kurulması gerekmez.
+        shouldPauseOnUnplug: () =>
+            Get.find<PreferencesController>().playback.value.pauseOnHeadphone,
         // audio_service yalnızca file:// ve content:// artUri'yi yerel okur; diğer şemaları
         // HTTP indirici (flutter_cache_manager) ile almaya çalışır. `data:` URI bildirimde
         // kapak göstermez (ve INTERNET izni de yok). Bu yüzden JPEG dosyaya yazılır.

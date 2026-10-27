@@ -42,6 +42,21 @@ class ResonanceApp extends StatelessWidget {
         supportedLocales: AppLocalizations.supportedLocales,
         initialRoute: initialRoute,
         getPages: AppPages.routes,
+        // Görev 1.6: Yazı ölçeği (textScale) artık tüm uygulamaya uygulanıyor.
+        // Bu ölçek, sistem erişilebilirlik ölçeğiyle ÇARPILIR; 1.00 değeri
+        // "sistem ölçeğini aynen devral" anlamına gelir. Okuma, Obx kapsamında
+        // themeCtrl.settings.value üzerinden yapıldığı için ölçek değişimi
+        // uygulamayı anında yeniden çizer; değer zaten active_theme_settings
+        // JSON'unda saklandığından ek kalıcılık gerekmez.
+        builder: (context, child) {
+          final scale =
+              themeCtrl.settings.value.textScale.clamp(0.5, 2.0).toDouble();
+          return MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(scale)),
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
         // Tanımsız bir yol gelirse (ör. dış intent) boş ekran yerine açılış sayfası.
         unknownRoute: GetPage<dynamic>(
           name: '/not-found',

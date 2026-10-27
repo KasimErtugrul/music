@@ -9,13 +9,23 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   ResonanceAudioHandler({
     required this._source,
     required this._artResolver,
+    required this.shouldPauseOnUnplug,
   }) {
-    AudioSessionDatasource(_source).init();
+    // Görev 1.2: Kulaklık çıkarma koşulu yukarıdan gösterge olarak alınır;
+    // AudioSessionDatasource olay anında bu göstergeyi okuyup karar verir.
+    AudioSessionDatasource(
+      _source,
+      shouldPauseOnUnplug: shouldPauseOnUnplug,
+    ).init();
     _bindStreams();
   }
 
   final PlayerDataSource _source;
   final Future<Uri?> Function(String songUri) _artResolver;
+
+  /// "Kulaklık çıkınca duraklat" tercihi (Görev 1.2). Olay anında canlı okunur;
+  /// ayar değiştiğinde handler'ın yeniden kurulması gerekmez.
+  final bool Function() shouldPauseOnUnplug;
   AudioPlayer get _player => _source.player;
 
   Stream<Duration> get positionStream => _source.positionStream;
@@ -33,7 +43,7 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
       if (index >= 0 && index < items.length) {
         final item = items[index];
         mediaItem.add(item);
-        
+
         final artUri = await _artResolver(item.id);
         if (artUri != null && mediaItem.value?.id == item.id) {
           mediaItem.add(item.copyWith(artUri: artUri));
@@ -64,8 +74,8 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
       LoopMode.one => AudioServiceRepeatMode.one,
       LoopMode.all => AudioServiceRepeatMode.all,
     };
-    final shuffleMode = _player.shuffleModeEnabled 
-        ? AudioServiceShuffleMode.all 
+    final shuffleMode = _player.shuffleModeEnabled
+        ? AudioServiceShuffleMode.all
         : AudioServiceShuffleMode.none;
 
     return PlaybackState(
@@ -147,7 +157,7 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> skipToNext() => _source.skipToNext();
   @override
   Future<void> skipToPrevious() => _source.skipToPrevious();
-  
+
   // BaseAudioHandler'da override edilmesi gerekmeyenler
   Future<void> setVolume(double volume) => _source.setVolume(volume);
   Future<void> setPitch(double pitch) => _source.setPitch(pitch);
@@ -155,12 +165,12 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> setSpeed(double speed) => _source.setSpeed(speed);
-  
+
   @override
   Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
     await _source.setShuffleModeEnabled(shuffleMode == AudioServiceShuffleMode.all);
   }
-  
+
   @override
   Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
     final mode = switch (repeatMode) {

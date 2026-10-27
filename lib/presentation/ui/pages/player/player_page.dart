@@ -14,6 +14,10 @@ import 'package:resonance/presentation/ui/widgets/seek_bar.dart';
 import 'package:resonance/presentation/ui/widgets/sleep_timer_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/speed_pitch_sheet.dart';
 
+/// Ek-B: Hız çipi etiketi. 1.0 → "1.0x", 1.5 → "1.5x", 1.25 → "1.25x".
+String _speedLabel(double v) =>
+    v == v.roundToDouble() ? '${v.toStringAsFixed(1)}x' : '${v.toStringAsFixed(2)}x';
+
 class PlayerPage extends GetView<PlayerController> {
   const PlayerPage({super.key});
 
@@ -160,7 +164,7 @@ class PlayerPage extends GetView<PlayerController> {
                       final song = controller.currentSong;
                       if (song == null) return const SizedBox.shrink();
                       final favCtrl = Get.find<FavoriteController>();
-                      
+
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Row(
@@ -206,45 +210,50 @@ class PlayerPage extends GetView<PlayerController> {
                         ),
                       );
                     }),
-                    
+
                     const Spacer(),
-                    
+
                     // Seek Bar
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8),
                       child: SeekBar(),
                     ),
-                    
+
                     // Ana Kontroller
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       child: PlayerControls(),
                     ),
 
-                    // İkincil Eylem Satırı (-10s, Hız, Sözler, +10s, Kuyruk)
+                    // İkincil Eylem Satırı (-Xs, Hız, Sözler, +Xs, Kuyruk)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // -10s
+                          // Geri sarma — Görev 1.1: sabit 10 sn yerine
+                          // controller.rewind() kullanılır; süre
+                          // seekIntervalSeconds tercihi okunur (5/10/15/30 sn).
                           IconButton(
                             icon: const Icon(Icons.replay_10),
                             tooltip: l10n.rewind10,
                             iconSize: 28,
                             color: theme.colorScheme.onSurfaceVariant,
-                            onPressed: () {
-                              final newPos = controller.position.value - const Duration(seconds: 10);
-                              controller.seek(newPos.isNegative ? Duration.zero : newPos);
-                            },
+                            onPressed: controller.rewind,
                           ),
-                          // Hız
-                          ActionChip(
-                            label: Text('1.0x', style: theme.textTheme.labelMedium),
-                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                            side: BorderSide.none,
-                            onPressed: () => SpeedPitchSheet.show(context),
-                          ),
+                          // Hız — Ek-B: sabit '1.0x' yerine playbackState'ten
+                          // beslenen canlı hız; ayar değişince etiket güncellenir.
+                          Obx(() {
+                            final spd = controller.speed.value;
+                            return ActionChip(
+                              label: Text(_speedLabel(spd),
+                                  style: theme.textTheme.labelMedium),
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainerHighest,
+                              side: BorderSide.none,
+                              onPressed: () => SpeedPitchSheet.show(context),
+                            );
+                          }),
                           // Sözler (Kapsam Dışı)
                           IconButton(
                             icon: const Icon(Icons.format_quote),
@@ -253,16 +262,14 @@ class PlayerPage extends GetView<PlayerController> {
                             color: theme.colorScheme.onSurfaceVariant,
                             onPressed: () => Get.snackbar(l10n.lyrics, 'Kapsam dışı (Gün 25)'),
                           ),
-                          // +10s
+                          // İleri sarma — Görev 1.1: sabit 10 sn yerine
+                          // controller.fastForward() kullanılır.
                           IconButton(
                             icon: const Icon(Icons.forward_10),
                             tooltip: l10n.forward10,
                             iconSize: 28,
                             color: theme.colorScheme.onSurfaceVariant,
-                            onPressed: () {
-                              final newPos = controller.position.value + const Duration(seconds: 10);
-                              controller.seek(newPos);
-                            },
+                            onPressed: controller.fastForward,
                           ),
                           // Kuyruk / Waveform
                           IconButton(
@@ -275,7 +282,7 @@ class PlayerPage extends GetView<PlayerController> {
                         ],
                       ),
                     ),
-                    
+
                     // Alt Sürükleme Tutamacı (Görsel)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16, top: 8),
