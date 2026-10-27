@@ -29,6 +29,9 @@ class PlayerPage extends GetView<PlayerController> {
         PlayerThemeExtension.defaults;
     final bgStyle = playerSettings.backgroundStyle;
     final artworkShape = playerSettings.artworkShape;
+    // Görev 3.3: animasyon seviyesi. 'none' dekoratif parıltıyı hiç üretmez;
+    // 'reduced' daha yumuşak (düşük alfa + küçük blur) bir parıltı çizer.
+    final anim = playerSettings.animationLevel;
 
     final borderRadius = switch (artworkShape) {
       'circle' => 200.0,
@@ -132,19 +135,24 @@ class PlayerPage extends GetView<PlayerController> {
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Glow Efekti
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(borderRadius),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                                    blurRadius: 60,
-                                    spreadRadius: 10,
-                                  ),
-                                ],
+                            // Glow Efekti — Görev 3.3: animasyon seviyesine
+                            // duyarlı. 'none' iken katman hiç üretilmez
+                            // (düşük donanımda blend maliyeti ortadan kalkar).
+                            if (anim != 'none')
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(borderRadius),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.colorScheme.primary.withValues(
+                                        alpha: anim == 'reduced' ? 0.12 : 0.25,
+                                      ),
+                                      blurRadius: anim == 'reduced' ? 30 : 60,
+                                      spreadRadius: anim == 'reduced' ? 5 : 10,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
                             AspectRatio(
                               aspectRatio: 1,
                               child: ArtworkImage(

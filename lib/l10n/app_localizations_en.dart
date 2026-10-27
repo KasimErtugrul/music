@@ -1118,4 +1118,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String offlineCoreBadge(String version) {
     return 'v$version • Offline Core';
   }
+
+  @override
+  String get themeAnimationLevel => 'Animation level';
+
+  @override
+  String get animFull => 'Full';
+
+  @override
+  String get animReduced => 'Reduced';
+
+  @override
+  String get animNone => 'Off';
 }

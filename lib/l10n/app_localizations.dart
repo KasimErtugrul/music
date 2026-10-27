@@ -2137,6 +2137,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'v{version} • Offline Core'**
   String offlineCoreBadge(String version);
+
+  /// No description provided for @themeAnimationLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Animation level'**
+  String get themeAnimationLevel;
+
+  /// No description provided for @animFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get animFull;
+
+  /// No description provided for @animReduced.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduced'**
+  String get animReduced;
+
+  /// No description provided for @animNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get animNone;
 }
 
 class _AppLocalizationsDelegate

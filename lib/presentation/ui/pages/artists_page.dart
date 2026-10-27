@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/routes/app_routes.dart';
+import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 
+/// Görev 3.4: Liste stili ayarı (listViewMode) sanatçı sekmesine de
+/// uygulanır. Izgara modunda sanatçı kapakları YUVARLAK kart olarak
+/// gösterilir (albümdeki kare orandan farklı içerik kararı).
 class ArtistsPage extends GetView<LibraryController> {
   const ArtistsPage({super.key});
 
@@ -16,6 +21,7 @@ class ArtistsPage extends GetView<LibraryController> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final player = Get.find<PlayerController>();
+    final listMode = Get.find<ThemeController>().settings.value.listViewMode;
 
     return Obx(() {
       if (controller.isLoading.value) {
@@ -42,55 +48,96 @@ class ArtistsPage extends GetView<LibraryController> {
 
       final currentArtistId = player.currentSong?.artistId;
 
-      return Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Row(
-              children: [
-                Text(
-                  l10n.songCount(controller.artists.length),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide =
+              Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
+          final isGrid = listMode == 'grid' || (isWide && listMode != 'compact');
+          final dense = listMode == 'compact';
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Row(
+                  children: [
+                    Text(
+                      l10n.songCount(controller.artists.length),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.sort,
+                      size: 18,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                Icon(
-                  Icons.sort,
-                  size: 18,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              itemCount: controller.artists.length,
-              itemBuilder: (context, i) {
-                final artist = controller.artists[i];
-                final isCurrent =
-                    currentArtistId != null && currentArtistId == artist.id;
-                return _ArtistTile(
-                  artist: artist,
-                  isCurrent: isCurrent,
-                  onTap: () => Get.toNamed<dynamic>(
-                    AppRoutes.artistDetail,
-                    arguments: artist,
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+              ),
+              Expanded(
+                child: isGrid
+                    ? GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 180,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 12,
+                          // Yuvarlak kapak + isim + istatistik bloğu.
+                          childAspectRatio: 0.82,
+                        ),
+                        itemCount: controller.artists.length,
+                        itemBuilder: (context, i) {
+                          final artist = controller.artists[i];
+                          final isCurrent = currentArtistId != null &&
+                              currentArtistId == artist.id;
+                          return _ArtistCard(
+                            artist: artist,
+                            isCurrent: isCurrent,
+                            onTap: () => Get.toNamed<dynamic>(
+                              AppRoutes.artistDetail,
+                              arguments: artist,
+                            ),
+                          );
+                        },
+                      )
+                    : ListView.builder(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: dense ? 4 : 8,
+                        ),
+                        itemExtent: dense ? 64.0 : 76.0,
+                        itemCount: controller.artists.length,
+                        itemBuilder: (context, i) {
+                          final artist = controller.artists[i];
+                          final isCurrent = currentArtistId != null &&
+                              currentArtistId == artist.id;
+                          return _ArtistTile(
+                            artist: artist,
+                            isCurrent: isCurrent,
+                            dense: dense,
+                            onTap: () => Get.toNamed<dynamic>(
+                              AppRoutes.artistDetail,
+                              arguments: artist,
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
       );
     });
   }
 }
 
-class _ArtistTile extends StatelessWidget {
-  const _ArtistTile({
+/// Görev 3.4: yuvarlak kapaklı ızgara kartı.
+class _ArtistCard extends StatelessWidget {
+  const _ArtistCard({
     required this.artist,
     required this.onTap,
     this.isCurrent = false,
@@ -108,8 +155,72 @@ class _ArtistTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
+      child: Column(
+        children: [
+          Expanded(
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: isCurrent
+                      ? Border.all(color: theme.colorScheme.primary, width: 2)
+                      : null,
+                ),
+                child: ArtworkImage(
+                  songId: artist.artworkSongId,
+                  fallbackIcon: Icons.person_outline,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            artist.name ?? l10n.unknownArtist,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: isCurrent ? theme.colorScheme.primary : null,
+            ),
+          ),
+          Text(
+            l10n.songCount(artist.songCount),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ArtistTile extends StatelessWidget {
+  const _ArtistTile({
+    required this.artist,
+    required this.onTap,
+    this.isCurrent = false,
+    this.dense = false,
+  });
+
+  final ArtistModel artist;
+  final VoidCallback onTap;
+  final bool isCurrent;
+  final bool dense;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: dense ? 4 : 8),
         child: Row(
           children: [
             // Avatar
@@ -122,8 +233,8 @@ class _ArtistTile extends StatelessWidget {
               ),
               child: ArtworkImage(
                 songId: artist.artworkSongId,
-                size: 56,
-                borderRadius: BorderRadius.circular(28),
+                size: dense ? 44 : 56,
+                borderRadius: BorderRadius.circular(dense ? 22 : 28),
                 fallbackIcon: Icons.person_outline,
               ),
             ),

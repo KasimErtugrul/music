@@ -54,6 +54,12 @@ dependencies:
   file_picker: 13.1.0
   share_plus: 13.3.1
   home_widget: 0.10.0
+  # Görev 3.1: Android 12+ Material You dinamik renk paleti (Renk kaynağı =
+  # Sistem seçeneği artık gerçekten çalışır; desteklenmeyen cihazda seed'e düşer).
+  # NOT: pub.dev'de yayınlanan en son sürüm 2.1.0'dır (2.3.0 diye sürüm YOKTUR).
+  # 2.x, material_ui tabanlı ColorScheme döndürür; ThemeController bu değeri
+  # flutter/material ColorScheme'ine köprüler (bkz. _loadSystemScheme).
+  dynamic_color: ^2.1.0
 
 dev_dependencies:
   flutter_test:

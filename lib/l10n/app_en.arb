@@ -355,5 +355,9 @@
   "sortByDateAdded": "Date Added (New)",
   "sortByDuration": "Duration (Long-Short)",
     "offlineCoreBadge": "v{version} • Offline Core",
-  "@offlineCoreBadge": { "placeholders": { "version": { "type": "String" } } }
+  "@offlineCoreBadge": { "placeholders": { "version": { "type": "String" } } },
+  "themeAnimationLevel": "Animation level",
+  "animFull": "Full",
+  "animReduced": "Reduced",
+  "animNone": "Off"
 }

@@ -1114,4 +1114,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String offlineCoreBadge(String version) {
     return 'v$version • Çevrimdışı Çekirdek';
   }
+
+  @override
+  String get themeAnimationLevel => 'Animasyon seviyesi';
+
+  @override
+  String get animFull => 'Tam';
+
+  @override
+  String get animReduced => 'Azaltılmış';
+
+  @override
+  String get animNone => 'Kapalı';
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/theme/dynamic_theme_service.dart';
@@ -16,7 +17,9 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
 
   final settings = const ThemeSettings().obs;
   final isLoading = true.obs;
-  
+
+  // Kapaktan türetme (artwork) ve sistem (Material You) şemaları aynı kanaldan
+  // beslenir: ThemeEngine, dynamicScheme doluysa onu kullanır.
   ColorScheme? _lightArtworkScheme;
   ColorScheme? _darkArtworkScheme;
   Timer? _scheduledTimer;
@@ -28,7 +31,7 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     _loadActive();
-    
+
     _playerStream.listen((item) {
       _lastMediaItem = item;
       if (settings.value.themeSource == 'artwork') _updateArtworkTheme(item);
@@ -58,6 +61,129 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
     if (loaded != null) settings.value = loaded;
     isLoading.value = false;
     _applyThemeIfChanged(force: true);
+
+    // Görev 3.1: açılışta kaynak "system" ise Android 12+ sistem paletini
+    // sorgula. dynamic_color'dan gelen şema ThemeEngine'in dynamicScheme
+    // kanalına beslenir; desteklenmeyen cihazda (Android 11 ve altı) null
+    // döner ve seed paleti etkin kalır.
+    if (settings.value.themeSource == 'system') {
+      await _loadSystemScheme();
+    }
+  }
+
+  /// Görev 3.1: Material You (Android 12+ dinamik renk) şeması.
+  ///
+  /// ÖNEMLİ (pub.dev API + changelog + paket kaynağıyla doğrulandı):
+  /// 1) dynamic_color paketinde DynamicColorPlugin.getScheme() diye bir metot
+  ///    YOKTUR (planın özet yaması hatalıydı); paketin gerçek API'si
+  ///    DynamicColorPlugin.getCorePalette() + CorePaletteToColorScheme
+  ///    extension'ıdır. CorePalette'ten hem açık hem koyu şema doğrudan
+  ///    üretilir: koyu taraf light.primary'den türetilmez, Material You'nun
+  ///    gerçek koyu tonları kullanılır.
+  /// 2) dynamic_color 2.0.0'dan itibaren flutter/material yerine material_ui
+  ///    paketine göç etti; toColorScheme() artık material_ui'nin
+  ///    ColorScheme'ini döndürür. Proje flutter/material'ın ColorScheme'ini
+  ///    kullandığından iki tip aynı adı taşısa da FARKLI sınıflardır
+  ///    ("A value of type 'ColorScheme' can't be assigned to a variable of
+  ///    type 'ColorScheme?'" hatasının kökü budur). Dönüş değeri bu yüzden
+  ///    rol rol flutter/material ColorScheme'ine köprülenir: renk adayları
+  ///    her iki tarafta da dart:ui Color olduğundan taşımada kayıp yoktur
+  ///    ve material_ui projeye bağımlılık olarak eklenmez. Köprü deseni
+  ///    (fromSeed + copyWith), dynamic_color 2.x'in kendi uygulamasının
+  ///    aynısıdır; yalnızca hedef tip farklıdır.
+  ///
+  /// getCorePalette() desteklenmeyen cihazlarda (Android 11 ve altı) null
+  /// döner veya PlatformException atar; her iki durumda da sessizce seed'e
+  /// düşülür ve arayüz çökmez.
+  ///
+  /// Not: kapatıp açma sırasında eski şemanın kalıntısını bırakmamak için
+  /// önce kanallar sıfırlanır; başarılı sorguda tekrar doldurulur.
+  Future<void> _loadSystemScheme() async {
+    _lightArtworkScheme = null;
+    _darkArtworkScheme = null;
+    try {
+      final palette = await DynamicColorPlugin.getCorePalette();
+      if (palette == null) {
+        // Desteklenmiyor: seed paletle devam et.
+        _applyThemeIfChanged(force: true);
+        return;
+      }
+      // material_ui'nin ColorScheme'i: tip adı dosyada anılmadığından
+      // import gerekmez, tip çıkarımıyla kullanılır.
+      final muLight = palette.toColorScheme(brightness: Brightness.light);
+      final muDark = palette.toColorScheme(brightness: Brightness.dark);
+      // flutter/material ColorScheme'ine köprü (yukarıdaki 2. not).
+      // fromSeed, yeni rol adlarını (surfaceContainer* vb.) doldurur;
+      // copyWith, OS'tan gelen gerçek dinamik palet rollerini ezer.
+      _lightArtworkScheme = ColorScheme.fromSeed(
+        seedColor: muLight.primary,
+        brightness: Brightness.light,
+      ).copyWith(
+        primary: muLight.primary,
+        onPrimary: muLight.onPrimary,
+        primaryContainer: muLight.primaryContainer,
+        onPrimaryContainer: muLight.onPrimaryContainer,
+        secondary: muLight.secondary,
+        onSecondary: muLight.onSecondary,
+        secondaryContainer: muLight.secondaryContainer,
+        onSecondaryContainer: muLight.onSecondaryContainer,
+        tertiary: muLight.tertiary,
+        onTertiary: muLight.onTertiary,
+        tertiaryContainer: muLight.tertiaryContainer,
+        onTertiaryContainer: muLight.onTertiaryContainer,
+        error: muLight.error,
+        onError: muLight.onError,
+        errorContainer: muLight.errorContainer,
+        onErrorContainer: muLight.onErrorContainer,
+        surface: muLight.surface,
+        onSurface: muLight.onSurface,
+        onSurfaceVariant: muLight.onSurfaceVariant,
+        outline: muLight.outline,
+        outlineVariant: muLight.outlineVariant,
+        shadow: muLight.shadow,
+        scrim: muLight.scrim,
+        inverseSurface: muLight.inverseSurface,
+        onInverseSurface: muLight.onInverseSurface,
+        inversePrimary: muLight.inversePrimary,
+        surfaceTint: muLight.surfaceTint,
+      );
+      _darkArtworkScheme = ColorScheme.fromSeed(
+        seedColor: muDark.primary,
+        brightness: Brightness.dark,
+      ).copyWith(
+        primary: muDark.primary,
+        onPrimary: muDark.onPrimary,
+        primaryContainer: muDark.primaryContainer,
+        onPrimaryContainer: muDark.onPrimaryContainer,
+        secondary: muDark.secondary,
+        onSecondary: muDark.onSecondary,
+        secondaryContainer: muDark.secondaryContainer,
+        onSecondaryContainer: muDark.onSecondaryContainer,
+        tertiary: muDark.tertiary,
+        onTertiary: muDark.onTertiary,
+        tertiaryContainer: muDark.tertiaryContainer,
+        onTertiaryContainer: muDark.onTertiaryContainer,
+        error: muDark.error,
+        onError: muDark.onError,
+        errorContainer: muDark.errorContainer,
+        onErrorContainer: muDark.onErrorContainer,
+        surface: muDark.surface,
+        onSurface: muDark.onSurface,
+        onSurfaceVariant: muDark.onSurfaceVariant,
+        outline: muDark.outline,
+        outlineVariant: muDark.outlineVariant,
+        shadow: muDark.shadow,
+        scrim: muDark.scrim,
+        inverseSurface: muDark.inverseSurface,
+        onInverseSurface: muDark.onInverseSurface,
+        inversePrimary: muDark.inversePrimary,
+        surfaceTint: muDark.surfaceTint,
+      );
+      _applyThemeIfChanged(force: true);
+    } on Object {
+      // Paket/Platform hatası: seed'te kal, arayüzü bozma.
+      _applyThemeIfChanged(force: true);
+    }
   }
 
   Future<void> _updateArtworkTheme(MediaItem? item) async {
@@ -81,6 +207,9 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
     _repo.saveActiveTheme(next);
     if (next.themeSource == 'artwork') {
       _updateArtworkTheme(_lastMediaItem); // Hata veren Get.find kaldırıldı, son item kullanılıyor
+    } else if (next.themeSource == 'system') {
+      // Görev 3.1: sistem paleti kanalı (Material You).
+      _loadSystemScheme();
     } else {
       _lightArtworkScheme = null;
       _darkArtworkScheme = null;

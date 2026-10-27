@@ -62,6 +62,22 @@ class PlayerStylePage extends StatelessWidget {
               onChanged: (v) =>
                   themeCtrl.setPlayer(p.copyWith(miniPlayerStyle: v)),
             ),
+            // Görev 3.3: animasyon seviyesi. Alan modelde ve JSON dönüşümünde
+            // zaten vardı; ne arayüz seçeneği ne de tüketicisi olduğu için ölü
+            // duruyordu. "Kapalı" seviye dekoratif gölgeleri (kapak parıltısı,
+            // mini player gölgesi) çizmez; düşük donanımda akıcılık kazandırır.
+            SettingsChoiceTile<String>(
+              title: l10n.themeAnimationLevel,
+              value: p.animationLevel,
+              options: const <String>['full', 'reduced', 'none'],
+              labelOf: (v) => switch (v) {
+                'reduced' => l10n.animReduced,
+                'none' => l10n.animNone,
+                _ => l10n.animFull,
+              },
+              onChanged: (v) =>
+                  themeCtrl.setPlayer(p.copyWith(animationLevel: v)),
+            ),
           ],
         );
       }),
