@@ -77,10 +77,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
   final Map<SongSort, List<int>> _orders = {};
   final Map<SongSort, List<SongModel>> _sorted = {};
 
-  // Ek-A: Şarkı listesinin süzülmesinde kullanılan son min. süre (ms).
-  // Filtre ayarı değiştiğinde _sorted önbelleği geçersiz kılınmalıdır;
-  // aksi halde yeni filtre rescan/yeniden başlatmaya kadar etkisiz kalır.
-  int? _filterMinDurMs;
+  // Görev 4.3: min. süre filtresi ARTIK İNDEKS KURULUMUNDA uygulanır.
+  // İndeks hangi filtre değeriyle kurulduysa o tutulur; ayar değiştiğinde
+  // indeks _rawSongs ham verisinden yeniden kurulur (MediaStore tekrar
+  // sorgulanmaz). Böylece şarkı listesi, albüm/sanatçı/tür/klasör sayaçları
+  // ve detay sayfaları hep aynı filtreli veri kümesini görür. (Ek-A'nın
+  // yalnızca songs() çıktısına süzen yaklaşımının yerini aldı.)
+  int _indexMinDurSec = 0;
+  List<SongModel>? _rawSongs;
+  List<String>? _excludedPaths;
 
   Future<_LibraryIndex> _ensureIndex() {
     final ready = _index;
@@ -96,9 +101,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
       final excludedFolders = await _excludedRepo.getExcludedFolders();
       final excludedPaths = excludedFolders.map((f) => f.path).toList();
 
+      // Görev 4.3: indeks, güncel min. süre tercihiyle baştan filtreli kurulur.
+      final minDurSec = (await _prefs.loadLibrary()).minDurationSeconds;
+      _rawSongs = songs;
+      _excludedPaths = excludedPaths;
+      _indexMinDurSec = minDurSec;
+
       final index = useIsolate
-          ? await _buildIndexInIsolate(songs, excludedPaths)
-          : _buildIndex(songs, excludedPaths);
+          ? await _buildIndexInIsolate(songs, excludedPaths, minDurSec)
+          : _buildIndex(songs, excludedPaths, minDurSec);
       _orders.clear();
       _sorted.clear();
       _index = index;
@@ -122,7 +133,38 @@ class LibraryRepositoryImpl implements LibraryRepository {
       _orders.clear();
       _sorted.clear();
     }
-    await _ensureIndex();
+    await _ensureFreshIndex();
+  }
+
+  /// Görev 4.3: indeksi güncel min. süre tercihiyle taze tutar. Tüm liste,
+  /// sayaç ve detay metotları bunu kullanır; ayar değiştiğinde indeks ham
+  /// veriden hızlıca yeniden kurulur (cihaz yeniden sorgulanmaz).
+  Future<_LibraryIndex> _ensureFreshIndex() async {
+    final minDurSec = (await _prefs.loadLibrary()).minDurationSeconds;
+    if (_index != null && minDurSec != _indexMinDurSec) {
+      await _rebuildIndexWithMinDuration(minDurSec);
+    }
+    return _ensureIndex();
+  }
+
+  /// İndeksi aynı ham veri üzerinde yeni filtre değeriyle yeniden kurar.
+  /// Geçiş atomiktir: yeni indeks hazır olana kadar tüketiciler eski indeksi
+  /// okumaya devam eder, null görmezler.
+  Future<void> _rebuildIndexWithMinDuration(int minDurSec) async {
+    final raw = _rawSongs;
+    final excluded = _excludedPaths;
+    if (raw == null || excluded == null) {
+      // Ham veri yok (ilk yük tamamlanmadı): kalın yol — tam rescan.
+      await rescan();
+      return;
+    }
+    final index = useIsolate
+        ? await _buildIndexInIsolate(raw, excluded, minDurSec)
+        : _buildIndex(raw, excluded, minDurSec);
+    _indexMinDurSec = minDurSec;
+    _index = index;
+    _orders.clear();
+    _sorted.clear();
   }
 
   List<int> _orderFor(_LibraryIndex index, SongSort sort) {
@@ -185,35 +227,24 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
   @override
   Future<List<SongModel>> songs({SongSort sort = const SongSort()}) async {
-    final index = await _ensureIndex();
-
-    // Ek-A: Güncel filtre değerini ÖNBELLEK kontrolünden ÖNCE oku; ayar
-    // değiştiyse sıralı liste önbelleğini geçersiz kıl. Böylece "Min. süre"
-    // tercihi rescan/yeniden başlatma beklemeden bir sonraki sorguda etkilidir.
-    final libPrefs = await _prefs.loadLibrary();
-    final minDurMs = libPrefs.minDurationSeconds * 1000;
-    if (_filterMinDurMs != null && _filterMinDurMs != minDurMs) {
-      _sorted.clear();
-    }
-    _filterMinDurMs = minDurMs;
+    // Görev 4.3: filtre indeks düzeyinde uygulandığı için burada ek süzme
+    // gerekmez; _ensureFreshIndex, ayar değişiminde indeksi yeniden kurar.
+    final index = await _ensureFreshIndex();
 
     final cached = _sorted[sort];
     if (cached != null) return cached;
 
     final order = _orderFor(index, sort);
 
-    final result = List<SongModel>.unmodifiable(<SongModel>[
-      for (final i in order)
-        if (minDurMs == 0 || index.songs[i].durationMs >= minDurMs)
-          index.songs[i]
-    ]);
+    final result = List<SongModel>.unmodifiable(
+        <SongModel>[for (final i in order) index.songs[i]]);
     _sorted[sort] = result;
     return result;
   }
 
   @override
   Future<Map<String, int>> letterOffsets(SongSort sort) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     final List<String?> keys;
     switch (sort.field) {
       case SongSortField.title:
@@ -250,40 +281,40 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
   @override
   Future<List<AlbumModel>> albums({bool descending = false}) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     return List.unmodifiable(_orderByName<AlbumModel>(
         index.albums, (a) => a.title, descending: descending));
   }
 
   @override
   Future<List<ArtistModel>> artists({bool descending = false}) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     return List.unmodifiable(_orderByName<ArtistModel>(
         index.artists, (a) => a.name, descending: descending));
   }
 
   @override
   Future<List<GenreModel>> genres({bool descending = false}) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     return List.unmodifiable(_orderByName<GenreModel>(
         index.genres, (g) => g.name, descending: descending));
   }
 
   @override
   Future<List<SongModel>> songsInAlbum(int albumId) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     return _songsByTitle(index, index.songsByAlbum[albumId] ?? const []);
   }
 
   @override
   Future<List<SongModel>> songsOfArtist(int artistId) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     return _songsByTitle(index, index.songsByArtist[artistId] ?? const []);
   }
 
   @override
   Future<List<AlbumModel>> albumsOfArtist(int artistId) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     final ids = index.albumIdsByArtist[artistId] ?? const <int>[];
     final models = <AlbumModel>[
       for (final id in ids)
@@ -295,13 +326,13 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
   @override
   Future<List<SongModel>> songsInGenre(String genreKey) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     return _songsByTitle(index, index.songsByGenre[genreKey] ?? const []);
   }
 
   @override
   Future<List<FolderModel>> folders({String? parentPath}) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     final paths = parentPath == null
         ? index.rootFolders
         : (index.childFolders[parentPath] ?? const <String>[]);
@@ -312,7 +343,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
   @override
   Future<List<SongModel>> songsInFolder(String path, {bool recursive = false}) async {
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     if (!recursive) {
       return _songsByTitle(index, index.songsByFolder[path] ?? const []);
     }
@@ -333,7 +364,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
         .toList(growable: false);
     if (tokens.isEmpty) return LibrarySearchResult.empty;
 
-    final index = await _ensureIndex();
+    final index = await _ensureFreshIndex();
     bool matches(String text) => tokens.every(text.contains);
 
     final songs = <SongModel>[];
@@ -374,8 +405,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
 // ---------- Isolate ----------
 
 Future<_LibraryIndex> _buildIndexInIsolate(
-        List<SongModel> songs, List<String> excludedPaths) =>
-    Isolate.run<_LibraryIndex>(() => _buildIndex(songs, excludedPaths));
+        List<SongModel> songs,
+        List<String> excludedPaths,
+        int minDurationSeconds) =>
+    Isolate.run<_LibraryIndex>(
+        () => _buildIndex(songs, excludedPaths, minDurationSeconds));
 
 class _LibraryIndex {
   _LibraryIndex({
@@ -470,7 +504,19 @@ List<T> _orderByName<T>(
   return [for (final e in known) e.$2, ...unknown];
 }
 
-_LibraryIndex _buildIndex(List<SongModel> songs, List<String> excludedPaths) {
+_LibraryIndex _buildIndex(
+  List<SongModel> songs,
+  List<String> excludedPaths,
+  int minDurationSeconds,
+) {
+  // Görev 4.3: min. süre filtresi indeks girişinde uygulanır; böylece
+  // albüm/sanatçı/tür/klasör sayaçları ve detay listeleri de aynı kümeden
+  // beslenir (önceden yalnızca songs() çıktısı süzülüyordu).
+  if (minDurationSeconds > 0) {
+    final minMs = minDurationSeconds * 1000;
+    songs = songs.where((s) => s.durationMs >= minMs).toList(growable: false);
+  }
+
   // YENİ: Gizli klasör filtresi
   if (excludedPaths.isNotEmpty) {
     songs = songs.where((s) {

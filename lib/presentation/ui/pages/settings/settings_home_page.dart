@@ -51,6 +51,29 @@ class SettingsHomePage extends StatelessWidget {
         final settings = ctrl.settings.value;
         if (settings == null) return const Center(child: Text('—'));
 
+        // Görev 4.2: arama boş değilse eşleşme TÜM ayar girdileri üzerinde
+        // yapılır (registry artık gerçek ayar haritasıdır) ve sonuç, hedef
+        // sayfaya giden ListTile'lar olarak basılır. GetX'te sayfa builder
+        // ile açılır; isimli rota zorunlu değildir. Boş sorguda mevcut
+        // bölüm görünümü aynen korunur.
+        if (search.query.value.trim().isNotEmpty) {
+          final results = search.filter(SettingsRegistry.all, l10n);
+          return ListView(
+            children: <Widget>[
+              for (final e in results)
+                ListTile(
+                  title: Text(e.title(l10n)),
+                  trailing: e.pageBuilder != null
+                      ? const Icon(Icons.chevron_right)
+                      : null,
+                  onTap: e.pageBuilder == null
+                      ? null
+                      : () => Get.to(e.pageBuilder!),
+                ),
+            ],
+          );
+        }
+
         final general = search.filter(
           SettingsRegistry.byGroup(SettingsGroup.general),
           l10n,
