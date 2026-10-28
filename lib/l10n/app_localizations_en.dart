@@ -61,6 +61,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonClose => 'Close';
 
   @override
+  String get commonClear => 'Clear';
+
+  @override
   String songCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1130,4 +1133,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get animNone => 'Off';
+
+  @override
+  String get settingsDescPlayback =>
+      'Seek intervals, headphone pause, ReplayGain and repeat';
+
+  @override
+  String get settingsDescAudio => 'Equalizer, loudness and audio effects';
+
+  @override
+  String get settingsDescLibrary =>
+      'Scanning, excluded folders, minimum duration';
+
+  @override
+  String get settingsDescTags => 'Tag reading and album artwork';
+
+  @override
+  String get settingsDescWidget => 'Home screen widget appearance';
+
+  @override
+  String get settingsDescTheme => 'Color, mode and custom themes';
+
+  @override
+  String get settingsDescFont => 'Font family and scale';
+
+  @override
+  String get settingsDescPlayerStyle => 'Player visuals and animation level';
+
+  @override
+  String get settingsDescListStyle => 'List and grid density';
+
+  @override
+  String get settingsDescBackup => 'Back up your data as a JSON file';
+
+  @override
+  String get settingsDescAbout => 'Version info and licenses';
+
+  @override
+  String get settingsGroupContent => 'Library & Content';
+
+  @override
+  String get settingsGroupSystem => 'System';
+
+  @override
+  String get settingsStatusSongs => 'songs';
+
+  @override
+  String get settingsStatusEqOn => 'Equalizer on';
+
+  @override
+  String get settingsStatusEqOff => 'Equalizer off';
+
+  @override
+  String get eqReset => 'Reset';
+
+  @override
+  String get eqBandsTitle => 'Bands';
+
+  @override
+  String get eqBandsUnit => 'bands';
+
+  @override
+  String get themeColorSource => 'Color source';
+
+  @override
+  String get themeSourceSeed => 'Custom seed';
+
+  @override
+  String get themeSourceSystem => 'Material You';
+
+  @override
+  String get themeSourceArtwork => 'From artwork';
+
+  @override
+  String get themePresetsTitle => 'Preset palettes';
+
+  @override
+  String get themeCustomTitle => 'Custom themes';
+
+  @override
+  String get themeCustomEmpty => 'No custom themes yet. Create one with +.';
+
+  @override
+  String get themeAdvancedSettings => 'Advanced theme settings';
+
+  @override
+  String get themeImportTheme => 'Import theme';
+
+  @override
+  String get themeImported => 'Theme imported';
+
+  @override
+  String get themeImportInvalid => 'Invalid theme file';
+
+  @override
+  String get backupNoAudioNote =>
+      'Music files (.flac, .mp3) are not included in the backup';
+
+  @override
+  String get sleepTimerRemaining => 'Time remaining';
+
+  @override
+  String get sleepTimerAddFive => 'Add 5 min';
+
+  @override
+  String get settingsRowAppearance => 'Appearance & theme';
+
+  @override
+  String get commonEdit => 'Edit';
+
+  @override
+  String get commonExport => 'Export';
 }

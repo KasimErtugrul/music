@@ -61,6 +61,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonClose => 'Kapat';
 
   @override
+  String get commonClear => 'Temizle';
+
+  @override
   String songCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1126,4 +1129,117 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get animNone => 'Kapalı';
+
+  @override
+  String get settingsDescPlayback =>
+      'Aralıklar, kulaklık duraklatma, ReplayGain ve tekrar';
+
+  @override
+  String get settingsDescAudio => 'Ekolayzır, loudness ve ses efektleri';
+
+  @override
+  String get settingsDescLibrary =>
+      'Tarama, hariç tutulan klasörler, en az süre';
+
+  @override
+  String get settingsDescTags => 'Etiket okuma ve albüm kapakları';
+
+  @override
+  String get settingsDescWidget => 'Ana ekran widget görünümü';
+
+  @override
+  String get settingsDescTheme => 'Renk, mod ve özel temalar';
+
+  @override
+  String get settingsDescFont => 'Yazı tipi ailesi ve ölçeği';
+
+  @override
+  String get settingsDescPlayerStyle =>
+      'Oynatıcı görünümü ve animasyon seviyesi';
+
+  @override
+  String get settingsDescListStyle => 'Liste ve ızgara yoğunluğu';
+
+  @override
+  String get settingsDescBackup =>
+      'Verilerinizi JSON dosyası olarak yedekleyin';
+
+  @override
+  String get settingsDescAbout => 'Sürüm bilgisi ve lisanslar';
+
+  @override
+  String get settingsGroupContent => 'Kütüphane ve İçerik';
+
+  @override
+  String get settingsGroupSystem => 'Sistem';
+
+  @override
+  String get settingsStatusSongs => 'parça';
+
+  @override
+  String get settingsStatusEqOn => 'Ekolayzır açık';
+
+  @override
+  String get settingsStatusEqOff => 'Ekolayzır kapalı';
+
+  @override
+  String get eqReset => 'Sıfırla';
+
+  @override
+  String get eqBandsTitle => 'Bantlar';
+
+  @override
+  String get eqBandsUnit => 'bant';
+
+  @override
+  String get themeColorSource => 'Renk kaynağı';
+
+  @override
+  String get themeSourceSeed => 'Özel tohum';
+
+  @override
+  String get themeSourceSystem => 'Material You';
+
+  @override
+  String get themeSourceArtwork => 'Kapaktan';
+
+  @override
+  String get themePresetsTitle => 'Hazır paletler';
+
+  @override
+  String get themeCustomTitle => 'Özel temalar';
+
+  @override
+  String get themeCustomEmpty => 'Henüz özel tema yok. + ile oluşturun.';
+
+  @override
+  String get themeAdvancedSettings => 'Gelişmiş tema ayarları';
+
+  @override
+  String get themeImportTheme => 'Temayı içe aktar';
+
+  @override
+  String get themeImported => 'Tema içe aktarıldı';
+
+  @override
+  String get themeImportInvalid => 'Geçersiz tema dosyası';
+
+  @override
+  String get backupNoAudioNote =>
+      'Müzik dosyaları (.flac, .mp3) yedeğe dahil edilmez';
+
+  @override
+  String get sleepTimerRemaining => 'Kalan süre';
+
+  @override
+  String get sleepTimerAddFive => '5 dk ekle';
+
+  @override
+  String get settingsRowAppearance => 'Görünüm ve tema';
+
+  @override
+  String get commonEdit => 'Düzenle';
+
+  @override
+  String get commonExport => 'Dışa aktar';
 }

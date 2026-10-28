@@ -200,6 +200,12 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get commonClose;
 
+  /// No description provided for @commonClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get commonClear;
+
   /// Number of songs
   ///
   /// In en, this message translates to:
@@ -2161,6 +2167,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off'**
   String get animNone;
+
+  /// No description provided for @settingsDescPlayback.
+  ///
+  /// In en, this message translates to:
+  /// **'Seek intervals, headphone pause, ReplayGain and repeat'**
+  String get settingsDescPlayback;
+
+  /// No description provided for @settingsDescAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Equalizer, loudness and audio effects'**
+  String get settingsDescAudio;
+
+  /// No description provided for @settingsDescLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning, excluded folders, minimum duration'**
+  String get settingsDescLibrary;
+
+  /// No description provided for @settingsDescTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag reading and album artwork'**
+  String get settingsDescTags;
+
+  /// No description provided for @settingsDescWidget.
+  ///
+  /// In en, this message translates to:
+  /// **'Home screen widget appearance'**
+  String get settingsDescWidget;
+
+  /// No description provided for @settingsDescTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Color, mode and custom themes'**
+  String get settingsDescTheme;
+
+  /// No description provided for @settingsDescFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Font family and scale'**
+  String get settingsDescFont;
+
+  /// No description provided for @settingsDescPlayerStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Player visuals and animation level'**
+  String get settingsDescPlayerStyle;
+
+  /// No description provided for @settingsDescListStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'List and grid density'**
+  String get settingsDescListStyle;
+
+  /// No description provided for @settingsDescBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your data as a JSON file'**
+  String get settingsDescBackup;
+
+  /// No description provided for @settingsDescAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'Version info and licenses'**
+  String get settingsDescAbout;
+
+  /// No description provided for @settingsGroupContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Library & Content'**
+  String get settingsGroupContent;
+
+  /// No description provided for @settingsGroupSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsGroupSystem;
+
+  /// No description provided for @settingsStatusSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'songs'**
+  String get settingsStatusSongs;
+
+  /// No description provided for @settingsStatusEqOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Equalizer on'**
+  String get settingsStatusEqOn;
+
+  /// No description provided for @settingsStatusEqOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Equalizer off'**
+  String get settingsStatusEqOff;
+
+  /// No description provided for @eqReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get eqReset;
+
+  /// No description provided for @eqBandsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bands'**
+  String get eqBandsTitle;
+
+  /// No description provided for @eqBandsUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'bands'**
+  String get eqBandsUnit;
+
+  /// No description provided for @themeColorSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Color source'**
+  String get themeColorSource;
+
+  /// No description provided for @themeSourceSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom seed'**
+  String get themeSourceSeed;
+
+  /// No description provided for @themeSourceSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Material You'**
+  String get themeSourceSystem;
+
+  /// No description provided for @themeSourceArtwork.
+  ///
+  /// In en, this message translates to:
+  /// **'From artwork'**
+  String get themeSourceArtwork;
+
+  /// No description provided for @themePresetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset palettes'**
+  String get themePresetsTitle;
+
+  /// No description provided for @themeCustomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom themes'**
+  String get themeCustomTitle;
+
+  /// No description provided for @themeCustomEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No custom themes yet. Create one with +.'**
+  String get themeCustomEmpty;
+
+  /// No description provided for @themeAdvancedSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced theme settings'**
+  String get themeAdvancedSettings;
+
+  /// No description provided for @themeImportTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Import theme'**
+  String get themeImportTheme;
+
+  /// No description provided for @themeImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme imported'**
+  String get themeImported;
+
+  /// No description provided for @themeImportInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid theme file'**
+  String get themeImportInvalid;
+
+  /// No description provided for @backupNoAudioNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Music files (.flac, .mp3) are not included in the backup'**
+  String get backupNoAudioNote;
+
+  /// No description provided for @sleepTimerRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Time remaining'**
+  String get sleepTimerRemaining;
+
+  /// No description provided for @sleepTimerAddFive.
+  ///
+  /// In en, this message translates to:
+  /// **'Add 5 min'**
+  String get sleepTimerAddFive;
+
+  /// No description provided for @settingsRowAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance & theme'**
+  String get settingsRowAppearance;
+
+  /// No description provided for @commonEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get commonEdit;
+
+  /// No description provided for @commonExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get commonExport;
 }
 
 class _AppLocalizationsDelegate
