@@ -687,6 +687,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanOnStartup => 'Scan library on startup';
 
   @override
+  String get scanOnStartupHint =>
+      'New and changed files are picked up automatically';
+
+  @override
+  String get libraryScanUpdated => 'Library updated';
+
+  @override
   String get resetGroup => 'Reset group to defaults';
 
   @override
@@ -1633,4 +1640,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get widgetNativeNote =>
       'The widget is drawn by the Android launcher via RemoteViews; changes apply within a few seconds.';
+
+  @override
+  String get miniPlayerShow => 'Show mini player';
 }

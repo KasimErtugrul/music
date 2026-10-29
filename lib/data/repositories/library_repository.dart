@@ -42,6 +42,31 @@ class LibrarySearchResult {
   bool get isEmpty => songs.isEmpty && albums.isEmpty && artists.isEmpty;
 }
 
+/// Aşama 3: artımlı taramanın sonucu. [changed] yalnızca ham MediaStore
+/// verisi gerçekten değiştiğinde doğrudur; sayılar tarama öncesi → sonrası
+/// farkıdır (güncellenen şarkılar aynı MediaStore id ile korunur).
+class LibraryScanDelta {
+  const LibraryScanDelta({
+    required this.changed,
+    this.added = 0,
+    this.updated = 0,
+    this.removed = 0,
+    this.scannedFiles = 0,
+  });
+
+  final bool changed;
+  final int added;
+  final int updated;
+  final int removed;
+
+  /// Platform tarayıcıya bildirilen dosya sayısı (tetiklenmediyse 0).
+  final int scannedFiles;
+
+  @override
+  String toString() =>
+      'LibraryScanDelta(+$added ~$updated -$removed, scanned: $scannedFiles)';
+}
+
 abstract class LibraryRepository {
   Future<List<SongModel>> songs({SongSort sort = const SongSort()});
   Future<Map<String, int>> letterOffsets(SongSort sort);
@@ -56,6 +81,15 @@ abstract class LibraryRepository {
   Future<List<SongModel>> songsInFolder(String path, {bool recursive = false});
   Future<LibrarySearchResult> search(String query, {int limitPerGroup = 100});
   Future<void> rescan();
+
+  /// Aşama 3: artımlı tarama. MediaStore'u yeniden sorgular; ham veri
+  /// değişmediyse indekse dokunmaz (değişmediğinde maliyet = tek sorgu).
+  /// [triggerPlatformScan] doğruysa önce bilinen müzik klasörleri platform
+  /// tarayıcıya bildirilir (USB kopyası yeni dosyalar için). Değişiklik
+  /// varsa indeks güncel tercihlerlerle (min. süre, gizli klasörler)
+  /// atomik olarak yeniden kurulur.
+  Future<LibraryScanDelta> incrementalScan({bool triggerPlatformScan = false});
+
   Future<Uint8List?> artwork(int songId, {int size = 200});
 }
 
@@ -134,6 +168,51 @@ class LibraryRepositoryImpl implements LibraryRepository {
       _sorted.clear();
     }
     await _ensureFreshIndex();
+  }
+
+  @override
+  Future<LibraryScanDelta> incrementalScan({
+    bool triggerPlatformScan = false,
+  }) async {
+    var scannedFiles = 0;
+    if (triggerPlatformScan) {
+      scannedFiles = await _platformScanKnownFolders();
+    }
+    final fresh = await _source.querySongs();
+    final current = _rawSongs;
+    // İlk yükleme henüz tamamlanmadıysa farkı hesaplayamayız; açılış
+    // yüklemesi zaten taze MediaStore verisi getirecektir.
+    if (current == null) {
+      return LibraryScanDelta(changed: false, scannedFiles: scannedFiles);
+    }
+    final delta = _diffSongs(current, fresh);
+    if (!delta.changed) {
+      return LibraryScanDelta(changed: false, scannedFiles: scannedFiles);
+    }
+    // Ham veriyi tazele, indeksi güncel tercihlerlerle yeniden kur. Gizli
+    // klasör listesi her taramada yeniden okunur; kullanıcı ara vermede
+    // yaptığı dışlama değişiklikleri de burada devreye girer. Geçiş
+    // atomiktir: yeni indeks hazır olana dek tüketiciler eskisini okur.
+    final excludedPaths = (await _excludedRepo.getExcludedFolders())
+        .map((f) => f.path)
+        .toList(growable: false);
+    final minDurSec = (await _prefs.loadLibrary()).minDurationSeconds;
+    final index = useIsolate
+        ? await _buildIndexInIsolate(fresh, excludedPaths, minDurSec)
+        : _buildIndex(fresh, excludedPaths, minDurSec);
+    _rawSongs = fresh;
+    _excludedPaths = excludedPaths;
+    _indexMinDurSec = minDurSec;
+    _index = index;
+    _orders.clear();
+    _sorted.clear();
+    return LibraryScanDelta(
+      changed: true,
+      added: delta.added,
+      updated: delta.updated,
+      removed: delta.removed,
+      scannedFiles: scannedFiles,
+    );
   }
 
   /// Görev 4.3: indeksi güncel min. süre tercihiyle taze tutar. Tüm liste,
@@ -400,6 +479,119 @@ class LibraryRepositoryImpl implements LibraryRepository {
   @override
   Future<Uint8List?> artwork(int songId, {int size = 200}) =>
       _source.queryArtwork(songId, size: size);
+
+  // ---------- Aşama 3: artımlı tarama yardımcıları ----------
+
+  /// Tarama kökü olarak gönderilecek klasör sayısı sınırı. _reduceToRoots
+  /// ile indirgeme sonrası hâlâ bu sayıyı aşan kütüphanelerde (çok sayıda
+  /// bağımsız klasör) kök listesi kırpılır; standart Müzik klasörü yine de
+  /// Kotlin tarafında her zaman taranır.
+  static const int _maxScanRoots = 64;
+
+  /// Bilinen müzik klasörlerini platform tarayıcıya bildirir. Şarkı üst
+  /// dizinleri ortak köklere indirgenir (/a/b ve /a/b/c → /a/b); standart
+  /// Müzik/Download klasörlerini Kotlin tarafı ekler.
+  Future<int> _platformScanKnownFolders() async {
+    final raw = _rawSongs;
+    if (raw == null || raw.isEmpty) return 0;
+    // Üst dizin sondaki '/' OLMADAN alınır: substring(0, lastIndexOf('/'))
+    // (/Music/a.mp3 → /Music). Eski +1 + trimRight() sürümü yanıltıcıydı;
+    // trimRight yalnızca boşluk kırptığı için '/Music/' kökte kalıyor ve
+    // _reduceToRoots içindeki startsWith(kök + '/') karşılaştırması hiç
+    // tutmuyordu. Kök dizinde duran dosyalarda (ör. /a.mp3) sonuç '' olur
+    // ve aşağıdaki removeWhere zaten eler.
+    final parents = <String>{
+      for (final s in raw)
+        if (s.path.contains('/')) s.path.substring(0, s.path.lastIndexOf('/')),
+    }..removeWhere((p) => p.isEmpty || p.length < 2);
+    if (parents.isEmpty) return 0;
+    final roots = _reduceToRoots(parents);
+    final capped = roots.length > _maxScanRoots
+        ? roots.sublist(0, _maxScanRoots)
+        : roots;
+    try {
+      return await _source.triggerMediaScan(capped);
+    } on Object {
+      return 0;
+    }
+  }
+
+  /// İki ham listeyi MediaStore id bazında karşılaştırır; kimlikler aynı
+  /// kalıp içerik değişen şarkılar "güncellenmiş" sayılır.
+  static LibraryScanDelta _diffSongs(
+    List<SongModel> current,
+    List<SongModel> fresh,
+  ) {
+    final currentFp = <int, int>{
+      for (final s in current) s.id: _fingerprintOf(s),
+    };
+    final freshFp = <int, int>{
+      for (final s in fresh) s.id: _fingerprintOf(s),
+    };
+    var added = 0;
+    var updated = 0;
+    var removed = 0;
+    freshFp.forEach((id, fp) {
+      final old = currentFp[id];
+      if (old == null) {
+        added++;
+      } else if (old != fp) {
+        updated++;
+      }
+    });
+    currentFp.forEach((id, _) {
+      if (!freshFp.containsKey(id)) removed++;
+    });
+    // id tekrarı gibi olası bozukluklarda uzunluk farkı da değişiklik sayılır.
+    final changed = added != 0 ||
+        updated != 0 ||
+        removed != 0 ||
+        current.length != fresh.length;
+    return LibraryScanDelta(
+      changed: changed,
+      added: added,
+      updated: updated,
+      removed: removed,
+    );
+  }
+
+  /// Şarkının karşılaştırma parmak izi. SongModel.== yalnızca (id, path)
+  /// karşılaştırdığı için yeterli değildir; başlık/süre/boyut/tarih gibi
+  /// tüm kullanıcıya görünen alanlar parmak izine katılır.
+  static int _fingerprintOf(SongModel s) => Object.hash(
+        s.id,
+        s.uri,
+        s.path,
+        s.title,
+        s.artist,
+        s.album,
+        s.genre,
+        s.albumId,
+        s.artistId,
+        s.durationMs,
+        s.sizeBytes,
+        s.dateAdded?.millisecondsSinceEpoch,
+      );
+
+  /// Sıralanmış yolları ortak köklere indirger: atası listede olan yol
+  /// atlanır (kök zaten alt ağacını kapsar). Sondaki '/' önce normalleştirilir
+  /// (/a/b/ ile /a/b aynı kök sayılır; kök '/' kendisi korunur); aksi halde
+  /// '/a/b/' + '/' öneki '/a/b//' olur ve alt klasörler indirgenemezdi.
+  /// Girdinin sıralanmış olması yeterli; ata yollar sözcük sıralamasında
+  /// öncedir.
+  static List<String> _reduceToRoots(Iterable<String> paths) {
+    final normalized = <String>{
+      for (final p in paths)
+        if (p.length > 1 && p.endsWith('/')) p.substring(0, p.length - 1) else p,
+    }.toList()
+      ..sort();
+    final roots = <String>[];
+    for (final p in normalized) {
+      if (roots.isNotEmpty && p.startsWith('${roots.last}/')) continue;
+      roots.add(p);
+    }
+    return roots;
+  }
 }
 
 // ---------- Isolate ----------

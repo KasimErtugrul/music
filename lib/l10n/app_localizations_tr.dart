@@ -685,6 +685,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get scanOnStartup => 'Açılışta kütüphaneyi tara';
 
   @override
+  String get scanOnStartupHint => 'Yeni ve değişen dosyalar otomatik bulunur';
+
+  @override
+  String get libraryScanUpdated => 'Kütüphane güncellendi';
+
+  @override
   String get resetGroup => 'Grubu varsayılana sıfırla';
 
   @override
@@ -1630,4 +1636,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get widgetNativeNote =>
       'Widget, Android başlatıcısı tarafından RemoteViews ile çizilir; değişiklikler birkaç saniye içinde yansır.';
+
+  @override
+  String get miniPlayerShow => 'Mini oynatıcıyı göster';
 }

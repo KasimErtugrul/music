@@ -151,4 +151,17 @@ void main() {
       expect(controller.repeatMode.value, AudioServiceRepeatMode.none);
     });
   });
+
+  group('mini player kaydırma hareketleri (Aşama 4)', () {
+    test('varsayılan görünür; hideMiniPlayer gizler, showMiniPlayer getirir', () {
+      // Kalıcı tercih değildir: her yeni controller (oturum) görünür başlar.
+      expect(controller.miniPlayerHidden.value, isFalse);
+
+      controller.hideMiniPlayer();
+      expect(controller.miniPlayerHidden.value, isTrue);
+
+      controller.showMiniPlayer();
+      expect(controller.miniPlayerHidden.value, isFalse);
+    });
+  });
 }

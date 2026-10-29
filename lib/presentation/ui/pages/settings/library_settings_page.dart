@@ -23,6 +23,7 @@ class LibrarySettingsPage extends StatelessWidget {
           children: [
             SettingsSwitchTile(
               title: l10n.scanOnStartup,
+              subtitle: l10n.scanOnStartupHint,
               value: lib.scanOnStartup,
               onChanged: ctrl.setScanOnStartup,
             ),

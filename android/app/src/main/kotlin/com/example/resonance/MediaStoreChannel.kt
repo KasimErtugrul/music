@@ -5,8 +5,10 @@ import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
@@ -161,6 +163,11 @@ object MediaStoreChannel {
                 result.success(pendingExternalUri)
                 pendingExternalUri = null
             }
+            "triggerMediaScan" -> {
+                val paths = call.argument<List<String>>("paths") ?: emptyList()
+                if (paths.isEmpty()) result.success(0)
+                else runAsync(result) { triggerMediaScan(ctx, paths) }
+            }
             else -> result.notImplemented()
         }
     }
@@ -245,6 +252,55 @@ object MediaStoreChannel {
             }
         }
         return songs
+    }
+
+    /**
+     * Aşama 3: verilen klasörleri özyinelemeli gezip ses dosyalarını
+     * MediaScanner'a bildirir. USB üzerinden kopyalanan ama MediaStore'a
+     * henüz girmemiş dosyaları uygulamaya kazandırır; tarayıcı kendisi
+     * .nomedia vb. kuralları uyguladığı için burada ek filtre yoktur.
+     *
+     * Dart tarafı şarkı üst dizinlerini gönderir; standart Müzik/Download
+     * klasörleri de burada eklenir (kütüphane boşken bile yeni albümler
+     * genellikle oraya kopyalanır). Dönüş: tarayıcıya verilen dosya sayısı —
+     * MediaStore güncellemesi asenkron olarak sonrasında görünür.
+     */
+    private fun triggerMediaScan(context: Context, roots: List<String>): Int {
+        val audioExtensions = setOf(
+            "mp3", "flac", "wav", "ogg", "oga", "opus", "m4a", "aac", "wma",
+            "aif", "aiff", "ape", "wv", "dsf", "dff",
+        )
+        val visitedDirs = HashSet<String>()
+        val found = LinkedHashSet<String>()
+        val maxFilesPerRoot = 4000
+
+        fun canonicalOf(f: File): String = try {
+            f.canonicalPath
+        } catch (e: Exception) {
+            f.absolutePath
+        }
+
+        val standardDirs = listOfNotNull(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+        )
+
+        for (root in roots.map { File(it) } + standardDirs) {
+            if (!root.isDirectory) continue
+            root.walkTopDown()
+                // Aynı alt ağacı iki kez gezmeyi önler (iç içe gönderilen kökler).
+                .onEnter { visitedDirs.add(canonicalOf(it)) }
+                .filter { it.isFile }
+                .takeWhile { found.size < maxFilesPerRoot }
+                .forEach { f ->
+                    if (f.extension.lowercase() in audioExtensions) {
+                        found.add(f.absolutePath)
+                    }
+                }
+        }
+        if (found.isEmpty()) return 0
+        MediaScannerConnection.scanFile(context, found.toTypedArray(), null, null)
+        return found.size
     }
 
     private fun queryArtwork(resolver: ContentResolver, songId: Long, size: Int): ByteArray? {

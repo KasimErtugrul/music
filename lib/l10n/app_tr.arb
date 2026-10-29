@@ -208,6 +208,8 @@
   "repeatOne": "Tek",
   "minDuration": "Minimum şarkı süresi",
   "scanOnStartup": "Açılışta kütüphaneyi tara",
+  "scanOnStartupHint": "Yeni ve değişen dosyalar otomatik bulunur",
+  "libraryScanUpdated": "Kütüphane güncellendi",
   "resetGroup": "Grubu varsayılana sıfırla",
   "resetAll": "Tüm ayarları sıfırla",
   "resetConfirm": "Tüm ayarları varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.",
@@ -502,5 +504,6 @@
   "stateSuggestedLabel": "Önerilen sanatçılar",
   "widgetPreviewLabel": "Canlı önizleme",
   "widgetSizeBadge": "4 × 1",
-  "widgetNativeNote": "Widget, Android başlatıcısı tarafından RemoteViews ile çizilir; değişiklikler birkaç saniye içinde yansır."
+  "widgetNativeNote": "Widget, Android başlatıcısı tarafından RemoteViews ile çizilir; değişiklikler birkaç saniye içinde yansır.",
+  "miniPlayerShow": "Mini oynatıcıyı göster"
 }

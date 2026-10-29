@@ -1340,6 +1340,18 @@ abstract class AppLocalizations {
   /// **'Scan library on startup'**
   String get scanOnStartup;
 
+  /// No description provided for @scanOnStartupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'New and changed files are picked up automatically'**
+  String get scanOnStartupHint;
+
+  /// No description provided for @libraryScanUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Library updated'**
+  String get libraryScanUpdated;
+
   /// No description provided for @resetGroup.
   ///
   /// In en, this message translates to:
@@ -3037,6 +3049,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The widget is drawn by the Android launcher via RemoteViews; changes apply within a few seconds.'**
   String get widgetNativeNote;
+
+  /// No description provided for @miniPlayerShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show mini player'**
+  String get miniPlayerShow;
 }
 
 class _AppLocalizationsDelegate

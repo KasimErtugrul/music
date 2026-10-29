@@ -17,6 +17,13 @@ abstract class DeviceMediaDataSource {
 
   /// Şarkının gömülü/albüm kapağı (JPEG). Kapak yoksa veya okunamazsa null.
   Future<Uint8List?> queryArtwork(int songId, {int size = 200});
+
+  /// Aşama 3: verilen klasörleri platform medya tarayıcısına bildirir.
+  /// USB üzerinden kopyalanan yeni dosyaların MediaStore'a girmesini
+  /// hızlandırır. Döndürülen değer tarayıcıya verilen dosya sayısıdır.
+  /// Varsayılan no-op'tur; test sahteleri ve alternatif kaynaklar
+  /// etkilenmez, yalnızca gerçek kanal kaynağı override eder.
+  Future<int> triggerMediaScan(List<String> directories) async => 0;
 }
 
 /// Kendi Kotlin MethodChannel'ımız ile doğrudan MediaStore.
@@ -58,6 +65,19 @@ class MediaStoreChannelDataSource implements DeviceMediaDataSource {
       );
     } on Exception {
       return null;
+    }
+  }
+
+  @override
+  Future<int> triggerMediaScan(List<String> directories) async {
+    try {
+      return await _channel.invokeMethod<int>(
+            'triggerMediaScan',
+            <String, Object>{'paths': directories},
+          ) ??
+          0;
+    } on Exception {
+      return 0;
     }
   }
 }

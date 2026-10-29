@@ -68,6 +68,12 @@ class PlayerController extends GetxController {
   final formatInfo = Rxn<AudioFormatInfo>();
   final Map<int, AudioFormatInfo?> _formatCache = <int, AudioFormatInfo?>{};
 
+  // Aşama 4: mini player kaydırma hareketleri. Kart aşağı kaydırıldığında
+  // ince bir tutamağa küçülür (ekran alanı kazanımı); tutamağa dokunmak
+  // veya yukarı kaydırmak kartı geri getirir. Kalıcı tercih DEĞİLDİR:
+  // her uygulama açılışında kart görünür başlar.
+  final miniPlayerHidden = false.obs;
+
 
 
   SongModel? get currentSong {
@@ -381,6 +387,14 @@ class PlayerController extends GetxController {
   Future<void> seek(Duration pos) => _repository.seek(pos);
   Future<void> next() => _repository.skipToNext();
   Future<void> previous() => _repository.skipToPrevious();
+
+  /// Aşama 4: mini player kartını ince tutamağa küçültür
+  /// (kartta aşağı kaydırma hareketi).
+  void hideMiniPlayer() => miniPlayerHidden.value = true;
+
+  /// Aşama 4: küçültülen kartı geri açar
+  /// (tutamağa dokunma veya yukarı kaydırma hareketi).
+  void showMiniPlayer() => miniPlayerHidden.value = false;
 
   Future<void> toggleShuffle() async {
     final next = !shuffleEnabled.value;

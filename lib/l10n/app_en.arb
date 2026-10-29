@@ -216,6 +216,8 @@
   "repeatOne": "One",
   "minDuration": "Minimum song duration",
   "scanOnStartup": "Scan library on startup",
+  "scanOnStartupHint": "New and changed files are picked up automatically",
+  "libraryScanUpdated": "Library updated",
   "resetGroup": "Reset group to defaults",
   "resetAll": "Reset all settings",
   "resetConfirm": "Are you sure you want to reset all settings to their defaults? This cannot be undone.",
@@ -517,5 +519,6 @@
   "stateSuggestedLabel": "Suggested artists",
   "widgetPreviewLabel": "Live preview",
   "widgetSizeBadge": "4 × 1",
-  "widgetNativeNote": "The widget is drawn by the Android launcher via RemoteViews; changes apply within a few seconds."
+  "widgetNativeNote": "The widget is drawn by the Android launcher via RemoteViews; changes apply within a few seconds.",
+  "miniPlayerShow": "Show mini player"
 }

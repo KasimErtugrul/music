@@ -21,6 +21,10 @@ class FakeDataSource implements DeviceMediaDataSource {
   Object? error;
   int queryCount = 0;
 
+  // Aşama 3: platform tarama tetiklemesini yakalar.
+  List<String>? scannedDirs;
+  int triggerResult = 0;
+
   @override
   String get name => 'fake';
 
@@ -34,6 +38,12 @@ class FakeDataSource implements DeviceMediaDataSource {
 
   @override
   Future<Uint8List?> queryArtwork(int songId, {int size = 200}) async => null;
+
+  @override
+  Future<int> triggerMediaScan(List<String> directories) async {
+    scannedDirs = directories;
+    return triggerResult;
+  }
 }
 
 /// Testler için varsayılan ayarlarla dönen basit sahte PreferencesRepository.
@@ -504,6 +514,103 @@ void main() {
       watch.stop();
       debugPrint('10.000 şarkı: toplam ${watch.elapsedMilliseconds} ms');
       expect(watch.elapsedMilliseconds, lessThan(5000));
+    });
+  });
+
+  group('artımlı tarama (Aşama 3)', () {
+    test('değişiklik yoksa changed=false, indeks ve önbellek korunur', () async {
+      final before = await repo.songs();
+      final delta = await repo.incrementalScan();
+      expect(delta.changed, isFalse);
+      expect(delta.added, 0);
+      expect(delta.updated, 0);
+      expect(delta.removed, 0);
+      expect(source.queryCount, 2); // ilk yükleme + tarama sorgusu
+      expect(identical(await repo.songs(), before), isTrue);
+    });
+
+    test('ilk yüklemeden önce çağrılırsa değişiklik yok sayılır', () async {
+      final delta = await repo.incrementalScan();
+      expect(delta.changed, isFalse);
+    });
+
+    test('eklenen şarkı rescan olmadan listeye girer', () async {
+      await repo.songs();
+      source.songs = <SongModel>[
+        ...fixture(),
+        song(7, 'Yeni Parça', artist: 'Yeni Sanatçı'),
+      ];
+      final delta = await repo.incrementalScan();
+      expect(delta.changed, isTrue);
+      expect(delta.added, 1);
+      expect(delta.updated, 0);
+      expect(delta.removed, 0);
+      final list = await repo.songs();
+      expect(list, hasLength(7));
+      expect(ids(list), contains(7));
+      // Detay sorguları da yeni veriden beslenir (7'nin albümü bilinmeyen).
+      expect(ids(await repo.songsInAlbum(AlbumModel.unknownId)), contains(7));
+    });
+
+    test('silinen şarkı listeden çıkar', () async {
+      await repo.songs();
+      source.songs =
+          fixture().where((s) => s.id != 2).toList(growable: false);
+      final delta = await repo.incrementalScan();
+      expect(delta.changed, isTrue);
+      expect(delta.removed, 1);
+      expect(delta.added, 0);
+      expect(ids(await repo.songs()), isNot(contains(2)));
+      expect((await repo.artists())[0].songCount, 1); // Ayşe: 5 id'li şarkı kaldı
+    });
+
+    test('güncellenen şarkı (aynı id, farklı içerik) algılanır', () async {
+      await repo.songs();
+      final updated = fixture()
+          .map((s) => s.id == 2
+              ? song(2, 'Çiçek — Remaster',
+                  artist: 'Ayşe',
+                  album: 'Bahar',
+                  albumId: 11,
+                  artistId: 101,
+                  genre: 'Rock',
+                  durationMs: 123000,
+                  dateAdded: DateTime(2026, 1, 1))
+              : s)
+          .toList(growable: false);
+      source.songs = updated;
+      final delta = await repo.incrementalScan();
+      expect(delta.changed, isTrue);
+      expect(delta.updated, 1);
+      expect(delta.added, 0);
+      expect(delta.removed, 0);
+      expect(
+        (await repo.songs()).firstWhere((s) => s.id == 2).title,
+        'Çiçek — Remaster',
+      );
+    });
+
+    test('platform taraması azaltılmış kök klasörlere gönderilir', () async {
+      await repo.songs();
+      expect(source.scannedDirs, isNull);
+      final delta = await repo.incrementalScan(triggerPlatformScan: true);
+      // Fixture yollarının tümü tek klasörde → tek kök.
+      expect(source.scannedDirs, <String>['/storage/emulated/0/Music']);
+      expect(delta.scannedFiles, 0); // sahte kaynak 0 döndürür
+    });
+
+    test('iç içe klasörler ortak köke indirgenir', () async {
+      source.songs = <SongModel>[
+        song(1, 'A', path: '/storage/emulated/0/Music/Pop/a.mp3'),
+        song(2, 'B', path: '/storage/emulated/0/Music/Pop/Live/b.mp3'),
+        song(3, 'C', path: '/storage/emulated/0/Music/Rock/c.mp3'),
+      ];
+      await repo.songs();
+      await repo.incrementalScan(triggerPlatformScan: true);
+      expect(source.scannedDirs, <String>[
+        '/storage/emulated/0/Music/Pop',
+        '/storage/emulated/0/Music/Rock',
+      ]);
     });
   });
 }
