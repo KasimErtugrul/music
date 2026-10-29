@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/core/theme/extensions/player_theme_extension.dart';
 import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/l10n/app_localizations.dart';
@@ -59,18 +60,34 @@ class PlayerPage extends GetView<PlayerController> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            Obx(() => Text(
-              controller.currentSong?.album ?? l10n.unknownAlbum,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            // Albüm adına dokununca albüm detay sayfası açılır
+            // (sanatçı adındaki davranışın albüm kardeşi).
+            Obx(() => InkWell(
+              onTap: controller.openAlbumDetail,
+              borderRadius: BorderRadius.circular(6),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+                child: Text(
+                  controller.currentSong?.album ?? l10n.unknownAlbum,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             )),
           ],
         ),
         centerTitle: true,
         actions: [
+          // Kuyruk: kullanıcı şarkıları kuyruğa ekleyebiliyor ama kuyruk
+          // sayfasına hiçbir giriş noktası yoktu; AppBar'dan erişim eklendi.
+          IconButton(
+            icon: const Icon(Icons.queue_music_outlined),
+            tooltip: l10n.queue,
+            onPressed: () => Get.toNamed(AppRoutes.queue),
+          ),
           IconButton(
             icon: const Icon(Icons.timer_outlined),
             tooltip: l10n.sleepTimer,
@@ -313,27 +330,42 @@ class PlayerPage extends GetView<PlayerController> {
                       ),
                     ),
 
-                    // Alt Sürükleme Tutamacı (Görsel)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16, top: 8),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(2),
+                    // Alt Sürükleme Tutamacı — artık sadece görsel değil:
+                    // dokunma ve yukarı kaydırma hareketi kuyruk sayfasını
+                    // açar (yazıdaki vaat gerçek davranışa bağlandı).
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => Get.toNamed(AppRoutes.queue),
+                      onVerticalDragEnd: (details) {
+                        final velocity = details.primaryVelocity ?? 0;
+                        // Yukarı doğru hızlı kaydırma → kuyruk.
+                        if (velocity < -120) {
+                          Get.toNamed(AppRoutes.queue);
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 16, top: 8),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Kuyruğu görmek için yukarı kaydır',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.swipeUpToSeeQueue,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.6),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -384,27 +384,13 @@
   "commonExport": "Dışa aktar",
 
   "hoursShort": "{hours} sa",
-  "@hoursShort": {
-    "placeholders": {
-      "hours": {
-        "type": "int"
-      }
-    }
-  },
+  "@hoursShort": {"placeholders": {"hours": {"type": "int"}}},
   "queueLocalChip": "Yerel Bellek",
   "queueSummary": "{count, plural, =1{1 şarkı} other{{count} şarkı}} • {duration}",
-  "@queueSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "duration": {
-        "type": "String"
-      }
-    }
-  },
+  "@queueSummary": {"placeholders": {"count": {"type": "int"}, "duration": {"type": "String"}}},
   "queueUpNextTitle": "Sıradakiler",
   "queueRemoveAction": "Kuyruktan Çıkar",
+  "swipeUpToSeeQueue": "Kuyruğu görmek için yukarı kaydır",
   "albumDetailTitle": "Albüm Detayı",
   "albumTracksTitle": "Parçalar",
   "backupIncludedTitle": "Yedeğe Dahil Edilenler",
@@ -422,25 +408,14 @@
   "backupCreateFileTitle": "Yedek Dosyası Oluştur",
   "backupFormatNote": "Biçim: .json",
   "backupLastExport": "Son yedek: {date}",
-  "@backupLastExport": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
+  "@backupLastExport": {"placeholders": {"date": {"type": "String"}}},
   "backupRestorePickFile": "Dosya Seç ve Geri Yükle",
   "searchFilterAll": "Tümü",
   "searchResultCount": "{count, plural, =1{1 sonuç bulundu} other{{count} sonuç bulundu}}",
-  "@searchResultCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@searchResultCount": {"placeholders": {"count": {"type": "int"}}},
   "searchHistoryTitle": "Son Aramalar",
   "permissionMediaSpec": "READ_MEDIA_AUDIO",
+
   "folderHierarchyLabel": "Dizin hiyerarşisi",
   "folderPlay": "Klasörü çal",
   "folderHide": "Gizle",
@@ -448,19 +423,7 @@
   "folderHiddenToast": "Klasör kütüphaneden gizlendi",
   "folderUndo": "Geri Al",
   "folderSummary": "{folders, plural, =1{1 alt klasör} other{{folders} alt klasör}} • {songs, plural, =1{1 şarkı} other{{songs} şarkı}} • {duration}",
-  "@folderSummary": {
-    "placeholders": {
-      "folders": {
-        "type": "int"
-      },
-      "songs": {
-        "type": "int"
-      },
-      "duration": {
-        "type": "String"
-      }
-    }
-  },
+  "@folderSummary": {"placeholders": {"folders": {"type": "int"}, "songs": {"type": "int"}, "duration": {"type": "String"}}},
   "genreDetailTitle": "Tür Detayı",
   "genrePlayAll": "Türün Parçalarını Çal",
   "genreAlbumsTitle": "Bu Türdeki Albümler",
@@ -477,16 +440,7 @@
   "statsTotalListen": "Toplam Dinleme Süresi",
   "statsWeeklyChart": "Dinleme Alışkanlıkları",
   "statsWeeklyPeak": "Haftalık zirve: {day} ({count, plural, =1{1 çalma} other{{count} çalma}})",
-  "@statsWeeklyPeak": {
-    "placeholders": {
-      "day": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@statsWeeklyPeak": {"placeholders": {"day": {"type": "String"}, "count": {"type": "int"}}},
   "statsDayMon": "Pzt",
   "statsDayTue": "Sal",
   "statsDayWed": "Çar",
@@ -495,32 +449,14 @@
   "statsDaySat": "Cmt",
   "statsDaySun": "Paz",
   "statsSharePct": "%{pct} pay",
-  "@statsSharePct": {
-    "placeholders": {
-      "pct": {
-        "type": "int"
-      }
-    }
-  },
+  "@statsSharePct": {"placeholders": {"pct": {"type": "int"}}},
   "statsTopTracks": "En Çok Dinlenen Şarkılar",
   "statsRecent24h": "Son Çalınanlar",
   "statsRelNow": "şimdi",
   "statsRelMinutes": "{n} dk önce",
-  "@statsRelMinutes": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
+  "@statsRelMinutes": {"placeholders": {"n": {"type": "int"}}},
   "statsRelHours": "{n} sa önce",
-  "@statsRelHours": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
+  "@statsRelHours": {"placeholders": {"n": {"type": "int"}}},
   "statsPrivacyTitle": "Yerel ve Gizli",
   "statsPrivacyBody": "Tüm istatistikler cihazınızda yerel olarak saklanır, hiçbir veri dışarı gönderilmez.",
   "optionsQueuedNext": "Sonra çalma sırasına alındı",
@@ -554,13 +490,7 @@
   "notifPreviewIntro": "Medya bildirimini Android kendisi çizer; bu önizleme gerçek çalma durumunuzu yansıtır.",
   "notifSleepActive": "Uyku Zamanlayıcısı Aktif",
   "notifSleepFadesIn": "Ses {time} içinde sönümlenir",
-  "@notifSleepFadesIn": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
+  "@notifSleepFadesIn": {"placeholders": {"time": {"type": "String"}}},
   "notifSleepHint": "Çalmayı yumuşakça sonlandırmak için uyku zamanlayıcısını ayarlayın.",
   "previousTrack": "Önceki parça",
   "nextTrack": "Sonraki parça",

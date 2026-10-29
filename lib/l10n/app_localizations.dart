@@ -2414,6 +2414,12 @@ abstract class AppLocalizations {
   /// **'Remove from queue'**
   String get queueRemoveAction;
 
+  /// No description provided for @swipeUpToSeeQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe up to see the queue'**
+  String get swipeUpToSeeQueue;
+
   /// No description provided for @albumDetailTitle.
   ///
   /// In en, this message translates to:

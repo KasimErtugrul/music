@@ -5,6 +5,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 import 'package:resonance/data/datasources/metadata_datasource.dart';
+import 'package:resonance/data/models/album_model.dart';
 import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/queue_state_model.dart';
 import 'package:resonance/data/models/song_model.dart';
@@ -433,5 +434,49 @@ class PlayerController extends GetxController {
     }
     if (match == null) return;
     Get.toNamed<dynamic>(AppRoutes.artistDetail, arguments: match);
+  }
+
+  /// Oynatıcı sayfasındaki albüm adına dokunulduğunda albüm detay
+  /// sayfasını açar. Eşleştirme, kütüphane deposundaki `_albumIdOf`
+  /// mantığıyla tutarlıdır: albüm etiketi VE albumId birlikte varsa id
+  /// eşleşmesi; eşleşmezse başlığa göre; o da yoksa "bilinmeyen albüm"
+  /// kovası. Kütüphane hazır değilse no-op olur.
+  void openAlbumDetail() {
+    final song = currentSong;
+    if (song == null) return;
+    if (!Get.isRegistered<LibraryController>()) return;
+    final albums = Get.find<LibraryController>().albums;
+
+    AlbumModel? match;
+    final albumId = song.albumId;
+    if (song.album != null && albumId != null) {
+      for (final a in albums) {
+        if (a.id == albumId) {
+          match = a;
+          break;
+        }
+      }
+    }
+    final title = song.album?.trim();
+    if (match == null && title != null && title.isNotEmpty) {
+      final lower = title.toLowerCase();
+      for (final a in albums) {
+        final t = a.title?.trim().toLowerCase();
+        if (t != null && t == lower) {
+          match = a;
+          break;
+        }
+      }
+    }
+    if (match == null && (title == null || title.isEmpty)) {
+      for (final a in albums) {
+        if (a.isUnknown) {
+          match = a;
+          break;
+        }
+      }
+    }
+    if (match == null) return;
+    Get.toNamed<dynamic>(AppRoutes.albumDetail, arguments: match);
   }
 }

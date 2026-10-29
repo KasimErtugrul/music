@@ -399,27 +399,13 @@
   "commonExport": "Export",
 
   "hoursShort": "{hours} hr",
-  "@hoursShort": {
-    "placeholders": {
-      "hours": {
-        "type": "int"
-      }
-    }
-  },
+  "@hoursShort": {"placeholders": {"hours": {"type": "int"}}},
   "queueLocalChip": "On device",
   "queueSummary": "{count, plural, =1{1 song} other{{count} songs}} • {duration}",
-  "@queueSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "duration": {
-        "type": "String"
-      }
-    }
-  },
+  "@queueSummary": {"placeholders": {"count": {"type": "int"}, "duration": {"type": "String"}}},
   "queueUpNextTitle": "Up next",
   "queueRemoveAction": "Remove from queue",
+  "swipeUpToSeeQueue": "Swipe up to see the queue",
   "albumDetailTitle": "Album Details",
   "albumTracksTitle": "Tracks",
   "backupIncludedTitle": "Included in the backup",
@@ -437,25 +423,14 @@
   "backupCreateFileTitle": "Create backup file",
   "backupFormatNote": "Format: .json",
   "backupLastExport": "Last backup: {date}",
-  "@backupLastExport": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
+  "@backupLastExport": {"placeholders": {"date": {"type": "String"}}},
   "backupRestorePickFile": "Pick a file and restore",
   "searchFilterAll": "All",
   "searchResultCount": "{count, plural, =1{1 result found} other{{count} results found}}",
-  "@searchResultCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@searchResultCount": {"placeholders": {"count": {"type": "int"}}},
   "searchHistoryTitle": "Recent searches",
   "permissionMediaSpec": "READ_MEDIA_AUDIO",
+
   "folderHierarchyLabel": "Directory hierarchy",
   "folderPlay": "Play folder",
   "folderHide": "Hide",
@@ -463,19 +438,7 @@
   "folderHiddenToast": "Folder hidden from library",
   "folderUndo": "Undo",
   "folderSummary": "{folders, plural, =1{1 folder} other{{folders} folders}} • {songs, plural, =1{1 song} other{{songs} songs}} • {duration}",
-  "@folderSummary": {
-    "placeholders": {
-      "folders": {
-        "type": "int"
-      },
-      "songs": {
-        "type": "int"
-      },
-      "duration": {
-        "type": "String"
-      }
-    }
-  },
+  "@folderSummary": {"placeholders": {"folders": {"type": "int"}, "songs": {"type": "int"}, "duration": {"type": "String"}}},
   "genreDetailTitle": "Genre Details",
   "genrePlayAll": "Play Genre Tracks",
   "genreAlbumsTitle": "Albums in This Genre",
@@ -492,16 +455,7 @@
   "statsTotalListen": "Total Listening Time",
   "statsWeeklyChart": "Listening Habits",
   "statsWeeklyPeak": "Weekly peak: {day} ({count, plural, =1{1 play} other{{count} plays}})",
-  "@statsWeeklyPeak": {
-    "placeholders": {
-      "day": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@statsWeeklyPeak": {"placeholders": {"day": {"type": "String"}, "count": {"type": "int"}}},
   "statsDayMon": "Mon",
   "statsDayTue": "Tue",
   "statsDayWed": "Wed",
@@ -510,32 +464,14 @@
   "statsDaySat": "Sat",
   "statsDaySun": "Sun",
   "statsSharePct": "%{pct} share",
-  "@statsSharePct": {
-    "placeholders": {
-      "pct": {
-        "type": "int"
-      }
-    }
-  },
+  "@statsSharePct": {"placeholders": {"pct": {"type": "int"}}},
   "statsTopTracks": "Most Played Songs",
   "statsRecent24h": "Recently Played",
   "statsRelNow": "just now",
   "statsRelMinutes": "{n} min ago",
-  "@statsRelMinutes": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
+  "@statsRelMinutes": {"placeholders": {"n": {"type": "int"}}},
   "statsRelHours": "{n} h ago",
-  "@statsRelHours": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
+  "@statsRelHours": {"placeholders": {"n": {"type": "int"}}},
   "statsPrivacyTitle": "Local & Private",
   "statsPrivacyBody": "All statistics are stored locally on your device; no data is ever uploaded.",
   "optionsQueuedNext": "Added to play next",
@@ -569,13 +505,7 @@
   "notifPreviewIntro": "Android draws the media notification itself; this preview reflects your real playback state.",
   "notifSleepActive": "Sleep Timer Active",
   "notifSleepFadesIn": "Audio fades out in {time}",
-  "@notifSleepFadesIn": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
+  "@notifSleepFadesIn": {"placeholders": {"time": {"type": "String"}}},
   "notifSleepHint": "Set a sleep timer to fade playback gently.",
   "previousTrack": "Previous track",
   "nextTrack": "Next track",

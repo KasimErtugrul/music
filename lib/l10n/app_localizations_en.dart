@@ -1271,6 +1271,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueRemoveAction => 'Remove from queue';
 
   @override
+  String get swipeUpToSeeQueue => 'Swipe up to see the queue';
+
+  @override
   String get albumDetailTitle => 'Album Details';
 
   @override

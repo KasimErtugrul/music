@@ -1269,6 +1269,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get queueRemoveAction => 'Kuyruktan Çıkar';
 
   @override
+  String get swipeUpToSeeQueue => 'Kuyruğu görmek için yukarı kaydır';
+
+  @override
   String get albumDetailTitle => 'Albüm Detayı';
 
   @override

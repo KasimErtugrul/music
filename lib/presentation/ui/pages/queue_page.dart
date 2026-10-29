@@ -22,7 +22,11 @@ import 'package:resonance/presentation/ui/widgets/song_options_sheet.dart';
 /// modelinde "play next" kuyruğu ayrı tutulmadığı için tek bir gerçek
 /// listeye (mevcut indeksten sonraki parçalar) indirgendi; sahte bölüm
 /// eklenmedi.
-class QueuePage extends  GetView<PlayerController> {
+/// Not: `controller` (PlayerController) GetView getter'ı üzerinden gelir;
+/// bu sınıf daha önce StatelessWidget olarak bildirilmişti ve `controller`
+/// tanımsız kaldığı için dosya derlenmiyordu (kuyruk sayfası bu yüzden
+/// hiçbir yerden açılamıyordu).
+class QueuePage extends GetView<PlayerController> {
   const QueuePage({super.key});
 
   @override
@@ -30,7 +34,7 @@ class QueuePage extends  GetView<PlayerController> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.nowPlaying)),
+      appBar: AppBar(title: Text(l10n.queueTitle)),
       bottomNavigationBar: const MiniPlayer(),
       body: Obx(() {
         final queue = controller.songQueue;

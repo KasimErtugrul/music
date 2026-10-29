@@ -95,6 +95,14 @@ class MiniPlayer extends GetView<PlayerController> {
                     ] else ...[
                       const PlayerControls(compact: true),
                     ],
+                    // Kuyruk: mini player'dan da sıradakilere tek dokunuşla
+                    // erişim (kuyruk sayfasına ek giriş noktası).
+                    IconButton(
+                      icon: const Icon(Icons.queue_music_outlined),
+                      tooltip: AppLocalizations.of(context).queue,
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => Get.toNamed(AppRoutes.queue),
+                    ),
                     const SizedBox(width: 8),
                   ],
                 ),
