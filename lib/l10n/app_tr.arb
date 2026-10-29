@@ -505,5 +505,12 @@
   "widgetPreviewLabel": "Canlı önizleme",
   "widgetSizeBadge": "4 × 1",
   "widgetNativeNote": "Widget, Android başlatıcısı tarafından RemoteViews ile çizilir; değişiklikler birkaç saniye içinde yansır.",
-  "miniPlayerShow": "Mini oynatıcıyı göster"
+  "miniPlayerShow": "Mini oynatıcıyı göster",
+  "autoSongs": "Şarkılar",
+  "autoAlbums": "Albümler",
+  "autoArtists": "Sanatçılar",
+  "autoGenres": "Türler",
+  "autoPlaylists": "Çalma Listeleri",
+  "autoFavorites": "Favoriler",
+  "autoFolders": "Klasörler"
 }

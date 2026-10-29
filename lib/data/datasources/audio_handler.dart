@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:resonance/data/datasources/auto_browse_delegate.dart';
 import 'package:resonance/data/datasources/audio_session_datasource.dart';
 import 'package:resonance/data/datasources/player_datasource.dart';
 
@@ -27,6 +28,12 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   /// ayar değiştiğinde handler'ın yeniden kurulması gerekmez.
   final bool Function() shouldPauseOnUnplug;
   AudioPlayer get _player => _source.player;
+
+  /// Aşama 5: Android Auto göz atma delegesi. main() içinde InitialBinding
+  /// çalıştıktan SONRA bağlanır (kütüphane repoları o noktada hazır);
+  /// bağlanmadan önce Auto sorguları güvenli boş yanıt döner.
+  AutoBrowseDelegate? _autoBrowse;
+  void attachAutoBrowse(AutoBrowseDelegate delegate) => _autoBrowse = delegate;
 
   Stream<Duration> get positionStream => _source.positionStream;
   Stream<Duration?> get durationStream => _source.durationStream;
@@ -179,5 +186,66 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
       AudioServiceRepeatMode.all || AudioServiceRepeatMode.group => LoopMode.all,
     };
     await _source.setLoopMode(mode);
+  }
+
+  // --- Aşama 5: Android Auto göz atma / arama / medya-id çalma -----------
+  // Tüm karar mantığı AutoBrowseDelegate'tedir; burada yalnızca güvenli
+  // köprüler vardır. Delege yoksa veya delegasyon hata fırlatırsa Auto
+  // bağlantısını düşürmemek için boş yanıt döner (MediaBrowserService
+  // sözleşmesi: onLoadChildren asla patlamamalıdır).
+
+  @override
+  Future<List<MediaItem>> getChildren(String parentMediaId,
+      [Map<String, dynamic>? options]) async {
+    final delegate = _autoBrowse;
+    if (delegate == null) return const <MediaItem>[];
+    try {
+      return await delegate.getChildren(parentMediaId);
+    } catch (_) {
+      return const <MediaItem>[];
+    }
+  }
+
+  @override
+  Future<MediaItem?> getMediaItem(String mediaId) async {
+    final delegate = _autoBrowse;
+    if (delegate == null) return null;
+    try {
+      return await delegate.getMediaItem(mediaId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<List<MediaItem>> search(String query,
+      [Map<String, dynamic>? extras]) async {
+    final delegate = _autoBrowse;
+    if (delegate == null) return const <MediaItem>[];
+    try {
+      return await delegate.search(query);
+    } catch (_) {
+      return const <MediaItem>[];
+    }
+  }
+
+  @override
+  Future<void> playFromMediaId(String mediaId,
+      [Map<String, dynamic>? extras]) async {
+    try {
+      await _autoBrowse?.playFromMediaId(mediaId);
+    } catch (_) {
+      // Çalma isteği sessizce yutulur; Auto hata kartı göstermesin.
+    }
+  }
+
+  @override
+  Future<void> playFromSearch(String query,
+      [Map<String, dynamic>? extras]) async {
+    try {
+      await _autoBrowse?.playFromSearch(query);
+    } catch (_) {
+      // Arama sonuçsuzsa sessiz no-op.
+    }
   }
 }

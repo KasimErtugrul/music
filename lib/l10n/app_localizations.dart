@@ -3055,6 +3055,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show mini player'**
   String get miniPlayerShow;
+
+  /// No description provided for @autoSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs'**
+  String get autoSongs;
+
+  /// No description provided for @autoAlbums.
+  ///
+  /// In en, this message translates to:
+  /// **'Albums'**
+  String get autoAlbums;
+
+  /// No description provided for @autoArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Artists'**
+  String get autoArtists;
+
+  /// No description provided for @autoGenres.
+  ///
+  /// In en, this message translates to:
+  /// **'Genres'**
+  String get autoGenres;
+
+  /// No description provided for @autoPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists'**
+  String get autoPlaylists;
+
+  /// No description provided for @autoFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get autoFavorites;
+
+  /// No description provided for @autoFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders'**
+  String get autoFolders;
 }
 
 class _AppLocalizationsDelegate

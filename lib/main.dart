@@ -7,11 +7,15 @@ import 'package:resonance/app.dart';
 import 'package:resonance/core/bindings/initial_binding.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
+import 'package:resonance/data/datasources/auto_browse_delegate.dart';
 import 'package:resonance/data/datasources/player_datasource.dart';
+import 'package:resonance/data/repositories/favorite_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
+import 'package:resonance/data/repositories/playlist_repository.dart';
 import 'package:resonance/data/repositories/preferences_repository.dart';
 import 'package:resonance/data/repositories/settings_repository.dart';
 import 'package:resonance/data/repositories/theme_repository.dart';
+import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
@@ -21,6 +25,48 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 late final AudioHandler audioHandler;
+
+/// Aşama 5: bildirim kartı ve Android Auto düğümleri için PAYLAŞILAN kapak
+/// çözücüsü. artworkSongId → file:// Uri (temp önbellek jpg'si).
+/// audio_service yalnızca file:// ve content:// artUri'yi yerel okur;
+/// JPEG dosyaya yazılır (aynı mekanizma Görev 1.2'den beri bildirimde
+/// kullanılıyor). Hata daima null döner; Auto düğümü kapsız listelenir.
+Future<Uri?> artworkToFile(int id) async {
+  try {
+    final dir = Directory('${(await getTemporaryDirectory()).path}/notif_art');
+    final file = File('${dir.path}/$id.jpg');
+    if (await file.exists() && await file.length() > 0) {
+      return Uri.file(file.path);
+    }
+    final bytes = await Get.find<LibraryRepository>().artwork(id, size: 512);
+    if (bytes == null || bytes.isEmpty) return null;
+    await dir.create(recursive: true);
+    await file.writeAsBytes(bytes, flush: true);
+    return Uri.file(file.path);
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Aşama 5: Android Auto düğüm etiketleri için yerelleştirme çözücüsü.
+/// UI hazırken gerçek locale'den; hazır değilken (arka plan motoru) ayar
+/// dili tr ise Türkçe, değilse İngilizce döner. Hiçbir hata Auto sorgusunu
+/// engellememeli; her durumda bir AppLocalizations dönmelidir.
+AppLocalizations _autoL10n() {
+  try {
+    final ctx = Get.context;
+    if (ctx != null) {
+      final fromContext =
+          Localizations.of<AppLocalizations>(ctx, AppLocalizations);
+      if (fromContext != null) return fromContext;
+    }
+  } catch (_) {}
+  try {
+    final lang = Get.find<SettingsController>().settings.value?.languageCode;
+    if (lang == 'tr') return lookupAppLocalizations(const Locale('tr'));
+  } catch (_) {}
+  return lookupAppLocalizations(const Locale('en'));
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,16 +112,7 @@ Future<void> main() async {
         artResolver: (songUri) async {
           final id = int.tryParse(songUri.split('/').last);
           if (id == null) return null;
-          final dir = Directory('${(await getTemporaryDirectory()).path}/notif_art');
-          final file = File('${dir.path}/$id.jpg');
-          if (await file.exists() && await file.length() > 0) {
-            return Uri.file(file.path);
-          }
-          final bytes = await Get.find<LibraryRepository>().artwork(id, size: 512);
-          if (bytes == null || bytes.isEmpty) return null;
-          await dir.create(recursive: true);
-          await file.writeAsBytes(bytes, flush: true);
-          return Uri.file(file.path);
+          return artworkToFile(id);
         },
       ),
       config: const AudioServiceConfig(
@@ -94,6 +131,21 @@ Future<void> main() async {
     );
 
     InitialBinding().dependencies();
+
+    // Aşama 5: Android Auto göz atma delegesi. InitialBinding tüm repoları
+    // kaydettikten sonra bağlanır; Auto sorguları artık canlı kütüphaneyi
+    // çeker. Delege bağlanana kadar Auto sorguları güvenli boş döner.
+    Get.find<ResonanceAudioHandler>().attachAutoBrowse(
+      AutoBrowseDelegate(
+        library: Get.find<LibraryRepository>(),
+        playlists: Get.find<PlaylistRepository>(),
+        favorites: Get.find<FavoriteRepository>(),
+        player: Get.find<PlayerController>(),
+        l10n: _autoL10n,
+        artResolver: artworkToFile,
+      ),
+    );
+
     Get.put<SleepTimerController>(SleepTimerController(), permanent: true);
 
     Get.put<ThemeController>(

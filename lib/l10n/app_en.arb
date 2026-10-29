@@ -520,5 +520,12 @@
   "widgetPreviewLabel": "Live preview",
   "widgetSizeBadge": "4 × 1",
   "widgetNativeNote": "The widget is drawn by the Android launcher via RemoteViews; changes apply within a few seconds.",
-  "miniPlayerShow": "Show mini player"
+  "miniPlayerShow": "Show mini player",
+  "autoSongs": "Songs",
+  "autoAlbums": "Albums",
+  "autoArtists": "Artists",
+  "autoGenres": "Genres",
+  "autoPlaylists": "Playlists",
+  "autoFavorites": "Favorites",
+  "autoFolders": "Folders"
 }

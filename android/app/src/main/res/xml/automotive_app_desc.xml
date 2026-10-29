@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aşama 5: Android Auto bildirimi. Manifest'teki
+     com.google.android.gms.car.application meta-data'sı bu dosyayı gösterir;
+     "media" kullanımı uygulamayı medya uygulaması olarak kaydeder. Android Auto,
+     audio_service'in MediaBrowserServiceCompat tabanlı servisi üzerinden
+     ResonanceAudioHandler.getChildren(...) çağrılarıyla içerik ağacını çeker. -->
+<automotiveApp>
+    <uses name="media" />
+</automotiveApp>

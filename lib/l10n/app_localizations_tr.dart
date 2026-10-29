@@ -1639,4 +1639,25 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get miniPlayerShow => 'Mini oynatıcıyı göster';
+
+  @override
+  String get autoSongs => 'Şarkılar';
+
+  @override
+  String get autoAlbums => 'Albümler';
+
+  @override
+  String get autoArtists => 'Sanatçılar';
+
+  @override
+  String get autoGenres => 'Türler';
+
+  @override
+  String get autoPlaylists => 'Çalma Listeleri';
+
+  @override
+  String get autoFavorites => 'Favoriler';
+
+  @override
+  String get autoFolders => 'Klasörler';
 }

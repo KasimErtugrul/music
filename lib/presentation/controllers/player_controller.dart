@@ -5,6 +5,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 import 'package:resonance/data/datasources/audio_format_datasource.dart';
+import 'package:resonance/data/datasources/auto_browse_delegate.dart';
 import 'package:resonance/data/datasources/metadata_datasource.dart';
 import 'package:resonance/data/models/album_model.dart';
 import 'package:resonance/data/models/audio_format_info.dart';
@@ -19,7 +20,7 @@ import 'package:resonance/data/repositories/queue_state_repository.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 
-class PlayerController extends GetxController {
+class PlayerController extends GetxController implements AutoPlayController {
   PlayerController(
     this._repository,
     this._libraryRepo,

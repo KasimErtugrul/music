@@ -1643,4 +1643,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get miniPlayerShow => 'Show mini player';
+
+  @override
+  String get autoSongs => 'Songs';
+
+  @override
+  String get autoAlbums => 'Albums';
+
+  @override
+  String get autoArtists => 'Artists';
+
+  @override
+  String get autoGenres => 'Genres';
+
+  @override
+  String get autoPlaylists => 'Playlists';
+
+  @override
+  String get autoFavorites => 'Favorites';
+
+  @override
+  String get autoFolders => 'Folders';
 }

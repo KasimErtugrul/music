@@ -21,6 +21,15 @@
         android:icon="@mipmap/ic_launcher"
         android:localeConfig="@xml/locales_config">
 
+        <!-- Aşama 5: Android Auto. Uygulamayı medya uygulaması olarak bildirir;
+             içerik ağacı ResonanceAudioHandler getChildren/getMediaItem/search
+             override'larından gelir (audio_service MediaBrowserService).
+             Betimleyici dosya: res/xml/automotive_app_desc.xml -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
+
         <!-- TEK activity. AudioServiceActivity'den miras alındığı için ayrıca
              AudioServiceActivity tanımlanmaz (ikinci bir FlutterEngine açılırdı).
              launchMode=singleTask: "Bununla aç" dosya yöneticisinin görevinde İKİNCİ bir
