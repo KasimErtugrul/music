@@ -93,6 +93,14 @@ void main() {
     controller = PlayerController(repo, libRepo, stateRepo, historyRepo);
     controller.onInit();
 
+    // ŞART: MiniPlayer bir GetView<PlayerController>'dır; build sırasında
+    // Get.find<PlayerController>() çağırır. Kayıt yapılmazsa pump anında
+    // "PlayerController not found" ile tüm widget testleri düşer.
+    // (Controller testlerinde kayıt gerekmez; orada instance doğrudan
+    // kullanılır.) Get.put zaten kayıtlıysa ikinci onInit çağrımı zararsızdır:
+    // akışlar boş, loadState null döner.
+    Get.put<PlayerController>(controller);
+
     // Oynanmakta olan şarkı görünümü: currentItem + kuyruk + index 0.
     controller.currentItem.value = MediaItem(
       id: 'content://media/external/audio/media/1',
