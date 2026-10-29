@@ -44,5 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Android Gradle build çıktıları (rapor vb. repoya girmemeli)
+/android/build/
+
+# Teslimat arşivleri
+resonance.zip
+
 # Widget Preview related
 .widget_preview/
