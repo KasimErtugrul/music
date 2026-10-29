@@ -1242,4 +1242,389 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get commonExport => 'Dışa aktar';
+
+  @override
+  String hoursShort(int hours) {
+    return '$hours sa';
+  }
+
+  @override
+  String get queueLocalChip => 'Yerel Bellek';
+
+  @override
+  String queueSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count şarkı',
+      one: '1 şarkı',
+    );
+    return '$_temp0 • $duration';
+  }
+
+  @override
+  String get queueUpNextTitle => 'Sıradakiler';
+
+  @override
+  String get queueRemoveAction => 'Kuyruktan Çıkar';
+
+  @override
+  String get albumDetailTitle => 'Albüm Detayı';
+
+  @override
+  String get albumTracksTitle => 'Parçalar';
+
+  @override
+  String get backupIncludedTitle => 'Yedeğe Dahil Edilenler';
+
+  @override
+  String get backupIncludedSubtitle => 'Yedek dosyasına aktarılacak veriler';
+
+  @override
+  String get backupItemPlaylists => 'Çalma Listeleri';
+
+  @override
+  String get backupItemPlaylistsDesc => 'Oluşturduğunuz listeler ve şarkıları';
+
+  @override
+  String get backupItemFavorites => 'Favoriler';
+
+  @override
+  String get backupItemFavoritesDesc => 'Beğenilere eklediğiniz şarkılar';
+
+  @override
+  String get backupItemThemes => 'Özel Temalar';
+
+  @override
+  String get backupItemThemesDesc => 'Oluşturduğunuz renk ve arayüz temaları';
+
+  @override
+  String get backupItemEqualizer => 'Ekolayzır Profilleri';
+
+  @override
+  String get backupItemEqualizerDesc => 'Özel ekolayzır ve DSP ses profilleri';
+
+  @override
+  String get backupItemSettings => 'Uygulama ve Oynatıcı Ayarları';
+
+  @override
+  String get backupItemSettingsDesc => 'Tercihler, dil ve ses yapılandırması';
+
+  @override
+  String get backupCreateFileTitle => 'Yedek Dosyası Oluştur';
+
+  @override
+  String get backupFormatNote => 'Biçim: .json';
+
+  @override
+  String backupLastExport(String date) {
+    return 'Son yedek: $date';
+  }
+
+  @override
+  String get backupRestorePickFile => 'Dosya Seç ve Geri Yükle';
+
+  @override
+  String get searchFilterAll => 'Tümü';
+
+  @override
+  String searchResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sonuç bulundu',
+      one: '1 sonuç bulundu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchHistoryTitle => 'Son Aramalar';
+
+  @override
+  String get permissionMediaSpec => 'READ_MEDIA_AUDIO';
+
+  @override
+  String get folderHierarchyLabel => 'Dizin hiyerarşisi';
+
+  @override
+  String get folderPlay => 'Klasörü çal';
+
+  @override
+  String get folderHide => 'Gizle';
+
+  @override
+  String get folderHideConfirm =>
+      'Bu klasör kütüphane taramalarından hariç tutulacak. Devam edilsin mi?';
+
+  @override
+  String get folderHiddenToast => 'Klasör kütüphaneden gizlendi';
+
+  @override
+  String get folderUndo => 'Geri Al';
+
+  @override
+  String folderSummary(int folders, int songs, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      folders,
+      locale: localeName,
+      other: '$folders alt klasör',
+      one: '1 alt klasör',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      songs,
+      locale: localeName,
+      other: '$songs şarkı',
+      one: '1 şarkı',
+    );
+    return '$_temp0 • $_temp1 • $duration';
+  }
+
+  @override
+  String get genreDetailTitle => 'Tür Detayı';
+
+  @override
+  String get genrePlayAll => 'Türün Parçalarını Çal';
+
+  @override
+  String get genreAlbumsTitle => 'Bu Türdeki Albümler';
+
+  @override
+  String get artistProfileTitle => 'Sanatçı Profili';
+
+  @override
+  String get artistPopularTitle => 'Popüler Şarkılar';
+
+  @override
+  String get artistMostPlayedHint => 'En çok dinlenenler';
+
+  @override
+  String get artistAlbumsTitle => 'Albümler';
+
+  @override
+  String get artistSimilarTitle => 'Benzer Yerel Sanatçılar';
+
+  @override
+  String get artistSimilarHint => 'Kütüphanenden';
+
+  @override
+  String get artistOfflineNote =>
+      'Bu sanatçının tüm parçaları cihazınızda, tamamen çevrimdışı.';
+
+  @override
+  String get statsPeriodWeek => 'Bu Hafta';
+
+  @override
+  String get statsPeriodMonth => 'Bu Ay';
+
+  @override
+  String get statsPeriodAll => 'Tüm Zamanlar';
+
+  @override
+  String get statsTotalListen => 'Toplam Dinleme Süresi';
+
+  @override
+  String get statsWeeklyChart => 'Dinleme Alışkanlıkları';
+
+  @override
+  String statsWeeklyPeak(String day, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count çalma',
+      one: '1 çalma',
+    );
+    return 'Haftalık zirve: $day ($_temp0)';
+  }
+
+  @override
+  String get statsDayMon => 'Pzt';
+
+  @override
+  String get statsDayTue => 'Sal';
+
+  @override
+  String get statsDayWed => 'Çar';
+
+  @override
+  String get statsDayThu => 'Per';
+
+  @override
+  String get statsDayFri => 'Cum';
+
+  @override
+  String get statsDaySat => 'Cmt';
+
+  @override
+  String get statsDaySun => 'Paz';
+
+  @override
+  String statsSharePct(int pct) {
+    return '%$pct pay';
+  }
+
+  @override
+  String get statsTopTracks => 'En Çok Dinlenen Şarkılar';
+
+  @override
+  String get statsRecent24h => 'Son Çalınanlar';
+
+  @override
+  String get statsRelNow => 'şimdi';
+
+  @override
+  String statsRelMinutes(int n) {
+    return '$n dk önce';
+  }
+
+  @override
+  String statsRelHours(int n) {
+    return '$n sa önce';
+  }
+
+  @override
+  String get statsPrivacyTitle => 'Yerel ve Gizli';
+
+  @override
+  String get statsPrivacyBody =>
+      'Tüm istatistikler cihazınızda yerel olarak saklanır, hiçbir veri dışarı gönderilmez.';
+
+  @override
+  String get optionsQueuedNext => 'Sonra çalma sırasına alındı';
+
+  @override
+  String get optionsAddedToQueue => 'Kuyruğa eklendi';
+
+  @override
+  String get optionsFavAdded => 'Favorilere eklendi';
+
+  @override
+  String get optionsFavRemoved => 'Favorilerden çıkarıldı';
+
+  @override
+  String get optionsShareHint => 'Dosyayı doğrudan paylaş';
+
+  @override
+  String get optionsMetaTitle => 'Ayrıntılı Dosya Bilgisi';
+
+  @override
+  String get optionsMetaFormat => 'Biçim';
+
+  @override
+  String get commonCopy => 'Kopyala';
+
+  @override
+  String get optionsPathCopied => 'Dosya yolu panoya kopyalandı';
+
+  @override
+  String get sleepPresetsTitle => 'Hazır Süre Seçenekleri';
+
+  @override
+  String get sleepCustomChip => 'Özel';
+
+  @override
+  String get sleepCustomTitle => 'Özel Süre';
+
+  @override
+  String get sleepStartAction => 'Zamanlayıcıyı Başlat';
+
+  @override
+  String get sleepTimerActiveNote =>
+      'Müzik belirlenen sürede yumuşakça sönümlenerek kapanacak.';
+
+  @override
+  String get sleepStopAction => 'Zamanlayıcıyı Durdur';
+
+  @override
+  String get sleepFadeTitle => 'Kademeli Azalt';
+
+  @override
+  String get sleepFadeDesc => 'Sesi yavaşça kısarak uykuyu bölmez.';
+
+  @override
+  String get sleepFadeWindow => 'Sönümlenme Penceresi';
+
+  @override
+  String get notifPermissionHint =>
+      'Bildirimler; oynatıcı kontrollerinin ve uyku zamanlayıcısı durumunun uygulama dışında görünmesini sağlar.';
+
+  @override
+  String get sleepTimerEndOfTrackDesc =>
+      'Parça bitince oynatma nazikçe sonlandırılır.';
+
+  @override
+  String get externalTitle => 'Harici Dosya';
+
+  @override
+  String get externalTempNote => 'Geçici kaynak';
+
+  @override
+  String get externalSourceBadge => 'Harici Kaynak';
+
+  @override
+  String get externalSpecsTitle => 'Ses Akışı Özellikleri';
+
+  @override
+  String get externalAddLibrary => 'Kütüphaneye Ekle';
+
+  @override
+  String get externalScanDone => 'Kütüphane taraması tamamlandı';
+
+  @override
+  String get settingsRowNotifications => 'Bildirim ve Kilit Ekranı';
+
+  @override
+  String get settingsDescNotifications =>
+      'Medya bildirimi ve kilit ekranı önizlemesi';
+
+  @override
+  String get notifPreviewIntro =>
+      'Medya bildirimini Android kendisi çizer; bu önizleme gerçek çalma durumunuzu yansıtır.';
+
+  @override
+  String get notifSleepActive => 'Uyku Zamanlayıcısı Aktif';
+
+  @override
+  String notifSleepFadesIn(String time) {
+    return 'Ses $time içinde sönümlenir';
+  }
+
+  @override
+  String get notifSleepHint =>
+      'Çalmayı yumuşakça sonlandırmak için uyku zamanlayıcısını ayarlayın.';
+
+  @override
+  String get previousTrack => 'Önceki parça';
+
+  @override
+  String get nextTrack => 'Sonraki parça';
+
+  @override
+  String get stateFoldersAction => 'Klasör Ekle / İzinleri Kontrol Et';
+
+  @override
+  String get statePathHintTitle => 'Tavsiye edilen indirme yolu';
+
+  @override
+  String get stateFormatsTitle => 'Desteklenen Çevrimdışı Formatlar';
+
+  @override
+  String get stateNoLyricsTitle => 'Şarkı Sözü Bulunamadı';
+
+  @override
+  String get stateNoLyricsMessage =>
+      'Söz gösterimi bu sürümde henüz bulunmuyor.';
+
+  @override
+  String get stateSuggestedLabel => 'Önerilen sanatçılar';
+
+  @override
+  String get widgetPreviewLabel => 'Canlı önizleme';
+
+  @override
+  String get widgetSizeBadge => '4 × 1';
+
+  @override
+  String get widgetNativeNote =>
+      'Widget, Android başlatıcısı tarafından RemoteViews ile çizilir; değişiklikler birkaç saniye içinde yansır.';
 }

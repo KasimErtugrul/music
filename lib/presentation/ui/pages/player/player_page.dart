@@ -11,6 +11,7 @@ import 'package:resonance/presentation/ui/pages/waveform_viewer_page.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/player_controls.dart';
 import 'package:resonance/presentation/ui/widgets/seek_bar.dart';
+import 'package:resonance/presentation/ui/widgets/state_views.dart';
 import 'package:resonance/presentation/ui/widgets/sleep_timer_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/speed_pitch_sheet.dart';
 
@@ -191,13 +192,27 @@ class PlayerPage extends GetView<PlayerController> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(
-                                    song.artist ?? l10n.unknownArtist,
-                                    style: theme.textTheme.bodyLarge?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
+                                  // Sanatçı adına dokununca sanatçının tüm
+                                  // şarkılarını gösteren detay sayfası açılır.
+                                  InkWell(
+                                    onTap: controller.openArtistDetail,
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 2,
+                                        horizontal: 2,
+                                      ),
+                                      child: Text(
+                                        song.artist ?? l10n.unknownArtist,
+                                        style: theme.textTheme.bodyLarge
+                                            ?.copyWith(
+                                          color:
+                                              theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
@@ -262,13 +277,20 @@ class PlayerPage extends GetView<PlayerController> {
                               onPressed: () => SpeedPitchSheet.show(context),
                             );
                           }),
-                          // Sözler (Kapsam Dışı)
+                          // Sözler: şartname 6.15 durum görünümü
+                          // (söz gösterimi bu sürümde kapsam dışıdır;
+                          // düğme tasarlanmış bilgilendirme sheet'ini açar).
                           IconButton(
                             icon: const Icon(Icons.format_quote),
                             tooltip: l10n.lyrics,
                             iconSize: 28,
                             color: theme.colorScheme.onSurfaceVariant,
-                            onPressed: () => Get.snackbar(l10n.lyrics, 'Kapsam dışı (Gün 25)'),
+                            onPressed: () {
+                              final song = controller.currentSong;
+                              if (song != null) {
+                                NoLyricsView.show(context, song);
+                              }
+                            },
                           ),
                           // İleri sarma — Görev 1.1: sabit 10 sn yerine
                           // controller.fastForward() kullanılır.

@@ -4,11 +4,13 @@ import 'package:resonance/presentation/bindings/home_binding.dart';
 import 'package:resonance/presentation/ui/pages/album_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/artist_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/backup_page.dart';
+import 'package:resonance/presentation/ui/pages/external_player_page.dart';
 import 'package:resonance/presentation/ui/pages/favorites_page.dart';
 import 'package:resonance/presentation/ui/pages/genre_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/history_page.dart';
 import 'package:resonance/presentation/ui/pages/home_page.dart';
 import 'package:resonance/presentation/ui/pages/permission_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/notifications/notification_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/player/player_page.dart';
 import 'package:resonance/presentation/ui/pages/playlist_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/playlists/smart_playlists_page.dart';
@@ -77,5 +79,13 @@ abstract final class AppPages {
     GetPage(name: AppRoutes.audioSettings, page: () => const AudioSettingsPage()),
 // import 'package:resonance/presentation/ui/pages/settings/backup_page.dart';
     GetPage(name: AppRoutes.backup, page: () => const BackupPage()),
+    GetPage(
+      name: AppRoutes.externalPlayer,
+      page: () => const ExternalPlayerPage(),
+    ),
+    GetPage(
+      name: AppRoutes.notificationSettings,
+      page: () => const NotificationSettingsPage(),
+    ),
   ];
 }

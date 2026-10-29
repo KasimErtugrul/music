@@ -16,6 +16,7 @@ import 'package:resonance/presentation/ui/pages/settings/audio_settings_page.dar
 import 'package:resonance/presentation/ui/pages/settings/library_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/playback_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/tags_artwork_settings_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/notifications/notification_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/widget_settings_page.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
@@ -170,6 +171,13 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                       title: l10n.widgetSettings,
                       desc: l10n.settingsDescWidget,
                       onTap: () => Get.to(() => const WidgetSettingsPage()),
+                    ),
+                    _NavRow(
+                      icon: Icons.notifications_outlined,
+                      title: l10n.settingsRowNotifications,
+                      desc: l10n.settingsDescNotifications,
+                      onTap: () =>
+                          Get.to(() => const NotificationSettingsPage()),
                     ),
                   ]),
 

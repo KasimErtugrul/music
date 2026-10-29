@@ -396,5 +396,196 @@
   "sleepTimerAddFive": "Add 5 min",
   "settingsRowAppearance": "Appearance & theme",
   "commonEdit": "Edit",
-  "commonExport": "Export"
+  "commonExport": "Export",
+
+  "hoursShort": "{hours} hr",
+  "@hoursShort": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "queueLocalChip": "On device",
+  "queueSummary": "{count, plural, =1{1 song} other{{count} songs}} • {duration}",
+  "@queueSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "queueUpNextTitle": "Up next",
+  "queueRemoveAction": "Remove from queue",
+  "albumDetailTitle": "Album Details",
+  "albumTracksTitle": "Tracks",
+  "backupIncludedTitle": "Included in the backup",
+  "backupIncludedSubtitle": "Data exported to the backup file",
+  "backupItemPlaylists": "Playlists",
+  "backupItemPlaylistsDesc": "Your playlists and the songs in them",
+  "backupItemFavorites": "Favorites",
+  "backupItemFavoritesDesc": "Songs you marked as favorite",
+  "backupItemThemes": "Custom themes",
+  "backupItemThemesDesc": "Your created color and interface themes",
+  "backupItemEqualizer": "Equalizer presets",
+  "backupItemEqualizerDesc": "Custom EQ and DSP sound profiles",
+  "backupItemSettings": "App & player settings",
+  "backupItemSettingsDesc": "Preferences, language and audio configuration",
+  "backupCreateFileTitle": "Create backup file",
+  "backupFormatNote": "Format: .json",
+  "backupLastExport": "Last backup: {date}",
+  "@backupLastExport": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestorePickFile": "Pick a file and restore",
+  "searchFilterAll": "All",
+  "searchResultCount": "{count, plural, =1{1 result found} other{{count} results found}}",
+  "@searchResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchHistoryTitle": "Recent searches",
+  "permissionMediaSpec": "READ_MEDIA_AUDIO",
+  "folderHierarchyLabel": "Directory hierarchy",
+  "folderPlay": "Play folder",
+  "folderHide": "Hide",
+  "folderHideConfirm": "This folder will be excluded from library scans. Continue?",
+  "folderHiddenToast": "Folder hidden from library",
+  "folderUndo": "Undo",
+  "folderSummary": "{folders, plural, =1{1 folder} other{{folders} folders}} • {songs, plural, =1{1 song} other{{songs} songs}} • {duration}",
+  "@folderSummary": {
+    "placeholders": {
+      "folders": {
+        "type": "int"
+      },
+      "songs": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "genreDetailTitle": "Genre Details",
+  "genrePlayAll": "Play Genre Tracks",
+  "genreAlbumsTitle": "Albums in This Genre",
+  "artistProfileTitle": "Artist Profile",
+  "artistPopularTitle": "Popular Songs",
+  "artistMostPlayedHint": "Most played",
+  "artistAlbumsTitle": "Albums",
+  "artistSimilarTitle": "Similar Local Artists",
+  "artistSimilarHint": "From your library",
+  "artistOfflineNote": "All tracks by this artist are stored on your device, fully offline.",
+  "statsPeriodWeek": "This Week",
+  "statsPeriodMonth": "This Month",
+  "statsPeriodAll": "All Time",
+  "statsTotalListen": "Total Listening Time",
+  "statsWeeklyChart": "Listening Habits",
+  "statsWeeklyPeak": "Weekly peak: {day} ({count, plural, =1{1 play} other{{count} plays}})",
+  "@statsWeeklyPeak": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsDayMon": "Mon",
+  "statsDayTue": "Tue",
+  "statsDayWed": "Wed",
+  "statsDayThu": "Thu",
+  "statsDayFri": "Fri",
+  "statsDaySat": "Sat",
+  "statsDaySun": "Sun",
+  "statsSharePct": "%{pct} share",
+  "@statsSharePct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTopTracks": "Most Played Songs",
+  "statsRecent24h": "Recently Played",
+  "statsRelNow": "just now",
+  "statsRelMinutes": "{n} min ago",
+  "@statsRelMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statsRelHours": "{n} h ago",
+  "@statsRelHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statsPrivacyTitle": "Local & Private",
+  "statsPrivacyBody": "All statistics are stored locally on your device; no data is ever uploaded.",
+  "optionsQueuedNext": "Added to play next",
+  "optionsAddedToQueue": "Added to queue",
+  "optionsFavAdded": "Added to favorites",
+  "optionsFavRemoved": "Removed from favorites",
+  "optionsShareHint": "Share the file directly",
+  "optionsMetaTitle": "Detailed File Info",
+  "optionsMetaFormat": "Format",
+  "commonCopy": "Copy",
+  "optionsPathCopied": "File path copied to clipboard",
+  "sleepPresetsTitle": "Preset Durations",
+  "sleepCustomChip": "Custom",
+  "sleepCustomTitle": "Custom Duration",
+  "sleepStartAction": "Start Timer",
+  "sleepTimerActiveNote": "Music will fade out softly and stop when the timer ends.",
+  "sleepStopAction": "Stop Timer",
+  "sleepFadeTitle": "Fade Out",
+  "sleepFadeDesc": "Lower the volume gradually so sleep is not disturbed.",
+  "sleepFadeWindow": "Fade Window",
+  "notifPermissionHint": "Notifications let the player show media controls and the sleep timer status outside the app.",
+  "sleepTimerEndOfTrackDesc": "Playback ends gently when the current track finishes.",
+  "externalTitle": "External File",
+  "externalTempNote": "Temporary source",
+  "externalSourceBadge": "External Source",
+  "externalSpecsTitle": "Audio Stream Properties",
+  "externalAddLibrary": "Add to Library",
+  "externalScanDone": "Library scan finished",
+  "settingsRowNotifications": "Notifications & Lock Screen",
+  "settingsDescNotifications": "Media notification and lock screen preview",
+  "notifPreviewIntro": "Android draws the media notification itself; this preview reflects your real playback state.",
+  "notifSleepActive": "Sleep Timer Active",
+  "notifSleepFadesIn": "Audio fades out in {time}",
+  "@notifSleepFadesIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notifSleepHint": "Set a sleep timer to fade playback gently.",
+  "previousTrack": "Previous track",
+  "nextTrack": "Next track",
+  "stateFoldersAction": "Add Folders / Check Permissions",
+  "statePathHintTitle": "Recommended download path",
+  "stateFormatsTitle": "Supported Offline Formats",
+  "stateNoLyricsTitle": "No Lyrics Found",
+  "stateNoLyricsMessage": "Lyrics display is not available in this version yet.",
+  "stateSuggestedLabel": "Suggested artists",
+  "widgetPreviewLabel": "Live preview",
+  "widgetSizeBadge": "4 × 1",
+  "widgetNativeNote": "The widget is drawn by the Android launcher via RemoteViews; changes apply within a few seconds."
 }

@@ -381,5 +381,196 @@
   "sleepTimerAddFive": "5 dk ekle",
   "settingsRowAppearance": "Görünüm ve tema",
   "commonEdit": "Düzenle",
-  "commonExport": "Dışa aktar"
+  "commonExport": "Dışa aktar",
+
+  "hoursShort": "{hours} sa",
+  "@hoursShort": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "queueLocalChip": "Yerel Bellek",
+  "queueSummary": "{count, plural, =1{1 şarkı} other{{count} şarkı}} • {duration}",
+  "@queueSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "queueUpNextTitle": "Sıradakiler",
+  "queueRemoveAction": "Kuyruktan Çıkar",
+  "albumDetailTitle": "Albüm Detayı",
+  "albumTracksTitle": "Parçalar",
+  "backupIncludedTitle": "Yedeğe Dahil Edilenler",
+  "backupIncludedSubtitle": "Yedek dosyasına aktarılacak veriler",
+  "backupItemPlaylists": "Çalma Listeleri",
+  "backupItemPlaylistsDesc": "Oluşturduğunuz listeler ve şarkıları",
+  "backupItemFavorites": "Favoriler",
+  "backupItemFavoritesDesc": "Beğenilere eklediğiniz şarkılar",
+  "backupItemThemes": "Özel Temalar",
+  "backupItemThemesDesc": "Oluşturduğunuz renk ve arayüz temaları",
+  "backupItemEqualizer": "Ekolayzır Profilleri",
+  "backupItemEqualizerDesc": "Özel ekolayzır ve DSP ses profilleri",
+  "backupItemSettings": "Uygulama ve Oynatıcı Ayarları",
+  "backupItemSettingsDesc": "Tercihler, dil ve ses yapılandırması",
+  "backupCreateFileTitle": "Yedek Dosyası Oluştur",
+  "backupFormatNote": "Biçim: .json",
+  "backupLastExport": "Son yedek: {date}",
+  "@backupLastExport": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestorePickFile": "Dosya Seç ve Geri Yükle",
+  "searchFilterAll": "Tümü",
+  "searchResultCount": "{count, plural, =1{1 sonuç bulundu} other{{count} sonuç bulundu}}",
+  "@searchResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchHistoryTitle": "Son Aramalar",
+  "permissionMediaSpec": "READ_MEDIA_AUDIO",
+  "folderHierarchyLabel": "Dizin hiyerarşisi",
+  "folderPlay": "Klasörü çal",
+  "folderHide": "Gizle",
+  "folderHideConfirm": "Bu klasör kütüphane taramalarından hariç tutulacak. Devam edilsin mi?",
+  "folderHiddenToast": "Klasör kütüphaneden gizlendi",
+  "folderUndo": "Geri Al",
+  "folderSummary": "{folders, plural, =1{1 alt klasör} other{{folders} alt klasör}} • {songs, plural, =1{1 şarkı} other{{songs} şarkı}} • {duration}",
+  "@folderSummary": {
+    "placeholders": {
+      "folders": {
+        "type": "int"
+      },
+      "songs": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "genreDetailTitle": "Tür Detayı",
+  "genrePlayAll": "Türün Parçalarını Çal",
+  "genreAlbumsTitle": "Bu Türdeki Albümler",
+  "artistProfileTitle": "Sanatçı Profili",
+  "artistPopularTitle": "Popüler Şarkılar",
+  "artistMostPlayedHint": "En çok dinlenenler",
+  "artistAlbumsTitle": "Albümler",
+  "artistSimilarTitle": "Benzer Yerel Sanatçılar",
+  "artistSimilarHint": "Kütüphanenden",
+  "artistOfflineNote": "Bu sanatçının tüm parçaları cihazınızda, tamamen çevrimdışı.",
+  "statsPeriodWeek": "Bu Hafta",
+  "statsPeriodMonth": "Bu Ay",
+  "statsPeriodAll": "Tüm Zamanlar",
+  "statsTotalListen": "Toplam Dinleme Süresi",
+  "statsWeeklyChart": "Dinleme Alışkanlıkları",
+  "statsWeeklyPeak": "Haftalık zirve: {day} ({count, plural, =1{1 çalma} other{{count} çalma}})",
+  "@statsWeeklyPeak": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsDayMon": "Pzt",
+  "statsDayTue": "Sal",
+  "statsDayWed": "Çar",
+  "statsDayThu": "Per",
+  "statsDayFri": "Cum",
+  "statsDaySat": "Cmt",
+  "statsDaySun": "Paz",
+  "statsSharePct": "%{pct} pay",
+  "@statsSharePct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTopTracks": "En Çok Dinlenen Şarkılar",
+  "statsRecent24h": "Son Çalınanlar",
+  "statsRelNow": "şimdi",
+  "statsRelMinutes": "{n} dk önce",
+  "@statsRelMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statsRelHours": "{n} sa önce",
+  "@statsRelHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statsPrivacyTitle": "Yerel ve Gizli",
+  "statsPrivacyBody": "Tüm istatistikler cihazınızda yerel olarak saklanır, hiçbir veri dışarı gönderilmez.",
+  "optionsQueuedNext": "Sonra çalma sırasına alındı",
+  "optionsAddedToQueue": "Kuyruğa eklendi",
+  "optionsFavAdded": "Favorilere eklendi",
+  "optionsFavRemoved": "Favorilerden çıkarıldı",
+  "optionsShareHint": "Dosyayı doğrudan paylaş",
+  "optionsMetaTitle": "Ayrıntılı Dosya Bilgisi",
+  "optionsMetaFormat": "Biçim",
+  "commonCopy": "Kopyala",
+  "optionsPathCopied": "Dosya yolu panoya kopyalandı",
+  "sleepPresetsTitle": "Hazır Süre Seçenekleri",
+  "sleepCustomChip": "Özel",
+  "sleepCustomTitle": "Özel Süre",
+  "sleepStartAction": "Zamanlayıcıyı Başlat",
+  "sleepTimerActiveNote": "Müzik belirlenen sürede yumuşakça sönümlenerek kapanacak.",
+  "sleepStopAction": "Zamanlayıcıyı Durdur",
+  "sleepFadeTitle": "Kademeli Azalt",
+  "sleepFadeDesc": "Sesi yavaşça kısarak uykuyu bölmez.",
+  "sleepFadeWindow": "Sönümlenme Penceresi",
+  "notifPermissionHint": "Bildirimler; oynatıcı kontrollerinin ve uyku zamanlayıcısı durumunun uygulama dışında görünmesini sağlar.",
+  "sleepTimerEndOfTrackDesc": "Parça bitince oynatma nazikçe sonlandırılır.",
+  "externalTitle": "Harici Dosya",
+  "externalTempNote": "Geçici kaynak",
+  "externalSourceBadge": "Harici Kaynak",
+  "externalSpecsTitle": "Ses Akışı Özellikleri",
+  "externalAddLibrary": "Kütüphaneye Ekle",
+  "externalScanDone": "Kütüphane taraması tamamlandı",
+  "settingsRowNotifications": "Bildirim ve Kilit Ekranı",
+  "settingsDescNotifications": "Medya bildirimi ve kilit ekranı önizlemesi",
+  "notifPreviewIntro": "Medya bildirimini Android kendisi çizer; bu önizleme gerçek çalma durumunuzu yansıtır.",
+  "notifSleepActive": "Uyku Zamanlayıcısı Aktif",
+  "notifSleepFadesIn": "Ses {time} içinde sönümlenir",
+  "@notifSleepFadesIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notifSleepHint": "Çalmayı yumuşakça sonlandırmak için uyku zamanlayıcısını ayarlayın.",
+  "previousTrack": "Önceki parça",
+  "nextTrack": "Sonraki parça",
+  "stateFoldersAction": "Klasör Ekle / İzinleri Kontrol Et",
+  "statePathHintTitle": "Tavsiye edilen indirme yolu",
+  "stateFormatsTitle": "Desteklenen Çevrimdışı Formatlar",
+  "stateNoLyricsTitle": "Şarkı Sözü Bulunamadı",
+  "stateNoLyricsMessage": "Söz gösterimi bu sürümde henüz bulunmuyor.",
+  "stateSuggestedLabel": "Önerilen sanatçılar",
+  "widgetPreviewLabel": "Canlı önizleme",
+  "widgetSizeBadge": "4 × 1",
+  "widgetNativeNote": "Widget, Android başlatıcısı tarafından RemoteViews ile çizilir; değişiklikler birkaç saniye içinde yansır."
 }

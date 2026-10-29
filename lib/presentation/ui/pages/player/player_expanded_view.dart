@@ -44,10 +44,22 @@ class PlayerExpandedView extends GetView<PlayerController> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  controller.currentSong?.artist ?? l10n.unknownArtist,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                // Sanatçı adına dokununca sanatçının tüm şarkılarını
+                // gösteren detay sayfası açılır.
+                InkWell(
+                  onTap: controller.openArtistDetail,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 2,
+                      horizontal: 2,
+                    ),
+                    child: Text(
+                      controller.currentSong?.artist ?? l10n.unknownArtist,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 64),

@@ -20,5 +20,7 @@ abstract final class AppRoutes {
   static const String listStyle = '/settings/list-style';
   static const String audioSettings = '/settings/audio';
     static const String backup = '/settings/backup';
+    static const String externalPlayer = '/external-player';
+static const String notificationSettings = '/settings/notifications';
 
 }

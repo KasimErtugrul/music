@@ -2,27 +2,47 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 
+/// Uyku zamanlayıcısı.
+///
+/// Aşama 7 güncellemesi:
+/// - [totalSeconds]: halka göstergesi için başlangıç toplamı (kalan/toplam
+///   oranı gerçek ilerleme verir).
+/// - [startTimer]'ın `fadeSeconds` parametresi: sönümleme penceresi artık
+///   son 10 saniyeye sabit değil; 60-300 sn aralığında seçilebilir
+///   (0 = sönümleme yok, süre dolunca doğrudan durur). Ses kanalı
+///   davranışı aynen korunur: yalnızca oynatıcı sesi rampalanır.
 class SleepTimerController extends GetxController {
-  final _player = Get.find<PlayerController>();
+  SleepTimerController();
+
+  final PlayerController _player = Get.find<PlayerController>();
 
   final isActive = false.obs;
   final isEndOfTrackMode = false.obs;
   final remainingSeconds = 0.obs;
+  final totalSeconds = 0.obs;
+
+  /// Şu anki sönümleme penceresi (saniye). Sheet'e okunur; +5 dk uzatması
+  /// aynı pencereyi korur.
+  int _fadeSeconds = 10;
+  int get fadeSeconds => _fadeSeconds;
 
   Timer? _timer;
   StreamSubscription? _playerStateSub;
 
-  void startTimer(int minutes, {bool resetVolume = false}) {
+  void startTimer(int minutes, {bool resetVolume = false, int? fadeSeconds}) {
     cancelTimer(resetVolume: resetVolume);
+    if (fadeSeconds != null) _fadeSeconds = fadeSeconds;
     isActive.value = true;
     isEndOfTrackMode.value = false;
     remainingSeconds.value = minutes * 60;
+    totalSeconds.value = minutes * 60;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (remainingSeconds.value > 0) {
         remainingSeconds.value--;
-        if (remainingSeconds.value <= 10) {
-          final vol = remainingSeconds.value / 10.0;
+        if (_fadeSeconds > 0 &&
+            remainingSeconds.value <= _fadeSeconds) {
+          final vol = remainingSeconds.value / _fadeSeconds;
           _player.setVolume(vol.clamp(0.0, 1.0));
         }
       } else {
@@ -32,15 +52,18 @@ class SleepTimerController extends GetxController {
         _player.setVolume(1.0);
         isActive.value = false;
         isEndOfTrackMode.value = false;
+        totalSeconds.value = 0;
       }
     });
   }
 
   void startEndOfTrack() {
     cancelTimer(resetVolume: true);
+    _fadeSeconds = 0;
     isActive.value = true;
     isEndOfTrackMode.value = true;
     remainingSeconds.value = 0;
+    totalSeconds.value = 0;
 
     bool hasPaused = false;
 
@@ -77,6 +100,7 @@ class SleepTimerController extends GetxController {
     isActive.value = false;
     isEndOfTrackMode.value = false;
     remainingSeconds.value = 0;
+    totalSeconds.value = 0;
     if (resetVolume) {
       _player.setVolume(1.0);
     }

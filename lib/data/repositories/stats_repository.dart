@@ -10,7 +10,16 @@ abstract class StatsRepository {
   /// Her şarkı için çalınma sayısı. `songId -> playCount`.
   Future<Map<int, int>> getMostPlayedCounts({int limit = 100});
 
-  Future<PlayStatsModel> getStats();
+  /// [since] verilirse yalnızca bu andan sonraki çalmalar sayılır
+  /// (null: tüm zamanlar).
+  Future<PlayStatsModel> getStats({DateTime? since});
+
+  /// Son [window] içindeki çalmalar (en yeni önce). İstatistik sayfasının
+  /// "son çalınanlar" bölümü için zaman damgasıyla döner.
+  Future<List<RecentPlay>> getRecentPlays({
+    required Duration window,
+    int limit = 20,
+  });
 }
 
 class StatsRepositoryImpl implements StatsRepository {
@@ -58,18 +67,24 @@ class StatsRepositoryImpl implements StatsRepository {
   }
 
   @override
-  Future<PlayStatsModel> getStats() async {
+  Future<PlayStatsModel> getStats({DateTime? since}) async {
     final allHistory = await _historyDao.watchRecent(limit: 100000).first;
+    final rows = since == null
+        ? allHistory
+        : allHistory.where((h) => h.playedAt.isAfter(since)).toList();
     final allSongs = await _libraryRepo.songs();
     final songMap = {for (var s in allSongs) s.id: s};
 
-    final totalPlays = allHistory.length;
-    final uniqueSongsPlayed = allHistory.map((h) => h.songId).toSet().length;
+    final totalPlays = rows.length;
+    final uniqueSongsPlayed = rows.map((h) => h.songId).toSet().length;
 
     final artistCounts = <String, int>{};
     final genreCounts = <String, int>{};
+    final songCounts = <int, int>{};
+    final weekly = List<int>.filled(7, 0);
+    var listenMs = 0;
 
-    for (final play in allHistory) {
+    for (final play in rows) {
       final song = songMap[play.songId];
       if (song != null) {
         if (song.artist != null) {
@@ -78,18 +93,59 @@ class StatsRepositoryImpl implements StatsRepository {
         if (song.genre != null) {
           genreCounts[song.genre!] = (genreCounts[song.genre!] ?? 0) + 1;
         }
+        songCounts[song.id] = (songCounts[song.id] ?? 0) + 1;
+        listenMs += song.durationMs;
       }
+      // Dart weekday: 1 = Pazartesi ... 7 = Pazar -> 0 tabanlı indeks.
+      weekly[play.playedAt.weekday - 1]++;
     }
 
     final topArtists = _sortAndTakeTop(artistCounts, 5);
     final topGenres = _sortAndTakeTop(genreCounts, 5);
+
+    final topSongEntries = songCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final topSongs = <SongStatEntry>[];
+    for (final e in topSongEntries.take(5)) {
+      final song = songMap[e.key];
+      if (song != null) {
+        topSongs.add(SongStatEntry(song: song, playCount: e.value));
+      }
+    }
 
     return PlayStatsModel(
       totalPlays: totalPlays,
       uniqueSongsPlayed: uniqueSongsPlayed,
       topArtists: topArtists,
       topGenres: topGenres,
+      totalListenMs: listenMs,
+      weeklyCounts: weekly,
+      topSongs: topSongs,
     );
+  }
+
+  @override
+  Future<List<RecentPlay>> getRecentPlays({
+    required Duration window,
+    int limit = 20,
+  }) async {
+    final allHistory = await _historyDao.watchRecent(limit: limit * 3).first;
+    final cutoff = DateTime.now().subtract(window);
+    final songMap = <int, SongModel>{};
+    final result = <RecentPlay>[];
+    for (final row in allHistory) {
+      if (row.playedAt.isBefore(cutoff)) continue;
+      var song = songMap[row.songId];
+      if (song == null) {
+        final all = await _libraryRepo.songs();
+        songMap.addAll({for (var s in all) s.id: s});
+        song = songMap[row.songId];
+      }
+      if (song == null) continue;
+      result.add(RecentPlay(song: song, playedAt: row.playedAt));
+      if (result.length >= limit) break;
+    }
+    return result;
   }
 
   Map<String, int> _sortAndTakeTop(Map<String, int> counts, int limit) {

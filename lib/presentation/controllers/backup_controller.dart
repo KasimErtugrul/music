@@ -10,14 +10,44 @@ import 'package:resonance/data/models/backup_model.dart';
 import 'package:resonance/data/repositories/backup_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// İçe aktarma sonucu. UI, sürüm uyuşmazlığını kullanıcının görebileceği bir
+/// uyarıyla yüzeyler (şartname 7.13 uyumluluk banner'ı); artık sessiz
+/// geçiştirilmez.
+enum ImportStatus {
+  success,
+  versionMismatch,
+  cancelled,
+  failure,
+}
 
 class BackupController extends GetxController {
+  BackupController(this._repo, this._libraryRepo);
   final BackupRepository _repo;
   final LibraryRepository _libraryRepo;
 
-  BackupController(this._repo, this._libraryRepo);
-
   final isLoading = false.obs;
+
+  /// Son başarılı dışa aktarma zamanı (tasarımdaki "Son yedek" satırı).
+  final lastBackupAt = Rxn<DateTime>();
+
+  SharedPreferences? _prefs;
+  static const String _kLastBackup = 'last_backup_at';
+
+  @override
+  void onInit() {
+    super.onInit();
+    try {
+      _prefs = Get.find<SharedPreferences>();
+    } on Object {
+      _prefs = null;
+    }
+    final ms = _prefs?.getInt(_kLastBackup);
+    if (ms != null && ms > 0) {
+      lastBackupAt.value = DateTime.fromMillisecondsSinceEpoch(ms);
+    }
+  }
 
   Future<bool> exportData(AppLocalizations l10n) async {
     isLoading.value = true;
@@ -36,6 +66,7 @@ class BackupController extends GetxController {
           allowedExtensions: ['json'],
         );
         if (path != null) {
+          await _markBackupDone();
           isLoading.value = false;
           return true;
         }
@@ -49,6 +80,7 @@ class BackupController extends GetxController {
       await file.writeAsBytes(bytes, flush: true);
       debugPrint('Yedek şuraya yazıldı: ${file.path}');
 
+      await _markBackupDone();
       isLoading.value = false;
       return true;
     } catch (e) {
@@ -58,7 +90,10 @@ class BackupController extends GetxController {
     }
   }
 
-  Future<bool> importData(AppLocalizations l10n) async {
+  /// Kullanıcı dosya seçimi yaparsa ve içe aktarma tamamlanırsa
+  /// [ImportStatus.success] / sürüm uyuşmazsa [ImportStatus.versionMismatch]
+  /// döner. İptal ve hata ayrı durumlarla raporlanır; UI sessiz kalmaz.
+  Future<ImportStatus> importData(AppLocalizations l10n) async {
     isLoading.value = true;
     try {
       final files = await FilePicker.pickFiles(
@@ -67,13 +102,13 @@ class BackupController extends GetxController {
       );
       if (files.isEmpty) {
         isLoading.value = false;
-        return false;
+        return ImportStatus.cancelled;
       }
 
       final path = files.first.path;
       if (path == null) {
         isLoading.value = false;
-        return false;
+        return ImportStatus.cancelled;
       }
 
       final file = File(path);
@@ -81,15 +116,29 @@ class BackupController extends GetxController {
       final json = jsonDecode(content) as Map<String, dynamic>;
       final backup = BackupModel.fromJson(json);
 
+      final mismatch = backup.version != 1;
       await _repo.import(backup);
       await _libraryRepo.rescan();
 
       isLoading.value = false;
-      return true;
+      return mismatch ? ImportStatus.versionMismatch : ImportStatus.success;
     } catch (e) {
       debugPrint('Import error: $e');
       isLoading.value = false;
-      return false;
+      return ImportStatus.failure;
+    }
+  }
+
+  Future<void> _markBackupDone() async {
+    final now = DateTime.now();
+    lastBackupAt.value = now;
+    final prefs = _prefs;
+    if (prefs != null) {
+      try {
+        await prefs.setInt(_kLastBackup, now.millisecondsSinceEpoch);
+      } on Object {
+        // Kalıcılık başarısız olsa da oturumluk değer gösterilir.
+      }
     }
   }
 }

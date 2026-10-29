@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 import 'package:resonance/data/datasources/metadata_datasource.dart';
+import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/queue_state_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/equalizer_repository.dart';
@@ -11,6 +13,7 @@ import 'package:resonance/data/repositories/history_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
 import 'package:resonance/data/repositories/queue_state_repository.dart';
+import 'package:resonance/presentation/controllers/library_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 
 class PlayerController extends GetxController {
@@ -384,4 +387,51 @@ class PlayerController extends GetxController {
   }
 
   void clearError() => lastError.value = null;
+
+  /// Oynatıcı sayfasındaki sanatçı adına dokunulduğunda sanatçının tüm
+  /// şarkılarını gösteren [ArtistDetailPage]'e yönlendirir.
+  ///
+  /// Eşleştirme sırası: şarkının `artistId`'si ile kütüphane sanatçı
+  /// listesi → eşleşmezse ada (büyük/küçük harf duyarsız) → o da yoksa
+  /// sanatçı etiketsiz şarkılar için "bilinmeyen sanatçı" kovası.
+  /// Kütüphane denetleyicisi hazır değilse veya eşleşme bulunamazsa
+  /// sessizce no-op olur (ör. dış dosya oynatıcısından gelmişse).
+  void openArtistDetail() {
+    final song = currentSong;
+    if (song == null) return;
+    if (!Get.isRegistered<LibraryController>()) return;
+    final artists = Get.find<LibraryController>().artists;
+
+    ArtistModel? match;
+    final artistId = song.artistId;
+    if (artistId != null) {
+      for (final a in artists) {
+        if (a.id == artistId) {
+          match = a;
+          break;
+        }
+      }
+    }
+    final name = song.artist?.trim();
+    if (match == null && name != null && name.isNotEmpty) {
+      final lower = name.toLowerCase();
+      for (final a in artists) {
+        final n = a.name?.trim().toLowerCase();
+        if (n != null && n == lower) {
+          match = a;
+          break;
+        }
+      }
+    }
+    if (match == null && (name == null || name.isEmpty)) {
+      for (final a in artists) {
+        if (a.isUnknown) {
+          match = a;
+          break;
+        }
+      }
+    }
+    if (match == null) return;
+    Get.toNamed<dynamic>(AppRoutes.artistDetail, arguments: match);
+  }
 }

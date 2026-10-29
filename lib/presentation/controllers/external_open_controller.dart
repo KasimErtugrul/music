@@ -69,9 +69,11 @@ class ExternalOpenController extends GetxController {
 
       await _player.playSong(tempSong);
 
-      // PlayerPage'in gerçekten açıldığını doğrula
-      if (Get.currentRoute != AppRoutes.player) {
-        Get.offAllNamed(AppRoutes.player);
+      // Harici dosyanın özel oynatma ekranına geç (geçici SongModel
+      // argüman olarak taşınır; kütüphane kimliği olmadığı için favori/
+      // etiket akışları bu sayfada sunulmaz).
+      if (Get.currentRoute != AppRoutes.externalPlayer) {
+        Get.offAllNamed(AppRoutes.externalPlayer, arguments: tempSong);
       }
     } catch (e, st) {
       debugPrint('Harici dosya açılamadı: $e\n$st');

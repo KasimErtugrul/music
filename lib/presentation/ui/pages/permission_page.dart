@@ -224,6 +224,7 @@ class _MediaPermissionCard extends StatelessWidget {
           iconColor: theme.colorScheme.primary,
           iconBg: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
           title: l10n.permissionMediaTitle,
+          subtitle: l10n.permissionMediaSpec,
           description: l10n.permissionGrantedLabel,
           descriptionColor: theme.colorScheme.primary,
         );
@@ -252,6 +253,7 @@ class _MediaPermissionCard extends StatelessWidget {
         title: requested
             ? l10n.permissionDeniedTitle
             : l10n.permissionMediaTitle,
+        subtitle: requested ? null : l10n.permissionMediaSpec,
         titleColor: requested ? theme.colorScheme.error : null,
         description: requested
             ? l10n.permissionDeniedDescription
@@ -391,6 +393,7 @@ class _Card extends StatelessWidget {
     this.titleColor,
     this.descriptionColor,
     this.badge,
+    this.subtitle,
     this.trailing,
     this.action,
   });
@@ -403,6 +406,9 @@ class _Card extends StatelessWidget {
   final String description;
   final Color? descriptionColor;
   final String? badge;
+
+  /// Teknik etiket (ör. READ_MEDIA_AUDIO): başlığın altında küçük metin.
+  final String? subtitle;
   final Widget? trailing;
   final Widget? action;
 
@@ -466,6 +472,16 @@ class _Card extends StatelessWidget {
                         ],
                       ],
                     ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

@@ -1244,4 +1244,390 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonExport => 'Export';
+
+  @override
+  String hoursShort(int hours) {
+    return '$hours hr';
+  }
+
+  @override
+  String get queueLocalChip => 'On device';
+
+  @override
+  String queueSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0 • $duration';
+  }
+
+  @override
+  String get queueUpNextTitle => 'Up next';
+
+  @override
+  String get queueRemoveAction => 'Remove from queue';
+
+  @override
+  String get albumDetailTitle => 'Album Details';
+
+  @override
+  String get albumTracksTitle => 'Tracks';
+
+  @override
+  String get backupIncludedTitle => 'Included in the backup';
+
+  @override
+  String get backupIncludedSubtitle => 'Data exported to the backup file';
+
+  @override
+  String get backupItemPlaylists => 'Playlists';
+
+  @override
+  String get backupItemPlaylistsDesc => 'Your playlists and the songs in them';
+
+  @override
+  String get backupItemFavorites => 'Favorites';
+
+  @override
+  String get backupItemFavoritesDesc => 'Songs you marked as favorite';
+
+  @override
+  String get backupItemThemes => 'Custom themes';
+
+  @override
+  String get backupItemThemesDesc => 'Your created color and interface themes';
+
+  @override
+  String get backupItemEqualizer => 'Equalizer presets';
+
+  @override
+  String get backupItemEqualizerDesc => 'Custom EQ and DSP sound profiles';
+
+  @override
+  String get backupItemSettings => 'App & player settings';
+
+  @override
+  String get backupItemSettingsDesc =>
+      'Preferences, language and audio configuration';
+
+  @override
+  String get backupCreateFileTitle => 'Create backup file';
+
+  @override
+  String get backupFormatNote => 'Format: .json';
+
+  @override
+  String backupLastExport(String date) {
+    return 'Last backup: $date';
+  }
+
+  @override
+  String get backupRestorePickFile => 'Pick a file and restore';
+
+  @override
+  String get searchFilterAll => 'All';
+
+  @override
+  String searchResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results found',
+      one: '1 result found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchHistoryTitle => 'Recent searches';
+
+  @override
+  String get permissionMediaSpec => 'READ_MEDIA_AUDIO';
+
+  @override
+  String get folderHierarchyLabel => 'Directory hierarchy';
+
+  @override
+  String get folderPlay => 'Play folder';
+
+  @override
+  String get folderHide => 'Hide';
+
+  @override
+  String get folderHideConfirm =>
+      'This folder will be excluded from library scans. Continue?';
+
+  @override
+  String get folderHiddenToast => 'Folder hidden from library';
+
+  @override
+  String get folderUndo => 'Undo';
+
+  @override
+  String folderSummary(int folders, int songs, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      folders,
+      locale: localeName,
+      other: '$folders folders',
+      one: '1 folder',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      songs,
+      locale: localeName,
+      other: '$songs songs',
+      one: '1 song',
+    );
+    return '$_temp0 • $_temp1 • $duration';
+  }
+
+  @override
+  String get genreDetailTitle => 'Genre Details';
+
+  @override
+  String get genrePlayAll => 'Play Genre Tracks';
+
+  @override
+  String get genreAlbumsTitle => 'Albums in This Genre';
+
+  @override
+  String get artistProfileTitle => 'Artist Profile';
+
+  @override
+  String get artistPopularTitle => 'Popular Songs';
+
+  @override
+  String get artistMostPlayedHint => 'Most played';
+
+  @override
+  String get artistAlbumsTitle => 'Albums';
+
+  @override
+  String get artistSimilarTitle => 'Similar Local Artists';
+
+  @override
+  String get artistSimilarHint => 'From your library';
+
+  @override
+  String get artistOfflineNote =>
+      'All tracks by this artist are stored on your device, fully offline.';
+
+  @override
+  String get statsPeriodWeek => 'This Week';
+
+  @override
+  String get statsPeriodMonth => 'This Month';
+
+  @override
+  String get statsPeriodAll => 'All Time';
+
+  @override
+  String get statsTotalListen => 'Total Listening Time';
+
+  @override
+  String get statsWeeklyChart => 'Listening Habits';
+
+  @override
+  String statsWeeklyPeak(String day, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plays',
+      one: '1 play',
+    );
+    return 'Weekly peak: $day ($_temp0)';
+  }
+
+  @override
+  String get statsDayMon => 'Mon';
+
+  @override
+  String get statsDayTue => 'Tue';
+
+  @override
+  String get statsDayWed => 'Wed';
+
+  @override
+  String get statsDayThu => 'Thu';
+
+  @override
+  String get statsDayFri => 'Fri';
+
+  @override
+  String get statsDaySat => 'Sat';
+
+  @override
+  String get statsDaySun => 'Sun';
+
+  @override
+  String statsSharePct(int pct) {
+    return '%$pct share';
+  }
+
+  @override
+  String get statsTopTracks => 'Most Played Songs';
+
+  @override
+  String get statsRecent24h => 'Recently Played';
+
+  @override
+  String get statsRelNow => 'just now';
+
+  @override
+  String statsRelMinutes(int n) {
+    return '$n min ago';
+  }
+
+  @override
+  String statsRelHours(int n) {
+    return '$n h ago';
+  }
+
+  @override
+  String get statsPrivacyTitle => 'Local & Private';
+
+  @override
+  String get statsPrivacyBody =>
+      'All statistics are stored locally on your device; no data is ever uploaded.';
+
+  @override
+  String get optionsQueuedNext => 'Added to play next';
+
+  @override
+  String get optionsAddedToQueue => 'Added to queue';
+
+  @override
+  String get optionsFavAdded => 'Added to favorites';
+
+  @override
+  String get optionsFavRemoved => 'Removed from favorites';
+
+  @override
+  String get optionsShareHint => 'Share the file directly';
+
+  @override
+  String get optionsMetaTitle => 'Detailed File Info';
+
+  @override
+  String get optionsMetaFormat => 'Format';
+
+  @override
+  String get commonCopy => 'Copy';
+
+  @override
+  String get optionsPathCopied => 'File path copied to clipboard';
+
+  @override
+  String get sleepPresetsTitle => 'Preset Durations';
+
+  @override
+  String get sleepCustomChip => 'Custom';
+
+  @override
+  String get sleepCustomTitle => 'Custom Duration';
+
+  @override
+  String get sleepStartAction => 'Start Timer';
+
+  @override
+  String get sleepTimerActiveNote =>
+      'Music will fade out softly and stop when the timer ends.';
+
+  @override
+  String get sleepStopAction => 'Stop Timer';
+
+  @override
+  String get sleepFadeTitle => 'Fade Out';
+
+  @override
+  String get sleepFadeDesc =>
+      'Lower the volume gradually so sleep is not disturbed.';
+
+  @override
+  String get sleepFadeWindow => 'Fade Window';
+
+  @override
+  String get notifPermissionHint =>
+      'Notifications let the player show media controls and the sleep timer status outside the app.';
+
+  @override
+  String get sleepTimerEndOfTrackDesc =>
+      'Playback ends gently when the current track finishes.';
+
+  @override
+  String get externalTitle => 'External File';
+
+  @override
+  String get externalTempNote => 'Temporary source';
+
+  @override
+  String get externalSourceBadge => 'External Source';
+
+  @override
+  String get externalSpecsTitle => 'Audio Stream Properties';
+
+  @override
+  String get externalAddLibrary => 'Add to Library';
+
+  @override
+  String get externalScanDone => 'Library scan finished';
+
+  @override
+  String get settingsRowNotifications => 'Notifications & Lock Screen';
+
+  @override
+  String get settingsDescNotifications =>
+      'Media notification and lock screen preview';
+
+  @override
+  String get notifPreviewIntro =>
+      'Android draws the media notification itself; this preview reflects your real playback state.';
+
+  @override
+  String get notifSleepActive => 'Sleep Timer Active';
+
+  @override
+  String notifSleepFadesIn(String time) {
+    return 'Audio fades out in $time';
+  }
+
+  @override
+  String get notifSleepHint => 'Set a sleep timer to fade playback gently.';
+
+  @override
+  String get previousTrack => 'Previous track';
+
+  @override
+  String get nextTrack => 'Next track';
+
+  @override
+  String get stateFoldersAction => 'Add Folders / Check Permissions';
+
+  @override
+  String get statePathHintTitle => 'Recommended download path';
+
+  @override
+  String get stateFormatsTitle => 'Supported Offline Formats';
+
+  @override
+  String get stateNoLyricsTitle => 'No Lyrics Found';
+
+  @override
+  String get stateNoLyricsMessage =>
+      'Lyrics display is not available in this version yet.';
+
+  @override
+  String get stateSuggestedLabel => 'Suggested artists';
+
+  @override
+  String get widgetPreviewLabel => 'Live preview';
+
+  @override
+  String get widgetSizeBadge => '4 × 1';
+
+  @override
+  String get widgetNativeNote =>
+      'The widget is drawn by the Android launcher via RemoteViews; changes apply within a few seconds.';
 }

@@ -10,9 +10,12 @@ import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/home_controller.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
+import 'package:resonance/presentation/controllers/permission_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/ui/pages/smart_playlist_detail_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/library_settings_page.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
+import 'package:resonance/presentation/ui/widgets/state_views.dart';
 
 class HomeTabContent extends StatelessWidget {
   const HomeTabContent({super.key});
@@ -44,7 +47,22 @@ class HomeTabContent extends StatelessWidget {
           return const _LoadingView();
         }
         if (libCtrl.songs.isEmpty) {
-          return _EmptyState(libCtrl: libCtrl);
+          // Şartname 6.2 / 6.4: izin yoksa hata kartı, izin varsa boş
+          // kütüphane görünümü. Her iki görünüm de gerçek eylemlere bağlıdır.
+          final perm = Get.find<PermissionController>();
+          if (!perm.media.value.isGranted) {
+            return PermissionDeniedView(
+              onOpenSettings: perm.openSettings,
+              onRetry: perm.checkAndRoute,
+            );
+          }
+          return EmptyLibraryView(
+            onScan: () async {
+              await libCtrl.refresh();
+              await homeCtrl.loadAll();
+            },
+            onFolders: () => Get.to<void>(() => const LibrarySettingsPage()),
+          );
         }
 
         return RefreshIndicator(
@@ -888,7 +906,7 @@ class _AlbumCarousel extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: albums.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, i) {
               final album = albums[i];
               return SizedBox(
@@ -1000,7 +1018,7 @@ class _SongRowSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: songs.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, i) => _SongCard(
               song: songs[i],
               queue: songs,
@@ -1200,7 +1218,7 @@ class _ArtistCarousel extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: artists.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (_, _) => const SizedBox(width: 16),
             itemBuilder: (context, i) {
               final artist = artists[i];
               return SizedBox(
@@ -1244,65 +1262,3 @@ class _ArtistCarousel extends StatelessWidget {
   }
 }
 
-// ========== EMPTY STATE ==========
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.libCtrl});
-  final LibraryController libCtrl;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.25),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.album,
-                size: 64,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              l10n.homeEmptyTitle,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.6,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.homeEmptyMessage,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: libCtrl.refresh,
-              icon: const Icon(Icons.folder_open),
-              label: Text(l10n.homeScanAndStart),
-              style: FilledButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

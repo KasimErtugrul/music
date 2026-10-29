@@ -2383,6 +2383,654 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Export'**
   String get commonExport;
+
+  /// No description provided for @hoursShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hr'**
+  String hoursShort(int hours);
+
+  /// No description provided for @queueLocalChip.
+  ///
+  /// In en, this message translates to:
+  /// **'On device'**
+  String get queueLocalChip;
+
+  /// No description provided for @queueSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 song} other{{count} songs}} • {duration}'**
+  String queueSummary(int count, String duration);
+
+  /// No description provided for @queueUpNextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Up next'**
+  String get queueUpNextTitle;
+
+  /// No description provided for @queueRemoveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from queue'**
+  String get queueRemoveAction;
+
+  /// No description provided for @albumDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Album Details'**
+  String get albumDetailTitle;
+
+  /// No description provided for @albumTracksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracks'**
+  String get albumTracksTitle;
+
+  /// No description provided for @backupIncludedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Included in the backup'**
+  String get backupIncludedTitle;
+
+  /// No description provided for @backupIncludedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data exported to the backup file'**
+  String get backupIncludedSubtitle;
+
+  /// No description provided for @backupItemPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists'**
+  String get backupItemPlaylists;
+
+  /// No description provided for @backupItemPlaylistsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your playlists and the songs in them'**
+  String get backupItemPlaylistsDesc;
+
+  /// No description provided for @backupItemFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get backupItemFavorites;
+
+  /// No description provided for @backupItemFavoritesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs you marked as favorite'**
+  String get backupItemFavoritesDesc;
+
+  /// No description provided for @backupItemThemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom themes'**
+  String get backupItemThemes;
+
+  /// No description provided for @backupItemThemesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your created color and interface themes'**
+  String get backupItemThemesDesc;
+
+  /// No description provided for @backupItemEqualizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Equalizer presets'**
+  String get backupItemEqualizer;
+
+  /// No description provided for @backupItemEqualizerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom EQ and DSP sound profiles'**
+  String get backupItemEqualizerDesc;
+
+  /// No description provided for @backupItemSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'App & player settings'**
+  String get backupItemSettings;
+
+  /// No description provided for @backupItemSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences, language and audio configuration'**
+  String get backupItemSettingsDesc;
+
+  /// No description provided for @backupCreateFileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create backup file'**
+  String get backupCreateFileTitle;
+
+  /// No description provided for @backupFormatNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Format: .json'**
+  String get backupFormatNote;
+
+  /// No description provided for @backupLastExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {date}'**
+  String backupLastExport(String date);
+
+  /// No description provided for @backupRestorePickFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a file and restore'**
+  String get backupRestorePickFile;
+
+  /// No description provided for @searchFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get searchFilterAll;
+
+  /// No description provided for @searchResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result found} other{{count} results found}}'**
+  String searchResultCount(int count);
+
+  /// No description provided for @searchHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent searches'**
+  String get searchHistoryTitle;
+
+  /// No description provided for @permissionMediaSpec.
+  ///
+  /// In en, this message translates to:
+  /// **'READ_MEDIA_AUDIO'**
+  String get permissionMediaSpec;
+
+  /// No description provided for @folderHierarchyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Directory hierarchy'**
+  String get folderHierarchyLabel;
+
+  /// No description provided for @folderPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play folder'**
+  String get folderPlay;
+
+  /// No description provided for @folderHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get folderHide;
+
+  /// No description provided for @folderHideConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder will be excluded from library scans. Continue?'**
+  String get folderHideConfirm;
+
+  /// No description provided for @folderHiddenToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder hidden from library'**
+  String get folderHiddenToast;
+
+  /// No description provided for @folderUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get folderUndo;
+
+  /// No description provided for @folderSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{folders, plural, =1{1 folder} other{{folders} folders}} • {songs, plural, =1{1 song} other{{songs} songs}} • {duration}'**
+  String folderSummary(int folders, int songs, String duration);
+
+  /// No description provided for @genreDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Genre Details'**
+  String get genreDetailTitle;
+
+  /// No description provided for @genrePlayAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Genre Tracks'**
+  String get genrePlayAll;
+
+  /// No description provided for @genreAlbumsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Albums in This Genre'**
+  String get genreAlbumsTitle;
+
+  /// No description provided for @artistProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist Profile'**
+  String get artistProfileTitle;
+
+  /// No description provided for @artistPopularTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Songs'**
+  String get artistPopularTitle;
+
+  /// No description provided for @artistMostPlayedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Most played'**
+  String get artistMostPlayedHint;
+
+  /// No description provided for @artistAlbumsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Albums'**
+  String get artistAlbumsTitle;
+
+  /// No description provided for @artistSimilarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar Local Artists'**
+  String get artistSimilarTitle;
+
+  /// No description provided for @artistSimilarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'From your library'**
+  String get artistSimilarHint;
+
+  /// No description provided for @artistOfflineNote.
+  ///
+  /// In en, this message translates to:
+  /// **'All tracks by this artist are stored on your device, fully offline.'**
+  String get artistOfflineNote;
+
+  /// No description provided for @statsPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get statsPeriodWeek;
+
+  /// No description provided for @statsPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get statsPeriodMonth;
+
+  /// No description provided for @statsPeriodAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All Time'**
+  String get statsPeriodAll;
+
+  /// No description provided for @statsTotalListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Listening Time'**
+  String get statsTotalListen;
+
+  /// No description provided for @statsWeeklyChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening Habits'**
+  String get statsWeeklyChart;
+
+  /// No description provided for @statsWeeklyPeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly peak: {day} ({count, plural, =1{1 play} other{{count} plays}})'**
+  String statsWeeklyPeak(String day, int count);
+
+  /// No description provided for @statsDayMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get statsDayMon;
+
+  /// No description provided for @statsDayTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get statsDayTue;
+
+  /// No description provided for @statsDayWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get statsDayWed;
+
+  /// No description provided for @statsDayThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get statsDayThu;
+
+  /// No description provided for @statsDayFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get statsDayFri;
+
+  /// No description provided for @statsDaySat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get statsDaySat;
+
+  /// No description provided for @statsDaySun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get statsDaySun;
+
+  /// No description provided for @statsSharePct.
+  ///
+  /// In en, this message translates to:
+  /// **'%{pct} share'**
+  String statsSharePct(int pct);
+
+  /// No description provided for @statsTopTracks.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played Songs'**
+  String get statsTopTracks;
+
+  /// No description provided for @statsRecent24h.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Played'**
+  String get statsRecent24h;
+
+  /// No description provided for @statsRelNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get statsRelNow;
+
+  /// No description provided for @statsRelMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min ago'**
+  String statsRelMinutes(int n);
+
+  /// No description provided for @statsRelHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} h ago'**
+  String statsRelHours(int n);
+
+  /// No description provided for @statsPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Local & Private'**
+  String get statsPrivacyTitle;
+
+  /// No description provided for @statsPrivacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All statistics are stored locally on your device; no data is ever uploaded.'**
+  String get statsPrivacyBody;
+
+  /// No description provided for @optionsQueuedNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to play next'**
+  String get optionsQueuedNext;
+
+  /// No description provided for @optionsAddedToQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to queue'**
+  String get optionsAddedToQueue;
+
+  /// No description provided for @optionsFavAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get optionsFavAdded;
+
+  /// No description provided for @optionsFavRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get optionsFavRemoved;
+
+  /// No description provided for @optionsShareHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share the file directly'**
+  String get optionsShareHint;
+
+  /// No description provided for @optionsMetaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed File Info'**
+  String get optionsMetaTitle;
+
+  /// No description provided for @optionsMetaFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get optionsMetaFormat;
+
+  /// No description provided for @commonCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get commonCopy;
+
+  /// No description provided for @optionsPathCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'File path copied to clipboard'**
+  String get optionsPathCopied;
+
+  /// No description provided for @sleepPresetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset Durations'**
+  String get sleepPresetsTitle;
+
+  /// No description provided for @sleepCustomChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get sleepCustomChip;
+
+  /// No description provided for @sleepCustomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Duration'**
+  String get sleepCustomTitle;
+
+  /// No description provided for @sleepStartAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Timer'**
+  String get sleepStartAction;
+
+  /// No description provided for @sleepTimerActiveNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Music will fade out softly and stop when the timer ends.'**
+  String get sleepTimerActiveNote;
+
+  /// No description provided for @sleepStopAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Timer'**
+  String get sleepStopAction;
+
+  /// No description provided for @sleepFadeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fade Out'**
+  String get sleepFadeTitle;
+
+  /// No description provided for @sleepFadeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower the volume gradually so sleep is not disturbed.'**
+  String get sleepFadeDesc;
+
+  /// No description provided for @sleepFadeWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Fade Window'**
+  String get sleepFadeWindow;
+
+  /// No description provided for @notifPermissionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications let the player show media controls and the sleep timer status outside the app.'**
+  String get notifPermissionHint;
+
+  /// No description provided for @sleepTimerEndOfTrackDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback ends gently when the current track finishes.'**
+  String get sleepTimerEndOfTrackDesc;
+
+  /// No description provided for @externalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'External File'**
+  String get externalTitle;
+
+  /// No description provided for @externalTempNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary source'**
+  String get externalTempNote;
+
+  /// No description provided for @externalSourceBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'External Source'**
+  String get externalSourceBadge;
+
+  /// No description provided for @externalSpecsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Stream Properties'**
+  String get externalSpecsTitle;
+
+  /// No description provided for @externalAddLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Library'**
+  String get externalAddLibrary;
+
+  /// No description provided for @externalScanDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Library scan finished'**
+  String get externalScanDone;
+
+  /// No description provided for @settingsRowNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications & Lock Screen'**
+  String get settingsRowNotifications;
+
+  /// No description provided for @settingsDescNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Media notification and lock screen preview'**
+  String get settingsDescNotifications;
+
+  /// No description provided for @notifPreviewIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Android draws the media notification itself; this preview reflects your real playback state.'**
+  String get notifPreviewIntro;
+
+  /// No description provided for @notifSleepActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Timer Active'**
+  String get notifSleepActive;
+
+  /// No description provided for @notifSleepFadesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio fades out in {time}'**
+  String notifSleepFadesIn(String time);
+
+  /// No description provided for @notifSleepHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a sleep timer to fade playback gently.'**
+  String get notifSleepHint;
+
+  /// No description provided for @previousTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous track'**
+  String get previousTrack;
+
+  /// No description provided for @nextTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Next track'**
+  String get nextTrack;
+
+  /// No description provided for @stateFoldersAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Folders / Check Permissions'**
+  String get stateFoldersAction;
+
+  /// No description provided for @statePathHintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended download path'**
+  String get statePathHintTitle;
+
+  /// No description provided for @stateFormatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported Offline Formats'**
+  String get stateFormatsTitle;
+
+  /// No description provided for @stateNoLyricsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Lyrics Found'**
+  String get stateNoLyricsTitle;
+
+  /// No description provided for @stateNoLyricsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics display is not available in this version yet.'**
+  String get stateNoLyricsMessage;
+
+  /// No description provided for @stateSuggestedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested artists'**
+  String get stateSuggestedLabel;
+
+  /// No description provided for @widgetPreviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Live preview'**
+  String get widgetPreviewLabel;
+
+  /// No description provided for @widgetSizeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'4 × 1'**
+  String get widgetSizeBadge;
+
+  /// No description provided for @widgetNativeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The widget is drawn by the Android launcher via RemoteViews; changes apply within a few seconds.'**
+  String get widgetNativeNote;
 }
 
 class _AppLocalizationsDelegate
