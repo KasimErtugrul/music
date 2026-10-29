@@ -1664,4 +1664,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autoFolders => 'Folders';
+
+  @override
+  String get autoBackupSectionTitle => 'Automatic backup';
+
+  @override
+  String get autoBackupSectionDesc =>
+      'Your playlists, favorites, themes, equalizer presets and settings are backed up to the app folder on a schedule. Audio files are not included.';
+
+  @override
+  String get autoBackupSwitch => 'Back up automatically';
+
+  @override
+  String get autoBackupFrequencyLabel => 'Frequency';
+
+  @override
+  String get autoBackupDaily => 'Daily';
+
+  @override
+  String get autoBackupWeekly => 'Weekly';
+
+  @override
+  String get autoBackupKeep => 'Backups to keep';
+
+  @override
+  String get autoBackupRunNow => 'Back up now';
+
+  @override
+  String autoBackupLastRun(String time) {
+    return 'Last automatic backup: $time';
+  }
+
+  @override
+  String get autoBackupNeverRun => 'No automatic backup yet';
+
+  @override
+  String get autoBackupListTitle => 'Stored backups';
+
+  @override
+  String get autoBackupEmpty => 'No stored backups yet';
+
+  @override
+  String get autoBackupRestoreConfirmTitle => 'Restore this backup?';
+
+  @override
+  String autoBackupRestoreConfirmMessage(String time) {
+    return 'Current playlists, favorites, themes, equalizer presets and settings will be replaced with the backup from $time. This cannot be undone.';
+  }
+
+  @override
+  String get autoBackupRestoreDone => 'Backup restored';
+
+  @override
+  String get autoBackupRestoreError => 'Restore failed';
+
+  @override
+  String get autoBackupDeleteConfirmTitle => 'Delete this backup?';
+
+  @override
+  String get autoBackupDeleteConfirmMessage =>
+      'The backup file will be permanently removed.';
+
+  @override
+  String get autoBackupDelete => 'Delete';
+
+  @override
+  String get autoBackupDeleteDone => 'Backup deleted';
+
+  @override
+  String get autoBackupRunDone => 'Automatic backup created';
+
+  @override
+  String get autoBackupRunError => 'Backup failed';
+
+  @override
+  String autoBackupSize(int kb) {
+    return '$kb KB';
+  }
 }

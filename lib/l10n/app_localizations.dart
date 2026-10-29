@@ -3097,6 +3097,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Folders'**
   String get autoFolders;
+
+  /// No description provided for @autoBackupSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backup'**
+  String get autoBackupSectionTitle;
+
+  /// No description provided for @autoBackupSectionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your playlists, favorites, themes, equalizer presets and settings are backed up to the app folder on a schedule. Audio files are not included.'**
+  String get autoBackupSectionDesc;
+
+  /// No description provided for @autoBackupSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up automatically'**
+  String get autoBackupSwitch;
+
+  /// No description provided for @autoBackupFrequencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get autoBackupFrequencyLabel;
+
+  /// No description provided for @autoBackupDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get autoBackupDaily;
+
+  /// No description provided for @autoBackupWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get autoBackupWeekly;
+
+  /// No description provided for @autoBackupKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups to keep'**
+  String get autoBackupKeep;
+
+  /// No description provided for @autoBackupRunNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up now'**
+  String get autoBackupRunNow;
+
+  /// No description provided for @autoBackupLastRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Last automatic backup: {time}'**
+  String autoBackupLastRun(String time);
+
+  /// No description provided for @autoBackupNeverRun.
+  ///
+  /// In en, this message translates to:
+  /// **'No automatic backup yet'**
+  String get autoBackupNeverRun;
+
+  /// No description provided for @autoBackupListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored backups'**
+  String get autoBackupListTitle;
+
+  /// No description provided for @autoBackupEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No stored backups yet'**
+  String get autoBackupEmpty;
+
+  /// No description provided for @autoBackupRestoreConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore this backup?'**
+  String get autoBackupRestoreConfirmTitle;
+
+  /// No description provided for @autoBackupRestoreConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Current playlists, favorites, themes, equalizer presets and settings will be replaced with the backup from {time}. This cannot be undone.'**
+  String autoBackupRestoreConfirmMessage(String time);
+
+  /// No description provided for @autoBackupRestoreDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored'**
+  String get autoBackupRestoreDone;
+
+  /// No description provided for @autoBackupRestoreError.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed'**
+  String get autoBackupRestoreError;
+
+  /// No description provided for @autoBackupDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this backup?'**
+  String get autoBackupDeleteConfirmTitle;
+
+  /// No description provided for @autoBackupDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup file will be permanently removed.'**
+  String get autoBackupDeleteConfirmMessage;
+
+  /// No description provided for @autoBackupDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get autoBackupDelete;
+
+  /// No description provided for @autoBackupDeleteDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup deleted'**
+  String get autoBackupDeleteDone;
+
+  /// No description provided for @autoBackupRunDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backup created'**
+  String get autoBackupRunDone;
+
+  /// No description provided for @autoBackupRunError.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed'**
+  String get autoBackupRunError;
+
+  /// No description provided for @autoBackupSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{kb} KB'**
+  String autoBackupSize(int kb);
 }
 
 class _AppLocalizationsDelegate

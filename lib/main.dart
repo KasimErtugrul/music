@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
@@ -17,6 +18,7 @@ import 'package:resonance/data/repositories/settings_repository.dart';
 import 'package:resonance/data/repositories/theme_repository.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/auto_backup_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
 import 'package:resonance/presentation/controllers/sleep_timer_controller.dart';
@@ -156,6 +158,11 @@ Future<void> main() async {
       ),
       permanent: true,
     );
+
+    // Aşama 6: otomatik yedekleme zamanlayıcısı. Açılışı BLOKLAMAZ;
+    // ilk açılışta hemen, sonrasında sıklık süresi (günlük/haftalık) dolduğunda
+    // arka planda yedek alır. Hata fırlatmaz.
+    unawaited(Get.find<AutoBackupController>().ensureScheduledBackup());
 
     runApp(const ResonanceApp());
   } catch (e, st) {

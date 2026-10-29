@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/backup_controller.dart';
+import 'package:resonance/presentation/ui/widgets/auto_backup_section.dart';
 
 /// Yedekleme ve geri yükleme — M3 tasarım güncellemesi:
 /// - Üstte kapsam bilgi kartı (açıklama + "ses dosyaları dahil değildir" notu)
@@ -86,6 +87,10 @@ class BackupPage extends StatelessWidget {
 
             // --- Yedeğe dahil edilenler (gerçek kapsam) ---
             _IncludedCard(),
+            const SizedBox(height: 16),
+
+            // --- Otomatik yedekleme (Aşama 6) ---
+            const AutoBackupSection(),
             const SizedBox(height: 16),
 
             // --- Dışa Aktar ---

@@ -1660,4 +1660,81 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get autoFolders => 'Klasörler';
+
+  @override
+  String get autoBackupSectionTitle => 'Otomatik yedekleme';
+
+  @override
+  String get autoBackupSectionDesc =>
+      'Çalma listeleriniz, favorileriniz, temalarınız, ekolayzır ayarlarınız ve ayarlarınız belirli aralıklarla uygulama klasörüne yedeklenir. Ses dosyaları dahil değildir.';
+
+  @override
+  String get autoBackupSwitch => 'Otomatik yedekle';
+
+  @override
+  String get autoBackupFrequencyLabel => 'Sıklık';
+
+  @override
+  String get autoBackupDaily => 'Günlük';
+
+  @override
+  String get autoBackupWeekly => 'Haftalık';
+
+  @override
+  String get autoBackupKeep => 'Saklanacak yedek';
+
+  @override
+  String get autoBackupRunNow => 'Şimdi yedekle';
+
+  @override
+  String autoBackupLastRun(String time) {
+    return 'Son otomatik yedek: $time';
+  }
+
+  @override
+  String get autoBackupNeverRun => 'Henüz otomatik yedek yok';
+
+  @override
+  String get autoBackupListTitle => 'Kayıtlı yedekler';
+
+  @override
+  String get autoBackupEmpty => 'Kayıtlı yedek yok';
+
+  @override
+  String get autoBackupRestoreConfirmTitle => 'Bu yedek geri yüklensin mi?';
+
+  @override
+  String autoBackupRestoreConfirmMessage(String time) {
+    return 'Mevcut çalma listeleri, favoriler, temalar, ekolayzır ayarları ve ayarlar $time tarihindeki yedekle değiştirilecek. Bu işlem geri alınamaz.';
+  }
+
+  @override
+  String get autoBackupRestoreDone => 'Yedek geri yüklendi';
+
+  @override
+  String get autoBackupRestoreError => 'Geri yükleme başarısız';
+
+  @override
+  String get autoBackupDeleteConfirmTitle => 'Bu yedek silinsin mi?';
+
+  @override
+  String get autoBackupDeleteConfirmMessage =>
+      'Yedek dosyası kalıcı olarak silinecek.';
+
+  @override
+  String get autoBackupDelete => 'Sil';
+
+  @override
+  String get autoBackupDeleteDone => 'Yedek silindi';
+
+  @override
+  String get autoBackupRunDone => 'Otomatik yedek oluşturuldu';
+
+  @override
+  String get autoBackupRunError => 'Yedekleme başarısız';
+
+  @override
+  String autoBackupSize(int kb) {
+    return '$kb KB';
+  }
 }
