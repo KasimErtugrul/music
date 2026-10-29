@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:resonance/core/utils/permission_helper.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
+import 'package:resonance/data/datasources/audio_format_datasource.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
 import 'package:resonance/data/datasources/device_media_datasource.dart';
 import 'package:resonance/data/datasources/equalizer_datasource.dart';
@@ -129,6 +130,7 @@ class InitialBinding extends Bindings {
       permanent: true,
     );
     Get.put<MetadataDatasource>(MetadataDatasource(), permanent: true);
+    Get.put<AudioFormatDatasource>(AudioFormatDatasource(), permanent: true);
     Get.put<TagEditorRepository>(
       TagEditorRepositoryImpl(Get.find<MetadataDatasource>()),
       permanent: true,

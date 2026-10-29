@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
+import 'package:resonance/data/datasources/audio_format_datasource.dart';
 import 'package:resonance/data/datasources/metadata_datasource.dart';
 import 'package:resonance/data/models/album_model.dart';
+import 'package:resonance/data/models/audio_format_info.dart';
 import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/queue_state_model.dart';
 import 'package:resonance/data/models/song_model.dart';
@@ -60,6 +62,12 @@ class PlayerController extends GetxController {
   // engeller.
   String? _replayGainAppliedUri;
 
+  // Aşama 2: format rozeti. Şarkı başına bir kez başlık okunur, sonuç
+  // önbelleğe alınır; kuyruk içi geçişlerde cache isabeti kullanılır.
+  // Bilgi okunamazsa null kalır ve rozet gizlenir.
+  final formatInfo = Rxn<AudioFormatInfo>();
+  final Map<int, AudioFormatInfo?> _formatCache = <int, AudioFormatInfo?>{};
+
 
 
   SongModel? get currentSong {
@@ -83,6 +91,10 @@ class PlayerController extends GetxController {
     _repository.mediaItemStream.listen((item) {
       if (currentItem.value?.id != item?.id) {
         _loggedSongUri = null;
+        // Şarkı değişti: eski rozet anında gizlenir, yenisi arka planda
+        // okunur (önbellek isabetiyle anında gelir).
+        formatInfo.value = null;
+        unawaited(_updateFormatInfo());
       }
       currentItem.value = item;
 
@@ -478,5 +490,92 @@ class PlayerController extends GetxController {
     }
     if (match == null) return;
     Get.toNamed<dynamic>(AppRoutes.albumDetail, arguments: match);
+  }
+
+  /// Şu an çalan şarkının format bilgisini okur (önbellekli).
+  /// Oynatıcı sayfasındaki format rozetini besler; okuma başarısızsa
+  /// rozet gizlenir, asla çalmayı etkilemez.
+  Future<void> _updateFormatInfo() async {
+    final song = currentSong;
+    if (song == null) {
+      formatInfo.value = null;
+      return;
+    }
+    if (_formatCache.containsKey(song.id)) {
+      formatInfo.value = _formatCache[song.id];
+      return;
+    }
+    AudioFormatInfo? info;
+    try {
+      info = await Get.find<AudioFormatDatasource>().read(song.path);
+    } on Object {
+      info = null; // Datasource kayıtlı değil veya okuma patladı → rozet yok.
+    }
+    info = _fallbackEnrich(song, info);
+    _formatCache[song.id] = info;
+    // Okuma sürerken şarkı değişmişse eski şarkıya yazma.
+    if (currentSong?.id == song.id) {
+      formatInfo.value = info;
+    }
+  }
+
+  /// Başlıktan okunan bilgiyi zenginleştirir:
+  /// - Hiç bilgi yoksa uzantıdan codec tahmini (FLAC/MP3/AAC...)
+  /// - Bit hızı yoksa boyut/süreOranı'ndan ortalama kbps
+  AudioFormatInfo? _fallbackEnrich(SongModel song, AudioFormatInfo? info) {
+    final avgKbps = song.durationMs > 0
+        ? (song.sizeBytes * 8 / song.durationMs).round()
+        : 0;
+    if (info == null) {
+      final codec = _codecFromExtension(
+        song.path.isNotEmpty ? song.path : song.uri,
+      );
+      if (codec == null) return null;
+      final lossless = const {'flac', 'wav', 'aiff', 'ape', 'alac'}
+          .contains(codec.toLowerCase());
+      return AudioFormatInfo(
+        codec: codec,
+        bitrateKbps: avgKbps > 0 ? avgKbps : null,
+        lossless: lossless,
+      );
+    }
+    if (info.bitrateKbps == null && avgKbps > 0) {
+      return info.copyWith(bitrateKbps: avgKbps);
+    }
+    return info;
+  }
+
+  /// Uzantıdan kısa codec etiketi; tanınmayan uzantıda null.
+  static String? _codecFromExtension(String pathOrUri) {
+    final clean = pathOrUri.split('?').first;
+    final dot = clean.lastIndexOf('.');
+    if (dot < 0 || dot == clean.length - 1) return null;
+    switch (clean.substring(dot + 1).toLowerCase()) {
+      case 'flac':
+        return 'FLAC';
+      case 'mp3':
+        return 'MP3';
+      case 'm4a':
+      case 'mp4':
+      case 'm4b':
+      case 'aac':
+        return 'AAC';
+      case 'ogg':
+      case 'oga':
+        return 'OGG';
+      case 'opus':
+        return 'Opus';
+      case 'wav':
+        return 'WAV';
+      case 'aiff':
+      case 'aif':
+        return 'AIFF';
+      case 'wv':
+        return 'WavPack';
+      case 'ape':
+        return 'APE';
+      default:
+        return null;
+    }
   }
 }

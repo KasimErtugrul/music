@@ -190,6 +190,9 @@ class PlayerPage extends GetView<PlayerController> {
                       final song = controller.currentSong;
                       if (song == null) return const SizedBox.shrink();
                       final favCtrl = Get.find<FavoriteController>();
+                      // Aşama 2: format rozeti (codec · kHz · bit/kbps).
+                      // Aynı Obx formatInfo'yı da izler; bilgi yoksa gizlenir.
+                      final fmtLabel = controller.formatInfo.value?.label;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -231,6 +234,25 @@ class PlayerPage extends GetView<PlayerController> {
                                       ),
                                     ),
                                   ),
+                                  if (fmtLabel != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 2,
+                                        left: 2,
+                                      ),
+                                      child: Text(
+                                        fmtLabel,
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                          color: theme
+                                              .colorScheme.onSurfaceVariant
+                                              .withValues(alpha: 0.8),
+                                          letterSpacing: 0.3,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),

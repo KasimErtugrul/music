@@ -62,6 +62,24 @@ class PlayerExpandedView extends GetView<PlayerController> {
                     ),
                   ),
                 ),
+                // Aşama 2: format rozeti (codec · kHz · bit/kbps).
+                Obx(() {
+                  final label = controller.formatInfo.value?.label;
+                  if (label == null) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8, left: 2),
+                    child: Text(
+                      label,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant
+                            .withValues(alpha: 0.8),
+                        letterSpacing: 0.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }),
                 const SizedBox(height: 64),
                 const SeekBar(),
                 const SizedBox(height: 32),
