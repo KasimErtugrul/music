@@ -85,14 +85,7 @@ class PreferencesController extends GetxController {
     _repo.savePlayback(playback.value);
   }
 
-  /// Gün 2: KULLANILMIYOR — hiçbir UI anahtarı bu yöntemi çağırmaz; model
-  /// alanı yalnızca eski JSON/yedek uyumluluğu için yaşar. Yöntem, Gün 1
-  /// yedek anahtar kapsamı testi (settings_backup_keys_test) yazmaya devam
-  /// etsin ve JSON çıkışında alan kaybolmasın diye bilinçli olarak tutuldu.
-  void setGapless(bool v) {
-    playback.value = playback.value.copyWith(gapless: v);
-    _repo.savePlayback(playback.value);
-  }
+ 
 
   void setReplayGain(bool v) {
     playback.value = playback.value.copyWith(replayGain: v);

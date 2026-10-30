@@ -5,6 +5,7 @@ import 'package:resonance/data/models/song_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/data/datasources/local/app_database.dart';
 import 'package:resonance/data/models/backup_model.dart';
+import 'package:resonance/core/settings/settings_key_migration.dart';
 
 class BackupDatasource {
   final AppDatabase _db;
@@ -141,19 +142,36 @@ class BackupDatasource {
     return out;
   }
 
-  /// Gün 1: tip güvenli içe aktarma.
+    /// Gün 1: tip güvenli içe aktarma.
   ///
   /// * Yedekte olmayan anahtarlar DOKUNULMAZ (eksik alan = mevcut değer);
   ///   böylece eski yedeklerle geriye dönük uyum korunur.
   /// * Yedekteki bilinmeyen (listede olmayan) anahtarlar yok sayılır.
+  /// * Gün 10: geçerli adıyla bulunamayan anahtar, önce eski adıyla arama
+  ///   yapılır (SettingsKeyMigration.legacyKeys) — bir anahtar yeniden
+  ///   adlandırıldığında eski yedeklerin geri yüklenmesi kırılmaz. Harita
+  ///   bugün boştur; [legacyKeys] test enjeksiyonu içindir.
   /// * Desteklenmeyen değer tipi olan anahtar atlanır; tek bir hatalı değer
   ///   tüm içe aktarmayı durdurmaz.
   static Future<void> applyBackedUpSettings(
     SharedPreferences prefs,
-    Map<String, dynamic> raw,
-  ) async {
+    Map<String, dynamic> raw, {
+    Map<String, String> legacyKeys = SettingsKeyMigration.legacyKeys,
+  }) async {
     for (final key in SettingsPersistence.backupKeys) {
-      final val = raw[key];
+      var val = raw[key];
+      if (val == null) {
+        // Gün 10: geçerli ada yedekte yer yoksa eski adı denenir; geçerli
+        // ad yedekte VARSA eski ad hiç sorgulanmaz (yeni kazanır).
+        for (final entry in legacyKeys.entries) {
+          if (entry.value != key) continue;
+          final legacyVal = raw[entry.key];
+          if (legacyVal != null) {
+            val = legacyVal;
+            break;
+          }
+        }
+      }
       if (val == null) continue;
       try {
         if (val is String) {

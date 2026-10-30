@@ -90,7 +90,6 @@ Future<ThemeController> driveAllWriters(SharedPreferences prefs) async {
   prefCtrl.setAutoResume(true);
   prefCtrl.setSpeed(1.25);
   prefCtrl.setPitch(0.5);
-  prefCtrl.setGapless(true);
   prefCtrl.setReplayGain(true);
   prefCtrl.setSkipSilence(true);
   prefCtrl.setPauseOnHeadphone(true);
@@ -109,11 +108,13 @@ Future<ThemeController> driveAllWriters(SharedPreferences prefs) async {
   await _flush();
 
   // 3) ThemeController → active_theme_settings JSON'u.
-  final themeCtrl = Get.put<ThemeController>(ThemeController(
-    ThemeRepositoryImpl(prefs),
-    const Stream<MediaItem?>.empty(),
-    _MockLibraryRepository(),
-  ));
+  final themeCtrl = Get.put<ThemeController>(
+    ThemeController(
+      ThemeRepositoryImpl(prefs),
+      const Stream<MediaItem?>.empty(),
+      _MockLibraryRepository(),
+    ),
+  );
   await _flush(); // _loadActive mikro görevleri biter
   themeCtrl.setSeed(const Color(0xFF123456));
   await _flush(); // fire-and-forget saveActiveTheme tamamlanır
@@ -123,8 +124,11 @@ Future<ThemeController> driveAllWriters(SharedPreferences prefs) async {
   when(() => effects.setEnabled(any())).thenAnswer((_) async {});
   when(() => effects.setLoudnessEnabled(any())).thenAnswer((_) async {});
   when(() => effects.setLoudnessGain(any())).thenAnswer((_) async {});
-  final eqRepo =
-      EqualizerRepositoryImpl(effects, _MockEqualizerDatasource(), prefs);
+  final eqRepo = EqualizerRepositoryImpl(
+    effects,
+    _MockEqualizerDatasource(),
+    prefs,
+  );
   await eqRepo.setEnabled(true);
   await eqRepo.saveGains(const [1.5, -2.0, 0.5]);
   await eqRepo.saveLoudness(2.5);
@@ -134,21 +138,25 @@ Future<ThemeController> driveAllWriters(SharedPreferences prefs) async {
   when(() => player.currentItem).thenReturn(Rxn<MediaItem>());
   when(() => player.isPlaying).thenReturn(false.obs);
   final widgetRepo = _MockHomeWidgetRepository();
-  when(() => widgetRepo.updateWidget(
-        title: any(named: 'title'),
-        artist: any(named: 'artist'),
-        isPlaying: any(named: 'isPlaying'),
-        isTransparent: any(named: 'isTransparent'),
-      )).thenAnswer((_) async {});
+  when(
+    () => widgetRepo.updateWidget(
+      title: any(named: 'title'),
+      artist: any(named: 'artist'),
+      isPlaying: any(named: 'isPlaying'),
+      isTransparent: any(named: 'isTransparent'),
+    ),
+  ).thenAnswer((_) async {});
   final widgetDs = _MockHomeWidgetDatasource();
   when(() => widgetDs.saveArtwork(any())).thenAnswer((_) async {});
-  final widgetCtrl = Get.put<HomeWidgetController>(HomeWidgetController(
-    widgetRepo,
-    widgetDs,
-    player,
-    _MockLibraryRepository(),
-    prefs,
-  ));
+  final widgetCtrl = Get.put<HomeWidgetController>(
+    HomeWidgetController(
+      widgetRepo,
+      widgetDs,
+      player,
+      _MockLibraryRepository(),
+      prefs,
+    ),
+  );
   await widgetCtrl.setTransparency(true);
 
   // 6) Arama geçmişi → search_history.
@@ -160,12 +168,14 @@ Future<ThemeController> driveAllWriters(SharedPreferences prefs) async {
   // 7) Otomatik yedekleme tercihleri → settings_auto_backup_*.
   final autoRepo = _MockAutoBackupRepository();
   when(() => autoRepo.list()).thenAnswer((_) async => <AutoBackupEntry>[]);
-  final autoCtrl = Get.put<AutoBackupController>(AutoBackupController(
-    autoRepo: autoRepo,
-    backupRepo: _MockBackupRepository(),
-    libraryRepo: _MockLibraryRepository(),
-    prefs: prefs,
-  ));
+  final autoCtrl = Get.put<AutoBackupController>(
+    AutoBackupController(
+      autoRepo: autoRepo,
+      backupRepo: _MockBackupRepository(),
+      libraryRepo: _MockLibraryRepository(),
+      prefs: prefs,
+    ),
+  );
   await autoCtrl.setEnabled(false);
   await autoCtrl.setFrequency(AutoBackupFrequency.weekly);
   await autoCtrl.setKeepCount(5);
@@ -203,60 +213,79 @@ void main() {
   });
 
   group('yedek anahtar bütünlüğü', () {
-    test('backupKeys içinde yinelenen veya hariç listeyle çakışan anahtar yok', () {
-      expect(
-        SettingsPersistence.backupKeys.toSet().length,
-        SettingsPersistence.backupKeys.length,
-        reason: 'backupKeys içinde yinelenen anahtar var',
-      );
-      expect(
-        SettingsPersistence.backupKeys
-            .toSet()
-            .intersection(SettingsPersistence.notBackedUpKeys.toSet()),
-        isEmpty,
-        reason: 'Bir anahtar hem yedekleniyor hem hariç listede olamaz',
-      );
-    });
+    test(
+      'backupKeys içinde yinelenen veya hariç listeyle çakışan anahtar yok',
+      () {
+        expect(
+          SettingsPersistence.backupKeys.toSet().length,
+          SettingsPersistence.backupKeys.length,
+          reason: 'backupKeys içinde yinelenen anahtar var',
+        );
+        expect(
+          SettingsPersistence.backupKeys.toSet().intersection(
+            SettingsPersistence.notBackedUpKeys.toSet(),
+          ),
+          isEmpty,
+          reason: 'Bir anahtar hem yedekleniyor hem hariç listede olamaz',
+        );
+      },
+    );
 
-    test('anahtar dizgeleri tel formatına sabitlenmiştir (eski yedeklerle uyum)',
-        () {
-      // Bu dizgeler yedek dosyasında anahtar olarak durur; yeniden adlandırma
-      // eski yedeklerin geri yüklenmesini kırar. Değişiklik yalnızca geçiş
-      // fonksiyonuyla (Gün 10) birlikte yapılabilir.
-      expect(SettingsPersistence.languageCode, 'language_code');
-      expect(SettingsPersistence.playbackSettings, 'playback_settings');
-      expect(SettingsPersistence.librarySettings, 'library_settings');
-      expect(SettingsPersistence.activeThemeSettings, 'active_theme_settings');
-      expect(SettingsPersistence.equalizerEnabled, 'equalizer_enabled');
-      expect(SettingsPersistence.equalizerGains, 'equalizer_gains');
-      expect(SettingsPersistence.equalizerLoudness, 'equalizer_loudness');
-      expect(SettingsPersistence.widgetTransparent, 'widget_transparent');
-      expect(SettingsPersistence.searchHistory, 'search_history');
-      expect(
-          SettingsPersistence.autoBackupEnabled, 'settings_auto_backup_enabled');
-      expect(SettingsPersistence.autoBackupFrequency,
-          'settings_auto_backup_frequency');
-      expect(SettingsPersistence.autoBackupKeep, 'settings_auto_backup_keep');
-      expect(SettingsPersistence.lastBackupAt, 'last_backup_at');
-      expect(SettingsPersistence.autoBackupLast, 'settings_auto_backup_last');
-    });
+    test(
+      'anahtar dizgeleri tel formatına sabitlenmiştir (eski yedeklerle uyum)',
+      () {
+        // Bu dizgeler yedek dosyasında anahtar olarak durur; yeniden adlandırma
+        // eski yedeklerin geri yüklenmesini kırar. Gün 10'da geçiş fonksiyonu
+        // (SettingsKeyMigration) kuruldu: bir yeniden adlandırma artık yalnız
+        // legacyKeys haritasına tek satır eklenerek + bu pin testi
+        // güncellenerek yapılır (disk ve yedek yolu otomatik geçer).
+        expect(SettingsPersistence.languageCode, 'language_code');
+        expect(SettingsPersistence.playbackSettings, 'playback_settings');
+        expect(SettingsPersistence.librarySettings, 'library_settings');
+        expect(
+          SettingsPersistence.activeThemeSettings,
+          'active_theme_settings',
+        );
+        expect(SettingsPersistence.equalizerEnabled, 'equalizer_enabled');
+        expect(SettingsPersistence.equalizerGains, 'equalizer_gains');
+        expect(SettingsPersistence.equalizerLoudness, 'equalizer_loudness');
+        expect(SettingsPersistence.widgetTransparent, 'widget_transparent');
+        expect(SettingsPersistence.searchHistory, 'search_history');
+        expect(
+          SettingsPersistence.autoBackupEnabled,
+          'settings_auto_backup_enabled',
+        );
+        expect(
+          SettingsPersistence.autoBackupFrequency,
+          'settings_auto_backup_frequency',
+        );
+        expect(SettingsPersistence.autoBackupKeep, 'settings_auto_backup_keep');
+        expect(SettingsPersistence.lastBackupAt, 'last_backup_at');
+        expect(SettingsPersistence.autoBackupLast, 'settings_auto_backup_last');
+      },
+    );
 
     test('prefs’e yazılan her anahtar yedek listelerinde tanımlıdır', () async {
       final themeCtrl = await driveAllWriters(prefs);
       await _flush();
 
-      final unknown = prefs.getKeys()
-          .where((k) =>
-              !SettingsPersistence.backupKeys.contains(k) &&
-              !SettingsPersistence.notBackedUpKeys.contains(k))
-          .toList()
-        ..sort();
+      final unknown =
+          prefs
+              .getKeys()
+              .where(
+                (k) =>
+                    !SettingsPersistence.backupKeys.contains(k) &&
+                    !SettingsPersistence.notBackedUpKeys.contains(k),
+              )
+              .toList()
+            ..sort();
 
       themeCtrl.dispose();
       expect(
         unknown,
         isEmpty,
-        reason: 'Şu anahtarlar SettingsPersistence listelerinde tanımlı değil; '
+        reason:
+            'Şu anahtarlar SettingsPersistence listelerinde tanımlı değil; '
             'yazan kodu SettingsPersistence’a ekleyin: $unknown',
       );
     });
@@ -273,8 +302,11 @@ void main() {
       }
       // Hariç listedeki anahtarlar yedeğe girmez.
       for (final key in SettingsPersistence.notBackedUpKeys) {
-        expect(collected.containsKey(key), isFalse,
-            reason: '$key yedeklenmemeli');
+        expect(
+          collected.containsKey(key),
+          isFalse,
+          reason: '$key yedeklenmemeli',
+        );
       }
     });
 
@@ -291,16 +323,17 @@ void main() {
       themeCtrl.dispose();
 
       expect(collected.containsKey(SettingsPersistence.lastBackupAt), isFalse);
-      expect(collected.containsKey(SettingsPersistence.autoBackupLast), isFalse);
+      expect(
+        collected.containsKey(SettingsPersistence.autoBackupLast),
+        isFalse,
+      );
       expect(collected.containsKey('bazı_bilinmeyen_anahtar'), isFalse);
       expect(collected[SettingsPersistence.playbackSettings], isA<String>());
     });
   });
 
   group('tip güvenli içe aktarma', () {
-    test(
-        'bilinmeyen anahtarları yok sayar, bozuk tipte çökmez, eksik anahtara dokunmaz',
-        () async {
+    test('bilinmeyen anahtarları yok sayar, bozuk tipte çökmez, eksik anahtara dokunmaz', () async {
       await prefs.setString('mevcut_değer', 'dokunulmaz');
 
       final raw = <String, dynamic>{
@@ -320,8 +353,10 @@ void main() {
       expect(prefs.getBool(SettingsPersistence.equalizerEnabled), isTrue);
       expect(prefs.getDouble(SettingsPersistence.equalizerLoudness), 3.5);
       expect(prefs.getInt(SettingsPersistence.autoBackupKeep), 5);
-      expect(prefs.getStringList(SettingsPersistence.searchHistory),
-          <String>['a', 'b']);
+      expect(prefs.getStringList(SettingsPersistence.searchHistory), <String>[
+        'a',
+        'b',
+      ]);
       expect(prefs.containsKey(SettingsPersistence.widgetTransparent), isFalse);
     });
 
@@ -367,10 +402,15 @@ void main() {
       expect(prefs.getBool(SettingsPersistence.equalizerEnabled), isTrue);
       expect(prefs.getDouble(SettingsPersistence.equalizerLoudness), 2.5);
       expect(prefs.getBool(SettingsPersistence.widgetTransparent), isTrue);
-      expect(prefs.getString(SettingsPersistence.searchHistory),
-          jsonEncode(<String>['metallica']));
+      expect(
+        prefs.getString(SettingsPersistence.searchHistory),
+        jsonEncode(<String>['metallica']),
+      );
       expect(prefs.getBool(SettingsPersistence.autoBackupEnabled), isFalse);
-      expect(prefs.getString(SettingsPersistence.autoBackupFrequency), 'weekly');
+      expect(
+        prefs.getString(SettingsPersistence.autoBackupFrequency),
+        'weekly',
+      );
       expect(prefs.getInt(SettingsPersistence.autoBackupKeep), 5);
       // Tema JSON'u gidiş-dönüşte birebir aynı kalmalı.
       expect(
@@ -381,9 +421,7 @@ void main() {
       );
     });
 
-    test(
-        'içe aktarma sonrası PreferencesController.reload() canlı durumu yedekteki hale döndürür',
-        () async {
+    test('içe aktarma sonrası PreferencesController.reload() canlı durumu yedekteki hale döndürür', () async {
       final prefCtrl = Get.put<PreferencesController>(
         PreferencesController(PreferencesRepositoryImpl(prefs)),
       );
@@ -402,14 +440,14 @@ void main() {
       expect(prefCtrl.playback.value.seekIntervalSeconds, 30);
     });
 
-    test(
-        'içe aktarma sonrası ThemeController.reload() temayı yedekteki hale döndürür',
-        () async {
-      final themeCtrl = Get.put<ThemeController>(ThemeController(
-        ThemeRepositoryImpl(prefs),
-        const Stream<MediaItem?>.empty(),
-        _MockLibraryRepository(),
-      ));
+    test('içe aktarma sonrası ThemeController.reload() temayı yedekteki hale döndürür', () async {
+      final themeCtrl = Get.put<ThemeController>(
+        ThemeController(
+          ThemeRepositoryImpl(prefs),
+          const Stream<MediaItem?>.empty(),
+          _MockLibraryRepository(),
+        ),
+      );
       await _flush();
 
       themeCtrl.setSeed(const Color(0xFF111111));

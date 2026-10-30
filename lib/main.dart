@@ -25,6 +25,7 @@ import 'package:resonance/presentation/controllers/settings_controller.dart';
 import 'package:resonance/presentation/controllers/sleep_timer_controller.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:resonance/core/settings/settings_key_migration.dart';
 
 late final AudioHandler audioHandler;
 
@@ -83,6 +84,11 @@ Future<void> main() async {
   try {
     final prefs = await SharedPreferences.getInstance();
     Get.put<SharedPreferences>(prefs, permanent: true);
+        // Gün 10: prefs anahtar geçişi. Harita bugün boş (bkz.
+    // SettingsKeyMigration belgesi); işlev hiçbir koşulda fırlatmaz ve
+    // açılışı engellemez. Tüm repolardan ÖNCE çalışır: hiçbir okuyucu
+    // eski anahtar altında kalmış bir tercihe rastlamaz.
+    await SettingsKeyMigration.migrate(prefs);
 
     Get.put<SettingsRepository>(SettingsRepositoryImpl(prefs), permanent: true);
     Get.put<SettingsController>(
