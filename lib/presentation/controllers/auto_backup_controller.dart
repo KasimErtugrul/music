@@ -152,6 +152,9 @@ class AutoBackupController extends GetxController {
   /// kadar hiçbir controller tazelenmiyordu; tema/EQ/çalma/dil ve Gün 6'da
   /// reload() kazanmış arama geçmişi + otomatik yedek tercihleri
   /// yeniden başlatmadan eski görünmeye devam ediyordu.
+  /// Gün 9: çalma listeleri tablosu da yeniden kurulur; canlı
+  /// PlaylistController (varsa) listesini yeniden okur (ayar zincirinden
+  /// ayrı yardımcı — çalma listeleri bir ayar değildir).
   Future<bool> restore(AutoBackupEntry entry) async {
     if (isWorking.value) return false;
     isWorking.value = true;
@@ -161,6 +164,7 @@ class AutoBackupController extends GetxController {
       await _backupRepo.import(model);
       await _libraryRepo.rescan();
       await reloadLiveSettingsControllers();
+      await reloadLivePlaylistControllers();
       return true;
     } on Object {
       debugPrint('AutoBackupController: geri yükleme başarısız');
@@ -189,6 +193,6 @@ class AutoBackupController extends GetxController {
 
   Future<void> setKeepCount(int value) async {
     keepCount.value = keepChoices.contains(value) ? value : defaultKeepCount;
-    await _prefs?.setInt(_kKeep, keepCount.value);
+    await _prefs?.setInt(_kKeep, value);
   }
 }

@@ -16,11 +16,20 @@
 // Kayıtlı olmayan controller (ör. ilgili akış hiç başlamadıysa) sessizce
 // atlanır; tek bir reload hatası içe aktarma/geri yükleme akışını
 // başarısız saymaz (Gün 1'deki davranışın aynısı).
+//
+// Gün 9: bu dosyaya ayar zincirinden AYRI ikinci bir tazeleme eklendi —
+// reloadLivePlaylistControllers. İçe aktarma/geri yükleme yalnız ayarları
+// değil, veritabanındaki çalma listeleri tablosunu da silip yeniden kurar
+// (BackupDatasource.importData). Çalma listeleri SettingsPersistence
+// .backupKeys kapsamında bir AYAR DEĞİLDİR (BackupModel'in ayrı veri
+// alanıdır); bu yüzden Gün 1 doktrini gereği ayar zincirine eklenmedi.
+// Ayrıntılar aşağıdaki belgede.
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:resonance/presentation/controllers/auto_backup_controller.dart';
 import 'package:resonance/presentation/controllers/equalizer_controller.dart';
 import 'package:resonance/presentation/controllers/home_widget_controller.dart';
+import 'package:resonance/presentation/controllers/playlist_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/search_controller.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
@@ -48,5 +57,30 @@ Future<void> _reloadIfRegistered<T extends GetxController>() async {
     await (Get.find<T>() as dynamic).reload();
   } on Object catch (e) {
     debugPrint('Reload başarısız ($T): $e');
+  }
+}
+
+/// Gün 9: içe aktarma/geri yükleme sonrasında canlı çalma listesi
+/// durumunun tazelenmesi (Gün 7 raporundaki kayıtlı boşluğun çalma
+/// listesi yarısı; favoriler yarısı kayıt düzeltmesiyle çözümsüzdür —
+/// FavoriteController Drift canlı akışıyla beslenir, reload gerekmez).
+///
+/// PlaylistController `PlaylistBinding` içinde `lazyPut(fenix)` ile
+/// kayıtlıdır ve `loadPlaylists()`'i yalnız onInit'te bir kez çalıştırır;
+/// canlıyken içe aktarma sonrası listesi bayat kalırdı. Burada yalnız
+/// CANLI örneği tazeleriz: `isRegistered` fabrika KAYDINI, `isPrepared`
+/// ise henüz hiç kurulmamış fabrikayı işaretler (GetX 4.7: lazyPut +
+/// isInit=false). Hiç açılmamışsa (kullanıcı bu oturumda çalma
+/// listeleri sayfasına girmediyse) örnek ÖRNEKLENDİRİLMEZ; sayfa ilk
+/// açıldığında onInit zaten taze veri yükler. Hata akışı başarısız
+/// saymaz (yukarıdaki zincirle aynı sözleşme).
+Future<void> reloadLivePlaylistControllers() async {
+  if (!Get.isRegistered<PlaylistController>()) return;
+  // isPrepared = lazyPut fabrikası kurulu ama örneklendirilmemiş:
+  if (Get.isPrepared<PlaylistController>()) return;
+  try {
+    await Get.find<PlaylistController>().loadPlaylists();
+  } on Object catch (e) {
+    debugPrint('Reload başarısız (PlaylistController): $e');
   }
 }

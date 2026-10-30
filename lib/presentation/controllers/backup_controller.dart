@@ -128,6 +128,13 @@ class BackupController extends GetxController {
       // Aynı zincir otomatik yedek geri yükleme yolunda da kullanılıyor.
       await reloadLiveSettingsControllers();
 
+      // Gün 9: içe aktarma çalma listeleri tablosunu da silip yeniden
+      // kurar; canlı PlaylistController (varsa) listesini yeniden okur —
+      // Gün 7 raporundaki kayıtlı boşluğun çalma listesi yarısı. Ayar
+      // zincirinden ayrıdır: çalma listeleri bir ayar değil, kütüphane
+      // verisidir (backupKeys kapsamı dışı).
+      await reloadLivePlaylistControllers();
+
       isLoading.value = false;
       return mismatch ? ImportStatus.versionMismatch : ImportStatus.success;
     } catch (e) {
