@@ -454,12 +454,14 @@ class _ArtistHero extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                FilledButton.tonalIcon(
-                  onPressed: onShuffle,
-                  icon: const Icon(Icons.shuffle, size: 20),
-                  label: Text(l10n.shuffleAll),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    onPressed: onShuffle,
+                    icon: const Icon(Icons.shuffle, size: 20),
+                    label: Text(l10n.shuffleAll),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                    ),
                   ),
                 ),
               ],

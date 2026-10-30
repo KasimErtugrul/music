@@ -83,8 +83,10 @@ class _GenreDetailPageState extends State<GenreDetailPage> {
           if (an == null && bn == null) return byTitle(a, b);
           if (an == null) return 1;
           if (bn == null) return -1;
-          final c = dir * LocaleSorter.collationKey(an)
-              .compareTo(LocaleSorter.collationKey(bn));
+          final c =
+              dir *
+              LocaleSorter.collationKey(an)
+                  .compareTo(LocaleSorter.collationKey(bn));
           return c != 0 ? c : byTitle(a, b);
         };
       case SongSortField.duration:
@@ -101,20 +103,23 @@ class _GenreDetailPageState extends State<GenreDetailPage> {
         };
       case SongSortField.album:
         return (a, b) {
-          final c = dir * LocaleSorter.collationKey(a.album ?? '')
-              .compareTo(LocaleSorter.collationKey(b.album ?? ''));
+          final c =
+              dir *
+              LocaleSorter.collationKey(a.album ?? '')
+                  .compareTo(LocaleSorter.collationKey(b.album ?? ''));
           return c != 0 ? c : byTitle(a, b);
         };
     }
   }
 
-  String _sortLabel(AppLocalizations l10n, SongSort sort) => switch (sort.field) {
-    SongSortField.title => l10n.sortFieldTitle,
-    SongSortField.artist => l10n.sortFieldArtist,
-    SongSortField.duration => l10n.sortFieldDuration,
-    SongSortField.dateAdded => l10n.sortFieldDateAdded,
-    SongSortField.album => l10n.sortFieldAlbum,
-  };
+  String _sortLabel(AppLocalizations l10n, SongSort sort) =>
+      switch (sort.field) {
+        SongSortField.title => l10n.sortFieldTitle,
+        SongSortField.artist => l10n.sortFieldArtist,
+        SongSortField.duration => l10n.sortFieldDuration,
+        SongSortField.dateAdded => l10n.sortFieldDateAdded,
+        SongSortField.album => l10n.sortFieldAlbum,
+      };
 
   /// Türün şarkılarından gerçek albüm gruplaması. Bilinmeyen albüm
   /// kovası (-1) karusele alınmaz.
@@ -150,8 +155,7 @@ class _GenreDetailPageState extends State<GenreDetailPage> {
         artist: topArtist,
         artworkSongId: list.first.id,
       );
-    }).toList()
-      ..sort((a, b) => b.songCount.compareTo(a.songCount));
+    }).toList()..sort((a, b) => b.songCount.compareTo(a.songCount));
     return albums;
   }
 
@@ -180,25 +184,25 @@ class _GenreDetailPageState extends State<GenreDetailPage> {
       body: _songs == null
           ? const Center(child: CircularProgressIndicator())
           : _songs!.isEmpty
-              ? EmptyState(
-                  icon: Icons.music_off_outlined,
-                  title: l10n.libraryEmptySongsTitle,
-                )
-              : ListView(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  children: [
-                    _GenreHero(genre: genre, songs: _songs!),
-                    _ActionCluster(songs: _songs!),
-                    if (_albumsInGenre(_songs!).isNotEmpty)
-                      _GenreAlbumsCarousel(albums: _albumsInGenre(_songs!)),
-                    _TracksSection(
-                      songs: _songs!,
-                      sort: _sort,
-                      sortLabel: _sortLabel(l10n, _sort),
-                      onSort: _applySort,
-                    ),
-                  ],
+          ? EmptyState(
+              icon: Icons.music_off_outlined,
+              title: l10n.libraryEmptySongsTitle,
+            )
+          : ListView(
+              padding: const EdgeInsets.only(bottom: 24),
+              children: [
+                _GenreHero(genre: genre, songs: _songs!),
+                _ActionCluster(songs: _songs!),
+                if (_albumsInGenre(_songs!).isNotEmpty)
+                  _GenreAlbumsCarousel(albums: _albumsInGenre(_songs!)),
+                _TracksSection(
+                  songs: _songs!,
+                  sort: _sort,
+                  sortLabel: _sortLabel(l10n, _sort),
+                  onSort: _applySort,
                 ),
+              ],
+            ),
     );
   }
 }
@@ -236,8 +240,7 @@ class _GenreHero extends StatelessWidget {
           children: [
             // Rozet: yerel arşiv
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(999),
@@ -311,19 +314,21 @@ class _ActionCluster extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          FilledButton.tonalIcon(
-            onPressed: () async {
-              if (songs.isEmpty) return;
-              if (!player.shuffleEnabled.value) {
-                await player.toggleShuffle();
-              }
-              final first = songs[DateTime.now().millisecond % songs.length];
-              await player.playSong(first, queue: songs);
-            },
-            icon: const Icon(Icons.shuffle, size: 20),
-            label: Text(l10n.shuffleAll),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
+          Expanded(
+            child: FilledButton.tonalIcon(
+              onPressed: () async {
+                if (songs.isEmpty) return;
+                if (!player.shuffleEnabled.value) {
+                  await player.toggleShuffle();
+                }
+                final first = songs[DateTime.now().millisecond % songs.length];
+                await player.playSong(first, queue: songs);
+              },
+              icon: const Icon(Icons.shuffle, size: 20),
+              label: Text(l10n.shuffleAll),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
             ),
           ),
         ],
@@ -406,10 +411,8 @@ class _AlbumCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
-          onTap: () => Get.toNamed<void>(
-            AppRoutes.albumDetail,
-            arguments: album,
-          ),
+          onTap: () =>
+              Get.toNamed<void>(AppRoutes.albumDetail, arguments: album),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -436,11 +439,12 @@ class _AlbumCard extends StatelessWidget {
                         width: 26,
                         height: 26,
                         decoration: BoxDecoration(
-                          color: cs.surfaceContainerLowest.withValues(alpha: 0.8),
+                          color: cs.surfaceContainerLowest.withValues(
+                            alpha: 0.8,
+                          ),
                           shape: BoxShape.circle,
                         ),
-                        child:
-                            Icon(Icons.album, size: 15, color: cs.primary),
+                        child: Icon(Icons.album, size: 15, color: cs.primary),
                       ),
                     ),
                   ],
@@ -498,23 +502,20 @@ class _TracksSection extends StatelessWidget {
             children: [
               Text(
                 l10n.libraryTabSongs,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(width: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   l10n.songCount(songs.length),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
               const Spacer(),
@@ -543,8 +544,10 @@ class _TracksSection extends StatelessWidget {
                   ),
                 ],
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(20),
@@ -556,9 +559,8 @@ class _TracksSection extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         sortLabel,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: Theme.of(context).textTheme.labelSmall
+                            ?.copyWith(fontWeight: FontWeight.w500),
                       ),
                       const Icon(Icons.arrow_drop_down, size: 16),
                     ],
@@ -569,12 +571,8 @@ class _TracksSection extends StatelessWidget {
           ),
         ),
         ...songs.asMap().entries.map(
-              (e) => _TrackRow(
-                index: e.key + 1,
-                song: e.value,
-                queue: songs,
-              ),
-            ),
+          (e) => _TrackRow(index: e.key + 1, song: e.value, queue: songs),
+        ),
       ],
     );
   }
@@ -584,8 +582,8 @@ class _TracksSection extends StatelessWidget {
     SongSort sort,
     String label,
   ) {
-    final selected = sort.field == this.sort.field &&
-        sort.direction == this.sort.direction;
+    final selected =
+        sort.field == this.sort.field && sort.direction == this.sort.direction;
     return PopupMenuItem<SongSort>(
       value: sort,
       child: Row(
@@ -669,8 +667,9 @@ class _TrackRow extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: isCurrent ? cs.primary : cs.onSurface,
-                          fontWeight:
-                              isCurrent ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: isCurrent
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ),
                       ),
                       Text(
@@ -698,8 +697,11 @@ class _TrackRow extends StatelessWidget {
                 ),
                 IconButton(
                   tooltip: l10n.songInfo,
-                  icon: Icon(Icons.more_vert,
-                      size: 22, color: cs.onSurfaceVariant),
+                  icon: Icon(
+                    Icons.more_vert,
+                    size: 22,
+                    color: cs.onSurfaceVariant,
+                  ),
                   onPressed: () => SongOptionsSheet.show(context, song),
                 ),
               ],
