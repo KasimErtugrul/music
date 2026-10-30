@@ -23,10 +23,13 @@ class PermissionController extends GetxController with WidgetsBindingObserver {
 
   final RxBool mediaRequested = false.obs;
   final RxBool notificationRequired = false.obs;
+  final RxBool notificationHandled = false.obs;
   final RxBool busy = false.obs;
 
   bool get showNotificationCard =>
-      notificationRequired.value && !notification.value.isGranted;
+      notificationRequired.value &&
+      !notification.value.isGranted &&
+      !notificationHandled.value;
 
   @override
   void onInit() {
@@ -104,8 +107,15 @@ class PermissionController extends GetxController with WidgetsBindingObserver {
     } on Exception {
       // Bildirim izni isteğe bağlıdır; hata çalmayı etkilemez.
     } finally {
+      // Soruldu: sonuç ne olursa olsun kart bir daha gösterilmez.
+      notificationHandled.value = true;
       busy.value = false;
     }
+    _leaveIfDone();
+  }
+
+  void dismissNotification() {
+    notificationHandled.value = true;
     _leaveIfDone();
   }
 

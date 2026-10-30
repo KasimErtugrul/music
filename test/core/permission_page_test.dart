@@ -10,11 +10,19 @@ import 'package:resonance/presentation/ui/pages/permission_page.dart';
 class MockPermissionHelper extends Mock implements PermissionHelper {}
 
 void main() {
+  late MockPermissionHelper helper;
   late PermissionController controller;
 
   setUp(() {
+    helper = MockPermissionHelper();
+    when(() => helper.mediaStatus())
+        .thenAnswer((_) async => AppPermissionStatus.denied);
+    when(() => helper.notificationStatus())
+        .thenAnswer((_) async => AppPermissionStatus.denied);
+    when(() => helper.notificationPermissionRequired())
+        .thenAnswer((_) async => true);
     controller = PermissionController(
-      MockPermissionHelper(),
+      helper,
       navigate: (_) {},
       currentRoute: () => '',
     );
@@ -62,6 +70,11 @@ void main() {
   testWidgets('bildirim kartı yalnızca gerektiğinde görünür', (tester) async {
     controller.notificationRequired.value = true;
     await pumpPage(tester, const Locale('tr'));
+    await tester.scrollUntilVisible(
+      find.text('Bildirim izni'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Bildirim izni'), findsOneWidget);
 
     controller.notificationRequired.value = false;
