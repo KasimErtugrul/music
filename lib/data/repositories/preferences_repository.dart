@@ -47,7 +47,17 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
 
   @override
   Future<void> resetAll() async {
-    await _prefs.remove(_kPlayback);
-    await _prefs.remove(_kLibrary);
+    // Gün 6: "Tüm ayarları sıfırla" artık adına uygun. Taban kodda yalnız
+    // playback/library siliniyordu; tema, ekolayzer, widget, arama geçmişi,
+    // dil ve otomatik yedek tercihleri sıfırlamaya girmiyordu (üstelik
+    // hiçbir ekran bu metodu çağırmıyordu — Gün 6'da bağlandı). Şimdi
+    // SettingsPersistence.backupKeys'ün TAMAMI kaldırılır: anahtar yokluğu
+    // fabrika varsayılanı demektir (loadPlayback/loadLibrary zaten null'da
+    // varsayılana düşer; diğer katmanlar kendi repo'larında aynen böyle).
+    // Zamansal iş-bilgisi anahtarları (SettingsPersistence.notBackedUpKeys:
+    // son yedek zaman damgaları) ayar olmadığı için bilinçli olarak korunur.
+    for (final key in SettingsPersistence.backupKeys) {
+      await _prefs.remove(key);
+    }
   }
 }

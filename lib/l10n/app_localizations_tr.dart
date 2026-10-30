@@ -697,8 +697,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get resetAll => 'Tüm ayarları sıfırla';
 
   @override
+  String get resetAllDesc => 'Tüm tercihler fabrika değerlerine döner';
+
+  @override
   String get resetConfirm =>
       'Tüm ayarları varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.';
+
+  @override
+  String get resetDone => 'Ayarlar varsayılanlara döndürüldü';
 
   @override
   String get textScale => 'Yazı ölçeği';

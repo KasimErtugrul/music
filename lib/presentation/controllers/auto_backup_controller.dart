@@ -69,6 +69,25 @@ class AutoBackupController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _readPrefs();
+    // Liste tazeleme; başarısızlık uygulama açılışını etkilemesin.
+    refreshBackups();
+  }
+
+  /// Gün 6: kalıcı tercihleri yeniden okur. "Tüm ayarları sıfırla" akışı
+  /// anahtarları kaldırdıktan sonra canlı durumu fabrika değerine döndürür
+  /// (anahtar yokluğu = varsayılan); uygulama yeniden başlatmaya gerek
+  /// kalmaz. Yalnız tercih durumunu tazeler: yedek listesi (dosya sistemi)
+  /// ve zamanlanmış iş akışına dokunmaz.
+  Future<void> reload() async {
+    _readPrefs();
+  }
+
+  /// onInit ve reload'un paylaşılan okuma yolu (Gün 6: davranış
+  /// ikiye bölünmesin diye onInit'ten ayıklandı). lastRunAt artık anahtar
+  /// yokken null'a döner; onInit'te başlangıç değeri zaten null olduğundan
+  /// açılış davranışı değişmez.
+  void _readPrefs() {
     final p = _prefs;
     enabled.value = p?.getBool(_kEnabled) ?? true;
     final f = p?.getString(_kFrequency) ?? AutoBackupFrequency.daily;
@@ -77,11 +96,9 @@ class AutoBackupController extends GetxController {
     final k = p?.getInt(_kKeep) ?? defaultKeepCount;
     keepCount.value = keepChoices.contains(k) ? k : defaultKeepCount;
     final ms = p?.getInt(_kLast);
-    if (ms != null && ms > 0) {
-      lastRunAt.value = DateTime.fromMillisecondsSinceEpoch(ms);
-    }
-    // Liste tazeleme; başarısızlık uygulama açılışını etkilemesin.
-    refreshBackups();
+    lastRunAt.value = (ms != null && ms > 0)
+        ? DateTime.fromMillisecondsSinceEpoch(ms)
+        : null;
   }
 
   /// Sıklık süresi dolduysa yedek alır. Hata fırlatmaz; runNow içinde

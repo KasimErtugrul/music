@@ -700,8 +700,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetAll => 'Reset all settings';
 
   @override
+  String get resetAllDesc => 'All preferences return to their factory values';
+
+  @override
   String get resetConfirm =>
       'Are you sure you want to reset all settings to their defaults? This cannot be undone.';
+
+  @override
+  String get resetDone => 'Settings restored to defaults';
 
   @override
   String get textScale => 'Text scale';

@@ -1364,11 +1364,23 @@ abstract class AppLocalizations {
   /// **'Reset all settings'**
   String get resetAll;
 
+  /// No description provided for @resetAllDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All preferences return to their factory values'**
+  String get resetAllDesc;
+
   /// No description provided for @resetConfirm.
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to reset all settings to their defaults? This cannot be undone.'**
   String get resetConfirm;
+
+  /// No description provided for @resetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings restored to defaults'**
+  String get resetDone;
 
   /// No description provided for @textScale.
   ///

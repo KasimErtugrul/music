@@ -83,6 +83,15 @@ class AppSearchController extends GetxController {
     await _persistHistory();
   }
 
+  /// Gün 6: kalıcı geçmişi yeniden okur. "Tüm ayarları sıfırla" akışı
+  /// anahtarı kaldırdıktan sonra canlı listeyi boşaltır (anahtar yokluğu =
+  /// boş geçmiş). Yalnız okuma yapar, diske yazmaz: sıfırlamadan hemen
+  /// sonra boş bir kayıt geri yazılmaz.
+  Future<void> reload() async {
+    searchHistory.clear();
+    _loadHistory();
+  }
+
   void _loadHistory() {
     final raw = _prefs?.getString(_historyKey);
     if (raw == null || raw.isEmpty) return;

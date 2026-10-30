@@ -4,6 +4,7 @@ import 'package:resonance/core/settings/settings_registry.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/equalizer_controller.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
+import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
 import 'package:resonance/presentation/controllers/settings_search_controller.dart';
 import 'package:resonance/presentation/ui/pages/settings/about_page.dart';
@@ -227,6 +228,19 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                     ),
                   ]),
 
+                  // --- Gün 6: Tüm ayarları sıfırla ---
+                  // Yıkıcı eylem en sonda, kendi kartında. Taban l10n
+                  // dizgeleri (resetAll / resetConfirm) Gün 6 ile ilk kez
+                  // gerçek bir ekrana bağlandı.
+                  _NavCard(children: [
+                    _NavRow(
+                      icon: Icons.restart_alt,
+                      title: l10n.resetAll,
+                      desc: l10n.resetAllDesc,
+                      onTap: () => _confirmReset(context),
+                    ),
+                  ]),
+
                   // --- Alt durum kartı (gerçek veri) ---
                   const SizedBox(height: 16),
                   const _EngineStatusCard(),
@@ -260,6 +274,37 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  /// Gün 6: sıfırlama onayı. Onaylanırsa diskteki tüm yedeklenen ayar
+  /// anahtarları kaldırılır ve canlı controller'lar yeniden yüklenir
+  /// (PreferencesController.resetAll); sonuç SnackBar ile bildirilir.
+  Future<void> _confirmReset(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.resetAll),
+        content: Text(l10n.resetConfirm),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.resetAll),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await Get.find<PreferencesController>().resetAll();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.resetDone)),
+    );
   }
 }
 
