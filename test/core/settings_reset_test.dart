@@ -7,6 +7,12 @@
 //   tercihleri yeniden okur (anahtar yokluğu = fabrika varsayılanı).
 // * PreferencesController.resetAll diski temizler, kendi Rx durumunu
 //   sıfırlar ve kayıtlı canlı controller'ları yeniden yükler.
+//
+// Gün 11: resetAll içindeki canlı tazeleme zinciri Gün 7'nin tek doğruluk
+// kaynağına (live_settings_reload.dart) bağlandı; Gün 6'dan kalma özel
+// kopya silindi. Testler değişmedi — aynı davranış artık paylaşılan zincir
+// üzerinden pinleniyor.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';

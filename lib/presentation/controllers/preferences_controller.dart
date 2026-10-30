@@ -5,12 +5,12 @@ import 'package:get/get.dart';
 import 'package:resonance/data/models/playback_settings_model.dart';
 import 'package:resonance/data/models/library_settings_model.dart';
 import 'package:resonance/data/repositories/preferences_repository.dart';
-import 'package:resonance/presentation/controllers/auto_backup_controller.dart';
-import 'package:resonance/presentation/controllers/equalizer_controller.dart';
-import 'package:resonance/presentation/controllers/home_widget_controller.dart';
-import 'package:resonance/presentation/controllers/search_controller.dart';
-import 'package:resonance/presentation/controllers/settings_controller.dart';
-import 'package:resonance/presentation/controllers/theme_controller.dart';
+// Gün 11: resetAll'ın canlı tazeleme zinciri tek doğruluk kaynağından gelir
+// (Gün 7). Not: live_settings_reload.dart zincirde PreferencesController'ı
+// kullandığı için bu import bir döngü kurar; Dart'ta kütüphane import
+// döngüsü yasaldır ve iki taraf da yalnız tanımlara başvurur (top-level
+// başlatma döngüsü yok).
+import 'package:resonance/presentation/controllers/live_settings_reload.dart';
 
 class PreferencesController extends GetxController {
   PreferencesController(this._repo);
@@ -85,8 +85,6 @@ class PreferencesController extends GetxController {
     _repo.savePlayback(playback.value);
   }
 
- 
-
   void setReplayGain(bool v) {
     playback.value = playback.value.copyWith(replayGain: v);
     _repo.savePlayback(playback.value);
@@ -129,35 +127,24 @@ class PreferencesController extends GetxController {
   /// başlatmadan varsayılanlara döner (Gün 1'deki BackupController
   /// kalıbının aynısı). Sıra önemlidir: EqualizerController.reload()
   /// içinden PreferencesController okunur; o yüzden önce kendi durumumuz
-  /// tazelenir, sonra diğerleri yeniden yüklenir.
+  /// tazelenir, sonra zincir çalışır.
+  ///
+  /// Gün 11: zincir Gün 7'nin tek doğruluk kaynağına bağlandı
+  /// (live_settings_reload.dart). Gün 6'dan kalma özel _reloadLiveControllers
+  /// kopyası silindi — «çağrı noktaları listeyi kopyalamasın» ilkesi artık
+  /// üç çağrı noktasında da geçerli: manuel içe aktarma (Gün 1), otomatik
+  /// geri yükleme (Gün 7), tümünü sıfırla (bugün). Paylaşılan zincir
+  /// PreferencesController'ı (kendi örneğimizi) da yeniden yükler: disk
+  /// temizlendikten SONRA çalıştığı için yeniden okuma aynı fabrika
+  /// değerlerini verir (idempotent); yukarıdaki inline atama yalnız
+  /// senkron ilk görünümdür. Zincirin hata sözleşmesi Gün 1'le aynıdır:
+  /// kayıtsız controller sessizce atlanır, tek bir reload hatası
+  /// sıfırlamayı başarısız saymaz.
   Future<void> resetAll() async {
     await _repo.resetAll();
     playback.value = const PlaybackSettingsModel();
     library.value = const LibrarySettingsModel();
-    await _reloadLiveControllers();
+    await reloadLiveSettingsControllers();
   }
 
-  /// Gün 6: sıfırlama sonrası ayar taşıyan canlı controller'lar. Kayıtlı
-  /// olmayan controller (ilgili ekran hiç açılmadıysa) sessizce atlanır;
-  /// tek bir reload hatası sıfırlamayı başarısız saymaz (BackupController
-  /// _reloadIfRegistered davranışının aynısı). AppSearch ve AutoBackup,
-  /// Gün 6'da reload() kazanan iki controller'dır: sıfırlamada arama
-  /// geçmişi boşalır, otomatik yedek tercihleri varsayılana döner.
-  Future<void> _reloadLiveControllers() async {
-    await _reloadIfRegistered<ThemeController>();
-    await _reloadIfRegistered<SettingsController>();
-    await _reloadIfRegistered<EqualizerController>();
-    await _reloadIfRegistered<HomeWidgetController>();
-    await _reloadIfRegistered<AppSearchController>();
-    await _reloadIfRegistered<AutoBackupController>();
-  }
-
-  Future<void> _reloadIfRegistered<T extends GetxController>() async {
-    if (!Get.isRegistered<T>()) return;
-    try {
-      await (Get.find<T>() as dynamic).reload();
-    } on Object catch (e) {
-      debugPrint('Reload başarısız ($T): $e');
-    }
-  }
 }
