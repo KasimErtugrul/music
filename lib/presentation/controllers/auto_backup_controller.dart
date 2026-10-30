@@ -17,6 +17,7 @@ import 'package:resonance/data/datasources/auto_backup_storage.dart';
 import 'package:resonance/data/repositories/auto_backup_repository.dart';
 import 'package:resonance/data/repositories/backup_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
+import 'package:resonance/presentation/controllers/live_settings_reload.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Otomatik yedek sıklığı. Prefs'te string saklanır.
@@ -145,6 +146,12 @@ class AutoBackupController extends GetxController {
 
   /// Seçilen yedeği geri yükler: mevcut veri yedekle değiştirilir ve
   /// kütüphane yeniden taranır. Okuma bozuksa false döner, import yapılmaz.
+  /// Gün 7: geri yüklenen ayarlar canlı controller'lara da yansıtılır
+  /// (reloadLiveSettingsControllers) — manuel içe aktarmayla
+  /// (BackupController.importData, Gün 1) aynı sözleşme. Bu yolda Gün 7'ye
+  /// kadar hiçbir controller tazelenmiyordu; tema/EQ/çalma/dil ve Gün 6'da
+  /// reload() kazanmış arama geçmişi + otomatik yedek tercihleri
+  /// yeniden başlatmadan eski görünmeye devam ediyordu.
   Future<bool> restore(AutoBackupEntry entry) async {
     if (isWorking.value) return false;
     isWorking.value = true;
@@ -153,6 +160,7 @@ class AutoBackupController extends GetxController {
       if (model == null) return false;
       await _backupRepo.import(model);
       await _libraryRepo.rescan();
+      await reloadLiveSettingsControllers();
       return true;
     } on Object {
       debugPrint('AutoBackupController: geri yükleme başarısız');
