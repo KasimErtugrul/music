@@ -1753,4 +1753,107 @@ class AppLocalizationsTr extends AppLocalizations {
   String autoBackupSize(int kb) {
     return '$kb KB';
   }
+
+  @override
+  String get settingsLanguageDesc => 'Uygulama arayüzünün dili';
+
+  @override
+  String get themeModeDesc => 'Açık, koyu veya sistem tercihini izle';
+
+  @override
+  String get themeColorSourceDesc =>
+      'Renkler tohumdan, sistemden veya kapaktan türetilir';
+
+  @override
+  String get themePresetSeedDesc => 'Hazır paletlerden bir tohum rengi seçin';
+
+  @override
+  String get themeAmoledOnDesc => 'Koyu modda tam siyah yüzeyler kullanılır';
+
+  @override
+  String get themeHighContrastDesc => 'Daha belirgin kenar ve renk kontrastı';
+
+  @override
+  String get themeSurfaceTintDesc =>
+      'Kart, pencere ve alt gezinme çubuğuna ton uygular';
+
+  @override
+  String get themeRoundedCornersDesc =>
+      'Kart, pencere, menü ve alt sayfa köşelerini yuvarlar';
+
+  @override
+  String get themeDensityDesc => 'Liste ve kontrollerin sıkılığı';
+
+  @override
+  String get themeFontDesc => 'Uygulama genelinde yazı tipi ailesi';
+
+  @override
+  String get themeSeedColorDesc => 'Özel temanın temel rengi';
+
+  @override
+  String get themeAnimationLevelDesc =>
+      'Dekoratif animasyonların kapsamı; Kapalı gölgeleri çizmez';
+
+  @override
+  String get listViewModeTitle => 'Liste düzeni';
+
+  @override
+  String get listViewModeDesc => 'Şarkı listelerinin görünümü';
+
+  @override
+  String get playerBackgroundTitle => 'Arka plan';
+
+  @override
+  String get playerBackgroundDesc => 'Oynatıcının arka plan dokusu';
+
+  @override
+  String get playerArtworkShapeTitle => 'Kapak şekli';
+
+  @override
+  String get playerArtworkShapeDesc => 'Oynatıcıdaki kapak görselinin biçimi';
+
+  @override
+  String get miniPlayerStyleTitle => 'Mini oynatıcı';
+
+  @override
+  String get miniPlayerStyleDesc => 'Oynatıcı üzerindeki mini şeridin düzeni';
+
+  @override
+  String get miniPlayerCompact => 'Kompakt';
+
+  @override
+  String get miniPlayerWide => 'Geniş';
+
+  @override
+  String get seekBarStyleDesc => 'İlerleme çubuğunun biçimi';
+
+  @override
+  String get seekIntervalDesc => 'İleri ve geri sarma adımı';
+
+  @override
+  String get autoResumeDesc => 'Uygulama açılınca çalma kaldığı yerden sürer';
+
+  @override
+  String get pauseOnHeadphoneDesc => 'Kulaklık çıkınca çalma duraklatılır';
+
+  @override
+  String get defaultShuffleDesc =>
+      'Yeni bir kuyruk başlarken karıştırma açık olur';
+
+  @override
+  String get skipSilenceDesc => 'Şarkı içindeki sessiz bölümler atlanır';
+
+  @override
+  String get defaultRepeatDesc => 'Yeni bir kuyruk başlarken uygulanır';
+
+  @override
+  String get minDurationDesc => 'Bu süreden kısa şarkılar kütüphaneye alınmaz';
+
+  @override
+  String get minDurationOff => 'Kapalı';
+
+  @override
+  String minDurationSeconds(int seconds) {
+    return '$seconds sn';
+  }
 }

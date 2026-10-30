@@ -19,8 +19,11 @@ class ListStylePage extends StatelessWidget {
 
         return ListView(
           children: <Widget>[
+            // Gün 12: kutucuğun başlığı ayarın adıdır (eskiden bir seçenek
+            // etiketi olan listViewCompact kullanılıyordu) + alt açıklama.
             SettingsChoiceTile<String>(
-              title: l10n.listViewCompact,
+              title: l10n.listViewModeTitle,
+              subtitle: l10n.listViewModeDesc,
               value: s.listViewMode,
               options: const <String>['compact', 'comfortable', 'grid'],
               labelOf: (v) => switch (v) {

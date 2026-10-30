@@ -20,6 +20,7 @@ import 'package:resonance/presentation/ui/pages/settings/tags_artwork_settings_p
 import 'package:resonance/presentation/ui/pages/settings/notifications/notification_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/widget_settings_page.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
+import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
 import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
 
 /// UI tasarım güncellemesi: Ayarlar ana sayfası artık tasarım dilini izler —
@@ -29,6 +30,10 @@ import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
 /// Arama davranışı Görev 4.2'den aynen korunur: sorgu boş değilken eşleşme
 /// tüm [SettingsRegistry] girdileri üzerinde yapılır (iki dilli) ve sonuç,
 /// hedef sayfaya giden satırlar olarak basılır (pageBuilder + Get.to).
+///
+/// Gün 12: grup kartları ortak [SettingsGroupCard] bileşenine devredildi
+/// (eski özel _NavCard silindi); Dil anahtarı l10n alt açıklama aldı ve
+/// SettingsChoiceTile artık SegmentedButton çiziyor.
 class SettingsHomePage extends StatefulWidget {
   const SettingsHomePage({super.key});
 
@@ -130,13 +135,13 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                 children: <Widget>[
                   if (general.isNotEmpty) ...<Widget>[
                     SettingsSectionHeader(title: l10n.settingsGroupGeneral),
-                    _NavCard(children: [
+                    SettingsGroupCard(children: [
                       ...general.map((e) => _entry(e, l10n, ctrl)),
                     ]),
                   ],
 
                   // --- Genel & motor ---
-                  _NavCard(children: [
+                  SettingsGroupCard(children: [
                     _NavRow(
                       icon: Icons.play_circle_outline,
                       title: l10n.settingsPlayback,
@@ -153,7 +158,7 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
 
                   // --- Kütüphane ve içerik ---
                   SettingsSectionHeader(title: l10n.settingsGroupContent),
-                  _NavCard(children: [
+                  SettingsGroupCard(children: [
                     _NavRow(
                       icon: Icons.folder_special,
                       title: l10n.settingsLibrary,
@@ -184,7 +189,7 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
 
                   // --- Görünüm ---
                   SettingsSectionHeader(title: l10n.settingsGroupAppearance),
-                  _NavCard(children: [
+                  SettingsGroupCard(children: [
                     _NavRow(
                       icon: Icons.palette_outlined,
                       title: l10n.settingsRowAppearance,
@@ -213,7 +218,7 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
 
                   // --- Sistem ---
                   SettingsSectionHeader(title: l10n.settingsGroupSystem),
-                  _NavCard(children: [
+                  SettingsGroupCard(children: [
                     _NavRow(
                       icon: Icons.backup,
                       title: l10n.backupTitle,
@@ -232,7 +237,7 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                   // Yıkıcı eylem en sonda, kendi kartında. Taban l10n
                   // dizgeleri (resetAll / resetConfirm) Gün 6 ile ilk kez
                   // gerçek bir ekrana bağlandı.
-                  _NavCard(children: [
+                  SettingsGroupCard(children: [
                     _NavRow(
                       icon: Icons.restart_alt,
                       title: l10n.resetAll,
@@ -262,6 +267,7 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
       case 'language_code':
         return SettingsChoiceTile<String>(
           title: l10n.settingsLanguage,
+          subtitle: l10n.settingsLanguageDesc,
           value: ctrl.settings.value!.languageCode,
           options: const <String>['system', 'tr', 'en'],
           labelOf: (v) => switch (v) {
@@ -308,28 +314,8 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
   }
 }
 
-/// Kategorik grup kartı: tek yüzeyde toplanmış satırlar (tasarım:
-/// surface-container-low + rounded-xl).
-class _NavCard extends StatelessWidget {
-  const _NavCard({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 8, bottom: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(children: children),
-    );
-  }
-}
-
 /// Kategori satırı: ikon rozeti + başlık + açıklama + chevron.
+/// (Gün 12: grup yüzeyi ortak SettingsGroupCard'a devredildi.)
 class _NavRow extends StatelessWidget {
   const _NavRow({
     required this.icon,

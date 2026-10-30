@@ -5,6 +5,7 @@ import 'package:resonance/presentation/controllers/library_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
+import 'package:resonance/presentation/ui/widgets/settings_tile.dart';
 import 'package:resonance/presentation/ui/pages/settings/excluded_folders_page.dart';
 
 class LibrarySettingsPage extends StatelessWidget {
@@ -29,9 +30,12 @@ class LibrarySettingsPage extends StatelessWidget {
             ),
             SettingsChoiceTile<int>(
               title: l10n.minDuration,
+              subtitle: l10n.minDurationDesc,
               value: lib.minDurationSeconds,
               options: const [0, 30, 60],
-              labelOf: (v) => v == 0 ? 'Yok / None' : '$v s',
+              // Gün 12: süre etiketleri l10n (0 = Kapalı; örn. "30 sn").
+              labelOf: (v) =>
+                  v == 0 ? l10n.minDurationOff : l10n.minDurationSeconds(v),
               onChanged: (v) {
                 ctrl.setMinDuration(v);
                 // Ek-A: Filtre anında uygulansın. Repository, değişen filtre
@@ -40,10 +44,11 @@ class LibrarySettingsPage extends StatelessWidget {
                 Get.find<LibraryController>().reloadSongs();
               },
             ),
-              ListTile(
+            // Gün 12: ortak SettingsTile yüzü + alt açıklama.
+            SettingsTile(
               leading: const Icon(Icons.folder_off_outlined),
-              title: Text(l10n.excludedFolders),
-              trailing: const Icon(Icons.chevron_right),
+              title: l10n.excludedFolders,
+              subtitle: l10n.excludedFoldersDesc,
               onTap: () => Get.to(() => const ExcludedFoldersPage()),
             ),
           ],

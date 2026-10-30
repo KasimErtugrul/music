@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
-import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
 
 class PlayerStylePage extends StatelessWidget {
   const PlayerStylePage({super.key});
@@ -20,9 +19,12 @@ class PlayerStylePage extends StatelessWidget {
 
         return ListView(
           children: <Widget>[
-            const SettingsSectionHeader(title: '—'),
+            // Gün 12: dekoratif '—' başlığı kaldırıldı (tek tasarım dili:
+            // başlıklar gerçek ad taşır); sabit 'Background'/'Artwork shape'
+            // /'Mini player' başlıkları ve 'Wide'/'Compact' etiketleri l10n.
             SettingsChoiceTile<String>(
-              title: 'Background',
+              title: l10n.playerBackgroundTitle,
+              subtitle: l10n.playerBackgroundDesc,
               value: p.backgroundStyle,
               options: const <String>['solid', 'gradient', 'blur'],
               labelOf: (v) => switch (v) {
@@ -34,7 +36,8 @@ class PlayerStylePage extends StatelessWidget {
                   themeCtrl.setPlayer(p.copyWith(backgroundStyle: v)),
             ),
             SettingsChoiceTile<String>(
-              title: 'Artwork shape',
+              title: l10n.playerArtworkShapeTitle,
+              subtitle: l10n.playerArtworkShapeDesc,
               value: p.artworkShape,
               options: const <String>['square', 'rounded', 'circle'],
               labelOf: (v) => switch (v) {
@@ -47,6 +50,7 @@ class PlayerStylePage extends StatelessWidget {
             ),
             SettingsChoiceTile<String>(
               title: l10n.seekBarStyle,
+              subtitle: l10n.seekBarStyleDesc,
               value: p.seekBarStyle == 'waveform' ? 'classic' : p.seekBarStyle,
               options: const <String>['classic', 'thin'],
               labelOf: (v) =>
@@ -55,10 +59,12 @@ class PlayerStylePage extends StatelessWidget {
                   themeCtrl.setPlayer(p.copyWith(seekBarStyle: v)),
             ),
             SettingsChoiceTile<String>(
-              title: 'Mini player',
+              title: l10n.miniPlayerStyleTitle,
+              subtitle: l10n.miniPlayerStyleDesc,
               value: p.miniPlayerStyle,
               options: const <String>['compact', 'wide'],
-              labelOf: (v) => v == 'wide' ? 'Wide' : 'Compact',
+              labelOf: (v) =>
+                  v == 'wide' ? l10n.miniPlayerWide : l10n.miniPlayerCompact,
               onChanged: (v) =>
                   themeCtrl.setPlayer(p.copyWith(miniPlayerStyle: v)),
             ),
@@ -68,6 +74,7 @@ class PlayerStylePage extends StatelessWidget {
             // mini player gölgesi) çizmez; düşük donanımda akıcılık kazandırır.
             SettingsChoiceTile<String>(
               title: l10n.themeAnimationLevel,
+              subtitle: l10n.themeAnimationLevelDesc,
               value: p.animationLevel,
               options: const <String>['full', 'reduced', 'none'],
               labelOf: (v) => switch (v) {

@@ -19,8 +19,11 @@ class PlaybackSettingsPage extends StatelessWidget {
         final p = ctrl.playback.value;
         return ListView(
           children: [
+            // Gün 12: her anahtara l10n alt açıklama; 4 seçenekli sarma
+            // süresi SettingsChoiceTile'da alt sayfa radyo listesi açar.
             SettingsChoiceTile<int>(
               title: l10n.seekInterval,
+              subtitle: l10n.seekIntervalDesc,
               value: p.seekIntervalSeconds,
               options: const [5, 10, 15, 30],
               labelOf: (v) => l10n.seekIntervalValue(v),
@@ -28,21 +31,25 @@ class PlaybackSettingsPage extends StatelessWidget {
             ),
             SettingsSwitchTile(
               title: l10n.autoResume,
+              subtitle: l10n.autoResumeDesc,
               value: p.autoResume,
               onChanged: ctrl.setAutoResume,
             ),
             SettingsSwitchTile(
               title: l10n.pauseOnHeadphone,
+              subtitle: l10n.pauseOnHeadphoneDesc,
               value: p.pauseOnHeadphone,
               onChanged: ctrl.setPauseOnHeadphone,
             ),
             SettingsSwitchTile(
               title: l10n.defaultShuffle,
+              subtitle: l10n.defaultShuffleDesc,
               value: p.defaultShuffle,
               onChanged: ctrl.setDefaultShuffle,
             ),
             SettingsSwitchTile(
               title: l10n.skipSilence,
+              subtitle: l10n.skipSilenceDesc,
               value: p.skipSilence,
               onChanged: ctrl.setSkipSilence,
             ),
@@ -61,6 +68,7 @@ class PlaybackSettingsPage extends StatelessWidget {
             ),
             SettingsChoiceTile<int>(
               title: l10n.defaultRepeat,
+              subtitle: l10n.defaultRepeatDesc,
               value: p.defaultRepeat,
               options: const [0, 1, 2],
               labelOf: (v) => switch (v) {

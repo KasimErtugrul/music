@@ -3265,6 +3265,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{kb} KB'**
   String autoBackupSize(int kb);
+
+  /// No description provided for @settingsLanguageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Language of the app interface'**
+  String get settingsLanguageDesc;
+
+  /// No description provided for @themeModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Light, dark, or follow system preference'**
+  String get themeModeDesc;
+
+  /// No description provided for @themeColorSourceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors derived from a seed, system, or artwork'**
+  String get themeColorSourceDesc;
+
+  /// No description provided for @themePresetSeedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a seed color from preset palettes'**
+  String get themePresetSeedDesc;
+
+  /// No description provided for @themeAmoledOnDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses true black surfaces in dark mode'**
+  String get themeAmoledOnDesc;
+
+  /// No description provided for @themeHighContrastDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Stronger borders and enhanced color contrast'**
+  String get themeHighContrastDesc;
+
+  /// No description provided for @themeSurfaceTintDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies a color tint to cards, dialogs, and navigation bars'**
+  String get themeSurfaceTintDesc;
+
+  /// No description provided for @themeRoundedCornersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds the corners of cards, dialogs, menus, and sheets'**
+  String get themeRoundedCornersDesc;
+
+  /// No description provided for @themeDensityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Spacing and compactness of lists and controls'**
+  String get themeDensityDesc;
+
+  /// No description provided for @themeFontDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Font family used throughout the app'**
+  String get themeFontDesc;
+
+  /// No description provided for @themeSeedColorDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Base color for the custom theme'**
+  String get themeSeedColorDesc;
+
+  /// No description provided for @themeAnimationLevelDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Extent of decorative animations; \'Off\' removes shadows'**
+  String get themeAnimationLevelDesc;
+
+  /// No description provided for @listViewModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'List layout'**
+  String get listViewModeTitle;
+
+  /// No description provided for @listViewModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'How song lists are displayed'**
+  String get listViewModeDesc;
+
+  /// No description provided for @playerBackgroundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get playerBackgroundTitle;
+
+  /// No description provided for @playerBackgroundDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Background texture/style of the player'**
+  String get playerBackgroundDesc;
+
+  /// No description provided for @playerArtworkShapeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Artwork shape'**
+  String get playerArtworkShapeTitle;
+
+  /// No description provided for @playerArtworkShapeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape of the cover art in the player'**
+  String get playerArtworkShapeDesc;
+
+  /// No description provided for @miniPlayerStyleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mini player'**
+  String get miniPlayerStyleTitle;
+
+  /// No description provided for @miniPlayerStyleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout style of the mini player bar'**
+  String get miniPlayerStyleDesc;
+
+  /// No description provided for @miniPlayerCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact'**
+  String get miniPlayerCompact;
+
+  /// No description provided for @miniPlayerWide.
+  ///
+  /// In en, this message translates to:
+  /// **'Wide'**
+  String get miniPlayerWide;
+
+  /// No description provided for @seekBarStyleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Style of the progress bar'**
+  String get seekBarStyleDesc;
+
+  /// No description provided for @seekIntervalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward and rewind step duration'**
+  String get seekIntervalDesc;
+
+  /// No description provided for @autoResumeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Resumes playback from where it left off when the app opens'**
+  String get autoResumeDesc;
+
+  /// No description provided for @pauseOnHeadphoneDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pauses playback when headphones are disconnected'**
+  String get pauseOnHeadphoneDesc;
+
+  /// No description provided for @defaultShuffleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enables shuffle automatically when starting a new queue'**
+  String get defaultShuffleDesc;
+
+  /// No description provided for @skipSilenceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Skips silent parts within tracks'**
+  String get skipSilenceDesc;
+
+  /// No description provided for @defaultRepeatDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied when starting a new queue'**
+  String get defaultRepeatDesc;
+
+  /// No description provided for @minDurationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude songs shorter than this from your library'**
+  String get minDurationDesc;
+
+  /// No description provided for @minDurationOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get minDurationOff;
+
+  /// No description provided for @minDurationSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String minDurationSeconds(int seconds);
 }
 
 class _AppLocalizationsDelegate

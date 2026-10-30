@@ -1757,4 +1757,112 @@ class AppLocalizationsEn extends AppLocalizations {
   String autoBackupSize(int kb) {
     return '$kb KB';
   }
+
+  @override
+  String get settingsLanguageDesc => 'Language of the app interface';
+
+  @override
+  String get themeModeDesc => 'Light, dark, or follow system preference';
+
+  @override
+  String get themeColorSourceDesc =>
+      'Colors derived from a seed, system, or artwork';
+
+  @override
+  String get themePresetSeedDesc => 'Pick a seed color from preset palettes';
+
+  @override
+  String get themeAmoledOnDesc => 'Uses true black surfaces in dark mode';
+
+  @override
+  String get themeHighContrastDesc =>
+      'Stronger borders and enhanced color contrast';
+
+  @override
+  String get themeSurfaceTintDesc =>
+      'Applies a color tint to cards, dialogs, and navigation bars';
+
+  @override
+  String get themeRoundedCornersDesc =>
+      'Rounds the corners of cards, dialogs, menus, and sheets';
+
+  @override
+  String get themeDensityDesc =>
+      'Spacing and compactness of lists and controls';
+
+  @override
+  String get themeFontDesc => 'Font family used throughout the app';
+
+  @override
+  String get themeSeedColorDesc => 'Base color for the custom theme';
+
+  @override
+  String get themeAnimationLevelDesc =>
+      'Extent of decorative animations; \'Off\' removes shadows';
+
+  @override
+  String get listViewModeTitle => 'List layout';
+
+  @override
+  String get listViewModeDesc => 'How song lists are displayed';
+
+  @override
+  String get playerBackgroundTitle => 'Background';
+
+  @override
+  String get playerBackgroundDesc => 'Background texture/style of the player';
+
+  @override
+  String get playerArtworkShapeTitle => 'Artwork shape';
+
+  @override
+  String get playerArtworkShapeDesc => 'Shape of the cover art in the player';
+
+  @override
+  String get miniPlayerStyleTitle => 'Mini player';
+
+  @override
+  String get miniPlayerStyleDesc => 'Layout style of the mini player bar';
+
+  @override
+  String get miniPlayerCompact => 'Compact';
+
+  @override
+  String get miniPlayerWide => 'Wide';
+
+  @override
+  String get seekBarStyleDesc => 'Style of the progress bar';
+
+  @override
+  String get seekIntervalDesc => 'Forward and rewind step duration';
+
+  @override
+  String get autoResumeDesc =>
+      'Resumes playback from where it left off when the app opens';
+
+  @override
+  String get pauseOnHeadphoneDesc =>
+      'Pauses playback when headphones are disconnected';
+
+  @override
+  String get defaultShuffleDesc =>
+      'Enables shuffle automatically when starting a new queue';
+
+  @override
+  String get skipSilenceDesc => 'Skips silent parts within tracks';
+
+  @override
+  String get defaultRepeatDesc => 'Applied when starting a new queue';
+
+  @override
+  String get minDurationDesc =>
+      'Exclude songs shorter than this from your library';
+
+  @override
+  String get minDurationOff => 'Off';
+
+  @override
+  String minDurationSeconds(int seconds) {
+    return '${seconds}s';
+  }
 }

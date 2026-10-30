@@ -29,6 +29,7 @@ class ThemeSettingsPage extends StatelessWidget {
             SettingsSectionHeader(title: l10n.themeGroupMode),
             SettingsChoiceTile<ThemeMode>(
               title: l10n.settingsThemeMode,
+              subtitle: l10n.themeModeDesc,
               value: s.themeMode,
               options: ThemeMode.values,
               labelOf: (m) => switch (m) {
@@ -52,7 +53,7 @@ class ThemeSettingsPage extends StatelessWidget {
                   title: Text(
                     '${s.scheduledDarkStartHour.toString().padLeft(2, '0')}:${s.scheduledDarkStartMinute.toString().padLeft(2, '0')}'
                     ' - '
-                    '${s.scheduledDarkEndHour.toString().padLeft(2, '0')}:${s.scheduledDarkEndMinute.toString().padLeft(2, '0')}',
+                    '${s.scheduledDarkEndHour.toString().padLeft(2, '0')}:${s.scheduledDarkEndMinute.toString().padLeft(2, '0')}'
                   ),
                   onTap: () async {
                     final start = await showTimePicker(
@@ -77,24 +78,30 @@ class ThemeSettingsPage extends StatelessWidget {
 
             // --- Renk ---
             SettingsSectionHeader(title: l10n.themeGroupColor),
+            // Gün 12: başlık ve seçenek etiketleri l10n'a taşındı (Galeri
+            // sayfasıyla aynı anahtarlar: themeColorSource / themeSource*).
             SettingsChoiceTile<String>(
-              title: 'Color source',
+              title: l10n.themeColorSource,
+              subtitle: l10n.themeColorSourceDesc,
               value: s.themeSource,
               options: const ['seed', 'system', 'artwork'],
               labelOf: (v) => switch (v) {
-                'system' => 'System (Material You)',
-                'artwork' => 'From artwork',
-                _ => 'Custom seed',
+                'system' => l10n.themeSourceSystem,
+                'artwork' => l10n.themeSourceArtwork,
+                _ => l10n.themeSourceSeed,
               },
               onChanged: themeCtrl.setThemeSource,
             ),
             if (s.themeSource == 'seed')
               SettingsChoiceTile<String>(
                 title: l10n.themePresetSeed,
+                subtitle: l10n.themePresetSeedDesc,
                 // Gün 3: palet seçim durumu artık gerçek tohumdan türetilir;
                 // eskiden değer sabit 'default' idi ve seçili palet hiç
                 // gösterilmiyordu. Tohum bir palete denk gelmezse (özel
-                // renk) DropdownButton sözleşmesi için 'default' kullanılır.
+                // renk) 'default' yedek değeri kullanılır — davranış
+                // korunur (Gün 12: bu bileşen artık alt sayfa açar,
+                // DropdownButton kaldırıldı).
                 value: ThemePresets.all
                         .where((p) => p.seed == s.seedColor)
                         .map((p) => p.id)
@@ -109,16 +116,19 @@ class ThemeSettingsPage extends StatelessWidget {
               ),
             SettingsSwitchTile(
               title: l10n.themeAmoledOn,
+              subtitle: l10n.themeAmoledOnDesc,
               value: s.amoled,
               onChanged: themeCtrl.setAmoled,
             ),
             SettingsSwitchTile(
               title: l10n.themeHighContrast,
+              subtitle: l10n.themeHighContrastDesc,
               value: s.highContrast,
               onChanged: themeCtrl.setHighContrast,
             ),
             SettingsSwitchTile(
               title: l10n.themeSurfaceTint,
+              subtitle: l10n.themeSurfaceTintDesc,
               value: s.surfaceTint,
               onChanged: themeCtrl.setSurfaceTint,
             ),
@@ -127,11 +137,13 @@ class ThemeSettingsPage extends StatelessWidget {
             SettingsSectionHeader(title: l10n.themeGroupShape),
             SettingsSwitchTile(
               title: l10n.themeRoundedCorners,
+              subtitle: l10n.themeRoundedCornersDesc,
               value: s.roundedCorners,
               onChanged: themeCtrl.setRoundedCorners,
             ),
             SettingsChoiceTile<VisualDensity>(
               title: l10n.themeDensity,
+              subtitle: l10n.themeDensityDesc,
               value: s.density,
               options: const <VisualDensity>[
                 VisualDensity.compact,
@@ -150,6 +162,7 @@ class ThemeSettingsPage extends StatelessWidget {
             SettingsSectionHeader(title: l10n.themeGroupFont),
             SettingsChoiceTile<String>(
               title: l10n.themeFont,
+              subtitle: l10n.themeFontDesc,
               value: s.fontFamily,
               options: FontRegistry.fonts.map((f) => f.family).toList(),
               labelOf: (family) =>
@@ -158,7 +171,9 @@ class ThemeSettingsPage extends StatelessWidget {
             ),
 
             // --- Önizleme ---
-            const SettingsSectionHeader(title: '—'),
+            // Gün 12: '—' başlığı yerine gerçek bölüm adı (mevcut l10n
+            // anahtarı: themePreviewTitle).
+            SettingsSectionHeader(title: l10n.themePreviewTitle),
             Padding(
               padding: const EdgeInsets.all(16),
               child: ThemePreviewCard(settings: s),
