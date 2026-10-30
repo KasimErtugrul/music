@@ -47,6 +47,11 @@ class EqualizerController extends GetxController {
     _init();
   }
 
+  /// Gün 1: yedek içe aktarma sonrası kalıcı EQ durumunu (anahtar, bant
+  /// kazançları, loudness) yeniden okuyup donanıma uygular. [_init] zaten
+  /// kayıtlı değerleri okuyup geri yüklediği için aynı yol izlenir.
+  Future<void> reload() => _init();
+
   Future<void> _init() async {
     isLoading.value = true;
     try {

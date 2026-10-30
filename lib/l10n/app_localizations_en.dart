@@ -1234,6 +1234,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeImportInvalid => 'Invalid theme file';
 
   @override
+  String get themeScheduledDark => 'Scheduled dark mode';
+
+  @override
+  String get themeScheduledDarkDesc =>
+      'Switches to dark mode between the hours you set';
+
+  @override
+  String get themeExportFailed => 'Could not create the theme file';
+
+  @override
   String get backupNoAudioNote =>
       'Music files (.flac, .mp3) are not included in the backup';
 

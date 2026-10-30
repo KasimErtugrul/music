@@ -19,6 +19,13 @@ class PlaybackSettingsModel {
   final int defaultRepeat;
   final double speed;
   final double pitch;
+
+  /// Gün 2: KULLANILMIYOR. just_audio, setAudioSources ile yüklenen
+  /// kuyruklarda kesintisiz geçişi zaten varsayılan olarak sağlar; hiçbir
+  /// şey yapmayan "Kesintisiz oynatma" anahtarı ayar sayfasından
+  /// kaldırıldı. Alan, eski JSON'ların okunabilirliği (Gün 10'a kadar
+  /// fromJson/toJson sözleşmesi) ve yedek uyumluluğu için korunur; okunur
+  /// ama hiçbir tüketici yoktur.
   final bool gapless;
   final bool skipSilence;
   final bool replayGain;

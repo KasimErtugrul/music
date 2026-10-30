@@ -31,7 +31,9 @@ class ThemeEditorController extends GetxController {
     }
 
     // Kaydettikten sonra aktif temayı hemen uygula.
-    Get.find<ThemeController>().setSettings(settings.value);
+    // Gün 3 (Karar): özel tema yalnız renk/şekil alanlarıyla uygulanır;
+    // kullanıcının mod/yazı tipi/ölçek/liste tercihleri korunur.
+    Get.find<ThemeController>().applyCustomTheme(settings.value);
   }
 
   void setSeedColor(int colorValue) {

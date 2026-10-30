@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mocktail/mocktail.dart';
@@ -42,6 +43,8 @@ void main() {
     registerFallbackValue(const SongSort());
     registerFallbackValue(const PlaybackSettingsModel());
     registerFallbackValue(const LibrarySettingsModel());
+    // Gün 2: playSong artık setRepeatMode çağırıyor → fallback şart
+    registerFallbackValue(AudioServiceRepeatMode.none);
   });
 
   setUp(() {
@@ -81,6 +84,9 @@ void main() {
     when(() => repo.setSpeed(any())).thenAnswer((_) async {});
     when(() => repo.setPitch(any())).thenAnswer((_) async {});
     when(() => repo.setSkipSilenceEnabled(any())).thenAnswer((_) async {});
+    // Gün 2: playSong artık varsayılan shuffle/tekrarı da uyguluyor → mock şart
+    when(() => repo.setShuffleMode(any())).thenAnswer((_) async {});
+    when(() => repo.setRepeatMode(any())).thenAnswer((_) async {});
 
     controller = PlayerController(repo, libRepo, stateRepo, historyRepo);
     controller.onInit();

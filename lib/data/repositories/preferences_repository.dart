@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:resonance/core/settings/settings_persistence.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/data/models/playback_settings_model.dart';
 import 'package:resonance/data/models/library_settings_model.dart';
@@ -15,8 +16,10 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
   PreferencesRepositoryImpl(this._prefs);
   final SharedPreferences _prefs;
 
-  static const _kPlayback = 'playback_settings';
-  static const _kLibrary = 'library_settings';
+  // Gün 1: anahtar dizgeleri SettingsPersistence'tan gelir; yedek listesiyle
+  // ayrışamaz (tek doğruluk kaynağı).
+  static const _kPlayback = SettingsPersistence.playbackSettings;
+  static const _kLibrary = SettingsPersistence.librarySettings;
 
   @override
   Future<PlaybackSettingsModel> loadPlayback() async {

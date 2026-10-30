@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:resonance/core/theme/theme_engine.dart';
 import 'package:resonance/core/theme/theme_presets.dart';
 import 'package:resonance/data/models/custom_theme_model.dart';
@@ -200,7 +201,9 @@ class ThemeGalleryPage extends StatelessWidget {
                       name: theme.name,
                       seed: theme.settings.seedColor,
                       isSelected: false,
-                      onTap: () => themeCtrl.setSettings(theme.settings),
+                      // Gün 3 (Karar): özel tema yalnız renk/şekil alanlarıyla
+                      // uygulanır (ThemeController.applyCustomTheme).
+                      onTap: () => themeCtrl.applyCustomTheme(theme.settings),
                       onLongPress: () =>
                           _showThemeOptions(context, theme, customRepo),
                     );
@@ -263,8 +266,7 @@ class ThemeGalleryPage extends StatelessWidget {
               title: Text(l10n.commonExport),
               onTap: () {
                 Navigator.pop(sheetCtx);
-                final jsonStr = jsonEncode(theme.settings.toJson());
-                SharePlus.instance.share(ShareParams(text: jsonStr));
+                _exportTheme(context, theme);
               },
             ),
             ListTile(
@@ -283,6 +285,38 @@ class ThemeGalleryPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Gün 3: tema dışa aktarma artık düz metin değil, geçici dizine yazılan
+  /// .json DOSYASI olarak paylaşılır (mevcut path_provider + share_plus ile;
+  /// yeni bağımlılık yok). Alıcı taraf dosyayı "Tema içe aktar" ile açar.
+  Future<void> _exportTheme(
+    BuildContext context,
+    CustomThemeModel theme,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final dir = await getTemporaryDirectory();
+      final safeName = theme.name
+          .replaceAll(RegExp(r'[^\w\- ]'), '')
+          .trim()
+          .replaceAll(' ', '_');
+      final fileName =
+          '${safeName.isEmpty ? 'tema' : safeName}.json';
+      final file = File('${dir.path}${Platform.pathSeparator}$fileName');
+      await file.writeAsString(
+        const JsonEncoder.withIndent('  ').convert(theme.settings.toJson()),
+      );
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], subject: theme.name),
+      );
+    } on Object {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.themeExportFailed)),
+        );
+      }
+    }
   }
 
   Future<void> _importTheme(
@@ -304,7 +338,9 @@ class ThemeGalleryPage extends StatelessWidget {
     try {
       final map = jsonDecode(content) as Map<String, dynamic>;
       final settings = ThemeSettings.fromJson(map);
-      themeCtrl.setSettings(settings);
+      // Gün 3 (Karar): içe aktarılan tema da yalnız renk/şekil alanlarıyla
+      // uygulanır; kullanıcının mod/yazı tipi/liste tercihleri korunur.
+      themeCtrl.applyCustomTheme(settings);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.themeImported)),

@@ -3,10 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:resonance/data/datasources/audio_effects_datasource.dart';
+import 'package:resonance/data/datasources/metadata_datasource.dart';
 import 'package:resonance/data/models/library_settings_model.dart';
 import 'package:resonance/data/models/playback_settings_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/history_repository.dart';
+import 'package:resonance/data/repositories/equalizer_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
 import 'package:resonance/data/repositories/preferences_repository.dart';
@@ -19,6 +22,9 @@ class _MockLibraryRepository extends Mock implements LibraryRepository {}
 class _MockQueueStateRepository extends Mock implements QueueStateRepository {}
 class _MockHistoryRepository extends Mock implements HistoryRepository {}
 class _MockPreferencesRepository extends Mock implements PreferencesRepository {}
+class _MockAudioEffectsDatasource extends Mock implements AudioEffectsDatasource {}
+class _MockMetadataDatasource extends Mock implements MetadataDatasource {}
+class _MockEqualizerRepository extends Mock implements EqualizerRepository {}
 
 SongModel _song(int id, String title) => SongModel(
       id: id,
@@ -57,6 +63,8 @@ void main() {
 
     when(() => prefRepo.loadPlayback()).thenAnswer((_) async => const PlaybackSettingsModel());
     when(() => prefRepo.loadLibrary()).thenAnswer((_) async => const LibrarySettingsModel());
+    // Gün 2 testleri prefCtrl setter'larını kullanıyor → kalıcılık stub'u şart
+    when(() => prefRepo.savePlayback(any())).thenAnswer((_) async {});
 
     prefCtrl = PreferencesController(prefRepo);
     Get.put<PreferencesController>(prefCtrl);
@@ -81,6 +89,9 @@ void main() {
     when(() => repo.setSpeed(any())).thenAnswer((_) async {});
     when(() => repo.setPitch(any())).thenAnswer((_) async {});
     when(() => repo.setSkipSilenceEnabled(any())).thenAnswer((_) async {});
+    // Gün 2: playSong artık varsayılan shuffle/tekrarı da uyguluyor → mock şart
+    when(() => repo.setShuffleMode(any())).thenAnswer((_) async {});
+    when(() => repo.setRepeatMode(any())).thenAnswer((_) async {});
 
     controller = PlayerController(repo, libRepo, stateRepo, historyRepo);
     controller.onInit();
@@ -162,6 +173,136 @@ void main() {
 
       controller.showMiniPlayer();
       expect(controller.miniPlayerHidden.value, isFalse);
+    });
+  });
+
+  group('Gün 2: canlı tercih uygulaması', () {
+    // Test başlamadan disk yüklemesi ve _restoreQueue tamamen bitsin;
+    // aksi halde _isRestoring koruması yarış yapar.
+    Future<void> settle() async {
+      await prefCtrl.ready;
+      await Future<void>.delayed(Duration.zero);
+    }
+
+    test('skipSilence alanı değişince çalan oynatıcıya canlı uygulanır', () async {
+      await settle();
+      clearInteractions(repo);
+
+      prefCtrl.setSkipSilence(true);
+      await Future<void>.delayed(Duration.zero);
+
+      verify(() => repo.setSkipSilenceEnabled(true)).called(1);
+    });
+
+    test('alakasız alan değişimi (seekInterval) skipSilence uygulamasını tetiklemez', () async {
+      await settle();
+      clearInteractions(repo);
+
+      prefCtrl.setSeekInterval(30);
+      await Future<void>.delayed(Duration.zero);
+
+      verifyNever(() => repo.setSkipSilenceEnabled(any()));
+      expect(prefCtrl.playback.value.seekIntervalSeconds, 30);
+    });
+
+    test('replayGain açılınca çalan parçaya anında uygulanır', () async {
+      await settle();
+      final song = _song(1, 'A');
+      controller.songQueue.assignAll([song]);
+      controller.currentItem.value = MediaItem(id: song.uri, title: 'A');
+
+      final effects = _MockAudioEffectsDatasource();
+      final meta = _MockMetadataDatasource();
+      Get.put<AudioEffectsDatasource>(effects);
+      Get.put<MetadataDatasource>(meta);
+      when(() => meta.replayGainDb(any())).thenAnswer((_) async => 3.0);
+      when(() => effects.setLoudnessEnabled(any())).thenAnswer((_) async {});
+      when(() => effects.setLoudnessGain(any())).thenAnswer((_) async {});
+
+      prefCtrl.setReplayGain(true);
+      await Future<void>.delayed(Duration.zero);
+
+      verify(() => meta.replayGainDb(song)).called(1);
+      verify(() => effects.setLoudnessEnabled(true)).called(1);
+      verify(() => effects.setLoudnessGain(3.0)).called(1);
+    });
+
+    test('replayGain kapatılınca manuel loudness kanalına döner', () async {
+      await settle();
+      final song = _song(2, 'B');
+      controller.songQueue.assignAll([song]);
+      controller.currentItem.value = MediaItem(id: song.uri, title: 'B');
+
+      final effects = _MockAudioEffectsDatasource();
+      final meta = _MockMetadataDatasource();
+      final eqRepo = _MockEqualizerRepository();
+      Get.put<AudioEffectsDatasource>(effects);
+      Get.put<MetadataDatasource>(meta);
+      Get.put<EqualizerRepository>(eqRepo);
+      when(() => meta.replayGainDb(any())).thenAnswer((_) async => 2.0);
+      when(() => effects.setLoudnessEnabled(any())).thenAnswer((_) async {});
+      when(() => effects.setLoudnessGain(any())).thenAnswer((_) async {});
+      when(() => eqRepo.loadLoudness()).thenReturn(null);
+      when(() => eqRepo.isEnabled()).thenAnswer((_) async => false);
+
+      // Önce açık (başlangıç değeri false), sonra kapat: kapalı yolu izole etmek için
+      // ikinci geçişten önceki etkileşimler temizlenir.
+      prefCtrl.setReplayGain(true);
+      await Future<void>.delayed(Duration.zero);
+      clearInteractions(effects);
+
+      prefCtrl.setReplayGain(false);
+      await Future<void>.delayed(Duration.zero);
+
+      verify(() => effects.setLoudnessEnabled(false)).called(1);
+      verify(() => effects.setLoudnessGain(0.0)).called(1);
+    });
+
+    test('çalan parça yokken replayGain değişimi hiçbir şeye dokunmaz', () async {
+      await settle();
+      final effects = _MockAudioEffectsDatasource();
+      final meta = _MockMetadataDatasource();
+      Get.put<AudioEffectsDatasource>(effects);
+      Get.put<MetadataDatasource>(meta);
+      when(() => meta.replayGainDb(any())).thenAnswer((_) async => 1.0);
+
+      prefCtrl.setReplayGain(true);
+      await Future<void>.delayed(Duration.zero);
+
+      verifyNever(() => meta.replayGainDb(any()));
+      verifyNever(() => effects.setLoudnessEnabled(any()));
+    });
+
+    test('playSong yeni kuyrukta varsayılan shuffle/tekrarı uygular ve Rx senkronlar', () async {
+      await settle();
+      prefCtrl.setDefaultShuffle(true);
+      prefCtrl.setDefaultRepeat(2);
+      clearInteractions(repo);
+
+      await controller.playSong(_song(5, 'E'));
+
+      verify(() => repo.setShuffleMode(true)).called(1);
+      verify(() => repo.setRepeatMode(AudioServiceRepeatMode.one)).called(1);
+      expect(controller.shuffleEnabled.value, isTrue);
+      expect(controller.repeatMode.value, AudioServiceRepeatMode.one);
+    });
+
+    test('yeni kuyruk önceki manuel shuffle durumunu varsayılanla ezer', () async {
+      await settle();
+      expect(controller.shuffleEnabled.value, isFalse);
+
+      await controller.toggleShuffle(); // kullanıcının manuel tercihi
+      expect(controller.shuffleEnabled.value, isTrue);
+
+      // Geri yükleme düşüşü (fallback) ve toggle de desteği işaretledi;
+      // yalnız playSong'un kendi çağrısını izole etmek için temizle.
+      clearInteractions(repo);
+
+      // defaultShuffle=false: yeni kuyruk manuel durumu varsayılanla değiştirir.
+      await controller.playSong(_song(6, 'F'));
+
+      verify(() => repo.setShuffleMode(false)).called(1);
+      expect(controller.shuffleEnabled.value, isFalse);
     });
   });
 }

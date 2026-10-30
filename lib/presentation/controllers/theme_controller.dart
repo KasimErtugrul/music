@@ -71,6 +71,18 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  /// Gün 1: yedek içe aktarma sonrası kayıtlı temayı yeniden okuyup uygular.
+  /// Açılıştaki [_loadActive] ile aynı yolu izler; yalnızca isLoading'i
+  /// dokunmaz (açılış göstergesi değil, canlı güncelleme).
+  Future<void> reload() async {
+    final loaded = await _repo.loadActiveTheme();
+    if (loaded != null) settings.value = loaded;
+    _applyThemeIfChanged(force: true);
+    if (settings.value.themeSource == 'system') {
+      await _loadSystemScheme();
+    }
+  }
+
   /// Görev 3.1: Material You (Android 12+ dinamik renk) şeması.
   ///
   /// ÖNEMLİ (pub.dev API + changelog + paket kaynağıyla doğrulandı):
@@ -203,16 +215,26 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
   }
 
   void _update(ThemeSettings next) {
+    // Gün 3: önce/sonra karşılaştırması — pahalı işler (kapak yeniden okuma,
+    // Material You sorgusu) yalnız kaynak GERÇEKTEN değiştiğinde yapılır.
+    // Eskiden her alan değişiminde (ör. amoled anahtarı) artwork/system
+    // kanalı yeniden kuruluyordu.
+    final prev = settings.value;
+    final sourceChanged = prev.themeSource != next.themeSource;
+
     settings.value = next;
     _repo.saveActiveTheme(next);
-    if (next.themeSource == 'artwork') {
-      _updateArtworkTheme(_lastMediaItem); // Hata veren Get.find kaldırıldı, son item kullanılıyor
-    } else if (next.themeSource == 'system') {
-      // Görev 3.1: sistem paleti kanalı (Material You).
-      _loadSystemScheme();
-    } else {
-      _lightArtworkScheme = null;
-      _darkArtworkScheme = null;
+
+    if (sourceChanged) {
+      if (next.themeSource == 'artwork') {
+        _updateArtworkTheme(_lastMediaItem); // Hata veren Get.find kaldırıldı, son item kullanılıyor
+      } else if (next.themeSource == 'system') {
+        // Görev 3.1: sistem paleti kanalı (Material You).
+        _loadSystemScheme();
+      } else {
+        _lightArtworkScheme = null;
+        _darkArtworkScheme = null;
+      }
     }
     _applyThemeIfChanged(force: true);
   }
@@ -231,7 +253,11 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
   ThemeMode get themeMode => _computeThemeMode();
 
   ThemeMode _computeThemeMode() {
-    if (settings.value.themeMode == ThemeMode.system && _isScheduledTime()) {
+    // Gün 3 (Karar): zamanlama yalnız scheduledDarkEnabled açıkken uygulanır;
+    // kapalıyken saklanan saat aralığı yok sayılır.
+    if (settings.value.themeMode == ThemeMode.system &&
+        settings.value.scheduledDarkEnabled &&
+        _isScheduledTime()) {
       return ThemeMode.dark;
     }
     return settings.value.themeMode;
@@ -261,6 +287,37 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
   void setTextScale(double s) => _update(settings.value.copyWith(textScale: s));
   void setPlayer(PlayerThemeExtension p) => _update(settings.value.copyWith(player: p));
   void setListViewMode(String m) => _update(settings.value.copyWith(listViewMode: m));
+
+  /// Gün 3 (Karar): zamanlanmış koyu mod anahtarı.
+  void setScheduledDarkEnabled(bool v) =>
+      _update(settings.value.copyWith(scheduledDarkEnabled: v));
+
+  /// Gün 3: özel tema uygulaması — Karar uyarınca yalnız RENK ve ŞEKİL
+  /// alanları alınır (seed/amoled/highContrast/surfaceTint/roundedCorners/
+  /// density). Mod, kaynak, yazı tipi, yazı ölçeği, oynatıcı stili, liste
+  /// görünümü ve zamanlama saatleri kullanıcının kendi tercihleri olarak
+  /// korunur.
+  void applyCustomTheme(ThemeSettings custom) => _update(settings.value.copyWith(
+        seedColor: custom.seedColor,
+        amoled: custom.amoled,
+        highContrast: custom.highContrast,
+        surfaceTint: custom.surfaceTint,
+        roundedCorners: custom.roundedCorners,
+        density: custom.density,
+      ));
+
+  /// Gün 3: yazı ölçeği sürükleme önizlemesi. Rx'i günceller ve uygulamayı
+  /// yeniden çizer (mevcut yeniden çizim mekanizması: zorunlu mod uygulaması)
+  /// ama diske YAZMAZ; kalıcılık yalnız [commitTextScale] yapar. Böylece
+  /// kaydırıcı her kadimde SharedPreferences'a yazılmaz.
+  void previewTextScale(double s) {
+    settings.value = settings.value.copyWith(textScale: s);
+    _applyThemeIfChanged(force: true);
+  }
+
+  /// Gün 3: sürükleme bırakıldığında önizlenen ölçeği diske yazar.
+  Future<void> commitTextScale() => _repo.saveActiveTheme(settings.value);
+
   void setScheduledDark(int startH, int startM, int endH, int endM) =>
       _update(settings.value.copyWith(
         scheduledDarkStartHour: startH, scheduledDarkStartMinute: startM,

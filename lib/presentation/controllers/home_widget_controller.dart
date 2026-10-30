@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:resonance/data/datasources/home_widget_datasource.dart';
+import 'package:resonance/core/settings/settings_persistence.dart';
 import 'package:resonance/data/repositories/home_widget_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
@@ -88,7 +89,7 @@ class HomeWidgetController extends GetxController {
         title: current?.title ?? '',
         artist: current?.artist ?? '',
         isPlaying: current != null && _player.isPlaying.value,
-        isTransparent: _prefs.getBool('widget_transparent') ?? false,
+        isTransparent: _prefs.getBool(SettingsPersistence.widgetTransparent) ?? false,
       );
     } catch (e, st) {
       debugPrint('Widget güncelleme hatası: $e\n$st');
@@ -100,9 +101,14 @@ class HomeWidgetController extends GetxController {
   int? _songIdFromUri(String uri) => int.tryParse(uri.split('/').last);
 
   Future<void> setTransparency(bool value) async {
-    await _prefs.setBool('widget_transparent', value);
+    await _prefs.setBool(SettingsPersistence.widgetTransparent, value);
     await _requestSync();
   }
+
+  /// Gün 1: yedek içe aktarma sonrası widget'ı güncel tercihlerle yeniden
+  /// yazar. [_sync] şeffaflık tercihini her turda taze okuduğu için tek
+  /// senkron turu yeterlidir.
+  Future<void> reload() => _requestSync();
 
   @override
   void onClose() {

@@ -42,18 +42,22 @@ class ResonanceApp extends StatelessWidget {
         supportedLocales: AppLocalizations.supportedLocales,
         initialRoute: initialRoute,
         getPages: AppPages.routes,
-        // Görev 1.6: Yazı ölçeği (textScale) artık tüm uygulamaya uygulanıyor.
-        // Bu ölçek, sistem erişilebilirlik ölçeğiyle ÇARPILIR; 1.00 değeri
-        // "sistem ölçeğini aynen devral" anlamına gelir. Okuma, Obx kapsamında
-        // themeCtrl.settings.value üzerinden yapıldığı için ölçek değişimi
-        // uygulamayı anında yeniden çizer; değer zaten active_theme_settings
-        // JSON'unda saklandığından ek kalıcılık gerekmez.
+        // Görev 1.6: Yazı ölçeği (textScale) tüm uygulamaya uygulanır.
+        // Gün 3 düzeltmesi (Karar): yorum "sistem ölçeğiyle ÇARPILIR" diyordu
+        // ama kod TextScaler.linear(scale) ile SİSTEM ölçeğini eziyordu; artık
+        // gerçekten çarpılır ve bileşke değer 0.5–2.0'a kırpılır. 1.00 değeri
+        // "sistem ölçeğini aynen devral" anlamına gelir.
         builder: (context, child) {
-          final scale =
-              themeCtrl.settings.value.textScale.clamp(0.5, 2.0).toDouble();
+          final setting = themeCtrl.settings.value.textScale;
+          // Builder bağlamı uygulama düzeyi MediaQuery'nin altındadır; buradan
+          // okunan ölçekçi sistem erişilebilirlik ölçeğidir (lineer olmayan
+          // sistem ölçekleyicilerde de faktör örneklenerek çarpılır).
+          final systemScale =
+              MediaQuery.of(context).textScaler.scale(10) / 10;
+          final combined = (systemScale * setting).clamp(0.5, 2.0).toDouble();
           return MediaQuery(
             data: MediaQuery.of(context)
-                .copyWith(textScaler: TextScaler.linear(scale)),
+                .copyWith(textScaler: TextScaler.linear(combined)),
             child: child ?? const SizedBox.shrink(),
           );
         },

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:get/get.dart';
+import 'package:resonance/core/settings/settings_persistence.dart';
 import 'package:resonance/core/utils/debouncer.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,7 +23,8 @@ class AppSearchController extends GetxController {
 
   SharedPreferences? _prefs;
 
-  static const String _historyKey = 'search_history';
+  // Gün 1: anahtar SettingsPersistence'tan gelir (yedek listesiyle uyumlu).
+  static const String _historyKey = SettingsPersistence.searchHistory;
   static const int _historyMax = 8;
 
   final _debouncer = Debouncer(milliseconds: 400);

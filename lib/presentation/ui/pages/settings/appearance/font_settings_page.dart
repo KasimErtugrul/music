@@ -7,10 +7,10 @@ import 'package:resonance/presentation/controllers/theme_controller.dart';
 /// Yazı tipi ve yazı ölçeği ayarları.
 ///
 /// Görev 1.6: Ölçek kaydırıcısı eklendi (0.80x–1.40x aralığı, 12 adım).
-/// Eski sayfada yalnızca yazı tipi listesi vardı; textScale değeri hiçbir
-/// arayüzden değiştirilemiyordu. Değer active_theme_settings JSON'unda
-/// saklandığından ek kalıcılık gerekmez; değişim, ThemeController.setTextScale
-/// → app.dart'taki MediaQuery.textScaler zinciri üzerinden anında yansır.
+/// Gün 3: kalıcılık artık onChangeEnd'de yapılır — sürükleme sırasında
+/// her kademde SharedPreferences'a yazılmaz (previewTextScale yalnız canlı
+/// önizleme verir; commitTextScale bırakınca yazar). Ayrıca ölçek, uygulama
+/// genelinde sistem ölçeğiyle ÇARPILARAK uygulanır (app.dart Gün 3).
 class FontSettingsPage extends StatelessWidget {
   const FontSettingsPage({super.key});
 
@@ -74,7 +74,10 @@ class FontSettingsPage extends StatelessWidget {
               max: 1.4,
               divisions: 12,
               label: '${scale.toStringAsFixed(2)}x',
-              onChanged: themeCtrl.setTextScale,
+              // Gün 3: sürükleme sırasında yalnız önizleme (disk yazımı yok);
+              // kalıcılık onChangeEnd'de tek seferde yapılır.
+              onChanged: themeCtrl.previewTextScale,
+              onChangeEnd: (_) => themeCtrl.commitTextScale(),
             ),
             const SizedBox(height: 16),
           ],

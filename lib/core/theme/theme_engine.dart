@@ -18,6 +18,9 @@ class ThemeSettings {
     this.textScale = 1.0,
     this.player = PlayerThemeExtension.defaults,
     this.listViewMode = 'comfortable', // 'compact', 'comfortable', 'grid'
+    // Gün 3 (Karar): zamanlanmış koyu mod varsayılan KAPALI. Eski veride
+    // anahtar yoksa geçiş kuralı fromJson'da uygulanır.
+    this.scheduledDarkEnabled = false,
     this.scheduledDarkStartHour = 20,
     this.scheduledDarkStartMinute = 0,
     this.scheduledDarkEndHour = 7,
@@ -36,6 +39,10 @@ class ThemeSettings {
   final double textScale;
   final PlayerThemeExtension player;
   final String listViewMode;
+
+  /// Gün 3: zamanlanmış koyu mod anahtarı. Kapalıyken saat aralığı
+  /// saklanır ama uygulanmaz.
+  final bool scheduledDarkEnabled;
   final int scheduledDarkStartHour;
   final int scheduledDarkStartMinute;
   final int scheduledDarkEndHour;
@@ -54,6 +61,7 @@ class ThemeSettings {
     double? textScale,
     PlayerThemeExtension? player,
     String? listViewMode,
+    bool? scheduledDarkEnabled,
     int? scheduledDarkStartHour,
     int? scheduledDarkStartMinute,
     int? scheduledDarkEndHour,
@@ -72,6 +80,7 @@ class ThemeSettings {
       textScale: textScale ?? this.textScale,
       player: player ?? this.player,
       listViewMode: listViewMode ?? this.listViewMode,
+      scheduledDarkEnabled: scheduledDarkEnabled ?? this.scheduledDarkEnabled,
       scheduledDarkStartHour: scheduledDarkStartHour ?? this.scheduledDarkStartHour,
       scheduledDarkStartMinute: scheduledDarkStartMinute ?? this.scheduledDarkStartMinute,
       scheduledDarkEndHour: scheduledDarkEndHour ?? this.scheduledDarkEndHour,
@@ -100,6 +109,7 @@ class ThemeSettings {
         'animationLevel': player.animationLevel,
       },
       'listViewMode': listViewMode,
+      'scheduledDarkEnabled': scheduledDarkEnabled,
       'scheduledDarkStartHour': scheduledDarkStartHour,
       'scheduledDarkStartMinute': scheduledDarkStartMinute,
       'scheduledDarkEndHour': scheduledDarkEndHour,
@@ -107,34 +117,121 @@ class ThemeSettings {
     };
   }
 
+  /// Gün 3: alan-seviyesi güvenli ayrıştırma. Tek bozuk/eksik alan artık
+  /// TÜM temayı sıfırlamaz (eski kod ThemeMode.values.byName ve Color(int)
+  /// çağrılarında TypeError/ArgumentError fırlatıp loadActiveTheme'in
+  /// catch'ine düşüyor, bütün ayarlar varsayılana dönüyordu); yalnız o
+  /// alan varsayılana döner.
   factory ThemeSettings.fromJson(Map<String, dynamic> json) {
-    final playerJson = json['player'] as Map<String, dynamic>? ?? {};
+    // num kabul eder (jsonDecode 0.0'ı double, 0'ı int üretir).
+    double doubleOf(String key, double fallback) {
+      final v = json[key];
+      return v is num ? v.toDouble() : fallback;
+    }
+
+    int intOf(String key, int fallback) {
+      final v = json[key];
+      return v is int ? v : fallback;
+    }
+
+    bool boolOf(String key, bool fallback) {
+      final v = json[key];
+      return v is bool ? v : fallback;
+    }
+
+    String stringOf(String key, String fallback) {
+      final v = json[key];
+      return v is String ? v : fallback;
+    }
+
+    // Alt harita (player) için varyant — Gün 3: statik yardımcı değil,
+    // kapsamı sınırlı yerel fonksiyon.
+    String stringIn(Map<String, dynamic> map, String key, String fallback) {
+      final v = map[key];
+      return v is String ? v : fallback;
+    }
+
+    // themeMode: geçersiz isim tüm ayrıştırmayı bozmasın.
+    final modeName = stringOf('themeMode', 'system');
+    final themeMode = ThemeMode.values
+        .where((m) => m.name == modeName)
+        .firstOrNull ?? ThemeMode.system;
+
+    // themeSource: beyaz liste dışı değer seed'e döner.
+    final themeSource = switch (stringOf('themeSource', 'seed')) {
+      'system' => 'system',
+      'artwork' => 'artwork',
+      _ => 'seed',
+    };
+
+    // seedColor: tip bozuksa (ör. string) varsayılan tohum.
+    final seedRaw = json['seedColor'];
+    final seedColor = seedRaw is int ? Color(seedRaw) : AppColors.defaultSeed;
+
+    // textScale: tip bozuksa 1.0; aralık dışıysa 0.5–2.0'a kırpılır.
+    final textScale = doubleOf('textScale', 1.0).clamp(0.5, 2.0).toDouble();
+
+    // density: VisualDensity kurucusu |değer| <= 4 ister; kırp.
+    final density = VisualDensity(
+      horizontal: doubleOf('densityX', 0).clamp(-4, 4).toDouble(),
+      vertical: doubleOf('densityY', 0).clamp(-4, 4).toDouble(),
+    );
+
+    // player: harita değilse (bozuk veri) tamamen varsayılan.
+    final playerRaw = json['player'];
+    final playerJson = playerRaw is Map<String, dynamic>
+        ? playerRaw
+        : const <String, dynamic>{};
+    final player = PlayerThemeExtension(
+      backgroundStyle: stringIn(playerJson, 'backgroundStyle', 'solid'),
+      artworkShape: stringIn(playerJson, 'artworkShape', 'rounded'),
+      seekBarStyle: stringIn(playerJson, 'seekBarStyle', 'classic'),
+      miniPlayerStyle: stringIn(playerJson, 'miniPlayerStyle', 'compact'),
+      animationLevel: stringIn(playerJson, 'animationLevel', 'full'),
+    );
+
+    // listViewMode: beyaz liste dışı değer comfortable'e döner.
+    final listViewMode = switch (stringOf('listViewMode', 'comfortable')) {
+      'compact' => 'compact',
+      'grid' => 'grid',
+      _ => 'comfortable',
+    };
+
+    final startHour = intOf('scheduledDarkStartHour', 20);
+    final startMinute = intOf('scheduledDarkStartMinute', 0);
+    final endHour = intOf('scheduledDarkEndHour', 7);
+    final endMinute = intOf('scheduledDarkEndMinute', 0);
+
+    // Gün 3 geçiş kuralı (Karar): 'scheduledDarkEnabled' anahtarı eski
+    // veride yoktur. Bu durumda saklanan saat aralığı varsayılandan
+    // (20:00–07:00) farklıysa kullanıcı zamanlamayı kurmuş sayılır → açık;
+    // aralık varsayıansa kapalı. Anahtar varsa açıkça yazılan değer kazanır.
+    final enabledRaw = json['scheduledDarkEnabled'];
+    final scheduledDarkEnabled = enabledRaw is bool
+        ? enabledRaw
+        : startHour != 20 ||
+            startMinute != 0 ||
+            endHour != 7 ||
+            endMinute != 0;
+
     return ThemeSettings(
-      themeMode: ThemeMode.values.byName(json['themeMode'] ?? 'system'),
-      themeSource: json['themeSource'] ?? 'seed',
-      seedColor: Color(json['seedColor'] ?? AppColors.defaultSeed.value),
-      amoled: json['amoled'] ?? false,
-      highContrast: json['highContrast'] ?? false,
-      surfaceTint: json['surfaceTint'] ?? true,
-      roundedCorners: json['roundedCorners'] ?? true,
-      density: VisualDensity(
-        horizontal: json['densityX'] ?? 0,
-        vertical: json['densityY'] ?? 0,
-      ),
-      fontFamily: json['fontFamily'] ?? 'Inter',
-      textScale: (json['textScale'] ?? 1.0).toDouble(),
-      player: PlayerThemeExtension(
-        backgroundStyle: playerJson['backgroundStyle'] ?? 'solid',
-        artworkShape: playerJson['artworkShape'] ?? 'rounded',
-        seekBarStyle: playerJson['seekBarStyle'] ?? 'classic',
-        miniPlayerStyle: playerJson['miniPlayerStyle'] ?? 'compact',
-        animationLevel: playerJson['animationLevel'] ?? 'full',
-      ),
-      listViewMode: json['listViewMode'] ?? 'comfortable',
-      scheduledDarkStartHour: json['scheduledDarkStartHour'] ?? 20,
-      scheduledDarkStartMinute: json['scheduledDarkStartMinute'] ?? 0,
-      scheduledDarkEndHour: json['scheduledDarkEndHour'] ?? 7,
-      scheduledDarkEndMinute: json['scheduledDarkEndMinute'] ?? 0,
+      themeMode: themeMode,
+      themeSource: themeSource,
+      seedColor: seedColor,
+      amoled: boolOf('amoled', false),
+      highContrast: boolOf('highContrast', false),
+      surfaceTint: boolOf('surfaceTint', true),
+      roundedCorners: boolOf('roundedCorners', true),
+      density: density,
+      fontFamily: stringOf('fontFamily', 'Inter'),
+      textScale: textScale,
+      player: player,
+      listViewMode: listViewMode,
+      scheduledDarkEnabled: scheduledDarkEnabled,
+      scheduledDarkStartHour: startHour,
+      scheduledDarkStartMinute: startMinute,
+      scheduledDarkEndHour: endHour,
+      scheduledDarkEndMinute: endMinute,
     );
   }
 }
@@ -155,6 +252,17 @@ abstract final class ThemeEngine {
       brightness: brightness,
       contrastLevel: s.highContrast ? 1.0 : 0.0,
     );
+
+    // Gün 3 (Karar): highContrast dinamik şemaya da uygulanır. OS paletinin
+    // tonları birebir korunamaz; primary tohumundan M3 kontrast kademesi
+    // 1.0 ile yeniden üretilir. Kapalıyken OS paleti aynen kullanılır.
+    if (s.highContrast && dynamicScheme != null) {
+      baseScheme = ColorScheme.fromSeed(
+        seedColor: dynamicScheme.primary,
+        brightness: brightness,
+        contrastLevel: 1.0,
+      );
+    }
 
     // Primary rengi her durumda canlı tut (soft görünümü kır)
     final primary = dynamicScheme?.primary ?? s.seedColor;
@@ -220,6 +328,26 @@ abstract final class ThemeEngine {
         backgroundColor: scheme.surfaceContainer,
         elevation: s.surfaceTint ? null : 0,
         indicatorColor: scheme.primaryContainer,
+      ),
+      // Gün 3: roundedCorners artık alt sayfa / snackbar / popup menüyü de
+      // kapsar. Açıkken değerler M3 varsayılanlarıdır (28/4/4); kapalıyken
+      // köşeler kare olur (0).
+      bottomSheetTheme: BottomSheetThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(s.roundedCorners ? 28 : 0),
+          ),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(s.roundedCorners ? 4 : 0),
+        ),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(s.roundedCorners ? 4 : 0),
+        ),
       ),
       extensions: <ThemeExtension<dynamic>>[s.player],
     );

@@ -9,6 +9,7 @@ import 'package:resonance/data/datasources/auto_browse_delegate.dart';
 import 'package:resonance/data/datasources/metadata_datasource.dart';
 import 'package:resonance/data/models/album_model.dart';
 import 'package:resonance/data/models/audio_format_info.dart';
+import 'package:resonance/data/models/playback_settings_model.dart';
 import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/queue_state_model.dart';
 import 'package:resonance/data/models/song_model.dart';
@@ -90,6 +91,7 @@ class PlayerController extends GetxController implements AutoPlayController {
   void onInit() {
     super.onInit();
     _bind();
+    _bindPreferenceWatchers();
     _restoreQueue();
   }
 
@@ -148,6 +150,49 @@ class PlayerController extends GetxController implements AutoPlayController {
     _repository.durationStream.listen((dur) {
       if (dur != null) duration.value = dur;
     });
+  }
+
+  /// Gün 2: oynatmayla doğrudan ilgili tercihlerin canlı uygulaması.
+  ///
+  /// Karar (Gün 2): defaultShuffle/defaultRepeat canlı dinlenmez; yalnız
+  /// yeni kuyruk başlarken (playSong) uygulanır. skipSilence ve replayGain
+  /// ise alan-dinleyiciyle canlı uygulanır: ilgili alan DEĞİŞMEDİKÇE depoya
+  /// dokunulmaz; modelin başka bir alanına yazılan tercihler boşuna platform
+  /// çağrısı tetiklemez.
+  ///
+  /// Geri yükleme akışı (_restoreQueue) kendi tercihlerini açıkça uyguladığı
+  /// için _isRestoring süresince dinleyici yalnız anlık görüntüyü günceller;
+  /// çift uygulama ve açılışta yanlış tetiklenme engellenir. Yedek içe
+  /// aktarma sonrası reload() (Gün 1) ise _isRestoring=false iken çalıştığı
+  /// için içe aktarılan tercihler canlı oynatıcıya yansır (istenen davranış).
+  void _bindPreferenceWatchers() {
+    var prev = prefCtrl.playback.value;
+    ever<PlaybackSettingsModel>(prefCtrl.playback, (cur) {
+      if (_isRestoring) {
+        prev = cur;
+        return;
+      }
+      if (cur.skipSilence != prev.skipSilence) {
+        unawaited(_applySkipSilenceLive(cur.skipSilence));
+      }
+      if (cur.replayGain != prev.replayGain && currentSong != null) {
+        // _applyReplayGain hem açık hem kapalı yolunu bilir: tercih kapalıyken
+        // kanal manuel loudness'e döner (Görev 2.3 sözleşmesi).
+        unawaited(_applyReplayGain(currentSong!));
+      }
+      prev = cur;
+    });
+  }
+
+  /// Gün 2: skipSilence tercihini çalan oynatıcıya anında uygular.
+  /// Oynatıcı henüz hazır değilse hata yutulur; tercih kalıcıdır ve bir
+  /// sonraki kuyrukta (playSong / oturum geri yükleme) yine uygulanır.
+  Future<void> _applySkipSilenceLive(bool enabled) async {
+    try {
+      await _repository.setSkipSilenceEnabled(enabled);
+    } on Object {
+      // Ses akışını asla bozma.
+    }
   }
 
   void setVolume(double vol) => _repository.setVolume(vol);
@@ -236,9 +281,13 @@ class PlayerController extends GetxController implements AutoPlayController {
         }
       }
 
-      // Kayıtlı state yoksa veya boşsa Varsayılanları uygula
+      // Kayıtlı state yoksa veya boşsa Varsayılanları uygula.
+      // Gün 2: Rx durumu da senkronize edilir; aksi halde mini oynatıcının
+      // shuffle/tekrar rozetleri depo durumundan geri kalırdı.
       final pref = prefCtrl.playback.value;
       await _repository.setShuffleMode(pref.defaultShuffle);
+      shuffleEnabled.value = pref.defaultShuffle;
+      repeatMode.value = _mapRepeatMode(pref.defaultRepeat);
       await _repository.setRepeatMode(_mapRepeatMode(pref.defaultRepeat));
     } catch (_) {
     } finally {
@@ -277,6 +326,19 @@ class PlayerController extends GetxController implements AutoPlayController {
     await _repository.setSpeed(pref.speed);
     await _repository.setPitch(pref.pitch);
     await _repository.setSkipSilenceEnabled(pref.skipSilence);
+
+    // Gün 2 / Karar: varsayılan rastgele/tekrar yalnız YENİ KUYRUK
+    // başlarken uygulanır (playSong = yeni kuyruk; playNext/addToQueue
+    // yeniden uygulamaz). Kullanıcının mevcut kuyruk üzerindeki manuel
+    // toggle'ları canlıyken asla geriye dönük ezilmez; yeni kuyruk
+    // varsayılanla başlar. Rx değerleri depo çağrısıyla birlikte
+    // senkronize edilir; aksi halde mini oynatıcı rozetleri eski durumu
+    // gösterirdi.
+    shuffleEnabled.value = pref.defaultShuffle;
+    await _repository.setShuffleMode(pref.defaultShuffle);
+    final repeat = _mapRepeatMode(pref.defaultRepeat);
+    repeatMode.value = repeat;
+    await _repository.setRepeatMode(repeat);
 
     // Görev 2.3: parça başına ReplayGain (etiket yoksa kazanç 0 dB).
     await _applyReplayGain(song);

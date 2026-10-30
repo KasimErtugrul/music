@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:just_audio/just_audio.dart';
+import 'package:resonance/core/settings/settings_persistence.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 import 'package:resonance/data/datasources/equalizer_datasource.dart';
 import 'package:resonance/data/models/equalizer_model.dart';
@@ -30,13 +31,15 @@ class EqualizerRepositoryImpl implements EqualizerRepository {
   final EqualizerDatasource _db;
   final SharedPreferences _prefs;
 
-  static const _enabledKey = 'equalizer_enabled';
+  // Gün 1: anahtarlar SettingsPersistence'tan gelir; yedek listesiyle
+  // ayrışamaz (tek doğruluk kaynağı).
+  static const _enabledKey = SettingsPersistence.equalizerEnabled;
 
   // Görev 2.4: kalıcılık anahtarları. Kazançlar bant sırasına göre dB
   // değerleri listesi; loudness tek bir dB değeridir. Eski sürümde bu
   // değerler hiç yazılmıyordu; anahtarlar yeni kurulumda boş başlar.
-  static const _gainsKey = 'equalizer_gains';
-  static const _loudnessKey = 'equalizer_loudness';
+  static const _gainsKey = SettingsPersistence.equalizerGains;
+  static const _loudnessKey = SettingsPersistence.equalizerLoudness;
 
   EqualizerRepositoryImpl(this._effects, this._db, this._prefs);
 

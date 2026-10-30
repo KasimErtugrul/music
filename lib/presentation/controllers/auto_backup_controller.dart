@@ -6,12 +6,13 @@
 // saklama politikası uygulanır. İlk açılışta (son yedek yok) hemen yedek alınır
 // — kullanıcı kurulumdan itibaren korunur.
 //
-// Tercihler 'settings_' önekiyle kalıcıya yazılır: BackupDatasource yalnızca
-// bu önekteki anahtarları yedek kapsamına aldığından, otomatik yedek AYARLARI
-// da manuel yedeklere doğal olarak girer. Zamansal bağımlılıklar (`now`)
+// Tercihler SettingsPersistence'taki açık anahtar listesiyle kalıcıya yazılır;
+// manuel yedek (BackupDatasource) aynı listeden okuduğu için otomatik yedek
+// AYARLARI da manuel yedeklere girer. Zamansal bağımlılıklar (`now`)
 // enjekte edilebilir; testler sabit zamanla çalışır.
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:resonance/core/settings/settings_persistence.dart';
 import 'package:resonance/data/datasources/auto_backup_storage.dart';
 import 'package:resonance/data/repositories/auto_backup_repository.dart';
 import 'package:resonance/data/repositories/backup_repository.dart';
@@ -43,10 +44,12 @@ class AutoBackupController extends GetxController {
   final SharedPreferences? _prefs;
   final DateTime Function() _now;
 
-  static const String _kEnabled = 'settings_auto_backup_enabled';
-  static const String _kFrequency = 'settings_auto_backup_frequency';
-  static const String _kKeep = 'settings_auto_backup_keep';
-  static const String _kLast = 'settings_auto_backup_last';
+  // Gün 1: anahtarlar SettingsPersistence'tan gelir. _kLast bilinçli olarak
+  // yedeklenmez (SettingsPersistence.notBackedUpKeys içinde).
+  static const String _kEnabled = SettingsPersistence.autoBackupEnabled;
+  static const String _kFrequency = SettingsPersistence.autoBackupFrequency;
+  static const String _kKeep = SettingsPersistence.autoBackupKeep;
+  static const String _kLast = SettingsPersistence.autoBackupLast;
 
   static const int defaultKeepCount = 7;
 

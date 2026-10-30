@@ -1,4 +1,6 @@
 
+import 'package:flutter/foundation.dart';
+import 'package:resonance/core/settings/settings_persistence.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/data/datasources/local/app_database.dart';
@@ -53,13 +55,10 @@ class BackupDatasource {
     final backupEq = eqRows.map((e) => BackupEqualizerPreset(name: e.name, bandsJson: e.bandsJson)).toList();
 
     // 5. Settings
-    final settingsMap = <String, dynamic>{};
-    for (final key in _prefs.getKeys()) {
-      // Sadece uygulamaya özel anahtarları (ör. 'settings_') al
-      if (key.startsWith('settings_') || key == 'language_code' || key == 'active_theme_settings' || key == 'equalizer_enabled') {
-        settingsMap[key] = _prefs.get(key);
-      }
-    }
+    // Gün 1: kapsam artık SettingsPersistence.backupKeys açık listesinden
+    // gelir. Eski davranış (yalnızca 'settings_' öneki + 3 sabit anahtar)
+    // Çalma ve Kitaplık ayarlarını yedeğin dışında bırakıyordu.
+    final settingsMap = collectBackedUpSettings(_prefs);
 
     return BackupModel(
       version: 1,
@@ -125,12 +124,54 @@ class BackupDatasource {
     });
 
     // 6. Settings
-    for (final entry in backup.settings.entries) {
-      final val = entry.value;
-      if (val is String) await _prefs.setString(entry.key, val);
-      else if (val is bool) await _prefs.setBool(entry.key, val);
-      else if (val is int) await _prefs.setInt(entry.key, val);
-      else if (val is double) await _prefs.setDouble(entry.key, val);
+    // Gün 1: tip güvenli içe aktarma — yalnızca bilinen yedek anahtarları
+    // kabul eder, desteklenmeyen değer tiplerinde çökmez.
+    await applyBackedUpSettings(_prefs, backup.settings);
+  }
+
+  /// Gün 1: dışa aktarılan ayar kümesi. Yalnızca
+  /// [SettingsPersistence.backupKeys] içindeki ve prefs'te gerçekten var olan
+  /// anahtarlar alınır. Test edilebilir olsun diye statiktir.
+  static Map<String, Object?> collectBackedUpSettings(SharedPreferences prefs) {
+    final out = <String, Object?>{};
+    for (final key in SettingsPersistence.backupKeys) {
+      final value = prefs.get(key);
+      if (value != null) out[key] = value;
+    }
+    return out;
+  }
+
+  /// Gün 1: tip güvenli içe aktarma.
+  ///
+  /// * Yedekte olmayan anahtarlar DOKUNULMAZ (eksik alan = mevcut değer);
+  ///   böylece eski yedeklerle geriye dönük uyum korunur.
+  /// * Yedekteki bilinmeyen (listede olmayan) anahtarlar yok sayılır.
+  /// * Desteklenmeyen değer tipi olan anahtar atlanır; tek bir hatalı değer
+  ///   tüm içe aktarmayı durdurmaz.
+  static Future<void> applyBackedUpSettings(
+    SharedPreferences prefs,
+    Map<String, dynamic> raw,
+  ) async {
+    for (final key in SettingsPersistence.backupKeys) {
+      final val = raw[key];
+      if (val == null) continue;
+      try {
+        if (val is String) {
+          await prefs.setString(key, val);
+        } else if (val is bool) {
+          await prefs.setBool(key, val);
+        } else if (val is int) {
+          await prefs.setInt(key, val);
+        } else if (val is double) {
+          await prefs.setDouble(key, val);
+        } else if (val is List && val.every((e) => e is String)) {
+          await prefs.setStringList(key, val.cast<String>());
+        }
+        // Desteklenmeyen tip → yok say.
+      } on Object catch (e) {
+        // Tek bir anahtarın yazımı başarısız olsa da içe aktarma devam eder.
+        debugPrint('Ayar içe aktarılamadı ($key): $e');
+      }
     }
   }
 }

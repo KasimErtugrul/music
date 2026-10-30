@@ -1231,6 +1231,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get themeImportInvalid => 'Geçersiz tema dosyası';
 
   @override
+  String get themeScheduledDark => 'Zamanlanmış koyu mod';
+
+  @override
+  String get themeScheduledDarkDesc =>
+      'Belirttiğin saatler arasında koyu moda geçilir';
+
+  @override
+  String get themeExportFailed => 'Tema dosyası oluşturulamadı';
+
+  @override
   String get backupNoAudioNote =>
       'Müzik dosyaları (.flac, .mp3) yedeğe dahil edilmez';
 

@@ -2360,6 +2360,24 @@ abstract class AppLocalizations {
   /// **'Invalid theme file'**
   String get themeImportInvalid;
 
+  /// No description provided for @themeScheduledDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled dark mode'**
+  String get themeScheduledDark;
+
+  /// No description provided for @themeScheduledDarkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Switches to dark mode between the hours you set'**
+  String get themeScheduledDarkDesc;
+
+  /// No description provided for @themeExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the theme file'**
+  String get themeExportFailed;
+
   /// No description provided for @backupNoAudioNote.
   ///
   /// In en, this message translates to:

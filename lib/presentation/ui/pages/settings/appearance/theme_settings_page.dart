@@ -38,33 +38,42 @@ class ThemeSettingsPage extends StatelessWidget {
               },
               onChanged: themeCtrl.setMode,
             ),
-            if (s.themeMode == ThemeMode.system)
-              ListTile(
-                title: const Text('Scheduled dark mode'),
-                subtitle: Text(
-                  '${s.scheduledDarkStartHour.toString().padLeft(2, '0')}:${s.scheduledDarkStartMinute.toString().padLeft(2, '0')}'
-                  ' - '
-                  '${s.scheduledDarkEndHour.toString().padLeft(2, '0')}:${s.scheduledDarkEndMinute.toString().padLeft(2, '0')}',
-                ),
-                onTap: () async {
-                  final start = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay(hour: s.scheduledDarkStartHour, minute: s.scheduledDarkStartMinute),
-                  );
-                  if (start == null) return;
-                  if (!context.mounted) return;
-                  final end = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay(hour: s.scheduledDarkEndHour, minute: s.scheduledDarkEndMinute),
-                  );
-                  if (end == null) return;
-                  
-                  themeCtrl.setScheduledDark(
-                    start.hour, start.minute, 
-                    end.hour, end.minute
-                  );
-                },
+            if (s.themeMode == ThemeMode.system) ...[
+              // Gün 3 (Karar): zamanlanmış koyu mod varsayılan kapalıdır;
+              // anahtar açılmadan saat aralığı uygulanmaz.
+              SettingsSwitchTile(
+                title: l10n.themeScheduledDark,
+                subtitle: l10n.themeScheduledDarkDesc,
+                value: s.scheduledDarkEnabled,
+                onChanged: themeCtrl.setScheduledDarkEnabled,
               ),
+              if (s.scheduledDarkEnabled)
+                ListTile(
+                  title: Text(
+                    '${s.scheduledDarkStartHour.toString().padLeft(2, '0')}:${s.scheduledDarkStartMinute.toString().padLeft(2, '0')}'
+                    ' - '
+                    '${s.scheduledDarkEndHour.toString().padLeft(2, '0')}:${s.scheduledDarkEndMinute.toString().padLeft(2, '0')}',
+                  ),
+                  onTap: () async {
+                    final start = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay(hour: s.scheduledDarkStartHour, minute: s.scheduledDarkStartMinute),
+                    );
+                    if (start == null) return;
+                    if (!context.mounted) return;
+                    final end = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay(hour: s.scheduledDarkEndHour, minute: s.scheduledDarkEndMinute),
+                    );
+                    if (end == null) return;
+
+                    themeCtrl.setScheduledDark(
+                      start.hour, start.minute,
+                      end.hour, end.minute
+                    );
+                  },
+                ),
+            ],
 
             // --- Renk ---
             SettingsSectionHeader(title: l10n.themeGroupColor),
@@ -82,7 +91,15 @@ class ThemeSettingsPage extends StatelessWidget {
             if (s.themeSource == 'seed')
               SettingsChoiceTile<String>(
                 title: l10n.themePresetSeed,
-                value: 'default',
+                // Gün 3: palet seçim durumu artık gerçek tohumdan türetilir;
+                // eskiden değer sabit 'default' idi ve seçili palet hiç
+                // gösterilmiyordu. Tohum bir palete denk gelmezse (özel
+                // renk) DropdownButton sözleşmesi için 'default' kullanılır.
+                value: ThemePresets.all
+                        .where((p) => p.seed == s.seedColor)
+                        .map((p) => p.id)
+                        .firstOrNull ??
+                    'default',
                 options: ThemePresets.all.map((p) => p.id).toList(),
                 labelOf: (id) => ThemePresets.find(id)?.name ?? id,
                 onChanged: (id) {

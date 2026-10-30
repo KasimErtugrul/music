@@ -23,13 +23,15 @@ class SettingsController extends GetxController {
     isLoading.value = false;
   }
 
-  Future<void> setLanguage(String languageCode) async {
-    final current = settings.value;
-    if (current == null) return;
-    final next = current.copyWith(languageCode: languageCode);
-    settings.value = next;
-    await _repo.setString(SettingsKeys.languageCode, languageCode);
+  /// Gün 1: yedek içe aktarma sonrası dil tercihini yeniden okur ve yerelini
+  /// günceller; uygulama yeniden başlatmadan dil değişir.
+  Future<void> reload() async {
+    final loaded = await _repo.load();
+    settings.value = loaded;
+    _applyLocale(loaded.languageCode);
+  }
 
+  void _applyLocale(String languageCode) {
     switch (languageCode) {
       case 'system':
         Get.updateLocale(Get.deviceLocale ?? const Locale('en'));
@@ -38,5 +40,15 @@ class SettingsController extends GetxController {
       case 'en':
         Get.updateLocale(const Locale('en'));
     }
+  }
+
+  Future<void> setLanguage(String languageCode) async {
+    final current = settings.value;
+    if (current == null) return;
+    final next = current.copyWith(languageCode: languageCode);
+    settings.value = next;
+    await _repo.setString(SettingsKeys.languageCode, languageCode);
+
+    _applyLocale(languageCode);
   }
 }

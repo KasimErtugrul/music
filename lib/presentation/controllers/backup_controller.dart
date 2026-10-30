@@ -10,6 +10,11 @@ import 'package:resonance/data/models/backup_model.dart';
 import 'package:resonance/data/repositories/backup_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/l10n/app_localizations.dart';
+import 'package:resonance/presentation/controllers/equalizer_controller.dart';
+import 'package:resonance/presentation/controllers/home_widget_controller.dart';
+import 'package:resonance/presentation/controllers/preferences_controller.dart';
+import 'package:resonance/presentation/controllers/settings_controller.dart';
+import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// İçe aktarma sonucu. UI, sürüm uyuşmazlığını kullanıcının görebileceği bir
@@ -120,6 +125,10 @@ class BackupController extends GetxController {
       await _repo.import(backup);
       await _libraryRepo.rescan();
 
+      // Gün 1: içe aktarılan ayarlar canlı controller'lara yansıtılır;
+      // kullanıcı uygulama yeniden başlatmadan güncel tercihler görür.
+      await _reloadLiveControllers();
+
       isLoading.value = false;
       return mismatch ? ImportStatus.versionMismatch : ImportStatus.success;
     } catch (e) {
@@ -139,6 +148,28 @@ class BackupController extends GetxController {
       } on Object {
         // Kalıcılık başarısız olsa da oturumluk değer gösterilir.
       }
+    }
+  }
+
+  /// Gün 1: içe aktarma sonrası ayar taşıyan canlı controller'ları yeniden
+  /// yükler. Sıra önemlidir: EqualizerController.reload() içinden
+  /// PreferencesController okunur; o yüzden önce tercihler tazelenir.
+  /// Kayıtlı olmayan controller (ör. ilgili ekran hiç açılmadıysa) sessizce
+  /// atlanır; tek bir reload hatası içe aktarmayı başarısız saymaz.
+  Future<void> _reloadLiveControllers() async {
+    await _reloadIfRegistered<PreferencesController>();
+    await _reloadIfRegistered<ThemeController>();
+    await _reloadIfRegistered<SettingsController>();
+    await _reloadIfRegistered<EqualizerController>();
+    await _reloadIfRegistered<HomeWidgetController>();
+  }
+
+  Future<void> _reloadIfRegistered<T extends GetxController>() async {
+    if (!Get.isRegistered<T>()) return;
+    try {
+      await (Get.find<T>() as dynamic).reload();
+    } on Object catch (e) {
+      debugPrint('Reload başarısız ($T): $e');
     }
   }
 }
