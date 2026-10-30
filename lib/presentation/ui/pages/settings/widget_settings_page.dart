@@ -4,7 +4,6 @@ import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/home_widget_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Ana ekran widget'ı ayarları — M3 tasarım güncellemesi:
 /// - Canlı önizleme: gerçek PlayerController durumunu (kapak, başlık,
@@ -30,8 +29,10 @@ class _WidgetSettingsPageState extends State<WidgetSettingsPage> {
   @override
   void initState() {
     super.initState();
-    _transparent =
-        Get.find<SharedPreferences>().getBool('widget_transparent') ?? false;
+    // Gün 5: ham prefs erişimi ('widget_transparent' dizgesi) kaldırıldı;
+    // başlangıç değeri HomeWidgetController.transparency'den okunur —
+    // anahtara yalnız SettingsPersistence sabiti üzerinden dokunulur.
+    _transparent = Get.find<HomeWidgetController>().transparency;
   }
 
   @override

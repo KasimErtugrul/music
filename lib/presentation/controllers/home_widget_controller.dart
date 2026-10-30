@@ -89,7 +89,7 @@ class HomeWidgetController extends GetxController {
         title: current?.title ?? '',
         artist: current?.artist ?? '',
         isPlaying: current != null && _player.isPlaying.value,
-        isTransparent: _prefs.getBool(SettingsPersistence.widgetTransparent) ?? false,
+        isTransparent: transparency,
       );
     } catch (e, st) {
       debugPrint('Widget güncelleme hatası: $e\n$st');
@@ -99,6 +99,13 @@ class HomeWidgetController extends GetxController {
   /// `content://media/external/audio/media/123` -> 123. main.dart içindeki bildirim kapağı
   /// çözücüsüyle aynı kural. Harici (file://) dosyalarda null döner.
   int? _songIdFromUri(String uri) => int.tryParse(uri.split('/').last);
+
+  /// Gün 5: şeffaflık tercihi tek noktadan okunur. [_sync] her turda taze
+  /// okuduğu için yedek içe aktarma (reload()) sonrası widget güncel tercihi
+  /// yansıtır; ayar sayfası da başlangıç değerini bu getter'dan alır.
+  /// Prefs anahtarına yalnız SettingsPersistence sabiti üzerinden erişilir.
+  bool get transparency =>
+      _prefs.getBool(SettingsPersistence.widgetTransparent) ?? false;
 
   Future<void> setTransparency(bool value) async {
     await _prefs.setBool(SettingsPersistence.widgetTransparent, value);
