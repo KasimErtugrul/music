@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/core/settings/settings_defaults.dart';
-import 'package:resonance/core/settings/settings_keys.dart';
+import 'package:resonance/core/settings/settings_persistence.dart';
 import 'package:resonance/data/models/app_settings_model.dart';
 
 abstract class SettingsRepository {
@@ -15,7 +15,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<AppSettingsModel> load() async {
     return AppSettingsModel(
-      languageCode: _prefs.getString(SettingsKeys.languageCode) ??
+      // Gün 8: anahtar kimliği SettingsPersistence'tan — yedek listesiyle
+      // aynı tek doğruluk kaynağı (Gün 6 raporundaki doktrin notu kapandı).
+      // SettingsKeys arayüz kimliği katmanıdır; SettingsPersistence
+      // .languageCode onunla aynı dizgede yaşamaya devam eder.
+      languageCode: _prefs.getString(SettingsPersistence.languageCode) ??
           SettingsDefaults.languageCode,
     );
   }

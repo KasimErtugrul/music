@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:resonance/core/settings/settings_keys.dart';
+import 'package:resonance/core/settings/settings_persistence.dart';
 import 'package:resonance/data/models/app_settings_model.dart';
 import 'package:resonance/data/repositories/settings_repository.dart';
 
@@ -47,7 +47,9 @@ class SettingsController extends GetxController {
     if (current == null) return;
     final next = current.copyWith(languageCode: languageCode);
     settings.value = next;
-    await _repo.setString(SettingsKeys.languageCode, languageCode);
+    // Gün 8: anahtar kimliği SettingsPersistence'tan (yük tarafıyla aynı
+    // tek doğruluk kaynağı); SettingsKeys arayüz kimliği katmanıdır.
+    await _repo.setString(SettingsPersistence.languageCode, languageCode);
 
     _applyLocale(languageCode);
   }

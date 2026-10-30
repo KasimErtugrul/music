@@ -11,15 +11,13 @@
 /// Eski yedeklerde karşılaşılırsa `dynamic_color` / `amoled_dark`
 /// anahtarları, Gün 1'deki tip güvenli içe aktarma tarafından bilinmeyen
 /// anahtar sayılarak yok sayılır; çökme olmaz, mevcut değerler korunur.
+///
+/// Gün 8: `themeMode` da kaldırıldı — taban commit'ten beri okuyucusu yoktu
+/// (Gün 4 bulgusu). Tema modu `active_theme_settings` JSON'undaki
+/// ThemeSettings.themeMode alanıyla yönetilir; ayrıştırma varsayılanı
+/// ThemeMode.system'dır (theme_engine.dart).
 abstract final class SettingsDefaults {
   /// Prefs'te dil anahtarı yokken kullanılır (SettingsRepository.load).
   /// Geçerli değerler: 'system' | 'tr' | 'en'.
   static const String languageCode = 'system';
-
-  /// Gün 4 notu: Bu sabitin de okuyucusu kalmadı — tema modu artık
-  /// `active_theme_settings` JSON'undaki ThemeSettings.themeMode alanıyla
-  /// yönetilir (ayrıştırma varsayılanı ThemeMode.system, theme_engine.dart).
-  /// Gün 4 kapsamında yalnız `dynamicColor` ve `amoledDark` listelendiği
-  /// için bu sabite dokunulmadı; sonraki temizlikte kaldırılabilir.
-  static const String themeMode = 'system';
 }
