@@ -1,4 +1,4 @@
-package com.example.resonance
+package com.example.resonance.mediastore
 
 import android.content.ContentResolver
 import android.content.ContentUris
@@ -14,7 +14,6 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Size
-import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -30,33 +29,43 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
- * MediaStore MethodChannel'ı.
- *
- * NEDEN Activity'den ayrı: audio_service tek bir paylaşımlı FlutterEngine kullanır ve bu engine,
- * Activity kapansa bile (kullanıcı uygulamayı son uygulamalardan silip müzik çalmaya devam
- * ederken) servis sayesinde yaşar. Bildirim kapağı (artResolver) bu engine'den kanalı çağırır.
- * Handler Activity'ye bağlı olursa o durumda MissingPluginException alınır. Bu sınıf Activity
- * referansı tutmaz, yalnızca applicationContext kullanır.
+ * MediaStore MethodChannel. Holds no Activity reference; uses applicationContext only.
+ * Attached to every FlutterEngine by [MediaStorePlugin].
  */
-object MediaStoreChannel {
+object MediaStoreBridge {
     const val CHANNEL = "com.example.resonance/media_store"
 
-    private val executor: ExecutorService = Executors.newFixedThreadPool(2) { r ->
-        Thread(r, "media-store").apply { isDaemon = true }
-    }
+    private const val MAX_EXTERNAL_COPY_BYTES = 1L shl 30   // 1 GB
+    private const val MAX_QUEUED_PER_ROOT = 4000            // per ROOT, files to scan (new ones)
+    private const val MAX_VISITED_PER_ROOT = 200_000        // visited files cap
+
+    private val AUDIO_EXTENSIONS = setOf(
+        "mp3", "flac", "wav", "ogg", "oga", "opus", "m4a", "aac", "wma",
+        "aif", "aiff", "ape", "wv", "dsf", "dff",
+    )
+
+    // Separate pools: a long scan/query must not block artwork and file opening.
+    private val queryExecutor = newExecutor("media-store-query", 1)
+    private val scanExecutor = newExecutor("media-store-scan", 1)
+    private val artworkExecutor = newExecutor("media-store-art", 2)
+    private val externalExecutor = newExecutor("media-store-external", 1)
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    private var appContext: Context? = null
+    @Volatile private var appContext: Context? = null
     private var channel: MethodChannel? = null
     private var attachedMessenger: BinaryMessenger? = null
 
-    /** "Bununla aç" ile gelen, Dart tarafı tarafından henüz alınmamış URI. Yalnızca ana thread. */
+    /** URI from "Open with" not yet picked up by Dart. Main thread only. */
     private var pendingExternalUri: String? = null
 
-    /** Aynı engine için tekrar çağrılması zararsızdır. */
-    fun attach(engine: FlutterEngine, context: Context) {
+    private fun newExecutor(name: String, threads: Int): ExecutorService =
+        Executors.newFixedThreadPool(threads) { r -> Thread(r, name).apply { isDaemon = true } }
+
+    // ---------------------------------------------------------------- engine binding
+
+    /** Calling again for the same messenger is harmless. Main thread. */
+    fun attach(messenger: BinaryMessenger, context: Context) {
         appContext = context.applicationContext
-        val messenger = engine.dartExecutor.binaryMessenger
         if (attachedMessenger === messenger) return
         channel?.setMethodCallHandler(null)
         channel = MethodChannel(messenger, CHANNEL).also {
@@ -65,21 +74,23 @@ object MediaStoreChannel {
         attachedMessenger = messenger
     }
 
-    /**
-     * "Bununla aç" ile gelen adresi işler. Ana thread'den çağrılır.
-     *
-     * Dosya yöneticisinin `content://` adresine okuma izni geçici ve Activity'ye bağlıdır;
-     * oynatıcı onu sonradan açmaya çalışınca başarısız olabilir. Bu yüzden MediaStore dışı
-     * `content://` adreslerinde dosya, izin hâlâ geçerliyken uygulamanın önbelleğine kopyalanır
-     * ve `file://` adresi iletilir. Kopyalama başarısız olursa özgün adres iletilir.
-     */
+    fun detach(messenger: BinaryMessenger) {
+        if (attachedMessenger !== messenger) return
+        channel?.setMethodCallHandler(null)
+        channel = null
+        attachedMessenger = null
+    }
+
+    // ---------------------------------------------------------------- "Open with"
+
+    /** Called from the main thread. */
     fun handleExternalUri(uriString: String) {
         val ctx = appContext
         if (ctx == null) {
             deliverExternalUri(uriString)
             return
         }
-        executor.execute {
+        externalExecutor.execute {
             val resolved = try {
                 resolveExternal(ctx, uriString)
             } catch (e: Throwable) {
@@ -91,17 +102,28 @@ object MediaStoreChannel {
 
     private fun resolveExternal(ctx: Context, uriString: String): String {
         val uri = Uri.parse(uriString)
-        if (uri.scheme != "content") return uriString          // file:// olduğu gibi
-        if (uri.authority == MediaStore.AUTHORITY) return uriString // MediaStore: izinle okunur
+        if (uri.scheme != "content") return uriString
+        if (uri.authority == MediaStore.AUTHORITY) return uriString
         val resolver = ctx.contentResolver
-        val name = try {
-            resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
-                ?.use { if (it.moveToFirst()) it.getString(0) else null }
-        } catch (e: Exception) {
-            null
-        } ?: "audio"
-        val safeName = sanitizeFileName(name)
 
+        var name: String? = null
+        var size = -1L
+        try {
+            resolver.query(
+                uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null,
+            )?.use {
+                if (it.moveToFirst()) {
+                    if (!it.isNull(0)) name = it.getString(0)
+                    if (!it.isNull(1)) size = it.getLong(1)
+                }
+            }
+        } catch (e: Exception) {
+            // name/size unavailable; continue
+        }
+        // Very large file: do not copy, continue with the original uri (no start-up delay).
+        if (size > MAX_EXTERNAL_COPY_BYTES) return uriString
+
+        val safeName = sanitizeFileName(name ?: "audio")
         val root = File(ctx.cacheDir, "external").apply { mkdirs() }
         val dir = File(root, UUID.randomUUID().toString()).apply { mkdirs() }
         val out = File(dir, safeName)
@@ -113,26 +135,24 @@ object MediaStoreChannel {
             }
             input.use { src -> out.outputStream().use { dst -> src.copyTo(dst) } }
         } catch (e: Exception) {
-            // Yarım kalan kopya cache'te çöp olarak kalmasın; özgün adresle devam edilir.
             dir.deleteRecursively()
             return uriString
         }
-        // Başarılı kopyadan SONRA eskileri temizle: en yeni 3 klasör (yenisi dahil) kalır.
+        // After a successful copy, clean old ones: keep the newest 3 folders.
         root.listFiles()?.sortedByDescending { it.lastModified() }?.drop(3)
             ?.forEach { it.deleteRecursively() }
         return Uri.fromFile(out).toString()
     }
 
-    /** Yol ayracı/kontrol karakterlerini temizler; boş ya da yalnız noktaysa "audio" döner. */
     private fun sanitizeFileName(name: String): String {
         val cleaned = name
             .replace(Regex("[\\\\/:*?\"<>|\\u0000-\\u001F]"), "_")
             .trim()
             .trimStart('.')
-        return cleaned.ifEmpty { "audio" }.takeLast(120) // takeLast: uzantı korunur
+        return cleaned.ifEmpty { "audio" }.takeLast(120)
     }
 
-    /** Ana thread'den çağrılmalı. Dart onayı (true) gelmezse URI bekleyen olarak kalır. */
+    /** Main thread. The URI stays pending until Dart confirms with true. */
     fun deliverExternalUri(uri: String) {
         pendingExternalUri = uri
         channel?.invokeMethod("onExternalIntent", uri, object : MethodChannel.Result {
@@ -144,6 +164,8 @@ object MediaStoreChannel {
         })
     }
 
+    // ---------------------------------------------------------------- channel calls
+
     private fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         val ctx = appContext
         if (ctx == null) {
@@ -152,12 +174,12 @@ object MediaStoreChannel {
         }
         val resolver = ctx.contentResolver
         when (call.method) {
-            "querySongs" -> runAsync(result) { querySongs(resolver) }
+            "querySongs" -> runAsync(queryExecutor, result) { querySongs(resolver) }
             "queryArtwork" -> {
                 val id = call.argument<Number>("id")?.toLong()
                 val size = call.argument<Number>("size")?.toInt() ?: 200
                 if (id == null) result.error("bad_args", "id is required", null)
-                else runAsync(result) { queryArtwork(resolver, id, size) }
+                else runAsync(artworkExecutor, result) { loadArtworkBytes(resolver, id, size) }
             }
             "getExternalUri" -> {
                 result.success(pendingExternalUri)
@@ -166,13 +188,13 @@ object MediaStoreChannel {
             "triggerMediaScan" -> {
                 val paths = call.argument<List<String>>("paths") ?: emptyList()
                 if (paths.isEmpty()) result.success(0)
-                else runAsync(result) { triggerMediaScan(ctx, paths) }
+                else runAsync(scanExecutor, result) { triggerMediaScan(ctx, paths) }
             }
             else -> result.notImplemented()
         }
     }
 
-    private fun <T> runAsync(result: MethodChannel.Result, block: () -> T) {
+    private fun <T> runAsync(executor: ExecutorService, result: MethodChannel.Result, block: () -> T) {
         executor.execute {
             try {
                 val value = block()
@@ -182,6 +204,8 @@ object MediaStoreChannel {
             }
         }
     }
+
+    // ---------------------------------------------------------------- song query
 
     @Suppress("DEPRECATION")
     private fun querySongs(resolver: ContentResolver): List<Map<String, Any?>> {
@@ -254,25 +278,38 @@ object MediaStoreChannel {
         return songs
     }
 
+    // ---------------------------------------------------------------- media scan
+
+    /** Known audio files in MediaStore: path -> DATE_MODIFIED (sec). */
+    @Suppress("DEPRECATION")
+    private fun loadKnownAudio(resolver: ContentResolver): Map<String, Long> {
+        val known = HashMap<String, Long>()
+        resolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.DATE_MODIFIED),
+            null, null, null,
+        )?.use { c ->
+            while (c.moveToNext()) {
+                val path = c.getString(0) ?: continue
+                known[path] = c.getLong(1)
+            }
+        }
+        return known
+    }
+
     /**
-     * Aşama 3: verilen klasörleri özyinelemeli gezip ses dosyalarını
-     * MediaScanner'a bildirir. USB üzerinden kopyalanan ama MediaStore'a
-     * henüz girmemiş dosyaları uygulamaya kazandırır; tarayıcı kendisi
-     * .nomedia vb. kuralları uyguladığı için burada ek filtre yoktur.
-     *
-     * Dart tarafı şarkı üst dizinlerini gönderir; standart Müzik/Download
-     * klasörleri de burada eklenir (kütüphane boşken bile yeni albümler
-     * genellikle oraya kopyalanır). Dönüş: tarayıcıya verilen dosya sayısı —
-     * MediaStore güncellemesi asenkron olarak sonrasında görünür.
+     * Walks the given folders and reports audio files that are NOT in MediaStore (or changed
+     * since) to the MediaScanner. The cap is per root; Music/Download are always walked.
+     * Returns the number of files handed to the scanner (the update appears asynchronously).
      */
     private fun triggerMediaScan(context: Context, roots: List<String>): Int {
-        val audioExtensions = setOf(
-            "mp3", "flac", "wav", "ogg", "oga", "opus", "m4a", "aac", "wma",
-            "aif", "aiff", "ape", "wv", "dsf", "dff",
-        )
+        val known = try {
+            loadKnownAudio(context.contentResolver)
+        } catch (e: Exception) {
+            emptyMap()
+        }
         val visitedDirs = HashSet<String>()
-        val found = LinkedHashSet<String>()
-        val maxFilesPerRoot = 4000
+        val toScan = LinkedHashSet<String>()
 
         fun canonicalOf(f: File): String = try {
             f.canonicalPath
@@ -280,39 +317,49 @@ object MediaStoreChannel {
             f.absolutePath
         }
 
+        @Suppress("DEPRECATION")
         val standardDirs = listOfNotNull(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC),
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
         )
 
-        for (root in roots.map { File(it) } + standardDirs) {
+        for (root in standardDirs + roots.map { File(it) }) {
             if (!root.isDirectory) continue
+            var queued = 0
+            var visited = 0
             root.walkTopDown()
-                // Aynı alt ağacı iki kez gezmeyi önler (iç içe gönderilen kökler).
+                // Avoids walking the same subtree twice (nested roots, symlink loops).
                 .onEnter { visitedDirs.add(canonicalOf(it)) }
                 .filter { it.isFile }
-                .takeWhile { found.size < maxFilesPerRoot }
+                .takeWhile { queued < MAX_QUEUED_PER_ROOT && visited++ < MAX_VISITED_PER_ROOT }
                 .forEach { f ->
-                    if (f.extension.lowercase() in audioExtensions) {
-                        found.add(f.absolutePath)
+                    if (f.extension.lowercase() !in AUDIO_EXTENSIONS) return@forEach
+                    val path = f.absolutePath
+                    val modified = known[path]
+                    if (modified == null || f.lastModified() / 1000 > modified) {
+                        if (toScan.add(path)) queued++
                     }
                 }
         }
-        if (found.isEmpty()) return 0
-        MediaScannerConnection.scanFile(context, found.toTypedArray(), null, null)
-        return found.size
+        if (toScan.isEmpty()) return 0
+        MediaScannerConnection.scanFile(context, toScan.toTypedArray(), null, null)
+        return toScan.size
     }
 
-    private fun queryArtwork(resolver: ContentResolver, songId: Long, size: Int): ByteArray? {
+    // ---------------------------------------------------------------- artwork
+
+    /** Shared by the channel and [ArtworkProvider]. JPEG bytes or null. */
+    fun loadArtworkBytes(resolver: ContentResolver, songId: Long, size: Int): ByteArray? {
+        val px = size.coerceIn(16, 2048)
         val loaded: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId)
             try {
-                resolver.loadThumbnail(uri, Size(size, size), null)
+                resolver.loadThumbnail(uri, Size(px, px), null)
             } catch (e: Exception) {
                 null
             }
         } else {
-            legacyAlbumArt(resolver, songId, size)
+            legacyAlbumArt(resolver, songId, px)
         }
         val bitmap = loaded ?: return null
         val out = ByteArrayOutputStream()
@@ -340,17 +387,19 @@ object MediaStoreChannel {
 
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(artPath, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
         var sample = 1
         while (bounds.outWidth / (sample * 2) >= size && bounds.outHeight / (sample * 2) >= size) {
             sample *= 2
         }
-        val opts = BitmapFactory.Options().apply { inSampleSize = sample }
-        return BitmapFactory.decodeFile(artPath, opts)
+        return BitmapFactory.decodeFile(artPath, BitmapFactory.Options().apply { inSampleSize = sample })
     }
 
-    // ---- Bozuk (mojibake) etiket onarımı: "UTF-8 baytları Latin-1/CP1252 sanılmış" durumları ----
+    // ---------------------------------------------------------------- mojibake repair
+
+    // Latin-based code pages only: GBK/Big5/GB18030 could corrupt short Chinese titles.
     private val repairCharsets: List<Charset> by lazy {
-        listOf("ISO-8859-1", "windows-1252", "windows-1254", "GB18030", "GBK", "Big5")
+        listOf("ISO-8859-1", "windows-1252", "windows-1254")
             .mapNotNull { name -> try { Charset.forName(name) } catch (e: Exception) { null } }
     }
 

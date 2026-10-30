@@ -1,0 +1,19 @@
+name: resonance_media_store
+description: MediaStore MethodChannel and artwork ContentProvider for Resonance (local Android plugin).
+version: 0.0.1
+publish_to: 'none'
+
+environment:
+  sdk: ^3.13.4
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.example.resonance.mediastore
+        pluginClass: MediaStorePlugin

@@ -55,9 +55,9 @@ class InitialBinding extends Bindings {
   void dependencies() {
     // --- TEMEL YARDIMCILAR ---
     Get.put<PermissionHelper>(PermissionHelper(), permanent: true);
-    Get.lazyPut<PermissionController>(
-      () => PermissionController(Get.find<PermissionHelper>()),
-      fenix: true,
+    Get.put<PermissionController>(
+      PermissionController(Get.find<PermissionHelper>()),
+      permanent: true,
     );
     Get.lazyPut<DeviceMediaDataSource>(
       () => MediaStoreChannelDataSource(),

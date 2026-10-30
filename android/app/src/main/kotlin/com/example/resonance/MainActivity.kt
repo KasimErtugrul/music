@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import com.example.resonance.mediastore.MediaStoreBridge
 import com.example.resonance.widget.MusicWidgetProvider
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -27,8 +28,9 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        // The MediaStore channel is now registered on every engine by MediaStorePlugin
+        // (via GeneratedPluginRegistrant); no separate attach here.
         super.configureFlutterEngine(flutterEngine)
-        MediaStoreChannel.attach(flutterEngine, applicationContext)
         handleIntent(intent)
     }
 
@@ -46,6 +48,13 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
+    override fun onPause() {
+        // If the launcher confirmation dialog opened, the Activity pauses: the request was not
+        // swallowed, so cancel the "could not add" timeout. The receiver stays until onDestroy.
+        mainHandler.removeCallbacks(pinTimeout)
+        super.onPause()
+    }
+
     override fun onDestroy() {
         mainHandler.removeCallbacks(pinTimeout)
         unregisterPinReceiver()
@@ -56,7 +65,7 @@ class MainActivity : AudioServiceActivity() {
         if (intent == null) return
 
         if (intent.action == ACTION_ADD_WIDGET) {
-            intent.action = Intent.ACTION_MAIN // tekrar tetiklenmesin
+            intent.action = Intent.ACTION_MAIN // do not trigger again
             pendingPinWidget = true
             return
         }
@@ -67,7 +76,7 @@ class MainActivity : AudioServiceActivity() {
             (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0
         intent.action = Intent.ACTION_MAIN
         if (uri != null && !fromHistory) {
-            MediaStoreChannel.handleExternalUri(uri)
+            MediaStoreBridge.handleExternalUri(uri)
         }
     }
 
@@ -80,7 +89,6 @@ class MainActivity : AudioServiceActivity() {
             return
         }
 
-        // Launcher widget'ı gerçekten eklediğinde bu yayın gelir.
         unregisterPinReceiver()
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -107,8 +115,8 @@ class MainActivity : AudioServiceActivity() {
             ComponentName(this, MusicWidgetProvider::class.java), null, callback,
         )
         if (accepted) {
-            // Pencere açılır ve kullanıcı onaylarsa receiver tetiklenir; 3 sn içinde hiçbir
-            // şey olmazsa (ör. MIUI isteği sessizce yuttuysa) kullanıcıya yol gösterilir.
+            // If the dialog opens, onPause cancels this timer; if nothing happens at all
+            // (e.g. MIUI silently swallowed the request) the user gets guidance.
             mainHandler.postDelayed(pinTimeout, PIN_TIMEOUT_MS)
         } else {
             unregisterPinReceiver()
@@ -121,7 +129,7 @@ class MainActivity : AudioServiceActivity() {
             try {
                 unregisterReceiver(it)
             } catch (e: IllegalArgumentException) {
-                // zaten kayıtlı değil
+                // already unregistered
             }
         }
         pinReceiver = null
@@ -130,6 +138,6 @@ class MainActivity : AudioServiceActivity() {
     private companion object {
         const val ACTION_ADD_WIDGET = "com.example.resonance.ADD_WIDGET"
         const val ACTION_WIDGET_PINNED = "com.example.resonance.WIDGET_PINNED"
-        const val PIN_TIMEOUT_MS = 3000L
+        const val PIN_TIMEOUT_MS = 1500L
     }
 }

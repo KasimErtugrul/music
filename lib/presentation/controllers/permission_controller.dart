@@ -32,6 +32,7 @@ class PermissionController extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    unawaited(refresh());
   }
 
   @override

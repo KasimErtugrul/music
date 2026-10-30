@@ -61,6 +61,9 @@ dependencies:
   # flutter/material ColorScheme'ine köprüler (bkz. _loadSystemScheme).
   dynamic_color: ^2.1.0
 
+  resonance_media_store: 
+    path: packages/resonance_media_store
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

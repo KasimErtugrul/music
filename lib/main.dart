@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:resonance/app.dart';
 import 'package:resonance/core/bindings/initial_binding.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
@@ -17,13 +18,12 @@ import 'package:resonance/data/repositories/preferences_repository.dart';
 import 'package:resonance/data/repositories/settings_repository.dart';
 import 'package:resonance/data/repositories/theme_repository.dart';
 import 'package:resonance/l10n/app_localizations.dart';
-import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/auto_backup_controller.dart';
+import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/settings_controller.dart';
 import 'package:resonance/presentation/controllers/sleep_timer_controller.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 late final AudioHandler audioHandler;
@@ -50,6 +50,11 @@ Future<Uri?> artworkToFile(int id) async {
   }
 }
 
+/// Android Auto ayrı süreçtir; özel cache'teki file:// yolunu okuyamaz.
+/// ArtworkProvider kapağı content:// ile sunar.
+Future<Uri?> autoArtworkUri(int id) async =>
+    Uri.parse('content://com.example.resonance.artwork/art/$id');
+
 /// Aşama 5: Android Auto düğüm etiketleri için yerelleştirme çözücüsü.
 /// UI hazırken gerçek locale'den; hazır değilken (arka plan motoru) ayar
 /// dili tr ise Türkçe, değilse İngilizce döner. Hiçbir hata Auto sorgusunu
@@ -58,8 +63,10 @@ AppLocalizations _autoL10n() {
   try {
     final ctx = Get.context;
     if (ctx != null) {
-      final fromContext =
-          Localizations.of<AppLocalizations>(ctx, AppLocalizations);
+      final fromContext = Localizations.of<AppLocalizations>(
+        ctx,
+        AppLocalizations,
+      );
       if (fromContext != null) return fromContext;
     }
   } catch (_) {}
@@ -144,7 +151,7 @@ Future<void> main() async {
         favorites: Get.find<FavoriteRepository>(),
         player: Get.find<PlayerController>(),
         l10n: _autoL10n,
-        artResolver: artworkToFile,
+        artResolver: autoArtworkUri, // eskisi: artworkToFile
       ),
     );
 
@@ -186,20 +193,26 @@ class _StartupErrorApp extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Uygulama başlatılamadı',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red)),
+                const Text(
+                  'Uygulama başlatılamadı',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
                 const SizedBox(height: 12),
-                const Text('Hata:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Hata:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 SelectableText('$error'),
                 const SizedBox(height: 16),
-                const Text('Stack:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                SelectableText('$stack',
-                    style: const TextStyle(fontSize: 11)),
+                const Text(
+                  'Stack:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SelectableText('$stack', style: const TextStyle(fontSize: 11)),
               ],
             ),
           ),

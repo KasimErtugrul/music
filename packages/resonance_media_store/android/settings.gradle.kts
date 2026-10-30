@@ -1,0 +1,1 @@
+rootProject.name = "resonance_media_store"

@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Serves artwork as content:// so Android Auto / system UI can read it.
+             Read-only; accepts numeric song ids only. -->
+        <provider
+            android:name="com.example.resonance.mediastore.ArtworkProvider"
+            android:authorities="${applicationId}.artwork"
+            android:exported="true"
+            android:grantUriPermissions="false" />
+    </application>
+</manifest>
