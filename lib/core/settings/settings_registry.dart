@@ -177,7 +177,14 @@ abstract final class SettingsRegistry {
     SettingsEntry(
       key: SettingsKeys.themeAmoled,
       group: SettingsGroup.appearance,
-      title: (l) => l.themeAmoledOn,
+      // Gün 15: başlık themeAmoledOn'dan themeModeAmoled'a alındı. Gün 13
+      // birleşmesinden sonra sayfada AMOLED artık 4'lü mod seçeneğinin
+      // içindeydir ve etiketi themeModeAmoled'dan gelir; eskiden ayrı bir
+      // anahtar olduğu için kalan themeAmoledOn dizgesi arama sonucuyla
+      // sayfadaki etiketin AYNI kavramı farklı adla göstermesine yol
+      // açıyordu. themeAmoledOn dizgesi artık yalnız özel tema
+      // düzenleyicideki (tema nesnesinin) AMOLED alanını adlandırır.
+      title: (l) => l.themeModeAmoled,
       pageBuilder: () => const ThemeGalleryPage(),
     ),
     SettingsEntry(

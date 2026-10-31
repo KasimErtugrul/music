@@ -43,6 +43,32 @@ void main() {
       expect(s.player.seekBarStyle, 'classic');
     });
 
+    test('eski seekBarStyle=waveform verisi classic olarak normalleştirilir'
+        ' (Gün 15)', () {
+      // Arayüz hiçbir zaman 'waveform' seçeneği sunmadı; eski kayıtlı
+      // veride kalmış ölü değer artık fromJson'da tek noktadan düşürülür
+      // (PlayerStylePage'teki geçici görüntü eşlemesi silindi).
+      final s = ThemeSettings.fromJson(const {
+        'player': <String, dynamic>{'seekBarStyle': 'waveform'},
+      });
+      expect(s.player.seekBarStyle, 'classic');
+    });
+
+    test('Gün 15: classic/thin değerleri normalizasyondan etkilenmez', () {
+      expect(
+        ThemeSettings.fromJson(const {
+          'player': <String, dynamic>{'seekBarStyle': 'thin'},
+        }).player.seekBarStyle,
+        'thin',
+      );
+      expect(
+        ThemeSettings.fromJson(const {
+          'player': <String, dynamic>{'seekBarStyle': 'classic'},
+        }).player.seekBarStyle,
+        'classic',
+      );
+    });
+
     test('geçerli JSON int/double karışımıyla da eksiksiz ayrıştırılır', () {
       final s = ThemeSettings.fromJson(const {
         'themeMode': 'dark',

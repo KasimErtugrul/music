@@ -67,12 +67,18 @@ class _ExternalPlayerPageState extends State<ExternalPlayerPage>
     return song.path.isNotEmpty ? song.path : song.uri;
   }
 
-  static const List<double> _speeds = <double>[0.8, 1.0, 1.25, 1.5];
-
+  // Gün 15: yerel kopya sabit silindi; hız adımları artık tek kaynaktan
+  // (PlayerController.quickSpeeds) gelir — SpeedPitchSheet'inkiyle birebir.
+  // Döngü PlayerController.setSpeed'i çağırır; Gün 15 sözleşmesi gereği bu
+  // çağrı canlı uygulamaya ek olarak KALICI tercihi de yazar. Eski davranışta
+  // yalnız canlı değer değişiyor, tercih dosyası geride kalıyordu: sonraki
+  // playSong / oturum geri yüklemesi tercih değerini geri yükleyip bu
+  // sayfadan seçilen hızı sessizce sıfırlıyordu.
   void _cycleSpeed(PlayerController player, double current) {
-    var idx = _speeds.indexWhere((s) => (s - current).abs() < 0.001);
-    idx = (idx + 1) % _speeds.length;
-    player.setSpeed(_speeds[idx]);
+    final speeds = PlayerController.quickSpeeds;
+    var idx = speeds.indexWhere((s) => (s - current).abs() < 0.001);
+    idx = (idx + 1) % speeds.length;
+    player.setSpeed(speeds[idx]);
   }
 
   @override

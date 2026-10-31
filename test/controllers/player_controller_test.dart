@@ -40,6 +40,8 @@ void main() {
   late _MockLibraryRepository libRepo;
   late _MockQueueStateRepository stateRepo;
   late _MockHistoryRepository historyRepo;
+  // Gün 15: setSpeed/setPitch kalıcılık testi için alan seviyesine alındı.
+  late _MockPreferencesRepository prefRepo;
   late PreferencesController prefCtrl;
   late PlayerController controller;
 
@@ -59,7 +61,7 @@ void main() {
     libRepo = _MockLibraryRepository();
     stateRepo = _MockQueueStateRepository();
     historyRepo = _MockHistoryRepository();
-    final prefRepo = _MockPreferencesRepository();
+    prefRepo = _MockPreferencesRepository();
 
     when(() => prefRepo.loadPlayback()).thenAnswer((_) async => const PlaybackSettingsModel());
     when(() => prefRepo.loadLibrary()).thenAnswer((_) async => const LibrarySettingsModel());
@@ -303,6 +305,33 @@ void main() {
 
       verify(() => repo.setShuffleMode(false)).called(1);
       expect(controller.shuffleEnabled.value, isFalse);
+    });
+  });
+
+  // Gün 15: hız/perde kalıcılığı tek doğruluk kaynağına taşındı. Eskiden
+  // harici oynatıcının hız döngüsü yalnız canlı depo çağrısı yapıyor,
+  // kalıcı tercihe yazmıyordu; SpeedPitchSheet ise iki controller'a birden
+  // dokunuyordu. Yeni sözleşme: PlayerController.setSpeed/setPitch hem
+  // canlı depoya hem kalıcı tercihe yazar.
+  group('Gün 15: hız/perde kalıcılığı', () {
+    test('setSpeed canlı depoyu ve kalıcı tercihi birlikte yazar', () async {
+      await controller.setSpeed(1.25);
+
+      verify(() => repo.setSpeed(1.25)).called(1);
+      verify(() => prefRepo.savePlayback(any())).called(1);
+      expect(prefCtrl.playback.value.speed, 1.25);
+    });
+
+    test('setPitch canlı depoyu ve kalıcı tercihi birlikte yazar', () async {
+      await controller.setPitch(0.9);
+
+      verify(() => repo.setPitch(0.9)).called(1);
+      verify(() => prefRepo.savePlayback(any())).called(1);
+      expect(prefCtrl.playback.value.pitch, 0.9);
+    });
+
+    test('quickSpeeds, SpeedPitchSheet\'in eski sabitiyle aynı adımlardır', () {
+      expect(PlayerController.quickSpeeds, <double>[0.8, 1.0, 1.25, 1.5]);
     });
   });
 }

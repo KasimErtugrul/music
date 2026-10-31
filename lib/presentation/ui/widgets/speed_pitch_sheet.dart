@@ -9,12 +9,18 @@ import 'package:resonance/presentation/controllers/player_controller.dart';
 /// (0.8x / 1.0x / 1.25x / 1.5x) ve sıfırlama eylemi.
 ///
 /// Tasarımdaki "yarımton" pitch sunumu EKLENMEDİ: model doğrusal oranı
-/// (0.5x-2.0x) saklar; x biçimi gerçek değeri yansıtır. Controller
-/// bağlantıları (PreferencesController + PlayerController) aynen korunur.
+/// (0.5x-2.0x) saklar; x biçimi gerçek değeri yansıtır.
+///
+/// Gün 15: kalıcılık PlayerController'a taşındı (setSpeed/setPitch canlı
+/// uygulamanın yanında kalıcı tercihi de yazar). Eskiden her değişimde
+/// PreferencesController + PlayerController'a ayrı ayrı dokunuluyordu;
+/// çift çağrı deseni kaldırıldı. Hızlı çip listesi PlayerController
+/// .quickSpeeds'ten gelir (harici oynatıcının hız döngüsüyle ortak).
 class SpeedPitchSheet extends StatelessWidget {
   const SpeedPitchSheet({super.key});
 
-  static const List<double> _quickSpeeds = <double>[0.8, 1.0, 1.25, 1.5];
+  /// Gün 15: yerel kopya sabit silindi; tek kaynak PlayerController.
+  static const List<double> _quickSpeeds = PlayerController.quickSpeeds;
 
   /// Çip etiketi: 1x, 0.8x, 1.5x, 1.25x (gereksiz sıfır yok).
   static String _speedLabel(double v) {
@@ -39,15 +45,10 @@ class SpeedPitchSheet extends StatelessWidget {
     final ctrl = Get.find<PreferencesController>();
     final player = Get.find<PlayerController>();
 
-    void setSpeed(double v) {
-      ctrl.setSpeed(v);
-      player.setSpeed(v);
-    }
+    // Gün 15: yalnız player çağrısı — kalıcılık PlayerController içinde.
+    void setSpeed(double v) => player.setSpeed(v);
 
-    void setPitch(double v) {
-      ctrl.setPitch(v);
-      player.setPitch(v);
-    }
+    void setPitch(double v) => player.setPitch(v);
 
     return SafeArea(
       child: Padding(
@@ -157,11 +158,10 @@ class SpeedPitchSheet extends StatelessWidget {
               );
             }),
             const SizedBox(height: 4),
-            // Sıfırla: 1.0 hız + 1.0 perde (mevcut controller API'si).
+            // Sıfırla: 1.0 hız + 1.0 perde (Gün 15: tek çağrı — kalıcılık
+            // PlayerController'da).
             FilledButton.tonalIcon(
               onPressed: () {
-                ctrl.setSpeed(1.0);
-                ctrl.setPitch(1.0);
                 player.setSpeed(1.0);
                 player.setPitch(1.0);
               },

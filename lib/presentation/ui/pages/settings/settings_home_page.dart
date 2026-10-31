@@ -23,6 +23,7 @@ import 'package:resonance/presentation/ui/pages/settings/widget_settings_page.da
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
+import 'package:resonance/presentation/ui/widgets/settings_page_reset_action.dart';
 import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
 
 /// UI tasarım güncellemesi: Ayarlar ana sayfası artık tasarım dilini izler —
@@ -413,31 +414,19 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
   /// Gün 6: sıfırlama onayı. Onaylanırsa diskteki tüm yedeklenen ayar
   /// anahtarları kaldırılır ve canlı controller'lar yeniden yüklenir
   /// (PreferencesController.resetAll); sonuç SnackBar ile bildirilir.
-  Future<void> _confirmReset(BuildContext context) async {
+  ///
+  /// Gün 15: diyaloğun birebir kopyası SettingsPageResetAction.confirmAndRun
+  /// statik yardımcısına taşındı (Gün 13'teki sayfa eylemiyle aynı desen);
+  /// burada yalnız «Tümünü sıfırla» dizgeleriyle çağrılır. Görsel akış ve
+  /// disk etkisi birebir korunur (Gün 6 widget testi bu sözleşmeyi taşır).
+  Future<void> _confirmReset(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.resetAll),
-        content: Text(l10n.resetConfirm),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.resetAll),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-
-    await Get.find<PreferencesController>().resetAll();
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.resetDone)),
+    return SettingsPageResetAction.confirmAndRun(
+      context,
+      title: l10n.resetAll,
+      content: l10n.resetConfirm,
+      confirmLabel: l10n.resetAll,
+      onReset: () => Get.find<PreferencesController>().resetAll(),
     );
   }
 }

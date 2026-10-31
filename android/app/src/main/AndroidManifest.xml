@@ -73,6 +73,17 @@
             </intent-filter>
         </activity>
 
+        <!-- "Widget ekle" kısayolunun hedefi. Arayüzü yok (şeffaf), uygulamayı açmaz:
+             yalnızca launcher'a widget ekleme isteğini iletir ve kapanır.
+             taskAffinity="" => uygulamanın mevcut görevine katılmaz, ana ekran öne gelmez. -->
+        <activity
+            android:name=".widget.WidgetPinActivity"
+            android:exported="true"
+            android:theme="@style/PinTheme"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity="" />
+
         <!-- audio_service servisi (paket dokümantasyonundaki tanımla aynı) -->
         <service
             android:name="com.ryanheise.audioservice.AudioService"
@@ -106,6 +117,11 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/music_widget_info" />
         </receiver>
+
+        <!-- Widget gerçekten eklenince launcher bu alıcıyı çağırır -> "Widget eklendi" mesajı. -->
+        <receiver
+            android:name=".widget.WidgetPinResultReceiver"
+            android:exported="false" />
 
         <!-- Flutter tool tarafından kullanılır, SİLMEYİN. -->
         <meta-data

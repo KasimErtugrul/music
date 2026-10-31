@@ -396,8 +396,34 @@ class PlayerController extends GetxController implements AutoPlayController {
   }
 
    Future<void> pause() => _repository.pause();
-  Future<void> setSpeed(double speed) => _repository.setSpeed(speed);
-  Future<void> setPitch(double pitch) => _repository.setPitch(pitch);
+
+  /// Gün 15: hızlı hız seçeneklerinin TEK kaynağı. SpeedPitchSheet'in
+  /// çipleriyle harici oynatıcının hız döngüsü aynı listeyi kullanırdı;
+  /// iki kopya sabit tekilleştirildi.
+  static const List<double> quickSpeeds = <double>[0.8, 1.0, 1.25, 1.5];
+
+  /// Gün 15: kalıcılık tek doğruluk kaynağına taşındı. Eskiden
+  /// SpeedPitchSheet iki çağrı yapıyordu (PreferencesController.setSpeed +
+  /// buraya canlı çağrı), harici oynatıcının hız döngüsü ise YALNIZ canlı
+  /// çağrı yapıyordu — kalıcı tercihe yazmıyordu ve iki kontrol tercih
+  /// dosyasıyla ayrışıyordu (sheet'in gösterdiği değer ile sonraki
+  /// playSong/oturum geri yüklemesinin uyguladığı değer farklılaşıyordu).
+  /// Artık canlı uygulamanın yanında kalıcı tercih de buradan yazılır;
+  /// çağıranlar tek metodu çağırır. Tercih değişimi _bindPreferenceWatchers
+  /// içindeki alan dinleyicisini tetiklese bile hız alanı orada
+  /// dinlenmediğinden ek bir depo çağrısı oluşmaz (döngü yok).
+  Future<void> setSpeed(double speed) async {
+    await _repository.setSpeed(speed);
+    prefCtrl.setSpeed(speed);
+  }
+
+  /// Gün 15: [setSpeed] ile aynı sözleşme — canlı uygulama + kalıcı tercih
+  /// tek çağrıda. (Harici oynatıcı perdeyi değiştirmese de sözleşme
+  /// simetriktir; SpeedPitchSheet artık ikisini de tek çağrıyla yapar.)
+  Future<void> setPitch(double pitch) async {
+    await _repository.setPitch(pitch);
+    prefCtrl.setPitch(pitch);
+  }
 
 
 

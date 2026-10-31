@@ -182,10 +182,16 @@ class ThemeSettings {
     final playerJson = playerRaw is Map<String, dynamic>
         ? playerRaw
         : const <String, dynamic>{};
+    // Gün 15: ölü değer temizliği — sarma çubuğu seçeneği hiçbir zaman
+    // classic/thin dışına çıkmadı (Görev 3.2); eski kayıtlı veride ya da
+    // içe aktarılan temada kalmış 'waveform' değeri classic'e düşer.
+    // (Dalga formu sarma çubuğu bir gün gerçek seçenek olarak eklenirse bu
+    // normalizasyon kaldırılmalıdır.)
+    final seekBarRaw = stringIn(playerJson, 'seekBarStyle', 'classic');
     final player = PlayerThemeExtension(
       backgroundStyle: stringIn(playerJson, 'backgroundStyle', 'solid'),
       artworkShape: stringIn(playerJson, 'artworkShape', 'rounded'),
-      seekBarStyle: stringIn(playerJson, 'seekBarStyle', 'classic'),
+      seekBarStyle: seekBarRaw == 'waveform' ? 'classic' : seekBarRaw,
       miniPlayerStyle: stringIn(playerJson, 'miniPlayerStyle', 'compact'),
       animationLevel: stringIn(playerJson, 'animationLevel', 'full'),
     );

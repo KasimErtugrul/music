@@ -9,6 +9,6 @@
         <intent
             android:action="com.example.resonance.ADD_WIDGET"
             android:targetPackage="com.example.resonance"
-            android:targetClass="com.example.resonance.MainActivity" />
+            android:targetClass="com.example.resonance.widget.WidgetPinActivity" />
     </shortcut>
 </shortcuts>

@@ -50,10 +50,13 @@ class PlayerStylePage extends StatelessWidget {
                 onChanged: (v) =>
                     themeCtrl.setPlayer(p.copyWith(artworkShape: v)),
               ),
+              // Gün 15: 'waveform' → 'classic' normalizasyonu tek yere
+              // (ThemeSettings.fromJson) indi; buradaki geçici görüntü
+              // eşlemesi silindi. Modelden artık ölü değer gelemez.
               SettingsChoiceTile<String>(
                 title: l10n.seekBarStyle,
                 subtitle: l10n.seekBarStyleDesc,
-                value: p.seekBarStyle == 'waveform' ? 'classic' : p.seekBarStyle,
+                value: p.seekBarStyle,
                 options: const <String>['classic', 'thin'],
                 labelOf: (v) =>
                     v == 'thin' ? l10n.seekBarThin : l10n.seekBarClassic,
