@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// Gün 12: aç/kapa ayarının ortak yüzü (tek tasarım dili).
+/// Anahtar (switch) ayar satırı — Gün 12 tasarım dili.
 ///
-/// SwitchListTile sözleşmesi korunur: başlık + alt açıklama (l10n)
-/// yerleşimi ListTile ailesiyle aynıdır, varsayılan satır yüksekliği
-/// 48 dp dokunma hedefini karşılar ve SwitchListTile kendi içinde
-/// anlamsallığı (Semantics: başlık + değer) birleştirir.
+/// Tüm ayar satırları gibi en az 48 dp dokunma hedefiyle çizilir
+/// (SwitchListTile varsayılanı 56 dp); satırın herhangi bir yerine
+/// dokunmak anahtarı değiştirir.
+///
+/// Erişilebilirlik: SwitchListTile başlığı ve alt yazısı anahtarın
+/// Semantics etiketine kendisi ekler (durum okunurken satır metni duyulur);
+/// bu yüzden ayrıca etiket eklenmez.
 class SettingsSwitchTile extends StatelessWidget {
   const SettingsSwitchTile({
     super.key,

@@ -5,8 +5,8 @@ import 'package:resonance/data/repositories/custom_theme_repository.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/theme_editor_controller.dart';
 import 'package:resonance/presentation/ui/widgets/color_picker_sheet.dart';
+import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
 import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
-import 'package:resonance/presentation/ui/widgets/settings_tile.dart';
 
 class CustomThemeEditorPage extends StatefulWidget {
   const CustomThemeEditorPage({super.key, this.existingTheme});
@@ -82,11 +82,8 @@ class _CustomThemeEditorPageState extends State<CustomThemeEditorPage> {
               onChanged: (v) => controller.name.value = v,
             ),
             const SizedBox(height: 24),
-            // Gün 12: satır ortak SettingsTile yüzüne taşındı; başlık ve
-            // alt açıklama l10n (themeSeedColor / themeSeedColorDesc).
-            SettingsTile(
-              title: l10n.themeSeedColor,
-              subtitle: l10n.themeSeedColorDesc,
+            ListTile(
+              title: const Text('Seed Color'),
               trailing: Container(
                 width: 40,
                 height: 40,
@@ -100,18 +97,22 @@ class _CustomThemeEditorPageState extends State<CustomThemeEditorPage> {
                 if (color != null) controller.setSeedColor(color.toARGB32());
               },
             ),
-            SettingsSwitchTile(
-              title: l10n.themeAmoledOn,
-              subtitle: l10n.themeAmoledOnDesc,
-              value: s.amoled,
-              onChanged: controller.setAmoled,
-            ),
-            SettingsSwitchTile(
-              title: l10n.themeHighContrast,
-              subtitle: l10n.themeHighContrastDesc,
-              value: s.highContrast,
-              onChanged: controller.setHighContrast,
-            ),
+            // Gün 12: anahtar başlıkları l10n'e taşındı (eskiden gömülü
+            // İngilizceydi) ve her anahtar altyazı aldı.
+            SettingsGroupCard(children: [
+              SettingsSwitchTile(
+                title: l10n.themeAmoledOn,
+                subtitle: l10n.settingsAmoledDarkDescription,
+                value: s.amoled,
+                onChanged: controller.setAmoled,
+              ),
+              SettingsSwitchTile(
+                title: l10n.themeHighContrast,
+                subtitle: l10n.themeHighContrastDesc,
+                value: s.highContrast,
+                onChanged: controller.setHighContrast,
+              ),
+            ]),
           ],
         );
       }),

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
-/// Gün 12: ayar satırının ortak yüzü (tek tasarım dili).
+/// Tek satırlık ayar/gezinme döşemesi — Gün 12 tasarım dili.
 ///
-/// - Başlık/alt açıklama yerleşimi ListTile sözleşmesini izler; varsayılan
-///   satır yüksekliği 48 dp dokunma hedefini karşılar ve ListTile kendi
-///   içinde anlamsallığı (Semantics) birleştirir.
-/// - Navigasyon affordansı dürüsttür: chevron yalnızca satır dokunulabilirken
-///   (onTap != null) gösterilir; özel [trailing] verilirse o kazanır.
+/// Kart içindeki eylem/gezinme satırları için ortak görünüm: başlık
+/// bodyLarge/w600, alt yazı bodySmall/onSurfaceVariant, satır yüksekliği
+/// ListTile sayesinde 56 dp (48 dp dokunma hedefinin üzerinde).
+///
+/// Erişilebilirlik: satır tek bir Semantics düğümü olarak okunur (başlık +
+/// alt yazı); `button` işareti ve dokunma eylemi Semantics üzerinde
+/// bildirilir, alt düğümler hariç tutulur ki ekran okuyucu aynı bilgiyi
+/// iki kez okumasın.
 class SettingsTile extends StatelessWidget {
   const SettingsTile({
     super.key,
@@ -25,18 +28,35 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: leading,
-      title: Text(title),
-      subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: trailing ??
-          (onTap != null
-              ? Icon(
-                  Icons.chevron_right,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                )
-              : null),
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Semantics(
+      button: onTap != null,
+      excludeSemantics: true,
+      label: subtitle == null ? title : '$title. $subtitle',
       onTap: onTap,
+      child: ListTile(
+        leading: leading,
+        title: Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyLarge
+              ?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        subtitle: subtitle == null
+            ? null
+            : Text(
+                subtitle!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
+              ),
+        trailing: trailing ??
+            Icon(Icons.chevron_right, size: 20, color: cs.onSurfaceVariant),
+        onTap: onTap,
+      ),
     );
   }
 }

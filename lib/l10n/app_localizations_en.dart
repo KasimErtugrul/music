@@ -700,11 +700,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetAll => 'Reset all settings';
 
   @override
-  String get resetAllDesc => 'All preferences return to their factory values';
-
-  @override
   String get resetConfirm =>
       'Are you sure you want to reset all settings to their defaults? This cannot be undone.';
+
+  @override
+  String get resetAllDesc => 'All preferences return to their factory values';
 
   @override
   String get resetDone => 'Settings restored to defaults';
@@ -1759,110 +1759,94 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get seekIntervalDesc => 'How far playback jumps when you seek';
+
+  @override
+  String get autoResumeDesc =>
+      'Resumes playback where you left off when the app opens';
+
+  @override
+  String get pauseOnHeadphoneDesc =>
+      'Playback pauses when headphones are unplugged';
+
+  @override
+  String get defaultShuffleDesc => 'New queues start in shuffle mode';
+
+  @override
+  String get skipSilenceDesc => 'Silent parts are skipped automatically';
+
+  @override
+  String get defaultRepeatDesc => 'Repeat mode applied when the app opens';
+
+  @override
+  String get minDurationDesc =>
+      'Songs shorter than this are excluded from the library';
+
+  @override
+  String get minDurationNone => 'None';
+
+  @override
   String get settingsLanguageDesc => 'Language of the app interface';
 
   @override
-  String get themeModeDesc => 'Light, dark, or follow system preference';
+  String get themeColorSourceDesc => 'Where the theme colors come from';
 
   @override
-  String get themeColorSourceDesc =>
-      'Colors derived from a seed, system, or artwork';
-
-  @override
-  String get themePresetSeedDesc => 'Pick a seed color from preset palettes';
-
-  @override
-  String get themeAmoledOnDesc => 'Uses true black surfaces in dark mode';
+  String get themePresetSeedDesc => 'Pick one of the preset color palettes';
 
   @override
   String get themeHighContrastDesc =>
-      'Stronger borders and enhanced color contrast';
+      'Increases the contrast of text and controls';
 
   @override
   String get themeSurfaceTintDesc =>
-      'Applies a color tint to cards, dialogs, and navigation bars';
+      'Tints elevated surfaces with the primary color';
 
   @override
   String get themeRoundedCornersDesc =>
-      'Rounds the corners of cards, dialogs, menus, and sheets';
+      'Corners are drawn rounded across the app';
 
   @override
-  String get themeDensityDesc =>
-      'Spacing and compactness of lists and controls';
+  String get themeDensityDesc => 'Compactness of lists and components';
 
   @override
-  String get themeFontDesc => 'Font family used throughout the app';
-
-  @override
-  String get themeSeedColorDesc => 'Base color for the custom theme';
-
-  @override
-  String get themeAnimationLevelDesc =>
-      'Extent of decorative animations; \'Off\' removes shadows';
-
-  @override
-  String get listViewModeTitle => 'List layout';
-
-  @override
-  String get listViewModeDesc => 'How song lists are displayed';
+  String get themeFontDesc => 'Typeface used across the app';
 
   @override
   String get playerBackgroundTitle => 'Background';
 
   @override
-  String get playerBackgroundDesc => 'Background texture/style of the player';
+  String get playerBackgroundDesc => 'Background style of the player screen';
 
   @override
-  String get playerArtworkShapeTitle => 'Artwork shape';
+  String get playerArtworkTitle => 'Artwork shape';
 
   @override
-  String get playerArtworkShapeDesc => 'Shape of the cover art in the player';
+  String get playerArtworkDesc => 'Corner style of the album artwork';
 
   @override
-  String get miniPlayerStyleTitle => 'Mini player';
+  String get seekBarStyleDesc => 'Look of the seek bar';
 
   @override
-  String get miniPlayerStyleDesc => 'Layout style of the mini player bar';
+  String get playerMiniTitle => 'Mini player';
 
   @override
-  String get miniPlayerCompact => 'Compact';
+  String get playerMiniDesc =>
+      'Layout of the mini player above the navigation bar';
 
   @override
-  String get miniPlayerWide => 'Wide';
+  String get playerMiniCompact => 'Compact';
 
   @override
-  String get seekBarStyleDesc => 'Style of the progress bar';
+  String get playerMiniWide => 'Wide';
 
   @override
-  String get seekIntervalDesc => 'Forward and rewind step duration';
+  String get themeAnimationLevelDesc =>
+      'Level of transition and decorative animations';
 
   @override
-  String get autoResumeDesc =>
-      'Resumes playback from where it left off when the app opens';
+  String get listViewStyleDesc => 'How song lists are displayed';
 
   @override
-  String get pauseOnHeadphoneDesc =>
-      'Pauses playback when headphones are disconnected';
-
-  @override
-  String get defaultShuffleDesc =>
-      'Enables shuffle automatically when starting a new queue';
-
-  @override
-  String get skipSilenceDesc => 'Skips silent parts within tracks';
-
-  @override
-  String get defaultRepeatDesc => 'Applied when starting a new queue';
-
-  @override
-  String get minDurationDesc =>
-      'Exclude songs shorter than this from your library';
-
-  @override
-  String get minDurationOff => 'Off';
-
-  @override
-  String minDurationSeconds(int seconds) {
-    return '${seconds}s';
-  }
+  String get settingsThemeModeDesc => 'Appearance mode applied on startup';
 }

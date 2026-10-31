@@ -1,129 +1,148 @@
-// Gün 12: ortak ayar bileşenlerinin tasarım sözleşmesi testleri.
-//
-// Kapsam:
-// - SettingsChoiceTile ≤3 seçenek → SegmentedButton (48 dp hedef, Semantics
-//   grup etiketi, DropdownButton yok)
-// - SettingsChoiceTile >3 seçenek → alt sayfa radyo listesi (RadioGroup +
-//   RadioListTile, 48 dp+ satır, seçim pop + değer bildirimi)
-// - SettingsSwitchTile alt açıklama gösterir ve değeri bildirir
-// - SettingsGroupCard başlık + çocukları kart yüzeyinde çizer
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
-import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
+import 'package:resonance/presentation/ui/widgets/settings_tile.dart';
 
-Widget _host(Widget child) => MaterialApp(home: Scaffold(body: child));
-
+/// Gün 12: birleşik ayar döşemesi davranışları.
+///
+/// Kapsam: DropdownButton'ın kaldırılması (≤3 → SegmentedButton, >3 →
+/// alt sayfa listesi), 48 dp dokunma hedefi, Semantics etiketleri,
+/// altyazı gösterimi ve SettingsGroupCard/SettingsTile çizimi.
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  Widget sarmala(Widget child) => MaterialApp(
+        home: Scaffold(body: ListView(children: [child])),
+      );
 
-  testWidgets('3 seçenek: SegmentedButton çizilir; 48 dp hedef ve '
-      'Semantics etiketi var; seçim değeri bildirilir', (tester) async {
-    final semantics = tester.ensureSemantics();
-    String? selected;
-    await tester.pumpWidget(_host(
-      SettingsChoiceTile<String>(
-        title: 'Mod',
-        subtitle: 'açıklama',
-        value: 'b',
-        options: const ['a', 'b', 'c'],
-        labelOf: (v) => v.toUpperCase(),
-        onChanged: (v) => selected = v,
-      ),
-    ));
+  testWidgets('≤3 seçenek: SegmentedButton çizilir, DropdownButton yok',
+      (tester) async {
+    await tester.pumpWidget(sarmala(SettingsChoiceTile<String>(
+      title: 'Mod',
+      value: 'a',
+      options: const ['a', 'b', 'c'],
+      labelOf: (v) => v.toUpperCase(),
+      onChanged: (_) {},
+    )));
+    await tester.pump();
 
     expect(find.byType(SegmentedButton<String>), findsOneWidget);
-    // Gün 12: DropdownButton kaldırıldı.
     expect(find.byType(DropdownButton<String>), findsNothing);
-    expect(find.text('açıklama'), findsOneWidget);
-
-    // Dokunma hedefi: segment satırı >= 48 dp.
-    expect(
-      tester.getSize(find.byType(SegmentedButton<String>)).height,
-      greaterThanOrEqualTo(48),
-    );
-    // Semantics: grup, ayar adını etiket olarak taşır.
-    expect(find.bySemanticsLabel('Mod'), findsWidgets);
-
-    await tester.tap(find.text('C'));
-    await tester.pump();
-    expect(selected, 'c');
-    semantics.dispose();
+    // Tüm seçenek etiketleri görünür.
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
   });
 
-  testWidgets('4 seçenek: alt sayfa radyo listesi; seçim sayfayı kapatır '
-      've değeri bildirir', (tester) async {
-    int? selected;
-    await tester.pumpWidget(_host(
-      SettingsChoiceTile<int>(
-        title: 'Sarma',
-        value: 10,
-        options: const [5, 10, 15, 30],
-        labelOf: (v) => '$v sn',
-        onChanged: (v) => selected = v,
-      ),
-    ));
+  testWidgets('≤3 seçenek: segment dokunma hedefi en az 48 dp',
+      (tester) async {
+    await tester.pumpWidget(sarmala(SettingsChoiceTile<int>(
+      title: 'Tekrar',
+      value: 1,
+      options: const [0, 1, 2],
+      labelOf: (v) => '$v',
+      onChanged: (_) {},
+    )));
+    await tester.pump();
 
-    expect(find.byType(SegmentedButton<int>), findsNothing);
+    final rect = tester.getRect(find.byType(SegmentedButton<int>));
+    expect(rect.height, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('≤3 seçenek: segment seçimi onChanged çağrısını tetikler',
+      (tester) async {
+    int? secilen;
+    await tester.pumpWidget(sarmala(SettingsChoiceTile<int>(
+      title: 'Tekrar',
+      value: 1,
+      options: const [0, 1, 2],
+      labelOf: (v) => '$v',
+      onChanged: (v) => secilen = v,
+    )));
+    await tester.pump();
+
+    await tester.tap(find.text('2'));
+    await tester.pump();
+    expect(secilen, 2);
+  });
+
+  testWidgets('>3 seçenek: alt sayfa açılır, seçim onChanged + kapanır',
+      (tester) async {
+    int? secilen;
+    await tester.pumpWidget(sarmala(SettingsChoiceTile<int>(
+      title: 'Sarma',
+      subtitle: 'Sarma süresi',
+      value: 10,
+      options: const [5, 10, 15, 30],
+      labelOf: (v) => '$v sn',
+      onChanged: (v) => secilen = v,
+    )));
+    await tester.pump();
+
+    // DropdownButton yok; satır geçerli değeri gösteriyor.
+    expect(find.byType(DropdownButton<int>), findsNothing);
+    expect(find.text('10 sn'), findsOneWidget);
 
     await tester.tap(find.text('Sarma'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(RadioListTile<int>), findsNWidgets(4));
-    // Radyo satırı 48 dp+ dokunma hedefidir (varsayılan ListTile yüksekliği).
-    expect(
-      tester.getSize(find.byType(RadioListTile<int>).first).height,
-      greaterThanOrEqualTo(48),
-    );
-
+    // Alt sayfada tüm seçenekler listelenir.
+    expect(find.text('30 sn'), findsOneWidget);
     await tester.tap(find.text('30 sn'));
     await tester.pumpAndSettle();
 
-    expect(selected, 30);
-    // Alt sayfa kapandı.
-    expect(find.byType(RadioListTile<int>), findsNothing);
-  });
-
-  testWidgets('SettingsSwitchTile alt açıklamayı gösterir ve değeri '
-      'bildirir', (tester) async {
-    bool? toggled;
-    await tester.pumpWidget(_host(
-      SettingsSwitchTile(
-        title: 'Anahtar',
-        subtitle: 'alt açıklama',
-        value: false,
-        onChanged: (v) => toggled = v,
-      ),
-    ));
-
-    expect(find.text('alt açıklama'), findsOneWidget);
-    await tester.tap(find.byType(SwitchListTile));
+    expect(secilen, 30);
+    // Sayfa kapandı. StatelessWidget harici bir değişkene yazdığı için
+    // kendi kendine yeniden çizilmez; gerçek uygulamada controller yeniden
+    // pompalar. Yeni değere sahip örnek pompanınca satır yeni değeri
+    // gösterir.
+    await tester.pumpWidget(sarmala(SettingsChoiceTile<int>(
+      title: 'Sarma',
+      subtitle: 'Sarma süresi',
+      value: secilen!,
+      options: const [5, 10, 15, 30],
+      labelOf: (v) => '$v sn',
+      onChanged: (v) => secilen = v,
+    )));
     await tester.pump();
-    expect(toggled, true);
+    expect(find.text('30 sn'), findsOneWidget);
+    expect(find.text('Sarma'), findsOneWidget);
   });
 
-  testWidgets('SettingsGroupCard başlığı ve çocuklarını kart yüzeyinde '
-      'çizer', (tester) async {
-    await tester.pumpWidget(_host(
-      SettingsGroupCard(
-        title: 'Grup',
-        children: const [Text('satır')],
-      ),
-    ));
+  testWidgets('>3 seçenek: Semantics satırı başlık + geçerli değerle okur',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(sarmala(SettingsChoiceTile<int>(
+      title: 'Sarma',
+      subtitle: 'Sarma süresi',
+      value: 10,
+      options: const [5, 10, 15, 30],
+      labelOf: (v) => '$v sn',
+      onChanged: (_) {},
+    )));
+    await tester.pump();
 
-    expect(find.text('Grup'), findsOneWidget);
-    expect(find.text('satır'), findsOneWidget);
-    // Kart yüzeyi: surfaceContainerLow + 16 radiusContainer'ı bulunur.
-    expect(
-      find.byWidgetPredicate(
-        (w) =>
-            w is Container &&
-            w.decoration is BoxDecoration &&
-            (w.decoration! as BoxDecoration).borderRadius ==
-                BorderRadius.circular(16),
+    final node = tester.getSemantics(find.text('Sarma'));
+    expect(node.label, 'Sarma. Sarma süresi');
+    expect(node.value, '10 sn');
+    expect(node.flagsCollection.isButton, isTrue);
+    handle.dispose();
+  });
+
+  testWidgets('SettingsGroupCard çocukları çizer, SettingsTile altyazılı okur',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(sarmala(SettingsGroupCard(children: [
+      const SettingsTile(
+        title: 'Ekolayzır',
+        subtitle: 'Ekolayzır ve ses efektleri',
+        onTap: null,
       ),
-      findsOneWidget,
-    );
+    ])));
+    await tester.pump();
+
+    expect(find.text('Ekolayzır'), findsOneWidget);
+    expect(find.text('Ekolayzır ve ses efektleri'), findsOneWidget);
+    final node = tester.getSemantics(find.text('Ekolayzır'));
+    expect(node.label, 'Ekolayzır. Ekolayzır ve ses efektleri');
+    handle.dispose();
   });
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
+import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
 import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
 
 class PlaybackSettingsPage extends StatelessWidget {
@@ -18,66 +19,66 @@ class PlaybackSettingsPage extends StatelessWidget {
       body: Obx(() {
         final p = ctrl.playback.value;
         return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            // Gün 12: her anahtara l10n alt açıklama; 4 seçenekli sarma
-            // süresi SettingsChoiceTile'da alt sayfa radyo listesi açar.
-            SettingsChoiceTile<int>(
-              title: l10n.seekInterval,
-              subtitle: l10n.seekIntervalDesc,
-              value: p.seekIntervalSeconds,
-              options: const [5, 10, 15, 30],
-              labelOf: (v) => l10n.seekIntervalValue(v),
-              onChanged: ctrl.setSeekInterval,
-            ),
-            SettingsSwitchTile(
-              title: l10n.autoResume,
-              subtitle: l10n.autoResumeDesc,
-              value: p.autoResume,
-              onChanged: ctrl.setAutoResume,
-            ),
-            SettingsSwitchTile(
-              title: l10n.pauseOnHeadphone,
-              subtitle: l10n.pauseOnHeadphoneDesc,
-              value: p.pauseOnHeadphone,
-              onChanged: ctrl.setPauseOnHeadphone,
-            ),
-            SettingsSwitchTile(
-              title: l10n.defaultShuffle,
-              subtitle: l10n.defaultShuffleDesc,
-              value: p.defaultShuffle,
-              onChanged: ctrl.setDefaultShuffle,
-            ),
-            SettingsSwitchTile(
-              title: l10n.skipSilence,
-              subtitle: l10n.skipSilenceDesc,
-              value: p.skipSilence,
-              onChanged: ctrl.setSkipSilence,
-            ),
-            // Görev 2.3: ReplayGain anahtarı. just_audio setAudioSources ile
-            // yüklenen kuyruklarda kesintisiz geçişi zaten varsayılan olarak
-            // sağladığından, hiçbir şey yapmayan "Kesintisiz oynatma"
-            // anahtarı (Görev 2.2) bu sayfadan kaldırılmıştı; modeldeki ölü
-            // gapless alanı da Gün 10'da kaldırıldı — eski JSON'larda kalan
-            // 'gapless' anahtarı ayrıştırmada bilinmeyen alan olarak
-            // yok sayılır.
-            SettingsSwitchTile(
-              title: l10n.replayGain,
-              subtitle: l10n.replayGainEnableDesc,
-              value: p.replayGain,
-              onChanged: ctrl.setReplayGain,
-            ),
-            SettingsChoiceTile<int>(
-              title: l10n.defaultRepeat,
-              subtitle: l10n.defaultRepeatDesc,
-              value: p.defaultRepeat,
-              options: const [0, 1, 2],
-              labelOf: (v) => switch (v) {
-                1 => l10n.repeatAll,
-                2 => l10n.repeatOne,
-                _ => l10n.repeatNone,
-              },
-              onChanged: ctrl.setDefaultRepeat,
-            ),
+            // Gün 12: sayfa tek grup kartında; her anahtar l10n altyazılı.
+            SettingsGroupCard(children: [
+              SettingsChoiceTile<int>(
+                title: l10n.seekInterval,
+                subtitle: l10n.seekIntervalDesc,
+                value: p.seekIntervalSeconds,
+                options: const [5, 10, 15, 30],
+                labelOf: (v) => l10n.seekIntervalValue(v),
+                onChanged: ctrl.setSeekInterval,
+              ),
+              SettingsSwitchTile(
+                title: l10n.autoResume,
+                subtitle: l10n.autoResumeDesc,
+                value: p.autoResume,
+                onChanged: ctrl.setAutoResume,
+              ),
+              SettingsSwitchTile(
+                title: l10n.pauseOnHeadphone,
+                subtitle: l10n.pauseOnHeadphoneDesc,
+                value: p.pauseOnHeadphone,
+                onChanged: ctrl.setPauseOnHeadphone,
+              ),
+              SettingsSwitchTile(
+                title: l10n.defaultShuffle,
+                subtitle: l10n.defaultShuffleDesc,
+                value: p.defaultShuffle,
+                onChanged: ctrl.setDefaultShuffle,
+              ),
+              SettingsSwitchTile(
+                title: l10n.skipSilence,
+                subtitle: l10n.skipSilenceDesc,
+                value: p.skipSilence,
+                onChanged: ctrl.setSkipSilence,
+              ),
+              // Görev 2.3: ReplayGain anahtarı. just_audio setAudioSources ile
+              // yüklenen kuyruklarda kesintisiz geçişi zaten varsayılan olarak
+              // sağladığından, hiçbir şey yapmayan "Kesintisiz oynatma"
+              // anahtarı (Görev 2.2) bu sayfadan kaldırıldı; modeldeki gapless
+              // alanı eski JSON'ların uyumluluğu için korunuyor.
+              SettingsSwitchTile(
+                title: l10n.replayGain,
+                subtitle: l10n.replayGainEnableDesc,
+                value: p.replayGain,
+                onChanged: ctrl.setReplayGain,
+              ),
+              SettingsChoiceTile<int>(
+                title: l10n.defaultRepeat,
+                subtitle: l10n.defaultRepeatDesc,
+                value: p.defaultRepeat,
+                options: const [0, 1, 2],
+                labelOf: (v) => switch (v) {
+                  1 => l10n.repeatAll,
+                  2 => l10n.repeatOne,
+                  _ => l10n.repeatNone,
+                },
+                onChanged: ctrl.setDefaultRepeat,
+              ),
+            ]),
           ],
         );
       }),

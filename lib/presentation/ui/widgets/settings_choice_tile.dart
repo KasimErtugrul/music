@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
-/// Gün 12: seçim ayarı kutucuğunun tek tasarım dili.
+/// Seçim (tek seçimli) ayar satırı — Gün 12'de yeniden yazıldı.
 ///
-/// İki yüz, tek sözleşme:
-/// - 3 veya daha az seçenek → [SegmentedButton]: başlık + alt açıklama
-///   üstte, tam genişlik segment satırı altta. Segment yüksekliği 48 dp'dir
-///   (dokunma hedefi); segment grubu [Semantics] etiketi olarak ayar adını
-///   taşır. Uzun etiketler satır taşması yerine üç nokta ile kırpılır.
-/// - 3'ten fazla seçenek → [ListTile]; mevcut değer satırda kapalı bilgi
-///   olarak okunur, dokununca alt sayfada radyo listesi ([RadioGroup] +
-///   [RadioListTile], satır yüksekliği 48 dp+) açılır.
+/// KARAR (Gün 12): `DropdownButton` kaldırıldı. Sunum seçenek sayısına
+/// göre otomatik seçilir:
+/// - 3 veya daha az seçenek → satırın altında [SegmentedButton]; tüm
+///   seçenekler görünür, tek dokunuşla seçilir.
+/// - 4 veya daha fazla seçenek → satır dokunulduğunda alt sayfada (bottom
+///   sheet) tek seçimli [RadioListTile] listesi; satırın sağında geçerli
+///   değer gösterilir.
 ///
-/// DropdownButton bu bileşenden Gün 12 ile kaldırıldı; API
-/// (title/value/options/labelOf/onChanged/subtitle) aynen korunmuştur.
+/// API değişmedi (title/subtitle/value/options/labelOf/onChanged): mevcut
+/// çağrı yerleri aynen derlenir (geriye dönük uyumluluk).
+///
+/// Erişilebilirlik: her iki sunum da ekran okuyucuya ayarın adını, alt
+/// yazısını ve (satır sunumunda) geçerli değeri tek etikette bildirir.
+/// Segment yüksekliği M3 varsayılanı 40 dp yerine 48 dp'dir (dokunma
+/// hedefi); alt sayfa satırları ListTile sayesinde 56 dp'dir.
 class SettingsChoiceTile<T> extends StatelessWidget {
   const SettingsChoiceTile({
     super.key,
@@ -34,144 +38,228 @@ class SettingsChoiceTile<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (options.length <= 3) {
-      return _SegmentedChoice<T>(tile: this);
+      return _SegmentedChoice<T>(
+        title: title,
+        subtitle: subtitle,
+        value: value,
+        options: options,
+        labelOf: labelOf,
+        onChanged: onChanged,
+      );
     }
-    return _SheetChoice<T>(tile: this);
+    return _SheetChoice<T>(
+      title: title,
+      subtitle: subtitle,
+      value: value,
+      options: options,
+      labelOf: labelOf,
+      onChanged: onChanged,
+    );
   }
 }
 
-/// ≤3 seçenek yüzü: M3 SegmentedButton.
+/// ≤3 seçenek: satır içi [SegmentedButton].
 class _SegmentedChoice<T> extends StatelessWidget {
-  const _SegmentedChoice({required this.tile});
+  const _SegmentedChoice({
+    required this.title,
+    required this.value,
+    required this.options,
+    required this.labelOf,
+    required this.onChanged,
+    this.subtitle,
+  });
 
-  final SettingsChoiceTile<T> tile;
+  final String title;
+  final String? subtitle;
+  final T value;
+  final List<T> options;
+  final String Function(T) labelOf;
+  final ValueChanged<T> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(tile.title, style: theme.textTheme.bodyLarge),
-          if (tile.subtitle != null) ...[
-            const SizedBox(height: 2),
+    final cs = theme.colorScheme;
+    return Semantics(
+      // Grup kapsayıcısı: segmentler tek tek okunur ama grup, ayarın adıyla
+      // tanımlanır.
+      container: true,
+      label: subtitle == null ? title : '$title. $subtitle',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
             Text(
-              tile.subtitle!,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              title,
+              style: theme.textTheme.bodyLarge
+                  ?.copyWith(fontWeight: FontWeight.w600),
             ),
-          ],
-          const SizedBox(height: 8),
-          // Ayar adı, segment grubunun erişilebilirlik etiketidir.
-          Semantics(
-            label: tile.title,
-            child: SegmentedButton<T>(
-              selected: <T>{
-                if (tile.options.contains(tile.value)) tile.value,
-              },
-              onSelectionChanged: (selection) {
-                if (selection.isNotEmpty) tile.onChanged(selection.first);
-              },
-              showSelectedIcon: false,
-              style: SegmentedButton.styleFrom(
-                // Dokunma hedefi: segment yüksekliği >= 48 dp.
-                minimumSize: const Size(0, 48),
+            if (subtitle != null)
+              Text(
+                subtitle!,
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
               ),
-              segments: [
-                for (final option in tile.options)
-                  ButtonSegment(
-                    value: option,
+            const SizedBox(height: 12),
+            SegmentedButton<T>(
+              // Seçim işareti yerine dolgu rengi; uzun etiketlerde yer
+              // kazanır.
+              showSelectedIcon: false,
+              selected: <T>{value},
+              onSelectionChanged: (s) => onChanged(s.first),
+              style: const ButtonStyle(
+                // Dokunma hedefi: M3 varsayılan 40 dp → 48 dp.
+                minimumSize: WidgetStatePropertyAll<Size>(Size(0, 48)),
+              ),
+              segments: <ButtonSegment<T>>[
+                for (final o in options)
+                  ButtonSegment<T>(
+                    value: o,
                     label: Text(
-                      tile.labelOf(option),
+                      labelOf(o),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-/// >3 seçenek yüzü: kapalı bilgi + alt sayfa radyo listesi.
+/// >3 seçenek: değer satırı + alt sayfada tek seçimli liste.
 class _SheetChoice<T> extends StatelessWidget {
-  const _SheetChoice({required this.tile});
+  const _SheetChoice({
+    required this.title,
+    required this.value,
+    required this.options,
+    required this.labelOf,
+    required this.onChanged,
+    this.subtitle,
+  });
 
-  final SettingsChoiceTile<T> tile;
+  final String title;
+  final String? subtitle;
+  final T value;
+  final List<T> options;
+  final String Function(T) labelOf;
+  final ValueChanged<T> onChanged;
+
+  Future<void> _ac(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        final sheetTheme = Theme.of(sheetContext);
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.75,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
+                  child: Text(
+                    title,
+                    style: sheetTheme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                if (subtitle != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
+                    child: Text(
+                      subtitle!,
+                      style: sheetTheme.textTheme.bodySmall?.copyWith(
+                        color: sheetTheme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      RadioGroup<T>(
+                        groupValue: value,
+                        onChanged: (v) {
+                          if (v == null) return;
+                          Navigator.of(sheetContext).pop();
+                          onChanged(v);
+                        },
+                        child: Column(
+                          children: <Widget>[
+                            for (final o in options)
+                              RadioListTile<T>(
+                                value: o,
+                                title: Text(labelOf(o)),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListTile(
-      title: Text(tile.title),
-      subtitle: tile.subtitle != null ? Text(tile.subtitle!) : null,
-      // Gün 12: mevcut değer, çok seçenekli yüzeyde satırda okunur.
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            tile.labelOf(tile.value),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          ),
-          Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
-        ],
-      ),
-      onTap: () => _showOptionsSheet(context),
-    );
-  }
-
-  void _showOptionsSheet(BuildContext context) {
-    final theme = Theme.of(context);
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetCtx) => SafeArea(
-        child: Column(
+    final cs = theme.colorScheme;
+    return Semantics(
+      // Satır tek düğüm: başlık + alt yazı etiketi, geçerli değer `value`
+      // alanında, dokunma eylemi Semantics üzerinde bildirilir.
+      excludeSemantics: true,
+      button: true,
+      label: subtitle == null ? title : '$title. $subtitle',
+      value: labelOf(value),
+      onTap: () => _ac(context),
+      child: ListTile(
+        title: Text(
+          title,
+          style: theme.textTheme.bodyLarge
+              ?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        subtitle: subtitle == null
+            ? null
+            : Text(
+                subtitle!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
+              ),
+        trailing: Row(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
-              child: Text(tile.title, style: theme.textTheme.titleMedium),
-            ),
-            if (tile.subtitle != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-                child: Text(
-                  tile.subtitle!,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-              ),
-            // Gün 12: radyo listesi RadioGroup ile yönetilir — klasik
-            // RadioListTile.groupValue/onChanged yolu v3.32'de önerilmiyor.
-            RadioGroup<T>(
-              groupValue: tile.value,
-              onChanged: (selected) {
-                Navigator.pop(sheetCtx);
-                if (selected != null) tile.onChanged(selected);
-              },
-              child: Column(
-                children: [
-                  for (final option in tile.options)
-                    RadioListTile<T>(
-                      value: option,
-                      title: Text(tile.labelOf(option)),
-                    ),
-                ],
+          children: <Widget>[
+            Flexible(
+              child: Text(
+                labelOf(value),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: cs.onSurfaceVariant),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right, size: 20, color: cs.onSurfaceVariant),
           ],
         ),
+        onTap: () => _ac(context),
       ),
     );
   }

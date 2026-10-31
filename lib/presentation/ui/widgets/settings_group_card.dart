@@ -1,36 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
 
-/// Gün 12: ayar gruplarının ortak kart bileşeni.
+/// Ayar sayfalarının ortak grup kartı — tek tasarım dilinin kart bileşeni.
 ///
-/// Tek tasarım dili: surfaceContainerLow yüzeyi + 16 radius + kenarlardan
-/// kırpılmış satırlar. SettingsHomePage'deki özel `_NavCard` bu bileşene
-/// devredildi; Gün 13'ün sayfa yeniden düzeni de aynı kartı kullanacak.
+/// Gün 12: ayarlar ana sayfasındaki kategorik kartların (surface-container-
+/// low + 16 radius + antiAlias kırpma) birebir karşılığıdır; artık tüm alt
+/// ayar sayfaları da aynı kartı kullanır (eskiden her sayfa kendi ListTile
+/// düz listesiyle "tasarım lehçesi" oluşturuyordu).
 ///
-/// [title] verilirse kartın üstünde bölüm başlığı (SettingsSectionHeader)
-/// çizilir; verilmezse yalnızca kart yüzeyi döner.
+/// [SettingsSectionHeader] kartın ÜSTÜNDE başlık verir; kartın içine
+/// [SettingsTile], [SettingsSwitchTile], [SettingsChoiceTile] veya sayfaya
+/// özel satırlar girer.
 class SettingsGroupCard extends StatelessWidget {
-  const SettingsGroupCard({super.key, this.title, required this.children});
+  const SettingsGroupCard({
+    super.key,
+    required this.children,
+    this.margin = const EdgeInsets.symmetric(vertical: 8),
+  });
 
-  final String? title;
+  /// Kart yüzeyinde dikey dizilen satırlar.
   final List<Widget> children;
+
+  /// Varsayılan yalnızca dikey 8 boşluk; yatay boşluğu sayfanın
+  /// ListView dolgusu verir (ayarlar ana sayfasıyla aynı ritim).
+  final EdgeInsetsGeometry margin;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (title != null) SettingsSectionHeader(title: title!),
-        Container(
-          margin: const EdgeInsets.only(top: 8, bottom: 8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(children: children),
-        ),
-      ],
+    return Container(
+      margin: margin,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(children: children),
     );
   }
 }

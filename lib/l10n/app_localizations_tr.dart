@@ -697,11 +697,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get resetAll => 'Tüm ayarları sıfırla';
 
   @override
-  String get resetAllDesc => 'Tüm tercihler fabrika değerlerine döner';
-
-  @override
   String get resetConfirm =>
       'Tüm ayarları varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.';
+
+  @override
+  String get resetAllDesc => 'Tüm tercihler fabrika değerlerine döner';
 
   @override
   String get resetDone => 'Ayarlar varsayılanlara döndürüldü';
@@ -1755,105 +1755,93 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get seekIntervalDesc => 'İleri/geri sarma adımının süresi';
+
+  @override
+  String get autoResumeDesc =>
+      'Uygulama açıldığında çalmaya kaldığın yerden devam eder';
+
+  @override
+  String get pauseOnHeadphoneDesc =>
+      'Kulaklık çıkarıldığında çalma duraklatılır';
+
+  @override
+  String get defaultShuffleDesc => 'Yeni kuyruklar karıştırılmış olarak başlar';
+
+  @override
+  String get skipSilenceDesc => 'Sessiz bölümler otomatik atlanır';
+
+  @override
+  String get defaultRepeatDesc => 'Uygulama açıldığında uygulanan tekrar modu';
+
+  @override
+  String get minDurationDesc => 'Bu süreden kısa şarkılar kitaplığa alınmaz';
+
+  @override
+  String get minDurationNone => 'Yok';
+
+  @override
   String get settingsLanguageDesc => 'Uygulama arayüzünün dili';
 
   @override
-  String get themeModeDesc => 'Açık, koyu veya sistem tercihini izle';
+  String get themeColorSourceDesc => 'Tema renklerinin kaynağı';
 
   @override
-  String get themeColorSourceDesc =>
-      'Renkler tohumdan, sistemden veya kapaktan türetilir';
+  String get themePresetSeedDesc => 'Hazır renk paletlerinden birini seç';
 
   @override
-  String get themePresetSeedDesc => 'Hazır paletlerden bir tohum rengi seçin';
-
-  @override
-  String get themeAmoledOnDesc => 'Koyu modda tam siyah yüzeyler kullanılır';
-
-  @override
-  String get themeHighContrastDesc => 'Daha belirgin kenar ve renk kontrastı';
+  String get themeHighContrastDesc =>
+      'Metin ve denetimlerin kontrastını artırır';
 
   @override
   String get themeSurfaceTintDesc =>
-      'Kart, pencere ve alt gezinme çubuğuna ton uygular';
+      'Yükseltilmiş yüzeyler ana renkle tonlanır';
 
   @override
   String get themeRoundedCornersDesc =>
-      'Kart, pencere, menü ve alt sayfa köşelerini yuvarlar';
+      'Köşeler uygulama genelinde yuvarlak çizilir';
 
   @override
-  String get themeDensityDesc => 'Liste ve kontrollerin sıkılığı';
+  String get themeDensityDesc => 'Listelerin ve bileşenlerin sıkılığı';
 
   @override
-  String get themeFontDesc => 'Uygulama genelinde yazı tipi ailesi';
-
-  @override
-  String get themeSeedColorDesc => 'Özel temanın temel rengi';
-
-  @override
-  String get themeAnimationLevelDesc =>
-      'Dekoratif animasyonların kapsamı; Kapalı gölgeleri çizmez';
-
-  @override
-  String get listViewModeTitle => 'Liste düzeni';
-
-  @override
-  String get listViewModeDesc => 'Şarkı listelerinin görünümü';
+  String get themeFontDesc => 'Uygulama genelinde kullanılan yazı tipi';
 
   @override
   String get playerBackgroundTitle => 'Arka plan';
 
   @override
-  String get playerBackgroundDesc => 'Oynatıcının arka plan dokusu';
+  String get playerBackgroundDesc => 'Çalma ekranının arka plan stili';
 
   @override
-  String get playerArtworkShapeTitle => 'Kapak şekli';
+  String get playerArtworkTitle => 'Kapak şekli';
 
   @override
-  String get playerArtworkShapeDesc => 'Oynatıcıdaki kapak görselinin biçimi';
+  String get playerArtworkDesc => 'Albüm kapağının köşe biçimi';
 
   @override
-  String get miniPlayerStyleTitle => 'Mini oynatıcı';
+  String get seekBarStyleDesc => 'Sarma çubuğunun görünümü';
 
   @override
-  String get miniPlayerStyleDesc => 'Oynatıcı üzerindeki mini şeridin düzeni';
+  String get playerMiniTitle => 'Mini oynatıcı';
 
   @override
-  String get miniPlayerCompact => 'Kompakt';
+  String get playerMiniDesc =>
+      'Gezinme çubuğu üzerindeki mini oynatıcının düzeni';
 
   @override
-  String get miniPlayerWide => 'Geniş';
+  String get playerMiniCompact => 'Sıkı';
 
   @override
-  String get seekBarStyleDesc => 'İlerleme çubuğunun biçimi';
+  String get playerMiniWide => 'Geniş';
 
   @override
-  String get seekIntervalDesc => 'İleri ve geri sarma adımı';
+  String get themeAnimationLevelDesc =>
+      'Geçiş ve dekoratif animasyonların düzeyi';
 
   @override
-  String get autoResumeDesc => 'Uygulama açılınca çalma kaldığı yerden sürer';
+  String get listViewStyleDesc => 'Şarkı listelerinin görünümü';
 
   @override
-  String get pauseOnHeadphoneDesc => 'Kulaklık çıkınca çalma duraklatılır';
-
-  @override
-  String get defaultShuffleDesc =>
-      'Yeni bir kuyruk başlarken karıştırma açık olur';
-
-  @override
-  String get skipSilenceDesc => 'Şarkı içindeki sessiz bölümler atlanır';
-
-  @override
-  String get defaultRepeatDesc => 'Yeni bir kuyruk başlarken uygulanır';
-
-  @override
-  String get minDurationDesc => 'Bu süreden kısa şarkılar kütüphaneye alınmaz';
-
-  @override
-  String get minDurationOff => 'Kapalı';
-
-  @override
-  String minDurationSeconds(int seconds) {
-    return '$seconds sn';
-  }
+  String get settingsThemeModeDesc => 'Açılışta uygulanacak görünüm modu';
 }
