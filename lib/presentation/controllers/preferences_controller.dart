@@ -147,4 +147,24 @@ class PreferencesController extends GetxController {
     await reloadLiveSettingsControllers();
   }
 
+  /// Gün 13: «Bu sayfayı varsayılana döndür» — yalnız Çalma sayfasındaki
+  /// anahtarlar fabrika değerine döner. Hız ve perde (speed_pitch_sheet'te
+  /// yaşar, bu sayfada DEĞİLDİR) kullanıcının kendi tercihleri olarak
+  /// korunur; aynısı gün içinde ThemeController'ın sayfa sıfırlaması için
+  /// de geçerlidir (yazı tipi/ölçek/liste korunur).
+  Future<void> resetPlayback() async {
+    playback.value = const PlaybackSettingsModel().copyWith(
+      speed: playback.value.speed,
+      pitch: playback.value.pitch,
+    );
+    await _repo.savePlayback(playback.value);
+  }
+
+  /// Gün 13: Kitaplık sayfası sıfırlaması — modelin tamamı bu sayfada
+  /// yaşadığı için bütün model fabrika değerine döner.
+  Future<void> resetLibrary() async {
+    library.value = const LibrarySettingsModel();
+    await _repo.saveLibrary(library.value);
+  }
+
 }

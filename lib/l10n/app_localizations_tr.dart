@@ -707,6 +707,32 @@ class AppLocalizationsTr extends AppLocalizations {
   String get resetDone => 'Ayarlar varsayılanlara döndürüldü';
 
   @override
+  String get commonUndo => 'Geri Al';
+
+  @override
+  String get pageResetTooltip => 'Bu sayfayı varsayılana döndür';
+
+  @override
+  String get pageResetConfirm =>
+      'Bu sayfadaki tüm ayarlar varsayılan değerlerine döndürülecek. Bu işlem geri alınamaz.';
+
+  @override
+  String get themeModeAmoled => 'AMOLED';
+
+  @override
+  String get playbackGroupControls => 'Denetim';
+
+  @override
+  String get playbackGroupStartup => 'Başlangıç davranışı';
+
+  @override
+  String get playbackGroupAudioProcessing => 'Ses işleme';
+
+  @override
+  String get excludedFolderRemoved =>
+      'Klasör hariç tutma listesinden kaldırıldı';
+
+  @override
   String get textScale => 'Yazı ölçeği';
 
   @override
@@ -878,7 +904,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addExcludedFolder => 'Klasör Ekle';
 
   @override
-  String get noExcludedFolders => 'Gizli klasör yok.';
+  String get noExcludedFolders => 'Hariç tutulan klasör yok';
 
   @override
   String get externalOpenError => 'Harici dosya açılamadı.';
@@ -1223,9 +1249,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get themeCustomEmpty => 'Henüz özel tema yok. + ile oluşturun.';
-
-  @override
-  String get themeAdvancedSettings => 'Gelişmiş tema ayarları';
 
   @override
   String get themeImportTheme => 'Temayı içe aktar';

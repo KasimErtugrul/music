@@ -33,7 +33,17 @@ class SettingsGroupCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(children: children),
+      // Gün 13: kart, satırlarına kendi Material'ını verir. ListTile
+      // tabanlı döşemeler (SettingsTile/SwitchTile/ChoiceTile satırı)
+      // mürekkeplerini en yakın Material atasına basar; bu Material yoksa
+      // kartın renkli Container'ı hem dokunma vurgusunu gizler hem de
+      // Flutter'ın «ListTile background color or ink splashes may be
+      // invisible» debug doğrulamasını tetikler. Şeffaf Material, görünümü
+      // değiştirmeden mürekkebi kart yüzeyine taşır.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(children: children),
+      ),
     );
   }
 }

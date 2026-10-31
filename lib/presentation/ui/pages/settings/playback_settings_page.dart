@@ -4,8 +4,16 @@ import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
+import 'package:resonance/presentation/ui/widgets/settings_page_reset_action.dart';
+import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
 import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
 
+/// Gün 13: sayfa üç bölüme ayrıldı — «Denetim · Başlangıç davranışı ·
+/// Ses işleme». Gruplama oynatma mantığını izler: sarma/kulaklık davranışı
+/// çalışı denetler; varsayılanlar yalnız yeni kuyruk başlarken uygulanır
+/// (Gün 2 Kararı) ve açılışta devam eder; sessizlik atlamayla ReplayGain
+/// ses işleme katmanıdır. AppBar'daki «Bu sayfayı varsayılana döndür»
+/// eylemi yalnız bu sayfadaki anahtarları sıfırlar (hız/perde korunur).
 class PlaybackSettingsPage extends StatelessWidget {
   const PlaybackSettingsPage({super.key});
 
@@ -15,13 +23,19 @@ class PlaybackSettingsPage extends StatelessWidget {
     final ctrl = Get.find<PreferencesController>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingsPlayback)),
+      appBar: AppBar(
+        title: Text(l10n.settingsPlayback),
+        actions: [
+          SettingsPageResetAction(onReset: ctrl.resetPlayback),
+        ],
+      ),
       body: Obx(() {
         final p = ctrl.playback.value;
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            // Gün 12: sayfa tek grup kartında; her anahtar l10n altyazılı.
+            // --- Denetim: çalış sırasında dokunarak kullanılan davranışlar ---
+            SettingsSectionHeader(title: l10n.playbackGroupControls),
             SettingsGroupCard(children: [
               SettingsChoiceTile<int>(
                 title: l10n.seekInterval,
@@ -32,16 +46,21 @@ class PlaybackSettingsPage extends StatelessWidget {
                 onChanged: ctrl.setSeekInterval,
               ),
               SettingsSwitchTile(
-                title: l10n.autoResume,
-                subtitle: l10n.autoResumeDesc,
-                value: p.autoResume,
-                onChanged: ctrl.setAutoResume,
-              ),
-              SettingsSwitchTile(
                 title: l10n.pauseOnHeadphone,
                 subtitle: l10n.pauseOnHeadphoneDesc,
                 value: p.pauseOnHeadphone,
                 onChanged: ctrl.setPauseOnHeadphone,
+              ),
+            ]),
+
+            // --- Başlangıç davranışı: açılış ve yeni kuyruk başlarken ---
+            SettingsSectionHeader(title: l10n.playbackGroupStartup),
+            SettingsGroupCard(children: [
+              SettingsSwitchTile(
+                title: l10n.autoResume,
+                subtitle: l10n.autoResumeDesc,
+                value: p.autoResume,
+                onChanged: ctrl.setAutoResume,
               ),
               SettingsSwitchTile(
                 title: l10n.defaultShuffle,
@@ -49,6 +68,23 @@ class PlaybackSettingsPage extends StatelessWidget {
                 value: p.defaultShuffle,
                 onChanged: ctrl.setDefaultShuffle,
               ),
+              SettingsChoiceTile<int>(
+                title: l10n.defaultRepeat,
+                subtitle: l10n.defaultRepeatDesc,
+                value: p.defaultRepeat,
+                options: const [0, 1, 2],
+                labelOf: (v) => switch (v) {
+                  1 => l10n.repeatAll,
+                  2 => l10n.repeatOne,
+                  _ => l10n.repeatNone,
+                },
+                onChanged: ctrl.setDefaultRepeat,
+              ),
+            ]),
+
+            // --- Ses işleme: ses verisine uygulanan işlemler ---
+            SettingsSectionHeader(title: l10n.playbackGroupAudioProcessing),
+            SettingsGroupCard(children: [
               SettingsSwitchTile(
                 title: l10n.skipSilence,
                 subtitle: l10n.skipSilenceDesc,
@@ -65,18 +101,6 @@ class PlaybackSettingsPage extends StatelessWidget {
                 subtitle: l10n.replayGainEnableDesc,
                 value: p.replayGain,
                 onChanged: ctrl.setReplayGain,
-              ),
-              SettingsChoiceTile<int>(
-                title: l10n.defaultRepeat,
-                subtitle: l10n.defaultRepeatDesc,
-                value: p.defaultRepeat,
-                options: const [0, 1, 2],
-                labelOf: (v) => switch (v) {
-                  1 => l10n.repeatAll,
-                  2 => l10n.repeatOne,
-                  _ => l10n.repeatNone,
-                },
-                onChanged: ctrl.setDefaultRepeat,
               ),
             ]),
           ],

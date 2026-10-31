@@ -7,7 +7,6 @@ import 'package:resonance/presentation/ui/pages/settings/appearance/font_setting
 import 'package:resonance/presentation/ui/pages/settings/appearance/list_style_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/appearance/player_style_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/appearance/theme_gallery_page.dart';
-import 'package:resonance/presentation/ui/pages/settings/appearance/theme_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/audio_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/excluded_folders_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/library_settings_page.dart';
@@ -165,7 +164,9 @@ abstract final class SettingsRegistry {
       key: SettingsKeys.themeMode,
       group: SettingsGroup.appearance,
       title: (l) => l.settingsThemeMode,
-      pageBuilder: () => const ThemeSettingsPage(),
+      // Gün 13 (Karar): «Gelişmiş» sayfa Görünüm sayfasına birleşti;
+      // tüm görünüm girdileri tek sayfaya gider.
+      pageBuilder: () => const ThemeGalleryPage(),
     ),
     SettingsEntry(
       key: SettingsKeys.themeColorSource,
@@ -177,13 +178,13 @@ abstract final class SettingsRegistry {
       key: SettingsKeys.themeAmoled,
       group: SettingsGroup.appearance,
       title: (l) => l.themeAmoledOn,
-      pageBuilder: () => const ThemeSettingsPage(),
+      pageBuilder: () => const ThemeGalleryPage(),
     ),
     SettingsEntry(
       key: SettingsKeys.themeHighContrast,
       group: SettingsGroup.appearance,
       title: (l) => l.themeHighContrast,
-      pageBuilder: () => const ThemeSettingsPage(),
+      pageBuilder: () => const ThemeGalleryPage(),
     ),
     SettingsEntry(
       key: SettingsKeys.themeFont,

@@ -710,6 +710,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetDone => 'Settings restored to defaults';
 
   @override
+  String get commonUndo => 'Undo';
+
+  @override
+  String get pageResetTooltip => 'Reset this page to defaults';
+
+  @override
+  String get pageResetConfirm =>
+      'All settings on this page will be restored to their defaults. This cannot be undone.';
+
+  @override
+  String get themeModeAmoled => 'AMOLED';
+
+  @override
+  String get playbackGroupControls => 'Controls';
+
+  @override
+  String get playbackGroupStartup => 'Startup behavior';
+
+  @override
+  String get playbackGroupAudioProcessing => 'Audio processing';
+
+  @override
+  String get excludedFolderRemoved => 'Folder removed from the exclusion list';
+
+  @override
   String get textScale => 'Text scale';
 
   @override
@@ -881,7 +906,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addExcludedFolder => 'Add Folder';
 
   @override
-  String get noExcludedFolders => 'No hidden folders.';
+  String get noExcludedFolders => 'No excluded folders';
 
   @override
   String get externalOpenError => 'Could not open the external file.';
@@ -1226,9 +1251,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeCustomEmpty => 'No custom themes yet. Create one with +.';
-
-  @override
-  String get themeAdvancedSettings => 'Advanced theme settings';
 
   @override
   String get themeImportTheme => 'Import theme';

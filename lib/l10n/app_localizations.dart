@@ -1382,6 +1382,54 @@ abstract class AppLocalizations {
   /// **'Settings restored to defaults'**
   String get resetDone;
 
+  /// No description provided for @commonUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get commonUndo;
+
+  /// No description provided for @pageResetTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset this page to defaults'**
+  String get pageResetTooltip;
+
+  /// No description provided for @pageResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'All settings on this page will be restored to their defaults. This cannot be undone.'**
+  String get pageResetConfirm;
+
+  /// No description provided for @themeModeAmoled.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED'**
+  String get themeModeAmoled;
+
+  /// No description provided for @playbackGroupControls.
+  ///
+  /// In en, this message translates to:
+  /// **'Controls'**
+  String get playbackGroupControls;
+
+  /// No description provided for @playbackGroupStartup.
+  ///
+  /// In en, this message translates to:
+  /// **'Startup behavior'**
+  String get playbackGroupStartup;
+
+  /// No description provided for @playbackGroupAudioProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio processing'**
+  String get playbackGroupAudioProcessing;
+
+  /// No description provided for @excludedFolderRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder removed from the exclusion list'**
+  String get excludedFolderRemoved;
+
   /// No description provided for @textScale.
   ///
   /// In en, this message translates to:
@@ -1715,7 +1763,7 @@ abstract class AppLocalizations {
   /// No description provided for @noExcludedFolders.
   ///
   /// In en, this message translates to:
-  /// **'No hidden folders.'**
+  /// **'No excluded folders'**
   String get noExcludedFolders;
 
   /// No description provided for @externalOpenError.
@@ -2347,12 +2395,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No custom themes yet. Create one with +.'**
   String get themeCustomEmpty;
-
-  /// No description provided for @themeAdvancedSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Advanced theme settings'**
-  String get themeAdvancedSettings;
 
   /// No description provided for @themeImportTheme.
   ///

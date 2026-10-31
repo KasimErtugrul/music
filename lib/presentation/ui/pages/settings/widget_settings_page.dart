@@ -4,6 +4,7 @@ import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/home_widget_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
+import 'package:resonance/presentation/ui/widgets/settings_page_reset_action.dart';
 
 /// Ana ekran widget'ı ayarları — M3 tasarım güncellemesi:
 /// - Canlı önizleme: gerçek PlayerController durumunu (kapak, başlık,
@@ -44,7 +45,20 @@ class _WidgetSettingsPageState extends State<WidgetSettingsPage> {
     final player = Get.find<PlayerController>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.widgetSettings)),
+      appBar: AppBar(
+        title: Text(l10n.widgetSettings),
+        actions: [
+          // Gün 13: sayfanın tek kalıcı tercihi şeffaflık; varsayılanı
+          // kapalıdır (HomeWidgetController.transparency null'da false döner).
+          // Sıfırlama önizleme yerel durumunu da tazeler.
+          SettingsPageResetAction(
+            onReset: () async {
+              await ctrl.setTransparency(false);
+              if (mounted) setState(() => _transparent = false);
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [

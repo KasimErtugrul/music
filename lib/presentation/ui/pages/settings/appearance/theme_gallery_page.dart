@@ -12,22 +12,29 @@ import 'package:resonance/data/repositories/custom_theme_repository.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
 import 'package:resonance/presentation/ui/pages/settings/appearance/custom_theme_editor_page.dart';
-import 'package:resonance/presentation/ui/pages/settings/appearance/theme_settings_page.dart';
+import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
+import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
+import 'package:resonance/presentation/ui/widgets/settings_page_reset_action.dart';
 import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
+import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
 import 'package:resonance/presentation/ui/widgets/theme_preview_card.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// UI tasarım güncellemesi: "Görünüm ve Tema Stüdyosu".
+/// «Görünüm» — Gün 13'te Galeri ve Gelişmiş (tune) sayfalarının BİRLEŞTİRİLMİŞ
+/// hâli (Karar: «Gelişmiş» sayfa Görünüm sayfasına birleşir). Tek sayfada
+/// bölümler: sabit canlı önizleme (kaydırılmaz) → mod (+ zamanlanmış koyu)
+/// → renk (kaynak, kontrast, yüzey tonu) → şekil ve yoğunluk → hazır
+/// paletler → özel temalar.
 ///
-/// Tek ekranda sıralı bölümler: canlı önizleme → tema modu (Sistem / Açık /
-/// Koyu / AMOLED) → renk kaynağı (Özel tohum / Material You / Kapaktan) →
-/// hazır paletler (renk noktalı kartlar) → özel temalar (Drift tabanlı,
-/// düzenle / dışa aktar / sil).
-///
-/// Tasarımdaki "WCAG AA/AAA kontrast kademesi" ve "3 kademeli köşe" kontrolleri
-/// bilinçli olarak buraya taşınmadı: uygulamanın gerçek modelleri tek kademe
-/// [ThemeSettings.highContrast] ve [ThemeSettings.roundedCorners] anahtarları
-///dır; bunlar Gelişmiş tema ayarları sayfasında (tune) yaşamaya devam eder.
+/// Birleşmenin getirdiği tekilleştirmeler:
+/// - Tema modu artık tek denetimdir: 4 seçenekli [SettingsChoiceTile]
+///   (Sistem / Açık / Koyu / AMOLED). Eski Gelişmiş sayfasındaki ayrı AMOLED
+///   anahtarı bu seçeneğe taşındı (AMOLED = koyu mod + saf siyah yüzey).
+/// - Hazır palet seçimi yalnız görsel ızgaradadır; Gelişmiş sayfasındaki
+///   metin seçicisi ızgaranın birebir yinelemesiydi, kaldırıldı.
+/// - Yazı tipi/yazı ölçeği bu sayfada YOK: kendi sayfası (FontSettingsPage)
+///   ve oynatıcı/liste stilleri ayrı sayfalardır; «Bu sayfayı varsayılana
+///   döndür» bu yüzden yalnız buradaki alanları sıfırlar.
 class ThemeGalleryPage extends StatelessWidget {
   const ThemeGalleryPage({super.key});
 
@@ -38,178 +45,270 @@ class ThemeGalleryPage extends StatelessWidget {
     final customRepo = Get.find<CustomThemeRepository>();
 
     return Scaffold(
+      // Gün 13: AppBar artık sayfanın adını gösterir (eski başlıklar
+      // tabSettings / themeGroupColor idi; bilgi mimarisi kaynağı
+      // settingsRowAppearance'dır — ana sayfadaki satırın aynı anahtarı).
       appBar: AppBar(
-        title: Text(l10n.themeGroupColor),
+        title: Text(l10n.settingsRowAppearance),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.tune),
-            tooltip: l10n.themeAdvancedSettings,
-            onPressed: () => Get.to(() => const ThemeSettingsPage()),
-          ),
           IconButton(
             icon: const Icon(Icons.file_download),
             tooltip: l10n.themeImportTheme,
             onPressed: () => _importTheme(context, themeCtrl),
           ),
+          SettingsPageResetAction(onReset: () async {
+            // Gün 13: yalnız BU sayfada yaşayan tema alanları fabrika
+            // değerine döner; yazı tipi, yazı ölçeği, oynatıcı stili ve
+            // liste görünümü kendi sayfalarında yaşadığı için korunur.
+            final s = themeCtrl.settings.value;
+            themeCtrl.setSettings(const ThemeSettings().copyWith(
+              fontFamily: s.fontFamily,
+              textScale: s.textScale,
+              player: s.player,
+              listViewMode: s.listViewMode,
+            ));
+          }),
         ],
       ),
       body: Obx(() {
         final s = themeCtrl.settings.value;
 
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        // Gün 13: sabit canlı önizleme — kaydırılan listenin DIŞINDA,
+        // her bölüm değişiminde anında güncellenen bir örnek kart.
+        return Column(
           children: [
-            // --- 1. Canlı önizleme ---
-            SettingsSectionHeader(title: l10n.themePreviewTitle),
-            ThemePreviewCard(settings: s),
-
-            // --- 2. Tema modu: 4 segment ---
             Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: SettingsSectionHeader(title: l10n.settingsThemeMode),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: ThemePreviewCard(settings: s),
             ),
-            _SegmentedRow(
-              selected: _modeKey(s),
-              items: <String, String>{
-                'system': l10n.settingsThemeSystem,
-                'light': l10n.settingsThemeLight,
-                'dark': l10n.settingsThemeDark,
-                'amoled': 'AMOLED',
-              },
-              onSelect: (key) => _applyMode(themeCtrl, key),
-            ),
-
-            // --- 3. Renk kaynağı ---
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: SettingsSectionHeader(title: l10n.themeColorSource),
-            ),
-            _SegmentedRow(
-              selected: s.themeSource,
-              items: <String, String>{
-                'seed': l10n.themeSourceSeed,
-                'system': l10n.themeSourceSystem,
-                'artwork': l10n.themeSourceArtwork,
-              },
-              onSelect: themeCtrl.setThemeSource,
-            ),
-
-            // --- 4. Hazır paletler ---
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Row(
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                 children: [
-                  Expanded(
-                    child: Text(
-                      l10n.themePresetsTitle,
-                      style: Theme.of(context).textTheme.titleMedium,
+                  // --- Mod (+ zamanlanmış koyu mod) ---
+                  SettingsSectionHeader(title: l10n.settingsThemeMode),
+                  SettingsGroupCard(children: [
+                    SettingsChoiceTile<String>(
+                      title: l10n.settingsThemeMode,
+                      subtitle: l10n.settingsThemeModeDesc,
+                      value: _modeKey(s),
+                      options: const <String>['system', 'light', 'dark', 'amoled'],
+                      labelOf: (v) => switch (v) {
+                        'light' => l10n.settingsThemeLight,
+                        'dark' => l10n.settingsThemeDark,
+                        'amoled' => l10n.themeModeAmoled,
+                        _ => l10n.settingsThemeSystem,
+                      },
+                      onChanged: (key) => _applyMode(themeCtrl, key),
                     ),
-                  ),
-                  Text(
-                    '${ThemePresets.all.length}',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    // Gün 3 (Karar): zamanlanmış koyu mod varsayılan kapalıdır;
+                    // yalnız mod Sistem iken anlamlıdır (eski Gelişmiş
+                    // sayfasından taşındı).
+                    if (s.themeMode == ThemeMode.system) ...[
+                      SettingsSwitchTile(
+                        title: l10n.themeScheduledDark,
+                        subtitle: l10n.themeScheduledDarkDesc,
+                        value: s.scheduledDarkEnabled,
+                        onChanged: themeCtrl.setScheduledDarkEnabled,
+                      ),
+                      if (s.scheduledDarkEnabled)
+                        ListTile(
+                          title: Text(
+                            '${s.scheduledDarkStartHour.toString().padLeft(2, '0')}:${s.scheduledDarkStartMinute.toString().padLeft(2, '0')}'
+                            ' - '
+                            '${s.scheduledDarkEndHour.toString().padLeft(2, '0')}:${s.scheduledDarkEndMinute.toString().padLeft(2, '0')}',
+                          ),
+                          onTap: () async {
+                            final start = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay(
+                                  hour: s.scheduledDarkStartHour,
+                                  minute: s.scheduledDarkStartMinute),
+                            );
+                            if (start == null) return;
+                            if (!context.mounted) return;
+                            final end = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay(
+                                  hour: s.scheduledDarkEndHour,
+                                  minute: s.scheduledDarkEndMinute),
+                            );
+                            if (end == null) return;
+
+                            themeCtrl.setScheduledDark(
+                              start.hour, start.minute,
+                              end.hour, end.minute,
+                            );
+                          },
                         ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 160,
-                mainAxisExtent: 132,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: ThemePresets.all.length,
-              itemBuilder: (context, i) {
-                final preset = ThemePresets.all[i];
-                final isSelected =
-                    s.themeSource == 'seed' && s.seedColor == preset.seed;
-                return _PaletteCard(
-                  name: preset.name,
-                  seed: preset.seed,
-                  isSelected: isSelected,
-                  onTap: () {
-                    // Kaynağı da tohuma çevir ki dokunuş anında etki etsin.
-                    if (s.themeSource != 'seed') {
-                      themeCtrl.setThemeSource('seed');
-                    }
-                    themeCtrl.setSeed(preset.seed);
-                  },
-                );
-              },
-            ),
+                    ],
+                  ]),
 
-            // --- 5. Özel temalar ---
-            Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.themeCustomTitle,
-                      style: Theme.of(context).textTheme.titleMedium,
+                  // --- Renk ---
+                  SettingsSectionHeader(title: l10n.themeGroupColor),
+                  SettingsGroupCard(children: [
+                    SettingsChoiceTile<String>(
+                      title: l10n.themeColorSource,
+                      subtitle: l10n.themeColorSourceDesc,
+                      value: s.themeSource,
+                      options: const <String>['seed', 'system', 'artwork'],
+                      labelOf: (v) => switch (v) {
+                        'system' => l10n.themeSourceSystem,
+                        'artwork' => l10n.themeSourceArtwork,
+                        _ => l10n.themeSourceSeed,
+                      },
+                      onChanged: themeCtrl.setThemeSource,
+                    ),
+                    SettingsSwitchTile(
+                      title: l10n.themeHighContrast,
+                      subtitle: l10n.themeHighContrastDesc,
+                      value: s.highContrast,
+                      onChanged: themeCtrl.setHighContrast,
+                    ),
+                    SettingsSwitchTile(
+                      title: l10n.themeSurfaceTint,
+                      subtitle: l10n.themeSurfaceTintDesc,
+                      value: s.surfaceTint,
+                      onChanged: themeCtrl.setSurfaceTint,
+                    ),
+                  ]),
+
+                  // --- Şekil ve yoğunluk ---
+                  SettingsSectionHeader(title: l10n.themeGroupShape),
+                  SettingsGroupCard(children: [
+                    SettingsSwitchTile(
+                      title: l10n.themeRoundedCorners,
+                      subtitle: l10n.themeRoundedCornersDesc,
+                      value: s.roundedCorners,
+                      onChanged: themeCtrl.setRoundedCorners,
+                    ),
+                    SettingsChoiceTile<VisualDensity>(
+                      title: l10n.themeDensity,
+                      subtitle: l10n.themeDensityDesc,
+                      value: s.density,
+                      options: const <VisualDensity>[
+                        VisualDensity.compact,
+                        VisualDensity.standard,
+                        VisualDensity.comfortable,
+                      ],
+                      labelOf: (d) => switch (d) {
+                        VisualDensity.compact => l10n.themeDensityCompact,
+                        VisualDensity.standard => l10n.themeDensityStandard,
+                        _ => l10n.themeDensityComfortable,
+                      },
+                      onChanged: themeCtrl.setDensity,
+                    ),
+                  ]),
+
+                  // --- Hazır paletler (görsel ızgara; seçim tohuma eşlenir) ---
+                  SettingsSectionHeader(title: l10n.themePresetsTitle),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 160,
+                      mainAxisExtent: 132,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemCount: ThemePresets.all.length,
+                    itemBuilder: (context, i) {
+                      final preset = ThemePresets.all[i];
+                      final isSelected = s.themeSource == 'seed' &&
+                          s.seedColor == preset.seed;
+                      return _PaletteCard(
+                        name: preset.name,
+                        seed: preset.seed,
+                        isSelected: isSelected,
+                        onTap: () {
+                          // Kaynağı da tohuma çevir ki dokunuş anında
+                          // etki etsin.
+                          if (s.themeSource != 'seed') {
+                            themeCtrl.setThemeSource('seed');
+                          }
+                          themeCtrl.setSeed(preset.seed);
+                        },
+                      );
+                    },
+                  ),
+
+                  // --- Özel temalar (Drift tabanlı; düzenle/dışa aktar/sil) ---
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20, bottom: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.themeCustomTitle,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        IconButton.filledTonal(
+                          icon: const Icon(Icons.add),
+                          tooltip: l10n.commonSave,
+                          onPressed: () =>
+                              Get.to(() => const CustomThemeEditorPage()),
+                        ),
+                      ],
                     ),
                   ),
-                  IconButton.filledTonal(
-                    icon: const Icon(Icons.add),
-                    tooltip: l10n.commonSave,
-                    onPressed: () => Get.to(() => const CustomThemeEditorPage()),
-                  ),
-                ],
-              ),
-            ),
-            StreamBuilder<List<CustomThemeModel>>(
-              stream: customRepo.watchAll(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      l10n.themeCustomEmpty,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  StreamBuilder<List<CustomThemeModel>>(
+                    stream: customRepo.watchAll(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
                             color: Theme.of(context)
                                 .colorScheme
-                                .onSurfaceVariant,
+                                .surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                    ),
-                  );
-                }
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 160,
-                    mainAxisExtent: 132,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
+                          child: Text(
+                            l10n.themeCustomEmpty,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                        );
+                      }
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 160,
+                          mainAxisExtent: 132,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, i) {
+                          final theme = snapshot.data![i];
+                          return _PaletteCard(
+                            name: theme.name,
+                            seed: theme.settings.seedColor,
+                            isSelected: false,
+                            // Gün 3 (Karar): özel tema yalnız renk/şekil
+                            // alanlarıyla uygulanır
+                            // (ThemeController.applyCustomTheme).
+                            onTap: () =>
+                                themeCtrl.applyCustomTheme(theme.settings),
+                            onLongPress: () => _showThemeOptions(
+                                context, theme, customRepo),
+                          );
+                        },
+                      );
+                    },
                   ),
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, i) {
-                    final theme = snapshot.data![i];
-                    return _PaletteCard(
-                      name: theme.name,
-                      seed: theme.settings.seedColor,
-                      isSelected: false,
-                      // Gün 3 (Karar): özel tema yalnız renk/şekil alanlarıyla
-                      // uygulanır (ThemeController.applyCustomTheme).
-                      onTap: () => themeCtrl.applyCustomTheme(theme.settings),
-                      onLongPress: () =>
-                          _showThemeOptions(context, theme, customRepo),
-                    );
-                  },
-                );
-              },
+                ],
+              ),
             ),
           ],
         );
@@ -217,16 +316,17 @@ class ThemeGalleryPage extends StatelessWidget {
     );
   }
 
-  /// Mevcut ayarlardan segment anahtarı.
+  /// Mevcut ayarlardan segment anahtarı. AMOLED = koyu mod + saf siyah
+  /// yüzey tercihi; dört durum tek seçim listesinde kalıcıdır.
   String _modeKey(ThemeSettings s) {
     if (s.themeMode == ThemeMode.light) return 'light';
     if (s.themeMode == ThemeMode.system) return 'system';
     return s.amoled ? 'amoled' : 'dark';
   }
 
-  /// Segment seçimini gerçek modele çevirir. AMOLED = koyu mod + saf siyah
-  /// yüzey tercihi; "Koyu" seçimi AMOLED'i kapatır (birebir tasarım
-  /// davranışı, model bozulmadan).
+  /// Seçimi gerçek modele çevirir. "Koyu" seçimi AMOLED'i kapatır;
+  /// "AMOLED" seçimi koyu modu açar (birebir eski galeri davranışı,
+  /// model bozulmadan).
   void _applyMode(ThemeController ctrl, String key) => switch (key) {
         'light' => ctrl.setMode(ThemeMode.light),
         'dark' => () {
@@ -287,9 +387,9 @@ class ThemeGalleryPage extends StatelessWidget {
     );
   }
 
-  /// Gün 3: tema dışa aktarma artık düz metin değil, geçici dizine yazılan
-  /// .json DOSYASI olarak paylaşılır (mevcut path_provider + share_plus ile;
-  /// yeni bağımlılık yok). Alıcı taraf dosyayı "Tema içe aktar" ile açar.
+  /// Gün 3: tema dışa aktarma .json DOSYASI olarak paylaşılır (mevcut
+  /// path_provider + share_plus ile; yeni bağımlılık yok). Alıcı taraf
+  /// dosyayı "Temayı içe aktar" ile açar.
   Future<void> _exportTheme(
     BuildContext context,
     CustomThemeModel theme,
@@ -353,67 +453,6 @@ class ThemeGalleryPage extends StatelessWidget {
         );
       }
     }
-  }
-}
-
-/// Tek seçimli pill sırası: tema modu ve renk kaynağı için ortak bileşen
-/// (tasarımdaki segmented button görünümü, M3 yüzey renkleriyle).
-class _SegmentedRow extends StatelessWidget {
-  const _SegmentedRow({
-    required this.selected,
-    required this.items,
-    required this.onSelect,
-  });
-
-  final String selected;
-  final Map<String, String> items;
-  final ValueChanged<String> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        children: [
-          for (final entry in items.entries)
-            Expanded(
-              child: Material(
-                color: selected == entry.key
-                    ? cs.secondaryContainer
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(999),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(999),
-                  onTap: () => onSelect(entry.key),
-                  child: SizedBox(
-                    height: 40,
-                    child: Center(
-                      child: Text(
-                        entry.value,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: selected == entry.key
-                              ? cs.onSecondaryContainer
-                              : cs.onSurfaceVariant,
-                          fontWeight:
-                              selected == entry.key ? FontWeight.w600 : null,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
   }
 }
 

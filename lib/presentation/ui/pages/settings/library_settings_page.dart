@@ -6,6 +6,7 @@ import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/ui/pages/settings/excluded_folders_page.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
+import 'package:resonance/presentation/ui/widgets/settings_page_reset_action.dart';
 import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_tile.dart';
 
@@ -18,7 +19,14 @@ class LibrarySettingsPage extends StatelessWidget {
     final ctrl = Get.find<PreferencesController>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingsLibrary)),
+      appBar: AppBar(
+        title: Text(l10n.settingsLibrary),
+        actions: [
+          // Gün 13: modelin tamamı bu sayfada yaşar; sıfırlama tüm
+          // kitaplık ayarlarını fabrika değerine döndürür.
+          SettingsPageResetAction(onReset: ctrl.resetLibrary),
+        ],
+      ),
       body: Obx(() {
         final lib = ctrl.library.value;
         return ListView(
