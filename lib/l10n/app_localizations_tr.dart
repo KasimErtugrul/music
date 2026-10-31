@@ -1870,4 +1870,79 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsThemeModeDesc => 'Açılışta uygulanacak görünüm modu';
+
+  @override
+  String get settingsInfoTooltip => 'Bu ayar ne işe yarar?';
+
+  @override
+  String get seekIntervalInfo =>
+      'Oynatıcıdaki ve bildirimdeki ileri/geri sarma düğmeleri her dokunuşta bu kadar saniye atlar. Örneğin 15 saniye seçilirse «-15s» ve «+15s» düğmeleri bu adımla çalışır.';
+
+  @override
+  String get pauseOnHeadphoneInfo =>
+      'Kulaklık çıkarıldığında veya Bluetooth bağlantısı kesildiğinde çalma anında duraklatılır; müzik telefonun hoparlöründen sürpriz şekilde çalmaya devam etmez. Tercih kapalıyken ses çıkış kaynağı değişse bile çalma sürer.';
+
+  @override
+  String get autoResumeInfo =>
+      'Uygulama açıldığında son kuyruk, parça ve konum otomatik geri yüklenir. Açıkken çalma kaldığı yerden devam eder; kapalıyken kuyruk ve konum yine yüklenir ama çalma duraklatılmış olarak bekler.';
+
+  @override
+  String get defaultShuffleInfo =>
+      'Yeni bir kuyruk başlarken (bir şarkıya, albüme veya listeye dokunduğunuzda) karıştırma bu değere göre açılır ya da kapanır. Çalma sırasında oynatıcıdaki karıştırma düğmesiyle yapılan değişiklikler geçicidir; bu varsayılanı değiştirmez.';
+
+  @override
+  String get defaultRepeatInfo =>
+      'Yeni bir kuyruk başlarken uygulanacak tekrar modu: «Kapalı» liste bitince çalmayı durdurur, «Tümü» listeyi baştan çalar, «Tek» çalan şarkıyı döngüde tutar.';
+
+  @override
+  String get skipSilenceInfo =>
+      'Ses akışındaki sessiz bölümler otomatik olarak hızlı geçirilir; podcast ve sesli kitap gibi konuşma içeriklerinde zaman kazandırır. Girişi sakin olan müziklerde de sessiz kısımların hızlandığını fark edebilirsiniz.';
+
+  @override
+  String get replayGainInfo =>
+      'Şarkıların etiketlerindeki ses düzeyi bilgisini kullanarak tüm parçaları benzer yükseklikte çalar; parçadan parçaya ses açıp kapatma derdini azaltır. Bu özellik açıkken ekolayzırdaki «Ses yüksekliği güçlendirici» ile aynı ses kanalı kullanılır ve parça kazancı öncelik alır; kapatınca manuel güçlendirme geri döner.';
+
+  @override
+  String get scanOnStartupInfo =>
+      'Uygulama her açıldığında cihazdaki müzik dosyaları taranır; eklenen, taşınan veya silinen parçalar kitaplığa otomatik yansıtılır. Kapatırsanız açılışta tarama yapılmaz ve kitaplık son taramadaki hâliyle kalır.';
+
+  @override
+  String get minDurationInfo =>
+      'Bu süreden kısa dosyalar (zil sesleri, kısa kayıtlar vb.) kitaplığa alınmaz. Değişiklik anında uygulanır; yeniden tarama gerekmez.';
+
+  @override
+  String get clearArtworkCacheInfo =>
+      'Kapak görsellerinin bellekteki önbelleğini ve bildirim için yazılan geçici kopyaları siler. Kapaklar hatalı veya eski görünüyorsa kullanın; kapaklar bir sonraki kullanımda kaynağından yeniden okunur. Ana ekran widget\'ının kapağı bilinçli olarak korunur.';
+
+  @override
+  String get widgetTransparencyInfo =>
+      'Ana ekran widget\'ının arka planını şeffaf yapar; duvar kağıdınız widget üzerinden görünür. Kapalıyken widget, temayı izleyen dolu bir zeminle çizilir.';
+
+  @override
+  String get themeScheduledDarkInfo =>
+      'Yalnızca «Sistem» modunda çalışır: seçtiğiniz saat aralığında uygulama otomatik olarak koyu moda geçer, aralık dışında sistem tercihini izlemeye devam eder.';
+
+  @override
+  String get themeColorSourceInfo =>
+      'Tema renklerinin kaynağını seçer: «Tohum» seçtiğiniz sabit palet renginden renk üretir, «Sistem» (Android 12+) duvar kağıdınızdan dinamik renkler alır, «Kapak» çalan şarkının albüm kapağından renk çıkarır.';
+
+  @override
+  String get themeHighContrastInfo =>
+      'Metin ve denetimlerin arka plandan ayrışmasını artırır; parlak ortamlarda ve görme hassasiyeti olan kullanıcılar için okunabilirliği yükseltir.';
+
+  @override
+  String get themeSurfaceTintInfo =>
+      'Material 3\'te yükseltilmiş yüzeyler (kartlar, menüler, alt sayfalar) ana renkle hafifçe tonlanır. Kapatırsanız yüzeyler nötr renkte ve daha düz görünür.';
+
+  @override
+  String get themeDensityInfo =>
+      'Arayüzün sıkılığını ayarlar: «Sıkı» ekrana daha fazla içerik sığdırır, «Rahat» öğelere daha fazla boşluk verir; «Standart» dengeli seçenektir.';
+
+  @override
+  String get animationLevelInfo =>
+      'Geçiş animasyonları ile dekoratif parıltı ve gölgelerin düzeyini belirler. «Kapalı» dekoratif gölgeleri kaldırarak düşük donanımda akıcılığı artırır; «Azaltılmış» ortada bir seçenektir.';
+
+  @override
+  String get loudnessInfo =>
+      'Sesi 0–15 dB arasında yükseltir; düşük kayıtlı parçalarda faydalıdır, çok yüksek değerlerde bozulma olabilir. ReplayGain açıkken bu kanal parça düzeyi ses düzeyi dengelemesi tarafından kullanılır.';
 }

@@ -90,6 +90,7 @@ class PlayerStylePage extends StatelessWidget {
                 },
                 onChanged: (v) =>
                     themeCtrl.setPlayer(p.copyWith(animationLevel: v)),
+                info: l10n.animationLevelInfo,
               ),
             ]),
           ],

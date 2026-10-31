@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:resonance/presentation/ui/widgets/settings_info_sheet.dart';
 
 /// Anahtar (switch) ayar satırı — Gün 12 tasarım dili.
 ///
 /// Tüm ayar satırları gibi en az 48 dp dokunma hedefiyle çizilir
 /// (SwitchListTile varsayılanı 56 dp); satırın herhangi bir yerine
 /// dokunmak anahtarı değiştirir.
+///
+/// Gün 16: [info] verilirse başlığın yanına [SettingsInfoBadge] eklenir;
+/// balon düğmesi kendi dokunmasını yuttuğu için anahtar tetiklenmez.
 ///
 /// Erişilebilirlik: SwitchListTile başlığı ve alt yazısı anahtarın
 /// Semantics etiketine kendisi ekler (durum okunurken satır metni duyulur);
@@ -16,6 +20,7 @@ class SettingsSwitchTile extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.subtitle,
+    this.info,
   });
 
   final String title;
@@ -23,10 +28,21 @@ class SettingsSwitchTile extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
+  /// Ayarın ne işe yaradığını anlatan metin; verilirse başlık yanında
+  /// bilgi balonu düğmesi çizilir (Gün 16).
+  final String? info;
+
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
-      title: Text(title),
+      title: info == null
+          ? Text(title)
+          : Row(
+              children: [
+                Expanded(child: Text(title)),
+                SettingsInfoBadge(title: title, info: info!),
+              ],
+            ),
       subtitle: subtitle != null ? Text(subtitle!) : null,
       value: value,
       onChanged: onChanged,

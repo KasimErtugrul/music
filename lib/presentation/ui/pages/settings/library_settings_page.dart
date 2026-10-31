@@ -40,6 +40,7 @@ class LibrarySettingsPage extends StatelessWidget {
                 subtitle: l10n.scanOnStartupHint,
                 value: lib.scanOnStartup,
                 onChanged: ctrl.setScanOnStartup,
+                info: l10n.scanOnStartupInfo,
               ),
               SettingsChoiceTile<int>(
                 title: l10n.minDuration,
@@ -55,6 +56,7 @@ class LibrarySettingsPage extends StatelessWidget {
                   // liste mevcut indeksten yeniden süzülür (rescan GEREKMEZ).
                   Get.find<LibraryController>().reloadSongs();
                 },
+                info: l10n.minDurationInfo,
               ),
             ]),
             SettingsGroupCard(children: [

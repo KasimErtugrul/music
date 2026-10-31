@@ -110,6 +110,7 @@ class ThemeGalleryPage extends StatelessWidget {
                         subtitle: l10n.themeScheduledDarkDesc,
                         value: s.scheduledDarkEnabled,
                         onChanged: themeCtrl.setScheduledDarkEnabled,
+                        info: l10n.themeScheduledDarkInfo,
                       ),
                       if (s.scheduledDarkEnabled)
                         ListTile(
@@ -158,18 +159,21 @@ class ThemeGalleryPage extends StatelessWidget {
                         _ => l10n.themeSourceSeed,
                       },
                       onChanged: themeCtrl.setThemeSource,
+                      info: l10n.themeColorSourceInfo,
                     ),
                     SettingsSwitchTile(
                       title: l10n.themeHighContrast,
                       subtitle: l10n.themeHighContrastDesc,
                       value: s.highContrast,
                       onChanged: themeCtrl.setHighContrast,
+                      info: l10n.themeHighContrastInfo,
                     ),
                     SettingsSwitchTile(
                       title: l10n.themeSurfaceTint,
                       subtitle: l10n.themeSurfaceTintDesc,
                       value: s.surfaceTint,
                       onChanged: themeCtrl.setSurfaceTint,
+                      info: l10n.themeSurfaceTintInfo,
                     ),
                   ]),
 
@@ -197,6 +201,7 @@ class ThemeGalleryPage extends StatelessWidget {
                         _ => l10n.themeDensityComfortable,
                       },
                       onChanged: themeCtrl.setDensity,
+                      info: l10n.themeDensityInfo,
                     ),
                   ]),
 

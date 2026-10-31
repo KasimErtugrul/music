@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
+import 'package:resonance/presentation/ui/widgets/settings_tile.dart';
 
 /// Etiketler ve kapak ayarları.
 ///
@@ -70,7 +71,10 @@ class _TagsArtworkSettingsPageState extends State<TagsArtworkSettingsPage> {
       appBar: AppBar(title: Text(l10n.tagsArtworkSettings)),
       body: ListView(
         children: [
-          ListTile(
+          // Gün 16: ham ListTile yerine ortak SettingsTile; «kapak
+          // önbelleği temizliği» teknik bir eylem olduğu için bilgi balonu
+          // nelerin silindiğini/nelerin korunduğunu anlatır.
+          SettingsTile(
             leading: _busy
                 ? const SizedBox(
                     width: 24,
@@ -78,8 +82,9 @@ class _TagsArtworkSettingsPageState extends State<TagsArtworkSettingsPage> {
                     child: CircularProgressIndicator(strokeWidth: 2.5),
                   )
                 : const Icon(Icons.cleaning_services),
-            title: Text(l10n.clearArtworkCache),
+            title: l10n.clearArtworkCache,
             onTap: _clearCache,
+            info: l10n.clearArtworkCacheInfo,
           ),
         ],
       ),

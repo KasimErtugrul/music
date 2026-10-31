@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:resonance/presentation/ui/widgets/settings_info_sheet.dart';
 
 /// Seçim (tek seçimli) ayar satırı — Gün 12'de yeniden yazıldı.
 ///
@@ -13,6 +14,12 @@ import 'package:flutter/material.dart';
 /// API değişmedi (title/subtitle/value/options/labelOf/onChanged): mevcut
 /// çağrı yerleri aynen derlenir (geriye dönük uyumluluk).
 ///
+/// Gün 16: [info] verilirse her iki sunumda da başlığın/satırın yanına
+/// [SettingsInfoBadge] eklenir. Bölümlü sunumda rozet başlık satırındadır
+/// (Semantics `container` olduğu için çocuk düğüm erişilebilir kalır);
+/// alt sayfalı sunumda rozet satır Semantics'ının DIŞINDA durur ki
+/// `excludeSemantics` etiketi rozeti yutmasın.
+///
 /// Erişilebilirlik: her iki sunum da ekran okuyucuya ayarın adını, alt
 /// yazısını ve (satır sunumunda) geçerli değeri tek etikette bildirir.
 /// Segment yüksekliği M3 varsayılanı 40 dp yerine 48 dp'dir (dokunma
@@ -26,6 +33,7 @@ class SettingsChoiceTile<T> extends StatelessWidget {
     required this.labelOf,
     required this.onChanged,
     this.subtitle,
+    this.info,
   });
 
   final String title;
@@ -34,6 +42,10 @@ class SettingsChoiceTile<T> extends StatelessWidget {
   final List<T> options;
   final String Function(T) labelOf;
   final ValueChanged<T> onChanged;
+
+  /// Ayarın ne işe yaradığını anlatan metin; verilirse bilgi balonu
+  /// düğmesi çizilir (Gün 16).
+  final String? info;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +57,7 @@ class SettingsChoiceTile<T> extends StatelessWidget {
         options: options,
         labelOf: labelOf,
         onChanged: onChanged,
+        info: info,
       );
     }
     return _SheetChoice<T>(
@@ -54,6 +67,7 @@ class SettingsChoiceTile<T> extends StatelessWidget {
       options: options,
       labelOf: labelOf,
       onChanged: onChanged,
+      info: info,
     );
   }
 }
@@ -67,6 +81,7 @@ class _SegmentedChoice<T> extends StatelessWidget {
     required this.labelOf,
     required this.onChanged,
     this.subtitle,
+    this.info,
   });
 
   final String title;
@@ -75,6 +90,7 @@ class _SegmentedChoice<T> extends StatelessWidget {
   final List<T> options;
   final String Function(T) labelOf;
   final ValueChanged<T> onChanged;
+  final String? info;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +98,8 @@ class _SegmentedChoice<T> extends StatelessWidget {
     final cs = theme.colorScheme;
     return Semantics(
       // Grup kapsayıcısı: segmentler tek tek okunur ama grup, ayarın adıyla
-      // tanımlanır.
+      // tanımlanır. `container` çocukları dışlamaz; bilgi rozeti erişilebilir
+      // kalır (Gün 16).
       container: true,
       label: subtitle == null ? title : '$title. $subtitle',
       child: Padding(
@@ -90,10 +107,18 @@ class _SegmentedChoice<T> extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              title,
-              style: theme.textTheme.bodyLarge
-                  ?.copyWith(fontWeight: FontWeight.w600),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.bodyLarge
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                if (info != null) SettingsInfoBadge(title: title, info: info!),
+              ],
             ),
             if (subtitle != null)
               Text(
@@ -140,6 +165,7 @@ class _SheetChoice<T> extends StatelessWidget {
     required this.labelOf,
     required this.onChanged,
     this.subtitle,
+    this.info,
   });
 
   final String title;
@@ -148,6 +174,7 @@ class _SheetChoice<T> extends StatelessWidget {
   final List<T> options;
   final String Function(T) labelOf;
   final ValueChanged<T> onChanged;
+  final String? info;
 
   Future<void> _ac(BuildContext context) {
     return showModalBottomSheet<void>(
@@ -220,15 +247,9 @@ class _SheetChoice<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    return Semantics(
-      // Satır tek düğüm: başlık + alt yazı etiketi, geçerli değer `value`
-      // alanında, dokunma eylemi Semantics üzerinde bildirilir.
-      excludeSemantics: true,
-      button: true,
-      label: subtitle == null ? title : '$title. $subtitle',
-      value: labelOf(value),
-      onTap: () => _ac(context),
-      child: ListTile(
+
+    Widget buildTile() {
+      final listTile = ListTile(
         title: Text(
           title,
           style: theme.textTheme.bodyLarge
@@ -260,7 +281,28 @@ class _SheetChoice<T> extends StatelessWidget {
           ],
         ),
         onTap: () => _ac(context),
-      ),
+      );
+      return Semantics(
+        // Satır tek düğüm: başlık + alt yazı etiketi, geçerli değer `value`
+        // alanında, dokunma eylemi Semantics üzerinde bildirilir.
+        excludeSemantics: true,
+        button: true,
+        label: subtitle == null ? title : '$title. $subtitle',
+        value: labelOf(value),
+        onTap: () => _ac(context),
+        child: listTile,
+      );
+    }
+
+    // Gün 16: bilgi rozeti satır Semantics'ının DIŞINDA durur
+    // (excludeSemantics rozetin düğümünü yutmasın diye).
+    if (info == null) return buildTile();
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(child: buildTile()),
+        SettingsInfoBadge(title: title, info: info!),
+      ],
     );
   }
 }

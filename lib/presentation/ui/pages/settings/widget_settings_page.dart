@@ -4,6 +4,7 @@ import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/home_widget_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
+import 'package:resonance/presentation/ui/widgets/settings_info_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/settings_page_reset_action.dart';
 
 /// Ana ekran widget'ı ayarları — M3 tasarım güncellemesi:
@@ -218,6 +219,13 @@ class _WidgetSettingsPageState extends State<WidgetSettingsPage> {
                   ),
                 ),
                 const SizedBox(width: 8),
+                // Gün 16: widget şeffaflığı uygulamaya özeldir (ne yaptığı
+                // ilk bakışta belli olmaz); bilgi balonu satırın eylemini
+                // tetiklemez, yalnız açıklama alt sayfası açar.
+                SettingsInfoBadge(
+                  title: l10n.widgetTransparency,
+                  info: l10n.widgetTransparencyInfo,
+                ),
                 Switch(
                   value: _transparent,
                   onChanged: (val) {

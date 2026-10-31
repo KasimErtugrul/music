@@ -1874,4 +1874,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsThemeModeDesc => 'Appearance mode applied on startup';
+
+  @override
+  String get settingsInfoTooltip => 'What does this setting do?';
+
+  @override
+  String get seekIntervalInfo =>
+      'How far the rewind/forward buttons on the player and notification jump with each tap. For example, with 15 seconds selected the “-15s” and “+15s” buttons work in 15-second steps.';
+
+  @override
+  String get pauseOnHeadphoneInfo =>
+      'Playback pauses immediately when headphones are unplugged or the Bluetooth link drops, so music never suddenly blares from the phone speaker. When this is off, playback keeps going even though the audio output changes.';
+
+  @override
+  String get autoResumeInfo =>
+      'When the app starts, the last queue, track and position are restored automatically. When on, playback continues from where it left off; when off, the queue and position are still restored but playback stays paused.';
+
+  @override
+  String get defaultShuffleInfo =>
+      'When a new queue starts (you tap a song, album or playlist), shuffle is turned on or off according to this setting. Toggling shuffle in the player during playback is temporary and does not change this default.';
+
+  @override
+  String get defaultRepeatInfo =>
+      'The repeat mode applied when a new queue starts: “None” stops when the queue ends, “All” repeats the whole queue, “One” loops the current track.';
+
+  @override
+  String get skipSilenceInfo =>
+      'Silent parts of the audio are fast-forwarded automatically; useful for speech content such as podcasts and audiobooks. You may also notice quiet intros of music being skipped faster.';
+
+  @override
+  String get replayGainInfo =>
+      'Uses the loudness information stored in each song\'s tags to play all tracks at a similar volume, saving you from adjusting the volume between songs. While this is on, it shares the same audio channel as the equalizer\'s “Loudness enhancer” and the per-track gain takes priority; turning it off brings back the manual boost.';
+
+  @override
+  String get scanOnStartupInfo =>
+      'Each time the app starts, music files on the device are scanned; added, moved or deleted tracks are reflected in the library automatically. When off, no scan runs at startup and the library stays as it was after the last scan.';
+
+  @override
+  String get minDurationInfo =>
+      'Files shorter than this (ringtones, short recordings, etc.) are left out of the library. The change applies instantly; no rescan is needed.';
+
+  @override
+  String get clearArtworkCacheInfo =>
+      'Clears the in-memory cache of artwork images and the temporary copies written for notifications. Use it if covers look wrong or stale; they are re-read from the source on next use. The home screen widget\'s artwork is intentionally kept.';
+
+  @override
+  String get widgetTransparencyInfo =>
+      'Makes the home screen widget\'s background transparent so your wallpaper shows through. When off, the widget is drawn with a solid background that follows the theme.';
+
+  @override
+  String get themeScheduledDarkInfo =>
+      'Only applies in “System” mode: within the hours you choose the app switches to dark mode automatically, and outside that range it keeps following the system preference.';
+
+  @override
+  String get themeColorSourceInfo =>
+      'Chooses where the theme colors come from: “Seed” derives colors from a fixed palette color you pick, “System” (Android 12+) takes dynamic colors from your wallpaper, “Artwork” extracts colors from the playing song\'s album cover.';
+
+  @override
+  String get themeHighContrastInfo =>
+      'Increases the separation of text and controls from the background, improving readability in bright environments and for users with visual sensitivity.';
+
+  @override
+  String get themeSurfaceTintInfo =>
+      'In Material 3, elevated surfaces (cards, menus, bottom sheets) are subtly tinted with the primary color. When off, surfaces look neutral and flatter.';
+
+  @override
+  String get themeDensityInfo =>
+      'Adjusts how dense the interface is: “Compact” fits more content on screen, “Comfortable” gives items more breathing room, “Standard” is the balanced choice.';
+
+  @override
+  String get animationLevelInfo =>
+      'Sets the level of transition animations plus decorative glows and shadows. “None” removes decorative shadows for extra smoothness on low-end hardware; “Reduced” is a middle ground.';
+
+  @override
+  String get loudnessInfo =>
+      'Boosts volume by 0–15 dB; helpful for quietly mastered tracks, very high values may distort. When ReplayGain is on, this channel is used by the per-track loudness normalization.';
 }

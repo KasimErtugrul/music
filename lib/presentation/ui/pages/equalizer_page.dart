@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:resonance/data/models/equalizer_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/equalizer_controller.dart';
+import 'package:resonance/presentation/ui/widgets/settings_info_sheet.dart';
 
 /// UI tasarım güncellemesi: ekolayzır sayfası tasarım diline göre yeniden
 /// düzenlendi — üstte ana anahtarlı kontrol kartı, hazır profillerin yatay
@@ -339,6 +340,13 @@ class _EqualizerPageState extends State<EqualizerPage> {
                             l10n.loudnessEnhancer,
                             style: theme.textTheme.titleSmall,
                           ),
+                        ),
+                        // Gün 16: loudness güçlendirici teknik bir denetimdir;
+                        // ReplayGain ile kanal paylaşımını da anlatan bilgi
+                        // balonu başlık satırına eklendi.
+                        SettingsInfoBadge(
+                          title: l10n.loudnessEnhancer,
+                          info: l10n.loudnessInfo,
                         ),
                         // Görev 2.3 birim düzeltmesi: değer dB cinsindedir.
                         Container(

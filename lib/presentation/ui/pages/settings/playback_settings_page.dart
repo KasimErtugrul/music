@@ -14,6 +14,11 @@ import 'package:resonance/presentation/ui/widgets/settings_switch_tile.dart';
 /// (Gün 2 Kararı) ve açılışta devam eder; sessizlik atlamayla ReplayGain
 /// ses işleme katmanıdır. AppBar'daki «Bu sayfayı varsayılana döndür»
 /// eylemi yalnız bu sayfadaki anahtarları sıfırlar (hız/perde korunur).
+///
+/// Gün 16: sayfadaki yedi ayar da uygulamaya özeldir (sarma adımı, kulaklık
+/// davranışı, oturum devamı, yeni kuyruk varsayılanları, sessizlik atlama,
+/// ReplayGain) — hepsine ne işe yaradığını anlatan bilgi balonu bağlandı;
+/// metinler ARB'de `xxxInfo` anahtarlarıdır.
 class PlaybackSettingsPage extends StatelessWidget {
   const PlaybackSettingsPage({super.key});
 
@@ -44,12 +49,14 @@ class PlaybackSettingsPage extends StatelessWidget {
                 options: const [5, 10, 15, 30],
                 labelOf: (v) => l10n.seekIntervalValue(v),
                 onChanged: ctrl.setSeekInterval,
+                info: l10n.seekIntervalInfo,
               ),
               SettingsSwitchTile(
                 title: l10n.pauseOnHeadphone,
                 subtitle: l10n.pauseOnHeadphoneDesc,
                 value: p.pauseOnHeadphone,
                 onChanged: ctrl.setPauseOnHeadphone,
+                info: l10n.pauseOnHeadphoneInfo,
               ),
             ]),
 
@@ -61,12 +68,14 @@ class PlaybackSettingsPage extends StatelessWidget {
                 subtitle: l10n.autoResumeDesc,
                 value: p.autoResume,
                 onChanged: ctrl.setAutoResume,
+                info: l10n.autoResumeInfo,
               ),
               SettingsSwitchTile(
                 title: l10n.defaultShuffle,
                 subtitle: l10n.defaultShuffleDesc,
                 value: p.defaultShuffle,
                 onChanged: ctrl.setDefaultShuffle,
+                info: l10n.defaultShuffleInfo,
               ),
               SettingsChoiceTile<int>(
                 title: l10n.defaultRepeat,
@@ -79,6 +88,7 @@ class PlaybackSettingsPage extends StatelessWidget {
                   _ => l10n.repeatNone,
                 },
                 onChanged: ctrl.setDefaultRepeat,
+                info: l10n.defaultRepeatInfo,
               ),
             ]),
 
@@ -90,6 +100,7 @@ class PlaybackSettingsPage extends StatelessWidget {
                 subtitle: l10n.skipSilenceDesc,
                 value: p.skipSilence,
                 onChanged: ctrl.setSkipSilence,
+                info: l10n.skipSilenceInfo,
               ),
               // Görev 2.3: ReplayGain anahtarı. just_audio setAudioSources ile
               // yüklenen kuyruklarda kesintisiz geçişi zaten varsayılan olarak
@@ -101,6 +112,7 @@ class PlaybackSettingsPage extends StatelessWidget {
                 subtitle: l10n.replayGainEnableDesc,
                 value: p.replayGain,
                 onChanged: ctrl.setReplayGain,
+                info: l10n.replayGainInfo,
               ),
             ]),
           ],
