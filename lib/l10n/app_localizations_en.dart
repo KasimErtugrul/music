@@ -478,6 +478,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSearchHint => 'Search settings';
 
   @override
+  String get settingsPickPrompt => 'Choose a setting from the list';
+
+  @override
   String get settingsAbout => 'About';
 
   @override

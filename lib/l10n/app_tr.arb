@@ -140,6 +140,7 @@
   "settingsGroupGeneral": "Genel",
   "settingsGroupAppearance": "Görünüm",
   "settingsSearchHint": "Ayarlarda ara",
+  "settingsPickPrompt": "Soldan bir ayar seçin",
   "settingsAbout": "Hakkında",
   "settingsVersionLabel": "Sürüm {version}",
   "settingsAboutDescription": "Resonance, Android için çevrimdışı bir müzik çalardır. Verileriniz bu cihazdan asla ayrılmaz.",

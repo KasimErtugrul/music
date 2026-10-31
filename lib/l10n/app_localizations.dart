@@ -938,6 +938,12 @@ abstract class AppLocalizations {
   /// **'Search settings'**
   String get settingsSearchHint;
 
+  /// No description provided for @settingsPickPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a setting from the list'**
+  String get settingsPickPrompt;
+
   /// No description provided for @settingsAbout.
   ///
   /// In en, this message translates to:

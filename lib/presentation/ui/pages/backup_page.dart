@@ -516,16 +516,23 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: color,
-              letterSpacing: 0.6,
-              fontWeight: FontWeight.w600,
+          // Gün 14: her iki uç da esner — bileşik yazı ölçeği (1.3×1.4)
+          // büyükken başlık/son yedek zamanı üç nokta ile kısalır, satır
+          // taşmaz.
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: color,
+                    letterSpacing: 0.6,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ),
-          const Spacer(),
-          if (trailing != null) trailing!,
+          const SizedBox(width: 12),
+          if (trailing != null) Flexible(child: trailing!),
         ],
       ),
     );

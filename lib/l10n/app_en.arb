@@ -146,6 +146,7 @@
   "settingsGroupGeneral": "General",
   "settingsGroupAppearance": "Appearance",
   "settingsSearchHint": "Search settings",
+  "settingsPickPrompt": "Choose a setting from the list",
   "settingsAbout": "About",
   "settingsVersionLabel": "Version {version}",
   "@settingsVersionLabel": { "placeholders": { "version": { "type": "String" } } },

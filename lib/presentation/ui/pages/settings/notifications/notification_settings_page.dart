@@ -177,16 +177,27 @@ class _MediaNotificationCard extends StatelessWidget {
                       Icon(Icons.graphic_eq, size: 14, color: cs.primary),
                 ),
                 const SizedBox(width: 7),
-                Text(
-                  l10n.appName,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                // Gün 14: iki metin de esnektir — sistem×uygulama ölçek
+                // birleşimi büyükken satır taşmaz, uzun metin üç nokta
+                // ile kısalır.
+                Flexible(
+                  child: Text(
+                    l10n.appName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                Text(
-                  ' • ${l10n.nowPlaying}',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant,
+                Flexible(
+                  child: Text(
+                    ' • ${l10n.nowPlaying}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
@@ -549,12 +560,19 @@ class _SleepNotificationCard extends StatelessWidget {
               ),
             ),
             if (active) ...<Widget>[
-              TextButton(
-                onPressed: () =>
-                    _ctrl.startTimer((_ctrl.remainingSeconds.value / 60)
-                            .ceil() +
-                        5),
-                child: Text(l10n.sleepTimerAddFive),
+              // Gün 14: uçlarda Flexible — bileşik yazı ölçeği 1.82'ye
+              // çıktığında düğme etiketleri üç nokta ile kısalır, satır
+              // taşmaz (Expanded metin bloğu zaten esner).
+              Flexible(
+                child: TextButton(
+                  onPressed: () => _ctrl.startTimer(
+                      (_ctrl.remainingSeconds.value / 60).ceil() + 5),
+                  child: Text(
+                    l10n.sleepTimerAddFive,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ),
               IconButton(
                 tooltip: l10n.sleepStopAction,
@@ -562,12 +580,18 @@ class _SleepNotificationCard extends StatelessWidget {
                 icon: Icon(Icons.stop_circle, color: cs.error),
               ),
             ] else
-              FilledButton.tonal(
-                onPressed: () => SleepTimerSheet.show(context),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(64, 40),
+              Flexible(
+                child: FilledButton.tonal(
+                  onPressed: () => SleepTimerSheet.show(context),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(64, 40),
+                  ),
+                  child: Text(
+                    l10n.sleepTimer,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                child: Text(l10n.sleepTimer),
               ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/settings/settings_registry.dart';
+import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/equalizer_controller.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
@@ -19,6 +20,7 @@ import 'package:resonance/presentation/ui/pages/settings/playback_settings_page.
 import 'package:resonance/presentation/ui/pages/settings/tags_artwork_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/notifications/notification_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/widget_settings_page.dart';
+import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
 import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
@@ -34,6 +36,12 @@ import 'package:resonance/presentation/ui/widgets/settings_section_header.dart';
 /// Gün 12: grup kartları ortak [SettingsGroupCard] bileşenine devredildi
 /// (eski özel _NavCard silindi); Dil anahtarı l10n alt açıklama aldı ve
 /// SettingsChoiceTile artık SegmentedButton çiziyor.
+///
+/// Gün 14: geniş ekranda (ayalar alanı >= 840 dp — M3 expanded, mevcut
+/// [Responsive] yardımcısı) iki bölmeli ayarlar: solda liste, sağda seçilen
+/// ayrıntı sayfası. Compact yerleşim ve davranış birebir korunur; ayar
+/// alanının KENDİ genişliği ölçülür (LayoutBuilder) — rail/panel alanları
+/// düşüldükten sonraki gerçek yerleşim alanı baz alınır.
 class SettingsHomePage extends StatefulWidget {
   const SettingsHomePage({super.key});
 
@@ -44,10 +52,32 @@ class SettingsHomePage extends StatefulWidget {
 class _SettingsHomePageState extends State<SettingsHomePage> {
   final _searchController = TextEditingController();
 
+  /// Gün 14: geniş ekranda sağ bölmede açık olan hedef (null = yer tutucu).
+  /// Rxn: liste satırlarındaki seçim vurgusu da bu değeri okuduğu için
+  /// değişimde her iki bölme de Obx ile kendiliğinden yeniden çizilir.
+  final _selected = Rxn<_PaneTarget>();
+
+  /// Son build'de hesaplanan iki bölme modu; tap geri çağrılarında kullanılır
+  /// (build bağlamı dışında MediaQuery/LayoutBuilder okunamaz).
+  bool _twoPane = false;
+
+  /// Sol bölme sabit genişlik: 840 dp'de ayrıntıya 840-340-1 ≈ 500 dp kalır.
+  static const double _listPaneWidth = 340;
+
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  /// Gün 14: satır dokunuşu — geniş ekranda sağ bölmeyi değiştirir,
+  /// compact'ta eskisi gibi sayfayı route olarak açar.
+  void _open(_PaneTarget target) {
+    if (_twoPane) {
+      _selected.value = target;
+    } else {
+      Get.to(target.builder);
+    }
   }
 
   @override
@@ -59,7 +89,55 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.tabSettings)),
-      body: Column(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Gün 14: eşik, ayar alanının kendi genişliğinde M3 expanded
+          // kırılımıdır (840 dp). 800x600'lük varsayılan test yüzeyi ve
+          // orta boy telefonlar compact'ta kalır — mevcut davranış korunur.
+          _twoPane = Responsive.fromWidth(constraints.maxWidth) ==
+              WindowSize.expanded;
+          final listPane = _buildListPane(l10n, theme, ctrl, search);
+          if (!_twoPane) return listPane;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(width: _listPaneWidth, child: listPane),
+              const VerticalDivider(width: 1),
+              Expanded(child: _buildDetailPane(l10n)),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Gün 14: sağ bölme — seçim yoksa yer tutucu; seçili hedef sayfası
+  /// kendi Scaffold/AppBar'ıyla bölme içinde çizilir (iç sayfaların Get.to
+  /// ile açtığı alt sayfalar — özel tema düzenleyici, ekolayzer vb. —
+  /// tam ekran route olarak açılmaya devam eder).
+  Widget _buildDetailPane(AppLocalizations l10n) {
+    return Obx(() {
+      final target = _selected.value;
+      if (target == null) {
+        return EmptyState(
+          icon: Icons.tune,
+          title: l10n.settingsPickPrompt,
+        );
+      }
+      return KeyedSubtree(
+        key: ValueKey<String>(target.id),
+        child: target.builder(),
+      );
+    });
+  }
+
+  Widget _buildListPane(
+    AppLocalizations l10n,
+    ThemeData theme,
+    SettingsController ctrl,
+    SettingsSearchController search,
+  ) {
+    return Column(
         children: [
           // --- M3 arama çubuğu (tasarım: yuvarlak, dolgulu) ---
           Padding(
@@ -119,7 +197,12 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                             : null,
                         onTap: e.pageBuilder == null
                             ? null
-                            : () => Get.to(e.pageBuilder!),
+                            : () => _open(
+                                  _PaneTarget(
+                                    id: e.key,
+                                    builder: e.pageBuilder!,
+                                  ),
+                                ),
                       ),
                   ],
                 );
@@ -146,13 +229,21 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                       icon: Icons.play_circle_outline,
                       title: l10n.settingsPlayback,
                       desc: l10n.settingsDescPlayback,
-                      onTap: () => Get.to(() => const PlaybackSettingsPage()),
+                      selected: _selected.value?.id == 'nav_playback',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_playback',
+                        builder: () => const PlaybackSettingsPage(),
+                      )),
                     ),
                     _NavRow(
                       icon: Icons.equalizer,
                       title: l10n.audioSettingsTitle,
                       desc: l10n.settingsDescAudio,
-                      onTap: () => Get.to(() => const AudioSettingsPage()),
+                      selected: _selected.value?.id == 'nav_audio',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_audio',
+                        builder: () => const AudioSettingsPage(),
+                      )),
                     ),
                   ]),
 
@@ -163,27 +254,41 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                       icon: Icons.folder_special,
                       title: l10n.settingsLibrary,
                       desc: l10n.settingsDescLibrary,
-                      onTap: () => Get.to(() => const LibrarySettingsPage()),
+                      selected: _selected.value?.id == 'nav_library',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_library',
+                        builder: () => const LibrarySettingsPage(),
+                      )),
                     ),
                     _NavRow(
                       icon: Icons.image_outlined,
                       title: l10n.tagsArtworkSettings,
                       desc: l10n.settingsDescTags,
-                      onTap: () =>
-                          Get.to(() => const TagsArtworkSettingsPage()),
+                      selected: _selected.value?.id == 'nav_tags',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_tags',
+                        builder: () => const TagsArtworkSettingsPage(),
+                      )),
                     ),
                     _NavRow(
                       icon: Icons.widgets_outlined,
                       title: l10n.widgetSettings,
                       desc: l10n.settingsDescWidget,
-                      onTap: () => Get.to(() => const WidgetSettingsPage()),
+                      selected: _selected.value?.id == 'nav_widget',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_widget',
+                        builder: () => const WidgetSettingsPage(),
+                      )),
                     ),
                     _NavRow(
                       icon: Icons.notifications_outlined,
                       title: l10n.settingsRowNotifications,
                       desc: l10n.settingsDescNotifications,
-                      onTap: () =>
-                          Get.to(() => const NotificationSettingsPage()),
+                      selected: _selected.value?.id == 'nav_notifications',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_notifications',
+                        builder: () => const NotificationSettingsPage(),
+                      )),
                     ),
                   ]),
 
@@ -194,25 +299,41 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                       icon: Icons.palette_outlined,
                       title: l10n.settingsRowAppearance,
                       desc: l10n.settingsDescTheme,
-                      onTap: () => Get.to(() => const ThemeGalleryPage()),
+                      selected: _selected.value?.id == 'nav_appearance',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_appearance',
+                        builder: () => const ThemeGalleryPage(),
+                      )),
                     ),
                     _NavRow(
                       icon: Icons.text_fields,
                       title: l10n.themeFont,
                       desc: l10n.settingsDescFont,
-                      onTap: () => Get.to(() => const FontSettingsPage()),
+                      selected: _selected.value?.id == 'nav_font',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_font',
+                        builder: () => const FontSettingsPage(),
+                      )),
                     ),
                     _NavRow(
                       icon: Icons.music_note,
                       title: l10n.themePlayerTitle,
                       desc: l10n.settingsDescPlayerStyle,
-                      onTap: () => Get.to(() => const PlayerStylePage()),
+                      selected: _selected.value?.id == 'nav_player_style',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_player_style',
+                        builder: () => const PlayerStylePage(),
+                      )),
                     ),
                     _NavRow(
                       icon: Icons.list_alt,
                       title: l10n.themeListTitle,
                       desc: l10n.settingsDescListStyle,
-                      onTap: () => Get.to(() => const ListStylePage()),
+                      selected: _selected.value?.id == 'nav_list_style',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_list_style',
+                        builder: () => const ListStylePage(),
+                      )),
                     ),
                   ]),
 
@@ -223,13 +344,21 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                       icon: Icons.backup,
                       title: l10n.backupTitle,
                       desc: l10n.settingsDescBackup,
-                      onTap: () => Get.to(() => const BackupPage()),
+                      selected: _selected.value?.id == 'nav_backup',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_backup',
+                        builder: () => const BackupPage(),
+                      )),
                     ),
                     _NavRow(
                       icon: Icons.info_outline,
                       title: l10n.settingsAbout,
                       desc: l10n.settingsDescAbout,
-                      onTap: () => Get.to(() => const AboutPage()),
+                      selected: _selected.value?.id == 'nav_about',
+                      onTap: () => _open(_PaneTarget(
+                        id: 'nav_about',
+                        builder: () => const AboutPage(),
+                      )),
                     ),
                   ]),
 
@@ -254,8 +383,7 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
             }),
           ),
         ],
-      ),
-    );
+      );
   }
 
   Widget _entry(
@@ -316,18 +444,23 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
 
 /// Kategori satırı: ikon rozeti + başlık + açıklama + chevron.
 /// (Gün 12: grup yüzeyi ortak SettingsGroupCard'a devredildi.)
+/// Gün 14: [selected] — geniş ekranda sağ bölmede açık sayfanın satırı
+/// secondaryContainer zeminle vurgulanır. Zemin Ink ile MALZEMEYE
+/// çizilir: InkWell mürekkebi (Gün 13 düzeltmesi) hâlâ üstünde görünür.
 class _NavRow extends StatelessWidget {
   const _NavRow({
     required this.icon,
     required this.title,
     required this.desc,
     required this.onTap,
+    this.selected = false,
   });
 
   final IconData icon;
   final String title;
   final String desc;
   final VoidCallback onTap;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -335,9 +468,13 @@ class _NavRow extends StatelessWidget {
     final cs = theme.colorScheme;
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Row(
+      child: Ink(
+        color: selected
+            ? cs.secondaryContainer.withValues(alpha: 0.45)
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Row(
           children: [
             Container(
               width: 40,
@@ -372,6 +509,7 @@ class _NavRow extends StatelessWidget {
             ),
             Icon(Icons.chevron_right, size: 20, color: cs.onSurfaceVariant),
           ],
+        ),
         ),
       ),
     );
@@ -449,3 +587,17 @@ class _EngineStatusCard extends StatelessWidget {
     return l10n.settingsGroupGeneral;
   }
 }
+
+/// Gün 14: iki bölmeli yerleşimde sağ bölmeye konacak hedef. [id] hem
+/// ValueKey hem seçim vurgusu karşılaştırmasıdır (nav_… önekli sabit kimlik
+/// veya arama sonucunda registry anahtarı); [builder], registry'nin
+/// pageBuilder'ıyla aynı tiptedir (Widget Function()) — compact modda
+/// Get.to'nun, geniş ekranda KeyedSubtree çocuğunun doğrudan girdisidir.
+@immutable
+class _PaneTarget {
+  const _PaneTarget({required this.id, required this.builder});
+
+  final String id;
+  final Widget Function() builder;
+}
+

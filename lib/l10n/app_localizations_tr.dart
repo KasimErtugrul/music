@@ -476,6 +476,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsSearchHint => 'Ayarlarda ara';
 
   @override
+  String get settingsPickPrompt => 'Soldan bir ayar seçin';
+
+  @override
   String get settingsAbout => 'Hakkında';
 
   @override
