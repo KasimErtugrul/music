@@ -302,6 +302,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get playlistEmpty => 'Bu playlist boş';
 
   @override
+  String get removeFromPlaylist => 'Bu listeden çıkar';
+
+  @override
   String get queueTitle => 'Kuyruk';
 
   @override

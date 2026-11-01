@@ -304,6 +304,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playlistEmpty => 'This playlist is empty';
 
   @override
+  String get removeFromPlaylist => 'Remove from this playlist';
+
+  @override
   String get queueTitle => 'Queue';
 
   @override

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/utils/share_helper.dart';
@@ -5,16 +6,29 @@ import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/playlist_controller.dart';
 import 'package:resonance/presentation/controllers/vault_controller.dart'; // YENİ (Gün 17)
 import 'package:resonance/presentation/ui/pages/tag_viewer_page.dart';
 import 'package:resonance/presentation/ui/widgets/playlist_picker_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/song_info_sheet.dart';
 
 class SongOptionsSheet extends StatelessWidget {
-  const SongOptionsSheet({super.key, required this.song});
+  const SongOptionsSheet({
+    super.key,
+    required this.song,
+    this.playlistId,
+  });
   final SongModel song;
 
-  static Future<void> show(BuildContext context, SongModel song) {
+  /// Gün 19: playlist detayından açıldığında dolu gelir; diğer tüm
+  /// çağrı noktalarında null kalır ve menü değişmez (davranış korunur).
+  final int? playlistId;
+
+  static Future<void> show(
+    BuildContext context,
+    SongModel song, {
+    int? playlistId,
+  }) {
     return showModalBottomSheet<void>(
       context: context,
       // Gün 17.6 taşma düzeltmesi: menü 9 satıra büyüdü («Kasaya ekle»);
@@ -22,7 +36,7 @@ class SongOptionsSheet extends StatelessWidget {
       // sayfaya tam yükseklik hakkı verilir; yine de sığmazsa aşağıdaki
       // kaydırılabilir sarmalayıcı devreye girer.
       isScrollControlled: true,
-      builder: (_) => SongOptionsSheet(song: song),
+      builder: (_) => SongOptionsSheet(song: song, playlistId: playlistId),
     );
   }
 
@@ -108,6 +122,26 @@ class SongOptionsSheet extends StatelessWidget {
                 SongInfoSheet.show(context, song);
               },
             ),
+            // Gün 19: playlist bağlamından açıldıysa «listeden çıkar».
+            // Kuyruğa dokunmaz: çalan parça listeden silinse de kuyruk
+            // anlık kopya olduğu için çalmaya devam eder. Yıkıcı eylem
+            // olduğu için hata rengiyle, kasa eyleminin hemen üstünde.
+            if (playlistId != null)
+              ListTile(
+                leading: Icon(
+                  Icons.playlist_remove,
+                  color: theme.colorScheme.error,
+                ),
+                title: Text(
+                  l10n.removeFromPlaylist,
+                  style: TextStyle(color: theme.colorScheme.error),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Get.find<PlaylistController>()
+                      .removeSong(playlistId!, song.id);
+                },
+              ),
             // Gün 17 (Kasa): yıkıcı eylem en sonda, hata rengiyle. Şarkı
             // kütüphaneden/aramadan/çalmadan tamamen çekilir; dosyaya
             // dokunulmaz.

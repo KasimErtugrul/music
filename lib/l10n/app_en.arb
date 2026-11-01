@@ -91,6 +91,7 @@
   "noPlaylists": "No playlists yet",
   "noPlaylistsMessage": "Tap + to create your first playlist.",
   "playlistEmpty": "This playlist is empty",
+  "removeFromPlaylist": "Remove from this playlist",
   "queueTitle": "Queue",
   "playNext": "Play next",
   "addToQueue": "Add to queue",

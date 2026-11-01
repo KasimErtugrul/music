@@ -1,3 +1,4 @@
+
 import 'package:drift/drift.dart';
 import 'package:resonance/data/datasources/local/app_database.dart';
 import 'package:resonance/data/datasources/local/tables/playlist_songs_table.dart';
@@ -54,19 +55,28 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<void> addSong(int playlistId, SongModel song) async {
+    // Gün 19: aynı playlistte aynı şarkının kopyası yasak. Tablo sınıfı
+    // uniqueKeys ile bunu İFADE eder ama üretilmiş şemaya bu kısıt ancak
+    // build_runner + göçle (schemaVersion) taşınır; mevcut kurulumlarda
+    // SQLite düzeyinde zorlanmadığı için bütünlüğü DAO katmanında
+    // savunuyoruz. UI zaten isSongInPlaylist ile engeller; bu satır o
+    // kapıyı aşan her yolu (yedek geri yükleme, gelecekteki çağrıcılar)
+    // yüksek sesle patlatır — sessiz kopya biriktirmez.
+    if (await isSongInPlaylist(playlistId, song.id)) {
+      throw StateError(
+        'Song ${song.id} is already in playlist $playlistId',
+      );
+    }
+
+    final maxPos = await (selectOnly(playlistSongs)
+          ..addColumns([playlistSongs.position.max()])
+          ..where(playlistSongs.playlistId.equals(playlistId)))
+        .map((row) => row.read(playlistSongs.position.max()))
+        .getSingleOrNull();
+
+    final next = (maxPos ?? -1) + 1;
+
     await transaction(() async {
-      // maxPos okuması transaction İÇİNDE: eşzamanlı iki ekleme aynı
-      // pozisyonu almaz.
-      final maxPos = await (selectOnly(playlistSongs)
-            ..addColumns([playlistSongs.position.max()])
-            ..where(playlistSongs.playlistId.equals(playlistId)))
-          .map((row) => row.read(playlistSongs.position.max()))
-          .getSingleOrNull();
-
-      final next = (maxPos ?? -1) + 1;
-
-      // insertOrIgnore: aynı şarkı listede zaten varsa UNIQUE ihlali
-      // fırlatmaz, sessizce yok sayılır.
       await into(playlistSongs).insert(
         PlaylistSongsCompanion.insert(
           playlistId: playlistId,
@@ -77,7 +87,6 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase>
           artist: Value(song.artist),
           durationMs: Value(song.durationMs),
         ),
-        mode: InsertMode.insertOrIgnore,
       );
       await (update(playlists)..where((t) => t.id.equals(playlistId))).write(
         PlaylistsCompanion(updatedAt: Value(DateTime.now())),

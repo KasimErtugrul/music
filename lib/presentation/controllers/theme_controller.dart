@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -44,18 +45,28 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
     });
   }
 
-  // GetX denetleyici yaşam döngüsü onClose'dur; dispose() çağrılmaz.
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _scheduledTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Gün 19: GetX silmede (delete/reset) yalnız onClose koşar; dispose()
+  /// çağrılmaz. Zamanlayıcı sızmasın diye iptal burada da yapılır.
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _scheduledTimer?.cancel();
     _playerSub?.cancel();
+
     super.onClose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && settings.value.themeMode == ThemeMode.system) {
+    if (state == AppLifecycleState.resumed &&
+        settings.value.themeMode == ThemeMode.system) {
       _applyThemeIfChanged();
     }
   }
@@ -131,70 +142,72 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
       // flutter/material ColorScheme'ine köprü (yukarıdaki 2. not).
       // fromSeed, yeni rol adlarını (surfaceContainer* vb.) doldurur;
       // copyWith, OS'tan gelen gerçek dinamik palet rollerini ezer.
-      _lightArtworkScheme = ColorScheme.fromSeed(
-        seedColor: muLight.primary,
-        brightness: Brightness.light,
-      ).copyWith(
-        primary: muLight.primary,
-        onPrimary: muLight.onPrimary,
-        primaryContainer: muLight.primaryContainer,
-        onPrimaryContainer: muLight.onPrimaryContainer,
-        secondary: muLight.secondary,
-        onSecondary: muLight.onSecondary,
-        secondaryContainer: muLight.secondaryContainer,
-        onSecondaryContainer: muLight.onSecondaryContainer,
-        tertiary: muLight.tertiary,
-        onTertiary: muLight.onTertiary,
-        tertiaryContainer: muLight.tertiaryContainer,
-        onTertiaryContainer: muLight.onTertiaryContainer,
-        error: muLight.error,
-        onError: muLight.onError,
-        errorContainer: muLight.errorContainer,
-        onErrorContainer: muLight.onErrorContainer,
-        surface: muLight.surface,
-        onSurface: muLight.onSurface,
-        onSurfaceVariant: muLight.onSurfaceVariant,
-        outline: muLight.outline,
-        outlineVariant: muLight.outlineVariant,
-        shadow: muLight.shadow,
-        scrim: muLight.scrim,
-        inverseSurface: muLight.inverseSurface,
-        onInverseSurface: muLight.onInverseSurface,
-        inversePrimary: muLight.inversePrimary,
-        surfaceTint: muLight.surfaceTint,
-      );
-      _darkArtworkScheme = ColorScheme.fromSeed(
-        seedColor: muDark.primary,
-        brightness: Brightness.dark,
-      ).copyWith(
-        primary: muDark.primary,
-        onPrimary: muDark.onPrimary,
-        primaryContainer: muDark.primaryContainer,
-        onPrimaryContainer: muDark.onPrimaryContainer,
-        secondary: muDark.secondary,
-        onSecondary: muDark.onSecondary,
-        secondaryContainer: muDark.secondaryContainer,
-        onSecondaryContainer: muDark.onSecondaryContainer,
-        tertiary: muDark.tertiary,
-        onTertiary: muDark.onTertiary,
-        tertiaryContainer: muDark.tertiaryContainer,
-        onTertiaryContainer: muDark.onTertiaryContainer,
-        error: muDark.error,
-        onError: muDark.onError,
-        errorContainer: muDark.errorContainer,
-        onErrorContainer: muDark.onErrorContainer,
-        surface: muDark.surface,
-        onSurface: muDark.onSurface,
-        onSurfaceVariant: muDark.onSurfaceVariant,
-        outline: muDark.outline,
-        outlineVariant: muDark.outlineVariant,
-        shadow: muDark.shadow,
-        scrim: muDark.scrim,
-        inverseSurface: muDark.inverseSurface,
-        onInverseSurface: muDark.onInverseSurface,
-        inversePrimary: muDark.inversePrimary,
-        surfaceTint: muDark.surfaceTint,
-      );
+      _lightArtworkScheme =
+          ColorScheme.fromSeed(
+            seedColor: muLight.primary,
+            brightness: Brightness.light,
+          ).copyWith(
+            primary: muLight.primary,
+            onPrimary: muLight.onPrimary,
+            primaryContainer: muLight.primaryContainer,
+            onPrimaryContainer: muLight.onPrimaryContainer,
+            secondary: muLight.secondary,
+            onSecondary: muLight.onSecondary,
+            secondaryContainer: muLight.secondaryContainer,
+            onSecondaryContainer: muLight.onSecondaryContainer,
+            tertiary: muLight.tertiary,
+            onTertiary: muLight.onTertiary,
+            tertiaryContainer: muLight.tertiaryContainer,
+            onTertiaryContainer: muLight.onTertiaryContainer,
+            error: muLight.error,
+            onError: muLight.onError,
+            errorContainer: muLight.errorContainer,
+            onErrorContainer: muLight.onErrorContainer,
+            surface: muLight.surface,
+            onSurface: muLight.onSurface,
+            onSurfaceVariant: muLight.onSurfaceVariant,
+            outline: muLight.outline,
+            outlineVariant: muLight.outlineVariant,
+            shadow: muLight.shadow,
+            scrim: muLight.scrim,
+            inverseSurface: muLight.inverseSurface,
+            onInverseSurface: muLight.onInverseSurface,
+            inversePrimary: muLight.inversePrimary,
+            surfaceTint: muLight.surfaceTint,
+          );
+      _darkArtworkScheme =
+          ColorScheme.fromSeed(
+            seedColor: muDark.primary,
+            brightness: Brightness.dark,
+          ).copyWith(
+            primary: muDark.primary,
+            onPrimary: muDark.onPrimary,
+            primaryContainer: muDark.primaryContainer,
+            onPrimaryContainer: muDark.onPrimaryContainer,
+            secondary: muDark.secondary,
+            onSecondary: muDark.onSecondary,
+            secondaryContainer: muDark.secondaryContainer,
+            onSecondaryContainer: muDark.onSecondaryContainer,
+            tertiary: muDark.tertiary,
+            onTertiary: muDark.onTertiary,
+            tertiaryContainer: muDark.tertiaryContainer,
+            onTertiaryContainer: muDark.onTertiaryContainer,
+            error: muDark.error,
+            onError: muDark.onError,
+            errorContainer: muDark.errorContainer,
+            onErrorContainer: muDark.onErrorContainer,
+            surface: muDark.surface,
+            onSurface: muDark.onSurface,
+            onSurfaceVariant: muDark.onSurfaceVariant,
+            outline: muDark.outline,
+            outlineVariant: muDark.outlineVariant,
+            shadow: muDark.shadow,
+            scrim: muDark.scrim,
+            inverseSurface: muDark.inverseSurface,
+            onInverseSurface: muDark.onInverseSurface,
+            inversePrimary: muDark.inversePrimary,
+            surfaceTint: muDark.surfaceTint,
+          );
       _applyThemeIfChanged(force: true);
     } on Object {
       // Paket/Platform hatası: seed'te kal, arayüzü bozma.
@@ -209,10 +222,16 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
 
     final bytes = await _libraryRepo.artwork(songId);
     if (bytes != null) {
-      final baseScheme = await DynamicThemeService.fromArtwork(bytes, brightness: Brightness.light);
+      final baseScheme = await DynamicThemeService.fromArtwork(
+        bytes,
+        brightness: Brightness.light,
+      );
       if (baseScheme != null) {
         _lightArtworkScheme = baseScheme;
-        _darkArtworkScheme = ColorScheme.fromSeed(seedColor: baseScheme.primary, brightness: Brightness.dark);
+        _darkArtworkScheme = ColorScheme.fromSeed(
+          seedColor: baseScheme.primary,
+          brightness: Brightness.dark,
+        );
         _applyThemeIfChanged(force: true);
       }
     }
@@ -231,7 +250,9 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
 
     if (sourceChanged) {
       if (next.themeSource == 'artwork') {
-        _updateArtworkTheme(_lastMediaItem); // Hata veren Get.find kaldırıldı, son item kullanılıyor
+        _updateArtworkTheme(
+          _lastMediaItem,
+        ); // Hata veren Get.find kaldırıldı, son item kullanılıyor
       } else if (next.themeSource == 'system') {
         // Görev 3.1: sistem paleti kanalı (Material You).
         _loadSystemScheme();
@@ -251,8 +272,10 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  ThemeData lightTheme() => ThemeEngine.light(settings.value, dynamicScheme: _lightArtworkScheme);
-  ThemeData darkTheme() => ThemeEngine.dark(settings.value, dynamicScheme: _darkArtworkScheme);
+  ThemeData lightTheme() =>
+      ThemeEngine.light(settings.value, dynamicScheme: _lightArtworkScheme);
+  ThemeData darkTheme() =>
+      ThemeEngine.dark(settings.value, dynamicScheme: _darkArtworkScheme);
 
   ThemeMode get themeMode => _computeThemeMode();
 
@@ -269,8 +292,14 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
 
   bool _isScheduledTime() {
     final now = TimeOfDay.now();
-    final start = TimeOfDay(hour: settings.value.scheduledDarkStartHour, minute: settings.value.scheduledDarkStartMinute);
-    final end = TimeOfDay(hour: settings.value.scheduledDarkEndHour, minute: settings.value.scheduledDarkEndMinute);
+    final start = TimeOfDay(
+      hour: settings.value.scheduledDarkStartHour,
+      minute: settings.value.scheduledDarkStartMinute,
+    );
+    final end = TimeOfDay(
+      hour: settings.value.scheduledDarkEndHour,
+      minute: settings.value.scheduledDarkEndMinute,
+    );
     final nowMins = now.hour * 60 + now.minute;
     final startMins = start.hour * 60 + start.minute;
     final endMins = end.hour * 60 + end.minute;
@@ -279,18 +308,27 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
   }
 
   void setSettings(ThemeSettings s) => _update(s);
-  void setMode(ThemeMode mode) => _update(settings.value.copyWith(themeMode: mode));
-  void setThemeSource(String source) => _update(settings.value.copyWith(themeSource: source));
-  void setSeed(Color color) => _update(settings.value.copyWith(seedColor: color));
+  void setMode(ThemeMode mode) =>
+      _update(settings.value.copyWith(themeMode: mode));
+  void setThemeSource(String source) =>
+      _update(settings.value.copyWith(themeSource: source));
+  void setSeed(Color color) =>
+      _update(settings.value.copyWith(seedColor: color));
   void setAmoled(bool v) => _update(settings.value.copyWith(amoled: v));
-  void setHighContrast(bool v) => _update(settings.value.copyWith(highContrast: v));
-  void setSurfaceTint(bool v) => _update(settings.value.copyWith(surfaceTint: v));
-  void setRoundedCorners(bool v) => _update(settings.value.copyWith(roundedCorners: v));
-  void setDensity(VisualDensity d) => _update(settings.value.copyWith(density: d));
+  void setHighContrast(bool v) =>
+      _update(settings.value.copyWith(highContrast: v));
+  void setSurfaceTint(bool v) =>
+      _update(settings.value.copyWith(surfaceTint: v));
+  void setRoundedCorners(bool v) =>
+      _update(settings.value.copyWith(roundedCorners: v));
+  void setDensity(VisualDensity d) =>
+      _update(settings.value.copyWith(density: d));
   void setFont(String f) => _update(settings.value.copyWith(fontFamily: f));
   void setTextScale(double s) => _update(settings.value.copyWith(textScale: s));
-  void setPlayer(PlayerThemeExtension p) => _update(settings.value.copyWith(player: p));
-  void setListViewMode(String m) => _update(settings.value.copyWith(listViewMode: m));
+  void setPlayer(PlayerThemeExtension p) =>
+      _update(settings.value.copyWith(player: p));
+  void setListViewMode(String m) =>
+      _update(settings.value.copyWith(listViewMode: m));
 
   /// Gün 3 (Karar): zamanlanmış koyu mod anahtarı.
   void setScheduledDarkEnabled(bool v) =>
@@ -301,14 +339,16 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
   /// density). Mod, kaynak, yazı tipi, yazı ölçeği, oynatıcı stili, liste
   /// görünümü ve zamanlama saatleri kullanıcının kendi tercihleri olarak
   /// korunur.
-  void applyCustomTheme(ThemeSettings custom) => _update(settings.value.copyWith(
-        seedColor: custom.seedColor,
-        amoled: custom.amoled,
-        highContrast: custom.highContrast,
-        surfaceTint: custom.surfaceTint,
-        roundedCorners: custom.roundedCorners,
-        density: custom.density,
-      ));
+  void applyCustomTheme(ThemeSettings custom) => _update(
+    settings.value.copyWith(
+      seedColor: custom.seedColor,
+      amoled: custom.amoled,
+      highContrast: custom.highContrast,
+      surfaceTint: custom.surfaceTint,
+      roundedCorners: custom.roundedCorners,
+      density: custom.density,
+    ),
+  );
 
   /// Gün 3: yazı ölçeği sürükleme önizlemesi. Rx'i günceller ve uygulamayı
   /// yeniden çizer (mevcut yeniden çizim mekanizması: zorunlu mod uygulaması)
@@ -322,9 +362,12 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
   /// Gün 3: sürükleme bırakıldığında önizlenen ölçeği diske yazar.
   Future<void> commitTextScale() => _repo.saveActiveTheme(settings.value);
 
-  void setScheduledDark(int startH, int startM, int endH, int endM) =>
-      _update(settings.value.copyWith(
-        scheduledDarkStartHour: startH, scheduledDarkStartMinute: startM,
-        scheduledDarkEndHour: endH, scheduledDarkEndMinute: endM,
-      ));
+  void setScheduledDark(int startH, int startM, int endH, int endM) => _update(
+    settings.value.copyWith(
+      scheduledDarkStartHour: startH,
+      scheduledDarkStartMinute: startM,
+      scheduledDarkEndHour: endH,
+      scheduledDarkEndMinute: endM,
+    ),
+  );
 }

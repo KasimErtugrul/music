@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/utils/duration_extensions.dart';
@@ -16,6 +17,7 @@ class SongTile extends StatelessWidget {
     this.onTap,
     this.trailing,
     this.height = 72,
+    this.playlistId,
   });
 
   final SongModel song;
@@ -23,6 +25,11 @@ class SongTile extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? trailing;
   final double height;
+
+  /// Gün 19: satır bir playlist detayındaysa seçenekler sayfası
+  /// «Bu listeden çıkar» eylemini de gösterir; null ise menü kümesine
+  /// dokunulmaz (kütüphane, arama, kuyruk vb. davranış değişmez).
+  final int? playlistId;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +64,8 @@ class SongTile extends StatelessWidget {
                 player.playSong(song, queue: queueContext);
               }
             },
-            onLongPress: () => SongOptionsSheet.show(context, song),
+            onLongPress: () =>
+                SongOptionsSheet.show(context, song, playlistId: playlistId),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
@@ -167,7 +175,11 @@ class SongTile extends StatelessWidget {
                       ),
                       IconButton(
                         icon: const Icon(Icons.more_vert, size: 20),
-                        onPressed: () => SongOptionsSheet.show(context, song),
+                        onPressed: () => SongOptionsSheet.show(
+                          context,
+                          song,
+                          playlistId: playlistId,
+                        ),
                       ),
                     ],
                   ),

@@ -614,6 +614,12 @@ abstract class AppLocalizations {
   /// **'This playlist is empty'**
   String get playlistEmpty;
 
+  /// No description provided for @removeFromPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from this playlist'**
+  String get removeFromPlaylist;
+
   /// No description provided for @queueTitle.
   ///
   /// In en, this message translates to:

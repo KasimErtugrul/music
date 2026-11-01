@@ -1,7 +1,9 @@
+
 import 'package:get/get.dart';
 import 'package:resonance/data/models/playlist_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/playlist_repository.dart';
+import 'package:resonance/presentation/controllers/player_controller.dart';
 
 class PlaylistController extends GetxController {
   PlaylistController(this._repo);
@@ -77,6 +79,38 @@ class PlaylistController extends GetxController {
   /// tazelenir), hatada yerel durum DB'deki eski sıraya geri sarılır.
   /// Repo hatası bugünkü gibi yukarı fırlar (davranış korunur); geri
   /// sarma finally'de yapıldığı için hata yutulmaz.
+  ///
+  /// Gün 19: playlist'i LİSTE olarak çal — kuyruk playlist'in tamamıdır.
+  ///
+  /// Hata kaydı: detay sayfası salt bir düzenleyiciydi (satırlarda onTap
+  /// yoktu, sayfada çal/karıştır düğmesi yoktu); oluşturulan playlist
+  /// hiçbir yoldan liste olarak çalınamıyordu. Akıllı listelerdeki
+  /// (SongTile queueContext) davranışın aynısı artık normal playlistlere
+  /// de uygulanır; tek kaynak burası — detay sayfasındaki eylem kümesi
+  /// de listeler sayfasındaki hızlı çal düğmesi de bu metodu çağırır.
+  ///
+  /// [shuffled] true ise karıştırma KAPALIYSA açılır ve rastgele bir
+  /// parçayla başlanır (albüm/sanatçı detayındaki «Tümünü Karıştır»
+  /// davranışının birebir aynısı). Zaten açıksa toggle çağrılmaz —
+  /// kullanıcının mevcut modu korunur.
+  ///
+  /// Dönen değer: çalma başladıysa true. Boş playlistte hiçbir oynatıcı
+  /// çağrısı yapılmaz ve false döner (kuyruk dokunulmaz). Şarkılar repo
+  /// üzerinden taze çözümlenir (ID→path yeniden bağlama dahil); sayfada
+  /// yüklenmiş kopyaya güvenilmez.
+  Future<bool> playPlaylist(int id, {bool shuffled = false}) async {
+    final songs = await _repo.getSongs(id);
+    if (songs.isEmpty) return false;
+    final player = Get.find<PlayerController>();
+    if (shuffled && !player.shuffleEnabled.value) {
+      await player.toggleShuffle();
+    }
+    final first = shuffled
+        ? songs[DateTime.now().millisecond % songs.length]
+        : songs.first;
+    return player.playSong(first, queue: songs);
+  }
+
   Future<void> reorderSongs(int playlistId, int oldIndex, int newIndex) async {
     if (newIndex > oldIndex) newIndex -= 1;
     final song = currentSongs.removeAt(oldIndex);

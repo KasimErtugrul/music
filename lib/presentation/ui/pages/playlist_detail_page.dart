@@ -1,9 +1,10 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/playlist_controller.dart';
-import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
+import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 
 class PlaylistDetailPage extends StatefulWidget {
   const PlaylistDetailPage({super.key});
@@ -40,22 +41,56 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         if (controller.currentSongs.isEmpty) {
           return EmptyState(icon: Icons.music_note, title: l10n.playlistEmpty);
         }
-        return ReorderableListView.builder(
-          itemCount: controller.currentSongs.length,
-          onReorder: (o, n) => controller.reorderSongs(_playlistId, o, n),
-          itemBuilder: (context, i) {
-            final song = controller.currentSongs[i];
-            return ListTile(
-              key: ValueKey(song.id),
-              leading: ArtworkImage(songId: song.id, size: 48),
-              title: Text(song.title),
-              subtitle: Text(song.artist ?? l10n.unknownArtist),
-              trailing: IconButton(
-                icon: const Icon(Icons.remove_circle_outline),
-                onPressed: () => controller.removeSong(_playlistId, song.id),
+        // Gün 19: sayfa artık salt bir düzenleyici değil — albüm/sanatçı
+        // detayındaki eylem kümesiyle LİSTE olarak çalınıyor.
+        return Column(
+          children: [
+            _ActionCluster(
+              playlistId: _playlistId,
+              controller: controller,
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: ReorderableListView.builder(
+                // Varsayılan uzun-bas tutamacı, SongTile'ın uzun-bas
+                // seçenekler menüsüyle aynı hareketi paylaşır ve çekişme
+                // belirsizdir (parmak kıpırdarsa sürükleme, durursa menü —
+                // güvensiz). Ayrı tutamacı görünür kılarız: sürükleme
+                // yalnız tutamaçtan, uzun bas her satırda menü açar.
+                buildDefaultDragHandles: false,
+                itemCount: controller.currentSongs.length,
+                onReorder: (o, n) => controller.reorderSongs(_playlistId, o, n),
+                itemBuilder: (context, i) {
+                  final song = controller.currentSongs[i];
+                  return Row(
+                    key: ValueKey(song.id),
+                    children: [
+                      Expanded(
+                        // queueContext: playlistin TAMAMI — dokunulan
+                        // parçadan itibaren kuyruk playlist sırasıyla
+                        // kurulur (akıllı listelerdeki sözleşme).
+                        child: SongTile(
+                          song: song,
+                          queueContext: controller.currentSongs.toList(),
+                          playlistId: _playlistId,
+                        ),
+                      ),
+                      ReorderableDragStartListener(
+                        index: i,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 25,
+                          ),
+                          child: Icon(Icons.drag_handle, size: 22),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         );
       }),
     );
@@ -78,5 +113,54 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
       await controller.deletePlaylist(_playlistId);
       Get.back();
     }
+  }
+}
+
+/// Gün 19: albüm/sanatçı detay sayfalarındaki eylem kümesinin playlist
+/// sürümü. Görsel ve davranışsal sözleşme aynı: «Sırayla Çal» kuyruğu
+/// playlist sırasıyla kurar; «Tümünü Karıştır» karıştırmayı açar ve
+/// rastgele bir parçayla başlar. Çalma mantığı PlaylistController'da
+/// (playPlaylist) — listeler sayfasındaki hızlı çal düğmesi de aynı
+/// kaynağı kullanır.
+class _ActionCluster extends StatelessWidget {
+  const _ActionCluster({
+    required this.playlistId,
+    required this.controller,
+  });
+  final int playlistId;
+  final PlaylistController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: FilledButton.icon(
+              onPressed: () => controller.playPlaylist(playlistId),
+              icon: const Icon(Icons.play_arrow, size: 22),
+              label: Text(l10n.playInOrder),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: FilledButton.tonalIcon(
+              onPressed: () =>
+                  controller.playPlaylist(playlistId, shuffled: true),
+              icon: const Icon(Icons.shuffle, size: 20),
+              label: Text(l10n.shuffleAll),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

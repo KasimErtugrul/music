@@ -284,6 +284,16 @@ void main() {
     themeCtrl = ThemeController(themeRepo, playerStream.stream, libRepo);
     Get.put(themeCtrl);
     themeCtrlNeedsDispose = true;
+    // Gün 19 düzeltmesi: flutter_test'in addTearDown'u, package:test'in
+    // tearDown'undan FARKLI olarak taşma-invaryant denetiminden ÖNCE
+    // koşar. Dakikalık periyodik zamanlayıcı bu pencerede iptal edilmezse
+    // «Timer is still pending» kaçak denetimi testi patlatır.
+    addTearDown(() {
+      if (themeCtrlNeedsDispose) {
+        themeCtrlNeedsDispose = false;
+        themeCtrl.dispose();
+      }
+    });
     Get.put<CustomThemeRepository>(_MockCustomThemeRepository());
     when(() => Get.find<CustomThemeRepository>().watchAll())
         .thenAnswer((_) => const Stream<List<CustomThemeModel>>.empty());

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/routes/app_routes.dart';
@@ -57,7 +58,21 @@ class PlaylistsPage extends GetView<PlaylistController> {
                     title: Text(p.name),
                     // TODO düzeltildi: ARB çoğul anahtarına bağlandı.
                     subtitle: Text(l10n.songCount(p.songCount)),
-                    trailing: const Icon(Icons.chevron_right),
+                    // Gün 19: hızlı çal — detay sayfasına girmeden liste
+                    // çalınır (playPlaylist tek kaynaktır). Boş listede
+                    // düğme gizlenir; girilen detayda boş durumu gösterilir.
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (p.songCount > 0)
+                          IconButton(
+                            icon: const Icon(Icons.play_arrow),
+                            tooltip: l10n.playInOrder,
+                            onPressed: () => controller.playPlaylist(p.id),
+                          ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
                     onTap: () => Get.toNamed(AppRoutes.playlistDetail, arguments: p.id),
                   );
                 },

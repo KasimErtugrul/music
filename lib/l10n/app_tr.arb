@@ -86,6 +86,7 @@
   "noPlaylists": "Henüz playlist yok",
   "noPlaylistsMessage": "İlk listenizi oluşturmak için + butonuna dokunun.",
   "playlistEmpty": "Bu playlist boş",
+  "removeFromPlaylist": "Bu listeden çıkar",
   "queueTitle": "Kuyruk",
   "playNext": "Sonra çal",
   "addToQueue": "Kuyruğa ekle",
