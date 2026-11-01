@@ -7,6 +7,7 @@ import 'package:resonance/presentation/ui/pages/artists_page.dart';
 import 'package:resonance/presentation/ui/pages/folders_page.dart';
 import 'package:resonance/presentation/ui/pages/genres_page.dart';
 import 'package:resonance/presentation/ui/pages/songs_page.dart';
+import 'package:resonance/presentation/ui/widgets/library_tab_pills.dart';
 
 class LibraryTabsPage extends StatefulWidget {
   const LibraryTabsPage({super.key});
@@ -117,18 +118,13 @@ class _LibraryTabsPageState extends State<LibraryTabsPage>
                     : null,
               ),
               // 2. Custom Pill TabBar
+              // Gün 17.8: sayaçlar LibraryTabPills içinde Obx ile okunur;
+              // yükleme bitince rozetler kendiliğinden güncellenir.
               SizedBox(
                 height: 48,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    _buildTab(0, l10n.libraryTabSongs, Icons.music_note, libCtrl.songs.length),
-                    _buildTab(1, l10n.libraryTabAlbums, Icons.album, libCtrl.albums.length),
-                    _buildTab(2, l10n.libraryTabArtists, Icons.person, libCtrl.artists.length),
-                    _buildTab(3, l10n.libraryTabGenres, Icons.category, libCtrl.genres.length),
-                    _buildTab(4, l10n.libraryTabFolders, Icons.folder, libCtrl.folders.length),
-                  ],
+                child: LibraryTabPills(
+                  controller: libCtrl,
+                  tabController: _tabController,
                 ),
               ),
               const SizedBox(height: 8),
@@ -145,60 +141,6 @@ class _LibraryTabsPageState extends State<LibraryTabsPage>
           GenresPage(),
           FoldersPage(),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTab(int index, String label, IconData icon, int count) {
-    final isSelected = _tabController.index == index;
-    final theme = Theme.of(context);
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _tabController.animateTo(index);
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? theme.colorScheme.secondaryContainer
-              : theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected
-                  ? theme.colorScheme.onSecondaryContainer
-                  : theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: theme.textTheme.labelMedium?.copyWith(
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected
-                    ? theme.colorScheme.onSecondaryContainer
-                    : theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              '$count',
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontFamily: 'monospace',
-                color: isSelected
-                    ? theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.7)
-                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
