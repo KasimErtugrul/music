@@ -206,9 +206,11 @@ class InitialBinding extends Bindings {
       HistoryController(Get.find<HistoryRepository>()),
       permanent: true,
     );
-    Get.put<StatsController>(
-      StatsController(Get.find<StatsRepository>()),
-      permanent: true,
+    // lazyPut: istatistik sayfası açılana kadar loadStats() koşmaz
+    // (önceden her uygulama açılışında çalışıyordu).
+    Get.lazyPut<StatsController>(
+      () => StatsController(Get.find<StatsRepository>()),
+      fenix: true,
     );
     Get.put<EqualizerController>(
       EqualizerController(Get.find<EqualizerRepository>()),
@@ -262,7 +264,14 @@ class InitialBinding extends Bindings {
       ),
       permanent: true,
     );
-Get.put<BackupDatasource>(BackupDatasource(Get.find<AppDatabase>(), Get.find<SharedPreferences>()), permanent: true);
+Get.put<BackupDatasource>(
+      BackupDatasource(
+        Get.find<AppDatabase>(),
+        Get.find<SharedPreferences>(),
+        songsLoader: () => Get.find<LibraryRepository>().songs(),
+      ),
+      permanent: true,
+    );
     Get.put<BackupRepository>(BackupRepositoryImpl(Get.find<BackupDatasource>()), permanent: true);
     Get.put<BackupController>(BackupController(Get.find<BackupRepository>(), Get.find<LibraryRepository>()), permanent: true);
 

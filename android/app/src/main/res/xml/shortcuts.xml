@@ -7,8 +7,8 @@
         android:shortcutShortLabel="@string/shortcut_add_widget_short"
         android:shortcutLongLabel="@string/shortcut_add_widget_long">
         <intent
-            android:action="com.example.resonance.ADD_WIDGET"
-            android:targetPackage="com.example.resonance"
-            android:targetClass="com.example.resonance.widget.WidgetPinActivity" />
+            android:action="com.developfly.resonance.ADD_WIDGET"
+            android:targetPackage="com.developfly.resonance"
+            android:targetClass="com.developfly.resonance.widget.WidgetPinActivity" />
     </shortcut>
 </shortcuts>

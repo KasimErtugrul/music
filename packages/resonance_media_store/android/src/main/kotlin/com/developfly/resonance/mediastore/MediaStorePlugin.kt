@@ -1,4 +1,4 @@
-package com.example.resonance.mediastore
+package com.developfly.resonance.mediastore
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 

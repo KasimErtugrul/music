@@ -54,15 +54,19 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<void> addSong(int playlistId, SongModel song) async {
-    final maxPos = await (selectOnly(playlistSongs)
-          ..addColumns([playlistSongs.position.max()])
-          ..where(playlistSongs.playlistId.equals(playlistId)))
-        .map((row) => row.read(playlistSongs.position.max()))
-        .getSingleOrNull();
-
-    final next = (maxPos ?? -1) + 1;
-
     await transaction(() async {
+      // maxPos okuması transaction İÇİNDE: eşzamanlı iki ekleme aynı
+      // pozisyonu almaz.
+      final maxPos = await (selectOnly(playlistSongs)
+            ..addColumns([playlistSongs.position.max()])
+            ..where(playlistSongs.playlistId.equals(playlistId)))
+          .map((row) => row.read(playlistSongs.position.max()))
+          .getSingleOrNull();
+
+      final next = (maxPos ?? -1) + 1;
+
+      // insertOrIgnore: aynı şarkı listede zaten varsa UNIQUE ihlali
+      // fırlatmaz, sessizce yok sayılır.
       await into(playlistSongs).insert(
         PlaylistSongsCompanion.insert(
           playlistId: playlistId,
@@ -73,6 +77,7 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase>
           artist: Value(song.artist),
           durationMs: Value(song.durationMs),
         ),
+        mode: InsertMode.insertOrIgnore,
       );
       await (update(playlists)..where((t) => t.id.equals(playlistId))).write(
         PlaylistsCompanion(updatedAt: Value(DateTime.now())),

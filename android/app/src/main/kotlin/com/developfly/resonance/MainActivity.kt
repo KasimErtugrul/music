@@ -1,4 +1,4 @@
-package com.example.resonance
+package com.developfly.resonance
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -11,8 +11,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
-import com.example.resonance.mediastore.MediaStoreBridge
-import com.example.resonance.widget.MusicWidgetProvider
+import com.developfly.resonance.mediastore.MediaStoreBridge
+import com.developfly.resonance.widget.MusicWidgetProvider
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 
@@ -136,8 +136,8 @@ class MainActivity : AudioServiceActivity() {
     }
 
     private companion object {
-        const val ACTION_ADD_WIDGET = "com.example.resonance.ADD_WIDGET"
-        const val ACTION_WIDGET_PINNED = "com.example.resonance.WIDGET_PINNED"
+        const val ACTION_ADD_WIDGET = "com.developfly.resonance.ADD_WIDGET"
+        const val ACTION_WIDGET_PINNED = "com.developfly.resonance.WIDGET_PINNED"
         const val PIN_TIMEOUT_MS = 1500L
     }
 }

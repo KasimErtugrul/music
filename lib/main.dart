@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:resonance/app.dart';
 import 'package:resonance/core/bindings/initial_binding.dart';
+import 'package:resonance/core/errors/app_logger.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
 import 'package:resonance/data/datasources/auto_browse_delegate.dart';
@@ -54,7 +57,7 @@ Future<Uri?> artworkToFile(int id) async {
 /// Android Auto ayrı süreçtir; özel cache'teki file:// yolunu okuyamaz.
 /// ArtworkProvider kapağı content:// ile sunar.
 Future<Uri?> autoArtworkUri(int id) async =>
-    Uri.parse('content://com.example.resonance.artwork/art/$id');
+    Uri.parse('content://com.developfly.resonance.artwork/art/$id');
 
 /// Aşama 5: Android Auto düğüm etiketleri için yerelleştirme çözücüsü.
 /// UI hazırken gerçek locale'den; hazır değilken (arka plan motoru) ayar
@@ -79,8 +82,42 @@ AppLocalizations _autoL10n() {
 }
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // Tüm yakalanmamış hatalar tek merkezi günlükçüye akar. Üç katman:
+  // Flutter çerçevesi, platform/asenkron ve zone. Binding ve runApp aynı
+  // zone içinde olmalıdır.
+  await runZonedGuarded<Future<void>>(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      _installGlobalErrorHandlers();
+      await _bootstrap();
+    },
+    (error, stack) => AppLog.error(error, stack, source: 'zone'),
+  );
+}
 
+void _installGlobalErrorHandlers() {
+  // Release'te debugPrint çıktısı (logcat sızıntısı) susturulur.
+  if (!kDebugMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
+
+  FlutterError.onError = (details) {
+    AppLog.error(details.exception, details.stack, source: 'flutter');
+    if (kDebugMode) FlutterError.presentError(details);
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    AppLog.error(error, stack, source: 'platform');
+    return true; // işlendi: süreç düşmez
+  };
+
+  // Release'te widget hatası gri kutu / ham metin yerine nötr bir boşluk.
+  if (!kDebugMode) {
+    ErrorWidget.builder = (details) => const SizedBox.shrink();
+  }
+}
+
+Future<void> _bootstrap() async {
   try {
     final prefs = await SharedPreferences.getInstance();
     Get.put<SharedPreferences>(prefs, permanent: true);
@@ -131,7 +168,7 @@ Future<void> main() async {
         },
       ),
       config: const AudioServiceConfig(
-        androidNotificationChannelId: 'com.example.resonance.channel.audio',
+        androidNotificationChannelId: 'com.developfly.resonance.channel.audio',
         androidNotificationChannelName: 'Playback',
         androidNotificationChannelDescription: 'Playback controls',
         // false: duraklatılınca bildirim kaydırılıp kapatılabilir. `true` iken
@@ -179,6 +216,7 @@ Future<void> main() async {
 
     runApp(const ResonanceApp());
   } catch (e, st) {
+    AppLog.error(e, st, source: 'startup');
     runApp(_StartupErrorApp(error: e, stack: st));
   }
 }
@@ -190,35 +228,40 @@ class _StartupErrorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Release'te ham hata ve yığın izi kullanıcıya gösterilmez (yalnızca
+    // günlüğe yazılır). Debug'ta geliştirici için ayrıntı korunur.
+    final lang = PlatformDispatcher.instance.locale.languageCode;
+    final isTr = lang == 'tr';
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Uygulama başlatılamadı',
-                  style: TextStyle(
+                Text(
+                  isTr ? 'Uygulama başlatılamadı' : 'The app could not start',
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.red,
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Hata:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  isTr
+                      ? 'Beklenmeyen bir sorun oluştu. Lütfen uygulamayı '
+                          'kapatıp yeniden açın.'
+                      : 'Something went wrong. Please close the app and '
+                          'open it again.',
                 ),
-                SelectableText('$error'),
-                const SizedBox(height: 16),
-                const Text(
-                  'Stack:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SelectableText('$stack', style: const TextStyle(fontSize: 11)),
+                if (kDebugMode) ...[
+                  const SizedBox(height: 16),
+                  SelectableText('$error'),
+                  const SizedBox(height: 8),
+                  SelectableText('$stack', style: const TextStyle(fontSize: 11)),
+                ],
               ],
             ),
           ),

@@ -1,10 +1,10 @@
-package com.example.resonance.widget
+package com.developfly.resonance.widget
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import com.example.resonance.R
+import com.developfly.resonance.R
 
 /**
  * Launcher, widget'ı gerçekten ana ekrana ekleyince (kullanıcı onayladıktan sonra)

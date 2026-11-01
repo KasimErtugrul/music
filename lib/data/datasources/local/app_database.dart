@@ -40,11 +40,14 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(_open());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async => m.createAll(),
+        onCreate: (m) async {
+          await m.createAll();
+          await _createHistoryIndexes();
+        },
         onUpgrade: (m, from, to) async {
           if (from < 2) await m.createTable(queueStates);
           if (from < 3) {
@@ -67,11 +70,49 @@ class AppDatabase extends _$AppDatabase {
           if (from < 6) await m.createTable(equalizerPresets);
           if (from < 7) await m.createTable(excludedFolders); // YENİ
           if (from < 8) await m.createTable(bannedSongs); // Gün 17: Kasa
+          if (from < 9) {
+            // v9: eski kurulumlarda eksik olan UNIQUE kısıtlar (taze
+            // kurulumda createAll bunları zaten oluşturuyordu) + geçmiş
+            // indeksleri. Önce mükerrer satırlar temizlenir; yoksa UNIQUE
+            // indeks oluşturma başarısız olur.
+            await customStatement(
+              'DELETE FROM favorites WHERE id NOT IN '
+              '(SELECT MIN(id) FROM favorites GROUP BY song_id)',
+            );
+            await customStatement(
+              'DELETE FROM playlist_songs WHERE id NOT IN '
+              '(SELECT MIN(id) FROM playlist_songs '
+              'GROUP BY playlist_id, song_id)',
+            );
+            await customStatement(
+              'CREATE UNIQUE INDEX IF NOT EXISTS idx_favorites_song_id_u '
+              'ON favorites (song_id)',
+            );
+            await customStatement(
+              'CREATE UNIQUE INDEX IF NOT EXISTS '
+              'idx_playlist_songs_playlist_song_u '
+              'ON playlist_songs (playlist_id, song_id)',
+            );
+            await _createHistoryIndexes();
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
         },
       );
+
+  /// Dinleme geçmişi sorguları (GROUP BY songId, tarih aralığı) için
+  /// indeksler. IF NOT EXISTS ile idempotent.
+  Future<void> _createHistoryIndexes() async {
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_play_history_song_id '
+      'ON play_history (song_id)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_play_history_played_at '
+      'ON play_history (played_at)',
+    );
+  }
 }
 
 QueryExecutor _open() {

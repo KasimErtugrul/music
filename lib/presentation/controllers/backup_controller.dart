@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:resonance/data/datasources/backup_datasource.dart';
 import 'package:resonance/data/models/backup_model.dart';
 import 'package:resonance/data/repositories/backup_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
@@ -50,7 +51,11 @@ class BackupController extends GetxController {
     }
   }
 
+  /// Son dışa aktarma kullanıcı tarafından iptal edildi mi (hata değil).
+  bool lastExportCancelled = false;
+
   Future<bool> exportData(AppLocalizations l10n) async {
+    lastExportCancelled = false;
     isLoading.value = true;
     try {
       final data = await _repo.export();
@@ -71,6 +76,11 @@ class BackupController extends GetxController {
           isLoading.value = false;
           return true;
         }
+        // path == null: kullanıcı kaydetme penceresini iptal etti. Sessizce
+        // belgeler klasörüne yazıp "başarılı" demek yanıltıcıydı.
+        lastExportCancelled = true;
+        isLoading.value = false;
+        return false;
       } catch (e) {
         debugPrint('FilePicker.saveFile başarısız: $e');
       }
@@ -117,7 +127,12 @@ class BackupController extends GetxController {
       final json = jsonDecode(content) as Map<String, dynamic>;
       final backup = BackupModel.fromJson(json);
 
-      final mismatch = backup.version != 1;
+      // Yedek bu uygulamanın desteklediğinden yeniyse hiçbir veri
+      // silinmeden içe aktarma engellenir.
+      if (backup.version > BackupDatasource.supportedVersion) {
+        isLoading.value = false;
+        return ImportStatus.versionMismatch;
+      }
       await _repo.import(backup);
       await _libraryRepo.rescan();
 
@@ -136,7 +151,7 @@ class BackupController extends GetxController {
       await reloadLivePlaylistControllers();
 
       isLoading.value = false;
-      return mismatch ? ImportStatus.versionMismatch : ImportStatus.success;
+      return ImportStatus.success;
     } catch (e) {
       debugPrint('Import error: $e');
       isLoading.value = false;

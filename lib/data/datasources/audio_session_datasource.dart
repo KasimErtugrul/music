@@ -12,6 +12,9 @@ class AudioSessionDatasource {
 
   final PlayerDataSource _player;
 
+  /// Duck başlarken saklanan ses seviyesi (null: duck etkin değil).
+  double? _volumeBeforeDuck;
+
   /// Olay anında "Kulaklık çıkınca duraklat" tercihinin güncel değerini okur.
   /// main.dart'ta PreferencesController, AudioService.init'ten ÖNCE kalıcı
   /// olarak kaydedildiği için gösterge güvenle bağlanabilir.
@@ -24,14 +27,20 @@ class AudioSessionDatasource {
     // Ses odağı kesintileri
     session.interruptionEventStream.listen((event) {
       if (event.begin) {
-        if (event.type == AudioInterruptionType.pause) {
-          _player.pause();
-        } else if (event.type == AudioInterruptionType.duck) {
+        if (event.type == AudioInterruptionType.duck) {
+          // Kullanıcının mevcut ses seviyesi saklanır; kesinti bitince
+          // koşulsuz 1.0'a değil buna dönülür.
+          _volumeBeforeDuck ??= _player.player.volume;
           _player.setVolume(0.3);
+        } else {
+          // pause ve unknown: ikisi de duraklatır.
+          _player.pause();
         }
       } else {
         if (event.type == AudioInterruptionType.duck) {
-          _player.setVolume(1.0);
+          final restore = _volumeBeforeDuck ?? 1.0;
+          _volumeBeforeDuck = null;
+          _player.setVolume(restore);
         }
         // Gün 21: Kesinti bitince çalmaya devam etme seçeneği.
       }

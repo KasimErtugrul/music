@@ -1,4 +1,4 @@
-package com.example.resonance.mediastore
+package com.developfly.resonance.mediastore
 
 import android.content.ContentProvider
 import android.content.ContentValues

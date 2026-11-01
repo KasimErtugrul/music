@@ -119,6 +119,10 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
   _LibraryIndex? _index;
   Future<_LibraryIndex>? _loading;
+  // incrementalScan'in indeksi kaç kez yazdığı. _load başladığında bunu
+  // yakalar; bittiğinde sayaç ilerlemişse daha taze bir indeks vardır ve
+  // bayat sonuç onun üstüne geri yazılmaz.
+  int _scanWrites = 0;
   final Map<SongSort, List<int>> _orders = {};
   final Map<SongSort, List<SongModel>> _sorted = {};
 
@@ -139,6 +143,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   Future<_LibraryIndex> _load() async {
+    final writesAtStart = _scanWrites;
     try {
       final songs = await _source.querySongs();
 
@@ -161,6 +166,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
               songs, excludedPaths, minDurSec, banIdx.ids, banIdx.paths)
           : _buildIndex(
               songs, excludedPaths, minDurSec, banIdx.ids, banIdx.paths);
+      final newer = _index;
+      if (_scanWrites != writesAtStart && newer != null) {
+        // Yükleme sürerken incrementalScan daha taze bir indeks yazdı.
+        return newer;
+      }
       _orders.clear();
       _sorted.clear();
       _index = index;
@@ -226,6 +236,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
     _rawSongs = fresh;
     _excludedPaths = excludedPaths;
     _indexMinDurSec = minDurSec;
+    _scanWrites++;
     _index = index;
     _orders.clear();
     _sorted.clear();

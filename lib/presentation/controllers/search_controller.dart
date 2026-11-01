@@ -121,7 +121,8 @@ class AppSearchController extends GetxController {
 
     try {
       final res = await _repo.search(text);
-      results.value = res;
+      // await sırasında sorgu değiştiyse bayat sonucu yazma.
+      if (text == query.value) results.value = res;
     } finally {
       if (text == query.value) {
         isLoading.value = false;

@@ -18,9 +18,11 @@ class WaveformController extends GetxController {
     waveform.value = null;
 
     try {
-      waveform.value = await _repo.getWaveform(songPath);
+      final result = await _repo.getWaveform(songPath);
+      // Bu arada parça değiştiyse eski hesabın sonucu yenisini ezmesin.
+      if (_currentPath == songPath) waveform.value = result;
     } finally {
-      isLoading.value = false;
+      if (_currentPath == songPath) isLoading.value = false;
     }
   }
 

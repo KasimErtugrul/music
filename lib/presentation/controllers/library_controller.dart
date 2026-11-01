@@ -117,8 +117,12 @@ class LibraryController extends GetxController with WidgetsBindingObserver {
     if (sort == songSort.value) return;
     songSort.value = sort;
     try {
-      songs.value = await _repository.songs(sort: sort);
-      letterOffsets.value = await _repository.letterOffsets(sort);
+      final sorted = await _repository.songs(sort: sort);
+      final offsets = await _repository.letterOffsets(sort);
+      // İki hızlı değişimde geç gelen eski sıralama uygulanmaz.
+      if (sort != songSort.value) return;
+      songs.value = sorted;
+      letterOffsets.value = offsets;
     } on Object {
       hasError.value = true;
     }

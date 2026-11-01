@@ -32,7 +32,7 @@ class MediaStoreChannelDataSource implements DeviceMediaDataSource {
   MediaStoreChannelDataSource({MethodChannel? channel})
       : _channel = channel ?? const MethodChannel(channelName);
 
-  static const String channelName = 'com.example.resonance/media_store';
+  static const String channelName = 'com.developfly.resonance/media_store';
 
   final MethodChannel _channel;
 

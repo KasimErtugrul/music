@@ -15,5 +15,5 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.resonance.mediastore
+        package: com.developfly.resonance.mediastore
         pluginClass: MediaStorePlugin

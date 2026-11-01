@@ -32,6 +32,7 @@ class BackupPage extends StatelessWidget {
     Future<void> doExport() async {
       final ok = await ctrl.exportData(l10n);
       if (!context.mounted) return;
+      if (!ok && ctrl.lastExportCancelled) return; // iptal: mesaj yok
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(ok ? l10n.backupExportSuccess : l10n.backupExportError),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:resonance/core/errors/app_logger.dart';
 import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 import 'package:resonance/data/datasources/audio_format_datasource.dart';
@@ -104,6 +105,8 @@ class PlayerController extends GetxController implements AutoPlayController {
     _restoreQueue();
   }
 
+  DateTime? _lastPositionSave;
+
   void _bind() {
 
     _repository.mediaItemStream.listen((item) {
@@ -154,6 +157,15 @@ class PlayerController extends GetxController implements AutoPlayController {
     _repository.positionStream.listen((pos) {
       position.value = pos;
       _checkHistory(pos);
+      // İşlem ölümünde konum kaybolmasın: çalarken ~5 sn'de bir kaydet.
+      if (!_isRestoring && isPlaying.value) {
+        final now = DateTime.now();
+        final last = _lastPositionSave;
+        if (last == null || now.difference(last) >= const Duration(seconds: 5)) {
+          _lastPositionSave = now;
+          unawaited(_saveQueueState());
+        }
+      }
     });
 
     _repository.durationStream.listen((dur) {
@@ -218,7 +230,13 @@ class PlayerController extends GetxController implements AutoPlayController {
     final threshold = minDuration < halfDuration ? minDuration : halfDuration;
 
     if (pos >= threshold) {
-      _historyRepo.recordPlay(song);
+      unawaited(
+        _historyRepo.recordPlay(song).then<void>(
+          (_) {},
+          onError: (Object e, StackTrace st) =>
+              AppLog.error(e, st, source: 'recordPlay'),
+        ),
+      );
       _loggedSongUri = song.uri;
     }
   }
@@ -306,7 +324,11 @@ class PlayerController extends GetxController implements AutoPlayController {
 
   Future<void> _saveQueueState() async {
     if (songQueue.isEmpty) {
-      await _stateRepo.clearState();
+      try {
+        await _stateRepo.clearState();
+      } on Object catch (e, st) {
+        AppLog.error(e, st, source: 'clearState');
+      }
       return;
     }
     try {
@@ -320,7 +342,9 @@ class PlayerController extends GetxController implements AutoPlayController {
           shuffleOrder: null,
         ),
       );
-    } catch (_) {}
+    } on Object catch (e, st) {
+      AppLog.error(e, st, source: 'saveQueueState');
+    }
   }
 
   AudioServiceRepeatMode _mapRepeatMode(int val) => switch (val) {
@@ -367,9 +391,18 @@ class PlayerController extends GetxController implements AutoPlayController {
     final list = queue ?? <SongModel>[song];
     final index = list.indexWhere((s) => s.id == song.id);
 
+    final previousQueue = List<SongModel>.of(songQueue);
     songQueue.assignAll(list);
-    await _repository.loadQueue(list, initialIndex: index < 0 ? 0 : index);
-    await _repository.play();
+    try {
+      await _repository.loadQueue(list, initialIndex: index < 0 ? 0 : index);
+      await _repository.play();
+    } on Object catch (e, st) {
+      // Kaynak yüklenemediyse arayüz kuyruğu gerçek oynatma listesinden
+      // ayrışmasın: önceki kuyruk geri yüklenir.
+      songQueue.assignAll(previousQueue);
+      AppLog.error(e, st, source: 'playSong');
+      rethrow;
+    }
     return true;
   }
 

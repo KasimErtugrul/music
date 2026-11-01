@@ -26,13 +26,15 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
   ThemeMode? _currentComputedMode;
   MediaItem? _lastMediaItem; // Son çalan şarkıyı tutar
 
+  StreamSubscription<dynamic>? _playerSub;
+
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     _loadActive();
 
-    _playerStream.listen((item) {
+    _playerSub = _playerStream.listen((item) {
       _lastMediaItem = item;
       if (settings.value.themeSource == 'artwork') _updateArtworkTheme(item);
     });
@@ -42,11 +44,13 @@ class ThemeController extends GetxController with WidgetsBindingObserver {
     });
   }
 
+  // GetX denetleyici yaşam döngüsü onClose'dur; dispose() çağrılmaz.
   @override
-  void dispose() {
+  void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _scheduledTimer?.cancel();
-    super.dispose();
+    _playerSub?.cancel();
+    super.onClose();
   }
 
   @override

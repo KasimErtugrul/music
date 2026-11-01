@@ -1,4 +1,4 @@
-group = "com.example.resonance.mediastore"
+group = "com.developfly.resonance.mediastore"
 version = "1.0-SNAPSHOT"
 
 rootProject.allprojects {
@@ -14,7 +14,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.resonance.mediastore"
+    namespace = "com.developfly.resonance.mediastore"
     compileSdk = 37
 
     compileOptions {

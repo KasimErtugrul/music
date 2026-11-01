@@ -101,6 +101,13 @@ class EqualizerController extends GetxController {
       await _repo.setEnabled(isEnabled.value);
     } catch (e) {
       params.value = null;
+      // Parametre okuma başarısızsa geçici etkinleştirilen ekolayzer
+      // donanımda açık kalmasın: kullanıcının kayıtlı tercihi geri yüklenir.
+      try {
+        await _repo.setEnabled(isEnabled.value);
+      } on Object {
+        // Geri yükleme de başarısızsa yapılacak başka bir şey yok.
+      }
     } finally {
       isLoading.value = false;
     }

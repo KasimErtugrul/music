@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:get/get.dart';
 import 'package:resonance/core/constants/smart_playlist_keys.dart';
+import 'package:resonance/core/errors/app_logger.dart';
 import 'package:resonance/data/models/album_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/favorite_repository.dart';
@@ -86,8 +87,7 @@ class HomeController extends GetxController {
       favoriteCount.value = favIds.length;
       await _updateFavoriteSongs(favIds, allSongs);
     } catch (e, st) {
-      // ignore: avoid_print
-      print('HomeController.loadAll: $e\n$st');
+      AppLog.error(e, st, source: 'HomeController.loadAll');
     } finally {
       isLoading.value = false;
     }

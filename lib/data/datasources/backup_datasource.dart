@@ -7,11 +7,45 @@ import 'package:resonance/data/datasources/local/app_database.dart';
 import 'package:resonance/data/models/backup_model.dart';
 import 'package:resonance/core/settings/settings_key_migration.dart';
 
+/// Yedek dosyasının sürümü bu uygulamanın desteklediğinden yüksek.
+/// Hiçbir veri silinmeden önce fırlatılır.
+class BackupVersionException implements Exception {
+  const BackupVersionException(this.found, this.supported);
+  final int found;
+  final int supported;
+  @override
+  String toString() =>
+      'BackupVersionException: yedek sürümü $found, desteklenen $supported';
+}
+
+/// Kütüphane okunamadığı/boş olduğu için eşleştirme yapılamaz; mevcut veri
+/// silinmeden içe aktarma durdurulur.
+class BackupLibraryUnavailableException implements Exception {
+  const BackupLibraryUnavailableException();
+  @override
+  String toString() => 'BackupLibraryUnavailableException';
+}
+
 class BackupDatasource {
   final AppDatabase _db;
   final SharedPreferences _prefs;
 
-  BackupDatasource(this._db, this._prefs);
+  /// İçe aktarmada yedek kayıtlarını güncel MediaStore kimlikleriyle
+  /// eşleştirmek için kütüphane şarkılarını döndürür. Verilmezse (veya
+  /// hata verirse) eşleştirme yapılamaz ve şarkı kayıtları atlanır.
+  final Future<List<SongModel>> Function()? _songsLoader;
+
+  /// Bu uygulamanın okuyabildiği en yüksek yedek sürümü.
+  static const int supportedVersion = 1;
+
+  BackupDatasource(
+    this._db,
+    this._prefs, {
+    Future<List<SongModel>> Function()? songsLoader,
+  }) : _songsLoader = songsLoader;
+
+  /// Son içe aktarmada eşleşmediği için atlanan şarkı kaydı sayısı.
+  int lastImportSkipped = 0;
 
   Future<BackupModel> exportData() async {
     // 1. Playlists
@@ -72,9 +106,30 @@ class BackupDatasource {
   }
 
   Future<void> importData(BackupModel backup) async {
-    if (backup.version != 1) {
-      // Sürüm uyuşmazlığı — uyarı göster, yine de devam et
+    // Yedek bizden yeniyse hiçbir şeye dokunmadan reddet.
+    if (backup.version > supportedVersion) {
+      throw BackupVersionException(backup.version, supportedVersion);
     }
+
+    // Eşleştirme için güncel kütüphane, veri silinmeden ÖNCE okunur.
+    var library = const <SongModel>[];
+    final loader = _songsLoader;
+    if (loader != null) {
+      try {
+        library = await loader();
+      } on Object catch (e) {
+        debugPrint('Yedek eşleştirme: kütüphane okunamadı: $e');
+      }
+    }
+    // Yedekte şarkı kaydı var ama kütüphane boşsa (izin verilmemiş / henüz
+    // taranmamış) tüm kayıtlar atlanır ve eski veri boşuna silinirdi.
+    final backupHasSongs = backup.favorites.isNotEmpty ||
+        backup.playlists.any((p) => p.songs.isNotEmpty);
+    if (backupHasSongs && library.isEmpty) {
+      throw const BackupLibraryUnavailableException();
+    }
+    final matcher = _SongMatcher(library);
+    var skipped = 0;
 
     await _db.transaction(() async {
       // 1. Temizle (Clear)
@@ -87,30 +142,28 @@ class BackupDatasource {
       // 2. Playlists
       for (final p in backup.playlists) {
         final newId = await _db.playlistDao.create(p.name);
+        final added = <int>{};
         for (final s in p.songs) {
-          await _db.playlistDao.addSong(newId, SongModel(
-            id: 0, // Geçici, MediaStore ID'si bilinmiyor. Gün 13'teki "path+title+artist" eşleşmesi Gün 31'de eklenecek.
-            uri: s.uri,
-            path: s.path,
-            title: s.title,
-            artist: s.artist,
-            durationMs: s.durationMs,
-            sizeBytes: 0,
-          ));
+          final match = matcher.find(s);
+          if (match == null) {
+            skipped++;
+            continue;
+          }
+          if (!added.add(match.id)) continue; // aynı listede tekrar
+          await _db.playlistDao.addSong(newId, match);
         }
       }
 
       // 3. Favorites
+      final favAdded = <int>{};
       for (final f in backup.favorites) {
-        await _db.favoriteDao.add(SongModel(
-          id: 0,
-          uri: f.uri,
-          path: f.path,
-          title: f.title,
-          artist: f.artist,
-          durationMs: f.durationMs,
-          sizeBytes: 0,
-        ));
+        final match = matcher.find(f);
+        if (match == null) {
+          skipped++;
+          continue;
+        }
+        if (!favAdded.add(match.id)) continue;
+        await _db.favoriteDao.add(match);
       }
 
       // 4. Themes
@@ -123,6 +176,10 @@ class BackupDatasource {
         await _db.equalizerPresetDao.insert(e.name, e.bandsJson);
       }
     });
+    lastImportSkipped = skipped;
+    if (skipped > 0) {
+      debugPrint('Yedek içe aktarma: $skipped şarkı kaydı eşleşmedi, atlandı.');
+    }
 
     // 6. Settings
     // Gün 1: tip güvenli içe aktarma — yalnızca bilinen yedek anahtarları
@@ -191,5 +248,45 @@ class BackupDatasource {
         debugPrint('Ayar içe aktarılamadı ($key): $e');
       }
     }
+  }
+}
+
+/// Yedekteki bir şarkı kaydını güncel kütüphanedeki gerçek [SongModel]
+/// ile eşleştirir: önce dosya yolu, bulunamazsa başlık+sanatçı (+süre
+/// yakınlığı).
+class _SongMatcher {
+  _SongMatcher(List<SongModel> songs) {
+    for (final s in songs) {
+      final path = s.path;
+      if (path.isNotEmpty) _byPath.putIfAbsent(path, () => s);
+      _byTitleArtist.putIfAbsent(_key(s.title, s.artist), () => []).add(s);
+    }
+  }
+
+  final Map<String, SongModel> _byPath = {};
+  final Map<String, List<SongModel>> _byTitleArtist = {};
+
+  static String _key(String? title, String? artist) =>
+      '${(title ?? '').trim().toLowerCase()}|${(artist ?? '').trim().toLowerCase()}';
+
+  SongModel? find(BackupSong b) {
+    if (b.path.isNotEmpty) {
+      final hit = _byPath[b.path];
+      if (hit != null) return hit;
+    }
+    if (b.title.trim().isEmpty) return null;
+    final list = _byTitleArtist[_key(b.title, b.artist)];
+    if (list == null || list.isEmpty) return null;
+    if (list.length == 1 || b.durationMs <= 0) return list.first;
+    SongModel best = list.first;
+    var bestDiff = (best.durationMs - b.durationMs).abs();
+    for (final s in list.skip(1)) {
+      final d = (s.durationMs - b.durationMs).abs();
+      if (d < bestDiff) {
+        best = s;
+        bestDiff = d;
+      }
+    }
+    return best;
   }
 }

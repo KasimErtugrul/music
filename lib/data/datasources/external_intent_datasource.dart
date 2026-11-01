@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class ExternalIntentDatasource {
-  static const _channel = MethodChannel('com.example.resonance/media_store');
+  static const _channel = MethodChannel('com.developfly.resonance/media_store');
 
   /// Kanalın callback tipi: String parametre alan fonksiyon.
   /// (VoidCallback = void Function() olduğu için kullanılamaz.)

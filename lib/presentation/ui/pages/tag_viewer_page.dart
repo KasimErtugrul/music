@@ -6,17 +6,45 @@ import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/tag_viewer_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 
-class TagViewerPage extends StatelessWidget {
+class TagViewerPage extends StatefulWidget {
   const TagViewerPage({super.key, required this.song});
   final SongModel song;
 
   @override
+  State<TagViewerPage> createState() => _TagViewerPageState();
+}
+
+class _TagViewerPageState extends State<TagViewerPage> {
+  late final TagViewerController ctrl;
+  bool _loaded = false;
+
+  SongModel get song => widget.song;
+
+  @override
+  void initState() {
+    super.initState();
+    ctrl = Get.put(TagViewerController(Get.find<TagEditorRepository>()));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // l10n bağlamdan gelir; yükleme sayfa başına yalnızca bir kez.
+    if (!_loaded) {
+      _loaded = true;
+      ctrl.load(song, AppLocalizations.of(context));
+    }
+  }
+
+  @override
+  void dispose() {
+    Get.delete<TagViewerController>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final ctrl = Get.put(
-      TagViewerController(Get.find<TagEditorRepository>()),
-    );
-    ctrl.load(song, l10n);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.tagViewer)),

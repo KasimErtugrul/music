@@ -6,7 +6,7 @@ import 'package:resonance/presentation/controllers/smart_playlist_controller.dar
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 
-class SmartPlaylistDetailPage extends StatelessWidget {
+class SmartPlaylistDetailPage extends StatefulWidget {
   const SmartPlaylistDetailPage({
     super.key,
     required this.keyValue,
@@ -17,17 +17,37 @@ class SmartPlaylistDetailPage extends StatelessWidget {
   final String title;
 
   @override
+  State<SmartPlaylistDetailPage> createState() =>
+      _SmartPlaylistDetailPageState();
+}
+
+class _SmartPlaylistDetailPageState extends State<SmartPlaylistDetailPage> {
+  late final SmartPlaylistController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Denetleyici sayfa ömrüne bağlı: bir kez kurulur, çıkışta silinir
+    // (önceden build başına Get.put + load çağrılıyordu).
+    controller = Get.put(
+      SmartPlaylistController(Get.find<StatsRepository>()),
+      tag: widget.keyValue,
+    );
+    controller.load(widget.keyValue);
+  }
+
+  @override
+  void dispose() {
+    Get.delete<SmartPlaylistController>(tag: widget.keyValue);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    // Basit bir DI (Get.put) işlemi:
-    final controller = Get.put(
-      SmartPlaylistController(Get.find<StatsRepository>()),
-      tag: keyValue,
-    );
-    controller.load(keyValue);
 
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(title: Text(widget.title)),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());

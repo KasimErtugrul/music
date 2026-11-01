@@ -1,4 +1,4 @@
-package com.example.resonance.widget
+package com.developfly.resonance.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -10,8 +10,8 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.view.KeyEvent
 import android.widget.RemoteViews
-import com.example.resonance.MainActivity
-import com.example.resonance.R
+import com.developfly.resonance.MainActivity
+import com.developfly.resonance.R
 import com.ryanheise.audioservice.MediaButtonReceiver
 import es.antonborri.home_widget.HomeWidgetProvider
 

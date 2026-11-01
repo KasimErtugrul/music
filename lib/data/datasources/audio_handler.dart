@@ -1,3 +1,4 @@
+import 'package:resonance/core/errors/app_logger.dart';
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
@@ -66,7 +67,9 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
       playbackState.add(_transformEvent(event));
     });
 
-    _source.errorStream.listen((e) {});
+    _source.errorStream.listen(
+      (e) => AppLog.error(e, null, source: 'player'),
+    );
   }
 
   PlaybackState _transformEvent(PlaybackEvent event) {
@@ -111,19 +114,34 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> loadTracks({required List<MediaItem> items, required List<AudioSource> sources, int initialIndex = 0, Duration? initialPosition}) async {
+    final prevQueue = queue.value;
+    final prevItem = mediaItem.value;
     queue.add(items);
     if (items.isEmpty) {
       mediaItem.add(null);
       return;
     }
     mediaItem.add(items[initialIndex.clamp(0, items.length - 1)]);
-    await _source.loadQueue(sources, initialIndex: initialIndex, initialPosition: initialPosition);
+    try {
+      await _source.loadQueue(sources, initialIndex: initialIndex, initialPosition: initialPosition);
+    } on Object {
+      // Yükleme başarısızsa bildirim/kuyruk durumu motorla ayrışmasın.
+      queue.add(prevQueue);
+      mediaItem.add(prevItem);
+      rethrow;
+    }
   }
 
   Future<void> insertTrack(int index, MediaItem item, AudioSource source) async {
-    final newQueue = queue.value.toList()..insert(index, item);
+    final prevQueue = queue.value;
+    final newQueue = prevQueue.toList()..insert(index, item);
     queue.add(newQueue);
-    await _source.insertSource(index, source);
+    try {
+      await _source.insertSource(index, source);
+    } on Object {
+      queue.add(prevQueue);
+      rethrow;
+    }
   }
 
   Future<void> removeTrack(int index) async {

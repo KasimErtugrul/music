@@ -3,7 +3,7 @@
         <!-- Serves artwork as content:// so Android Auto / system UI can read it.
              Read-only; accepts numeric song ids only. -->
         <provider
-            android:name="com.example.resonance.mediastore.ArtworkProvider"
+            android:name="com.developfly.resonance.mediastore.ArtworkProvider"
             android:authorities="${applicationId}.artwork"
             android:exported="true"
             android:grantUriPermissions="false" />

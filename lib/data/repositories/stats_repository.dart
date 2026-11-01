@@ -52,8 +52,7 @@ class StatsRepositoryImpl implements StatsRepository {
     }
 
     if (key == SmartPlaylistKeys.neverPlayed) {
-      final allHistory = await _historyDao.watchRecent(limit: 100000).first;
-      final playedIds = allHistory.map((h) => h.songId).toSet();
+      final playedIds = await _historyDao.getDistinctSongIds();
       return allSongs.where((s) => !playedIds.contains(s.id)).toList();
     }
 
@@ -68,15 +67,15 @@ class StatsRepositoryImpl implements StatsRepository {
 
   @override
   Future<PlayStatsModel> getStats({DateTime? since}) async {
-    final allHistory = await _historyDao.watchRecent(limit: 100000).first;
-    final rows = since == null
-        ? allHistory
-        : allHistory.where((h) => h.playedAt.isAfter(since)).toList();
+    // Satırları Dart'a çekmek yerine SQL GROUP BY ile songId başına sayım
+    // alınır; yalnızca haftalık dağılım için zaman damgaları okunur.
+    final counts = await _historyDao.getPlayCountsBySong(since: since);
+    final times = await _historyDao.getPlayTimes(since: since);
     final allSongs = await _libraryRepo.songs();
     final songMap = {for (var s in allSongs) s.id: s};
 
-    final totalPlays = rows.length;
-    final uniqueSongsPlayed = rows.map((h) => h.songId).toSet().length;
+    final totalPlays = counts.values.fold<int>(0, (a, b) => a + b);
+    final uniqueSongsPlayed = counts.length;
 
     final artistCounts = <String, int>{};
     final genreCounts = <String, int>{};
@@ -84,20 +83,22 @@ class StatsRepositoryImpl implements StatsRepository {
     final weekly = List<int>.filled(7, 0);
     var listenMs = 0;
 
-    for (final play in rows) {
-      final song = songMap[play.songId];
-      if (song != null) {
-        if (song.artist != null) {
-          artistCounts[song.artist!] = (artistCounts[song.artist!] ?? 0) + 1;
-        }
-        if (song.genre != null) {
-          genreCounts[song.genre!] = (genreCounts[song.genre!] ?? 0) + 1;
-        }
-        songCounts[song.id] = (songCounts[song.id] ?? 0) + 1;
-        listenMs += song.durationMs;
+    for (final entry in counts.entries) {
+      final song = songMap[entry.key];
+      if (song == null) continue;
+      final n = entry.value;
+      if (song.artist != null) {
+        artistCounts[song.artist!] = (artistCounts[song.artist!] ?? 0) + n;
       }
+      if (song.genre != null) {
+        genreCounts[song.genre!] = (genreCounts[song.genre!] ?? 0) + n;
+      }
+      songCounts[song.id] = n;
+      listenMs += song.durationMs * n;
+    }
+    for (final t in times) {
       // Dart weekday: 1 = Pazartesi ... 7 = Pazar -> 0 tabanlı indeks.
-      weekly[play.playedAt.weekday - 1]++;
+      weekly[t.weekday - 1]++;
     }
 
     final topArtists = _sortAndTakeTop(artistCounts, 5);

@@ -1,4 +1,4 @@
-package com.example.resonance.mediastore
+package com.developfly.resonance.mediastore
 
 import android.content.ContentResolver
 import android.content.ContentUris
@@ -33,7 +33,7 @@ import java.util.concurrent.Executors
  * Attached to every FlutterEngine by [MediaStorePlugin].
  */
 object MediaStoreBridge {
-    const val CHANNEL = "com.example.resonance/media_store"
+    const val CHANNEL = "com.developfly.resonance/media_store"
 
     private const val MAX_EXTERNAL_COPY_BYTES = 1L shl 30   // 1 GB
     private const val MAX_QUEUED_PER_ROOT = 4000            // per ROOT, files to scan (new ones)

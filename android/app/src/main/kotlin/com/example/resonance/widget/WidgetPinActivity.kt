@@ -1,4 +1,4 @@
-package com.example.resonance.widget
+package com.developfly.resonance.widget
 
 import android.app.Activity
 import android.app.PendingIntent
@@ -11,7 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import com.example.resonance.R
+import com.developfly.resonance.R
 
 /**
  * Uygulama simgesindeki "Widget ekle" kısayolunun hedefi.
@@ -160,7 +160,7 @@ class WidgetPinActivity : Activity() {
     private companion object {
         const val TAG = "WidgetPin"
         const val DEBUG = false
-        const val ACTION_ADD_WIDGET = "com.example.resonance.ADD_WIDGET"
+        const val ACTION_ADD_WIDGET = "com.developfly.resonance.ADD_WIDGET"
         const val NO_RESPONSE_MS = 2000L
         const val PAUSED_MAX_MS = 30_000L
     }

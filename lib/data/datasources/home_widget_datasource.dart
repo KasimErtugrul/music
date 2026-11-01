@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 class HomeWidgetDatasource {
   static const _qualifiedAndroidName =
-      'com.example.resonance.widget.MusicWidgetProvider';
+      'com.developfly.resonance.widget.MusicWidgetProvider';
 
   Future<void> saveData({
     required String title,
