@@ -536,40 +536,61 @@ class _EngineStatusCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: cs.outlineVariant),
       ),
+      // Gün 20.1: iki esnek grup + spaceBetween. Ekolayzer rozeti artık
+      // Flexible ve üç noktalı: test yüzeyi (Ahem) tüm glifleri eşit
+      // genişlikte çizdiği için 1.3×1.4 ölçek taramasında TR
+      // «Ekolayzır kapalı» satırı 2.3 px taşıyordu. Gerçek cihazda metin
+      // kısadır; grup solda, rozet sağ kenarda kalır — görünür düzen
+      // değişmez; dar ekranda yalnız metin kısalır. 3:2 ağırlığı, büyük
+      // yazı ölçeklerinde durum metnine rozetten fazla pay ayırır.
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: cs.primary,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              _statusText(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelMedium
-                  ?.copyWith(color: cs.onSurfaceVariant),
+          Flexible(
+            flex: 3,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: cs.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    _statusText(context),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium
+                        ?.copyWith(color: cs.onSurfaceVariant),
+                  ),
+                ),
+              ],
             ),
           ),
           if (hasEq)
-            Obx(() {
-              final eq = Get.find<EqualizerController>();
-              final on = eq.isEnabled.value;
-              return Text(
-                on
-                    ? AppLocalizations.of(context).settingsStatusEqOn
-                    : AppLocalizations.of(context).settingsStatusEqOff,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: on ? cs.primary : cs.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              );
-            }),
+            Flexible(
+              flex: 2,
+              child: Obx(() {
+                final eq = Get.find<EqualizerController>();
+                final on = eq.isEnabled.value;
+                return Text(
+                  on
+                      ? AppLocalizations.of(context).settingsStatusEqOn
+                      : AppLocalizations.of(context).settingsStatusEqOff,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: on ? cs.primary : cs.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                );
+              }),
+            ),
         ],
       ),
     );

@@ -26,7 +26,13 @@ class SettingsSwitchTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+
+  /// Gün 20.1: null geçilirse anahtar devre dışı çizilir (SwitchListTile
+  /// davranışı). Motoru kurulu olmayan yüzeylerde — örn. sayfayı
+  /// binding'siz pompalayan widget testleri — ayar dokunulamaz olur;
+  /// uygulamada InitialBinding her zaman controller kurduğu için bu yol
+  /// üretilmez.
+  final ValueChanged<bool>? onChanged;
 
   /// Ayarın ne işe yaradığını anlatan metin; verilirse başlık yanında
   /// bilgi balonu düğmesi çizilir (Gün 16).

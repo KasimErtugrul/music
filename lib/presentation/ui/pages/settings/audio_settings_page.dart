@@ -16,17 +16,22 @@ import 'package:resonance/presentation/ui/widgets/settings_tile.dart';
 /// sayfasında, sessizlik atlama ve ReplayGain çalma ayarlarında yaşar;
 /// buraya kopyalanmadı (tek doğruluk kaynağı).
 ///
-/// Ekolayzer anahtarı genel [EqualizerController]'ı kullanır (InitialBinding
-/// uygulama açılışında kurar); anahtarın loudness kanalıyla etkileşimi
-/// (Görev 2.3 sözleşmesi) controller'daki toggleEnabled ile aynı yoldan
-/// geçer — sayfa kendi başına kanal yazmaz.
+/// Ekolayzer anahtarı genel [EqualizerController]'ı kullanır; anahtarın
+/// loudness kanalıyla etkileşimi (Görev 2.3 sözleşmesi) controller'daki
+/// toggleEnabled ile aynı yoldan geçer — sayfa kendi başına kanal yazmaz.
+///
+/// Gün 20.1: controller'a erişim denetimlidir (Get.isRegistered).
+/// InitialBinding uygulamada her zaman kurar; kurulu olmadığı yüzeylerde
+/// (doğrudan pompalanan widget testleri vb.) anahtar devre dışı çizilir,
+/// sayfa istisna fırlatmaz — ayarlar ana sayfasındaki hasEq deseniyle
+/// aynı tutum.
 class AudioSettingsPage extends StatelessWidget {
   const AudioSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final eqCtrl = Get.find<EqualizerController>();
+    final hasEq = Get.isRegistered<EqualizerController>();
     final prefCtrl = Get.find<PreferencesController>();
 
     return Scaffold(
@@ -35,23 +40,34 @@ class AudioSettingsPage extends StatelessWidget {
         // Gün 12: ortak SettingsTile + grup kartı.
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          SettingsSectionHeader(title: l10n.audioGroupEqualizer),
-          Obx(() {
-            return SettingsGroupCard(children: [
-              SettingsSwitchTile(
-                title: l10n.equalizerTitle,
-                value: eqCtrl.isEnabled.value,
-                onChanged: eqCtrl.toggleEnabled,
-                info: l10n.eqSwitchInfo,
-              ),
-              SettingsTile(
-                title: l10n.audioEqOpenTitle,
-                subtitle: l10n.audioEqOpenDesc,
-                leading: const Icon(Icons.equalizer),
-                onTap: () => Get.to(() => const EqualizerPage()),
-              ),
-            ]);
-          }),
+          // Gün 20.1: ekolayzer grubunun bölüm başlığı yok — «Ekolayzer»
+          // başlığı, hemen altındaki anahtarın başlığıyla aynı olurdu
+          // (iki bölmeli testte metin iki kez bulunuyordu). İlk grup
+          // kendini anlatır: anahtar + «Ekolayzer ekranı» girişi.
+          SettingsGroupCard(children: [
+            hasEq
+                ? Obx(() {
+                    final eqCtrl = Get.find<EqualizerController>();
+                    return SettingsSwitchTile(
+                      title: l10n.equalizerTitle,
+                      value: eqCtrl.isEnabled.value,
+                      onChanged: eqCtrl.toggleEnabled,
+                      info: l10n.eqSwitchInfo,
+                    );
+                  })
+                : SettingsSwitchTile(
+                    title: l10n.equalizerTitle,
+                    value: false,
+                    onChanged: null, // motor yok: anahtar devre dışı çizilir
+                    info: l10n.eqSwitchInfo,
+                  ),
+            SettingsTile(
+              title: l10n.audioEqOpenTitle,
+              subtitle: l10n.audioEqOpenDesc,
+              leading: const Icon(Icons.equalizer),
+              onTap: () => Get.to(() => const EqualizerPage()),
+            ),
+          ]),
           SettingsSectionHeader(title: l10n.audioGroupFade),
           Obx(() {
             final p = prefCtrl.playback.value;
