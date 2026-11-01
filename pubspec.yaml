@@ -63,6 +63,7 @@ dependencies:
 
   resonance_media_store: 
     path: packages/resonance_media_store
+  crypto: ^3.0.8
 
 dev_dependencies:
   flutter_test:

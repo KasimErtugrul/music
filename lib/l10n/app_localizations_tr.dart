@@ -1945,4 +1945,83 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get loudnessInfo =>
       'Sesi 0–15 dB arasında yükseltir; düşük kayıtlı parçalarda faydalıdır, çok yüksek değerlerde bozulma olabilir. ReplayGain açıkken bu kanal parça düzeyi ses düzeyi dengelemesi tarafından kullanılır.';
+
+  @override
+  String get vaultTitle => 'Kasa';
+
+  @override
+  String get settingsDescVault =>
+      'Şarkıları her yerden gizler ve asla çalmaz; dosyalarınıza dokunulmaz';
+
+  @override
+  String get banSongAction => 'Kasaya ekle';
+
+  @override
+  String get banConfirmTitle => 'Kasaya eklensin mi?';
+
+  @override
+  String banConfirmBody(String title) {
+    return '«$title» kitaplıktan, aramadan, çalma listelerinden ve geçmişten kaybolur ve asla çalınamaz. Ses dosyasının kendisine dokunulmaz, taşınmaz, silinmez.';
+  }
+
+  @override
+  String get banConfirmCleanHistory => 'Çalma geçmişi de temizlensin';
+
+  @override
+  String get banSongDone => 'Kasaya eklendi';
+
+  @override
+  String get bannedToast => 'Bu şarkı kasada; çalınamaz';
+
+  @override
+  String get vaultSetupTitle => 'PIN belirleyin';
+
+  @override
+  String get vaultSetupDesc =>
+      'Bu PIN kasayı yalnızca Resonance içinde açar. PIN\'siz listeyi kimse göremez.';
+
+  @override
+  String get vaultCreatePin => '4–6 haneli bir PIN girin';
+
+  @override
+  String get vaultConfirmPin => 'PIN\'i doğrulayın';
+
+  @override
+  String get pinMismatch => 'PIN\'ler eşleşmiyor';
+
+  @override
+  String get pinInvalid => 'PIN 4–6 hane olmalı';
+
+  @override
+  String get vaultEnterPin => 'PIN\'i girin';
+
+  @override
+  String get pinWrong => 'PIN hatalı';
+
+  @override
+  String pinLocked(int seconds) {
+    return 'Çok fazla deneme. $seconds sn sonra tekrar deneyin.';
+  }
+
+  @override
+  String get vaultEmptyTitle => 'Kasa boş';
+
+  @override
+  String get vaultEmptyDesc =>
+      'Bir şarkıyı buraya gizlemek için seçenekler menüsündeki «Kasaya ekle»yi kullanın.';
+
+  @override
+  String get unbanAction => 'Kasadan çıkar';
+
+  @override
+  String get unbanConfirmTitle => 'Kasadan çıkarılsın mı?';
+
+  @override
+  String unbanConfirmBody(String title) {
+    return '«$title» yeniden görünür ve çalınabilir olur.';
+  }
+
+  @override
+  String get vaultPinNote =>
+      'Kasadaki dosyalar asla silinmez ya da değiştirilmez. PIN\'i unutursanız kasayı yalnızca uygulamanın verilerini silerek yeniden açabilirsiniz.';
 }

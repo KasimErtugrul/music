@@ -1949,4 +1949,83 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get loudnessInfo =>
       'Boosts volume by 0–15 dB; helpful for quietly mastered tracks, very high values may distort. When ReplayGain is on, this channel is used by the per-track loudness normalization.';
+
+  @override
+  String get vaultTitle => 'Vault';
+
+  @override
+  String get settingsDescVault =>
+      'Hide songs everywhere and never play them; your files stay untouched';
+
+  @override
+  String get banSongAction => 'Add to vault';
+
+  @override
+  String get banConfirmTitle => 'Add to vault?';
+
+  @override
+  String banConfirmBody(String title) {
+    return '“$title” will disappear from the library, search, playlists and history, and can never be played. The audio file itself is not touched, moved or deleted.';
+  }
+
+  @override
+  String get banConfirmCleanHistory => 'Also clear its play history';
+
+  @override
+  String get banSongDone => 'Added to vault';
+
+  @override
+  String get bannedToast => 'This song is in the vault and cannot be played';
+
+  @override
+  String get vaultSetupTitle => 'Set a PIN';
+
+  @override
+  String get vaultSetupDesc =>
+      'This PIN opens the vault only inside Resonance. Nobody can see the list without it.';
+
+  @override
+  String get vaultCreatePin => 'Enter a 4–6 digit PIN';
+
+  @override
+  String get vaultConfirmPin => 'Confirm the PIN';
+
+  @override
+  String get pinMismatch => 'PINs do not match';
+
+  @override
+  String get pinInvalid => 'PIN must be 4–6 digits';
+
+  @override
+  String get vaultEnterPin => 'Enter the PIN';
+
+  @override
+  String get pinWrong => 'Wrong PIN';
+
+  @override
+  String pinLocked(int seconds) {
+    return 'Too many attempts. Try again in $seconds s.';
+  }
+
+  @override
+  String get vaultEmptyTitle => 'The vault is empty';
+
+  @override
+  String get vaultEmptyDesc =>
+      'Use “Add to vault” in a song\'s options menu to hide it here.';
+
+  @override
+  String get unbanAction => 'Remove from vault';
+
+  @override
+  String get unbanConfirmTitle => 'Remove from vault?';
+
+  @override
+  String unbanConfirmBody(String title) {
+    return '“$title” will become visible and playable again.';
+  }
+
+  @override
+  String get vaultPinNote =>
+      'Files in the vault are never deleted or modified. If you forget the PIN, the vault can only be opened again by clearing the app\'s data.';
 }

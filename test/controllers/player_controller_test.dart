@@ -16,6 +16,7 @@ import 'package:resonance/data/repositories/preferences_repository.dart';
 import 'package:resonance/data/repositories/queue_state_repository.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/vault_controller.dart';
 
 class _MockPlayerRepository extends Mock implements PlayerRepository {}
 class _MockLibraryRepository extends Mock implements LibraryRepository {}
@@ -334,4 +335,63 @@ void main() {
       expect(PlayerController.quickSpeeds, <double>[0.8, 1.0, 1.25, 1.5]);
     });
   });
+
+  group('Gün 17: kasa koruması', () {
+    test('kasadaki şarkı playSong ile çalınamaz (depo hiç dokunulmaz)',
+        () async {
+      final v = _StubVault(bannedPaths: {'/music/7.mp3'});
+      final guarded = PlayerController(repo, libRepo, stateRepo, historyRepo,
+          vault: v);
+      guarded.onInit();
+
+      final ok = await guarded.playSong(_song(7, 'Yasaklı'));
+
+      expect(ok, isFalse);
+      verifyNever(() => repo.loadQueue(any(),
+          initialIndex: any(named: 'initialIndex'),
+          initialPosition: any(named: 'initialPosition')));
+      verifyNever(repo.play);
+      verifyNever(() => historyRepo.recordPlay(any()));
+    });
+
+    test('kasadaki şarkı kuyruğa da eklenemez', () async {
+      final v = _StubVault(bannedPaths: {'/music/8.mp3'});
+      final guarded = PlayerController(repo, libRepo, stateRepo, historyRepo,
+          vault: v);
+      guarded.onInit();
+
+      await guarded.addToQueue(_song(8, 'Yasaklı 2'));
+
+      expect(guarded.songQueue, isEmpty);
+      verifyNever(() => repo.insertSong(any(), any()));
+    });
+
+    test('kasada olmayan şarkı normal çalar (koruma saydamdır)', () async {
+      final v = _StubVault(bannedPaths: {'/music/8.mp3'});
+      final guarded = PlayerController(repo, libRepo, stateRepo, historyRepo,
+          vault: v);
+      guarded.onInit();
+
+      final ok = await guarded.playSong(_song(9, 'Serbest'));
+
+      expect(ok, isTrue);
+      verify(() => repo.loadQueue(any(),
+          initialIndex: any(named: 'initialIndex'),
+          initialPosition: any(named: 'initialPosition'))).called(1);
+      verify(repo.play).called(1);
+    });
+  });
+}
+
+/// Gün 17: yol bazlı sahte kasa — yalnız isBanned sözleşmesini taşır.
+class _StubVault implements VaultController {
+  _StubVault({required this.bannedPaths});
+
+  final Set<String> bannedPaths;
+
+  @override
+  bool isBanned(SongModel song) => bannedPaths.contains(song.path);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

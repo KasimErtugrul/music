@@ -3357,6 +3357,479 @@ class ExcludedFoldersCompanion extends UpdateCompanion<ExcludedFolder> {
   }
 }
 
+class $BannedSongsTable extends BannedSongs
+    with TableInfo<$BannedSongsTable, BannedSong> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BannedSongsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _songIdMeta = const VerificationMeta('songId');
+  @override
+  late final GeneratedColumn<int> songId = GeneratedColumn<int>(
+    'song_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _titleSnapshotMeta = const VerificationMeta(
+    'titleSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> titleSnapshot = GeneratedColumn<String>(
+    'title_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _artistSnapshotMeta = const VerificationMeta(
+    'artistSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> artistSnapshot = GeneratedColumn<String>(
+    'artist_snapshot',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _albumSnapshotMeta = const VerificationMeta(
+    'albumSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> albumSnapshot = GeneratedColumn<String>(
+    'album_snapshot',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    songId,
+    path,
+    titleSnapshot,
+    artistSnapshot,
+    albumSnapshot,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'banned_songs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BannedSong> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('song_id')) {
+      context.handle(
+        _songIdMeta,
+        songId.isAcceptableOrUnknown(data['song_id']!, _songIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_songIdMeta);
+    }
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pathMeta);
+    }
+    if (data.containsKey('title_snapshot')) {
+      context.handle(
+        _titleSnapshotMeta,
+        titleSnapshot.isAcceptableOrUnknown(
+          data['title_snapshot']!,
+          _titleSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_titleSnapshotMeta);
+    }
+    if (data.containsKey('artist_snapshot')) {
+      context.handle(
+        _artistSnapshotMeta,
+        artistSnapshot.isAcceptableOrUnknown(
+          data['artist_snapshot']!,
+          _artistSnapshotMeta,
+        ),
+      );
+    }
+    if (data.containsKey('album_snapshot')) {
+      context.handle(
+        _albumSnapshotMeta,
+        albumSnapshot.isAcceptableOrUnknown(
+          data['album_snapshot']!,
+          _albumSnapshotMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BannedSong map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BannedSong(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      songId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}song_id'],
+      )!,
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      )!,
+      titleSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title_snapshot'],
+      )!,
+      artistSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}artist_snapshot'],
+      ),
+      albumSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}album_snapshot'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BannedSongsTable createAlias(String alias) {
+    return $BannedSongsTable(attachedDatabase, alias);
+  }
+}
+
+class BannedSong extends DataClass implements Insertable<BannedSong> {
+  final int id;
+  final int songId;
+
+  /// Dosyanın kalıcı kimliği — yeniden taramada songId değişse bile
+  /// yasak bu yol üzerinden devam eder.
+  final String path;
+  final String titleSnapshot;
+  final String? artistSnapshot;
+  final String? albumSnapshot;
+  final DateTime createdAt;
+  const BannedSong({
+    required this.id,
+    required this.songId,
+    required this.path,
+    required this.titleSnapshot,
+    this.artistSnapshot,
+    this.albumSnapshot,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['song_id'] = Variable<int>(songId);
+    map['path'] = Variable<String>(path);
+    map['title_snapshot'] = Variable<String>(titleSnapshot);
+    if (!nullToAbsent || artistSnapshot != null) {
+      map['artist_snapshot'] = Variable<String>(artistSnapshot);
+    }
+    if (!nullToAbsent || albumSnapshot != null) {
+      map['album_snapshot'] = Variable<String>(albumSnapshot);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  BannedSongsCompanion toCompanion(bool nullToAbsent) {
+    return BannedSongsCompanion(
+      id: Value(id),
+      songId: Value(songId),
+      path: Value(path),
+      titleSnapshot: Value(titleSnapshot),
+      artistSnapshot: artistSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(artistSnapshot),
+      albumSnapshot: albumSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(albumSnapshot),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory BannedSong.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BannedSong(
+      id: serializer.fromJson<int>(json['id']),
+      songId: serializer.fromJson<int>(json['songId']),
+      path: serializer.fromJson<String>(json['path']),
+      titleSnapshot: serializer.fromJson<String>(json['titleSnapshot']),
+      artistSnapshot: serializer.fromJson<String?>(json['artistSnapshot']),
+      albumSnapshot: serializer.fromJson<String?>(json['albumSnapshot']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'songId': serializer.toJson<int>(songId),
+      'path': serializer.toJson<String>(path),
+      'titleSnapshot': serializer.toJson<String>(titleSnapshot),
+      'artistSnapshot': serializer.toJson<String?>(artistSnapshot),
+      'albumSnapshot': serializer.toJson<String?>(albumSnapshot),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  BannedSong copyWith({
+    int? id,
+    int? songId,
+    String? path,
+    String? titleSnapshot,
+    Value<String?> artistSnapshot = const Value.absent(),
+    Value<String?> albumSnapshot = const Value.absent(),
+    DateTime? createdAt,
+  }) => BannedSong(
+    id: id ?? this.id,
+    songId: songId ?? this.songId,
+    path: path ?? this.path,
+    titleSnapshot: titleSnapshot ?? this.titleSnapshot,
+    artistSnapshot: artistSnapshot.present
+        ? artistSnapshot.value
+        : this.artistSnapshot,
+    albumSnapshot: albumSnapshot.present
+        ? albumSnapshot.value
+        : this.albumSnapshot,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  BannedSong copyWithCompanion(BannedSongsCompanion data) {
+    return BannedSong(
+      id: data.id.present ? data.id.value : this.id,
+      songId: data.songId.present ? data.songId.value : this.songId,
+      path: data.path.present ? data.path.value : this.path,
+      titleSnapshot: data.titleSnapshot.present
+          ? data.titleSnapshot.value
+          : this.titleSnapshot,
+      artistSnapshot: data.artistSnapshot.present
+          ? data.artistSnapshot.value
+          : this.artistSnapshot,
+      albumSnapshot: data.albumSnapshot.present
+          ? data.albumSnapshot.value
+          : this.albumSnapshot,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BannedSong(')
+          ..write('id: $id, ')
+          ..write('songId: $songId, ')
+          ..write('path: $path, ')
+          ..write('titleSnapshot: $titleSnapshot, ')
+          ..write('artistSnapshot: $artistSnapshot, ')
+          ..write('albumSnapshot: $albumSnapshot, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    songId,
+    path,
+    titleSnapshot,
+    artistSnapshot,
+    albumSnapshot,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BannedSong &&
+          other.id == this.id &&
+          other.songId == this.songId &&
+          other.path == this.path &&
+          other.titleSnapshot == this.titleSnapshot &&
+          other.artistSnapshot == this.artistSnapshot &&
+          other.albumSnapshot == this.albumSnapshot &&
+          other.createdAt == this.createdAt);
+}
+
+class BannedSongsCompanion extends UpdateCompanion<BannedSong> {
+  final Value<int> id;
+  final Value<int> songId;
+  final Value<String> path;
+  final Value<String> titleSnapshot;
+  final Value<String?> artistSnapshot;
+  final Value<String?> albumSnapshot;
+  final Value<DateTime> createdAt;
+  const BannedSongsCompanion({
+    this.id = const Value.absent(),
+    this.songId = const Value.absent(),
+    this.path = const Value.absent(),
+    this.titleSnapshot = const Value.absent(),
+    this.artistSnapshot = const Value.absent(),
+    this.albumSnapshot = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  BannedSongsCompanion.insert({
+    this.id = const Value.absent(),
+    required int songId,
+    required String path,
+    required String titleSnapshot,
+    this.artistSnapshot = const Value.absent(),
+    this.albumSnapshot = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : songId = Value(songId),
+       path = Value(path),
+       titleSnapshot = Value(titleSnapshot);
+  static Insertable<BannedSong> custom({
+    Expression<int>? id,
+    Expression<int>? songId,
+    Expression<String>? path,
+    Expression<String>? titleSnapshot,
+    Expression<String>? artistSnapshot,
+    Expression<String>? albumSnapshot,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (songId != null) 'song_id': songId,
+      if (path != null) 'path': path,
+      if (titleSnapshot != null) 'title_snapshot': titleSnapshot,
+      if (artistSnapshot != null) 'artist_snapshot': artistSnapshot,
+      if (albumSnapshot != null) 'album_snapshot': albumSnapshot,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  BannedSongsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? songId,
+    Value<String>? path,
+    Value<String>? titleSnapshot,
+    Value<String?>? artistSnapshot,
+    Value<String?>? albumSnapshot,
+    Value<DateTime>? createdAt,
+  }) {
+    return BannedSongsCompanion(
+      id: id ?? this.id,
+      songId: songId ?? this.songId,
+      path: path ?? this.path,
+      titleSnapshot: titleSnapshot ?? this.titleSnapshot,
+      artistSnapshot: artistSnapshot ?? this.artistSnapshot,
+      albumSnapshot: albumSnapshot ?? this.albumSnapshot,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (songId.present) {
+      map['song_id'] = Variable<int>(songId.value);
+    }
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (titleSnapshot.present) {
+      map['title_snapshot'] = Variable<String>(titleSnapshot.value);
+    }
+    if (artistSnapshot.present) {
+      map['artist_snapshot'] = Variable<String>(artistSnapshot.value);
+    }
+    if (albumSnapshot.present) {
+      map['album_snapshot'] = Variable<String>(albumSnapshot.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BannedSongsCompanion(')
+          ..write('id: $id, ')
+          ..write('songId: $songId, ')
+          ..write('path: $path, ')
+          ..write('titleSnapshot: $titleSnapshot, ')
+          ..write('artistSnapshot: $artistSnapshot, ')
+          ..write('albumSnapshot: $albumSnapshot, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3373,6 +3846,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ExcludedFoldersTable excludedFolders = $ExcludedFoldersTable(
     this,
   );
+  late final $BannedSongsTable bannedSongs = $BannedSongsTable(this);
   late final PlaylistDao playlistDao = PlaylistDao(this as AppDatabase);
   late final FavoriteDao favoriteDao = FavoriteDao(this as AppDatabase);
   late final HistoryDao historyDao = HistoryDao(this as AppDatabase);
@@ -3387,6 +3861,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final ExcludedFolderDao excludedFolderDao = ExcludedFolderDao(
     this as AppDatabase,
   );
+  late final BannedSongDao bannedSongDao = BannedSongDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3401,6 +3876,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     customThemes,
     equalizerPresets,
     excludedFolders,
+    bannedSongs,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -5533,6 +6009,253 @@ typedef $$ExcludedFoldersTableProcessedTableManager =
       ExcludedFolder,
       PrefetchHooks Function()
     >;
+typedef $$BannedSongsTableCreateCompanionBuilder =
+    BannedSongsCompanion Function({
+      Value<int> id,
+      required int songId,
+      required String path,
+      required String titleSnapshot,
+      Value<String?> artistSnapshot,
+      Value<String?> albumSnapshot,
+      Value<DateTime> createdAt,
+    });
+typedef $$BannedSongsTableUpdateCompanionBuilder =
+    BannedSongsCompanion Function({
+      Value<int> id,
+      Value<int> songId,
+      Value<String> path,
+      Value<String> titleSnapshot,
+      Value<String?> artistSnapshot,
+      Value<String?> albumSnapshot,
+      Value<DateTime> createdAt,
+    });
+
+class $$BannedSongsTableFilterComposer
+    extends Composer<_$AppDatabase, $BannedSongsTable> {
+  $$BannedSongsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get songId => $composableBuilder(
+    column: $table.songId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get titleSnapshot => $composableBuilder(
+    column: $table.titleSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get artistSnapshot => $composableBuilder(
+    column: $table.artistSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get albumSnapshot => $composableBuilder(
+    column: $table.albumSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BannedSongsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BannedSongsTable> {
+  $$BannedSongsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get songId => $composableBuilder(
+    column: $table.songId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get titleSnapshot => $composableBuilder(
+    column: $table.titleSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get artistSnapshot => $composableBuilder(
+    column: $table.artistSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get albumSnapshot => $composableBuilder(
+    column: $table.albumSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BannedSongsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BannedSongsTable> {
+  $$BannedSongsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get songId =>
+      $composableBuilder(column: $table.songId, builder: (column) => column);
+
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+
+  GeneratedColumn<String> get titleSnapshot => $composableBuilder(
+    column: $table.titleSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get artistSnapshot => $composableBuilder(
+    column: $table.artistSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get albumSnapshot => $composableBuilder(
+    column: $table.albumSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$BannedSongsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BannedSongsTable,
+          BannedSong,
+          $$BannedSongsTableFilterComposer,
+          $$BannedSongsTableOrderingComposer,
+          $$BannedSongsTableAnnotationComposer,
+          $$BannedSongsTableCreateCompanionBuilder,
+          $$BannedSongsTableUpdateCompanionBuilder,
+          (
+            BannedSong,
+            BaseReferences<_$AppDatabase, $BannedSongsTable, BannedSong>,
+          ),
+          BannedSong,
+          PrefetchHooks Function()
+        > {
+  $$BannedSongsTableTableManager(_$AppDatabase db, $BannedSongsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BannedSongsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BannedSongsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BannedSongsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> songId = const Value.absent(),
+                Value<String> path = const Value.absent(),
+                Value<String> titleSnapshot = const Value.absent(),
+                Value<String?> artistSnapshot = const Value.absent(),
+                Value<String?> albumSnapshot = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => BannedSongsCompanion(
+                id: id,
+                songId: songId,
+                path: path,
+                titleSnapshot: titleSnapshot,
+                artistSnapshot: artistSnapshot,
+                albumSnapshot: albumSnapshot,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int songId,
+                required String path,
+                required String titleSnapshot,
+                Value<String?> artistSnapshot = const Value.absent(),
+                Value<String?> albumSnapshot = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => BannedSongsCompanion.insert(
+                id: id,
+                songId: songId,
+                path: path,
+                titleSnapshot: titleSnapshot,
+                artistSnapshot: artistSnapshot,
+                albumSnapshot: albumSnapshot,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$BannedSongsTable, BannedSong>(table),
+                  BaseReferences<_$AppDatabase, $BannedSongsTable, BannedSong>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BannedSongsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BannedSongsTable,
+      BannedSong,
+      $$BannedSongsTableFilterComposer,
+      $$BannedSongsTableOrderingComposer,
+      $$BannedSongsTableAnnotationComposer,
+      $$BannedSongsTableCreateCompanionBuilder,
+      $$BannedSongsTableUpdateCompanionBuilder,
+      (
+        BannedSong,
+        BaseReferences<_$AppDatabase, $BannedSongsTable, BannedSong>,
+      ),
+      BannedSong,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5555,4 +6278,6 @@ class $AppDatabaseManager {
       $$EqualizerPresetsTableTableManager(_db, _db.equalizerPresets);
   $$ExcludedFoldersTableTableManager get excludedFolders =>
       $$ExcludedFoldersTableTableManager(_db, _db.excludedFolders);
+  $$BannedSongsTableTableManager get bannedSongs =>
+      $$BannedSongsTableTableManager(_db, _db.bannedSongs);
 }

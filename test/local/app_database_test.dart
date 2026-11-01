@@ -14,11 +14,12 @@ void main() {
   });
 
   test(
-    'schemaVersion is 7 '
+    'schemaVersion is 8 '
     '(v1: base, v2: queue_states, v3: playlist fallback, v4: custom_themes, '
-    'v5: favorites/history fallback, v6: equalizer_presets, v7: excluded_folders)',
+    'v5: favorites/history fallback, v6: equalizer_presets, v7: excluded_folders, '
+    'v8: banned_songs / Gün 17 Kasa)',
     () {
-      expect(db.schemaVersion, 7);
+      expect(db.schemaVersion, 8);
     },
   );
 

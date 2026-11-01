@@ -8,6 +8,7 @@ import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/folder_model.dart';
 import 'package:resonance/data/models/genre_model.dart';
 import 'package:resonance/data/models/song_model.dart';
+import 'package:resonance/data/repositories/banned_song_repository.dart'; // YENİ (Gün 17)
 import 'package:resonance/data/repositories/excluded_folder_repository.dart';
 import 'package:resonance/data/repositories/preferences_repository.dart';
 
@@ -90,6 +91,11 @@ abstract class LibraryRepository {
   /// atomik olarak yeniden kurulur.
   Future<LibraryScanDelta> incrementalScan({bool triggerPlatformScan = false});
 
+  /// Gün 17: filtre kümeleri (gizli klasörler, min. süre, kasa) değiştiğinde
+  /// indeksi HAM VERİDEN yeniden kurar; MediaStore tekrar sorgulanmaz.
+  /// Kasa ban/unban akışı bunu çağırır — tam tarama (rescan) gerekmez.
+  Future<void> refreshFilters();
+
   Future<Uint8List?> artwork(int songId, {int size = 200});
 }
 
@@ -98,12 +104,17 @@ class LibraryRepositoryImpl implements LibraryRepository {
     this._source,
     this._prefs,
     this._excludedRepo, {
+    this.bannedRepo,
     this.useIsolate = true,
   });
 
   final DeviceMediaDataSource _source;
   final PreferencesRepository _prefs;
   final ExcludedFolderRepository _excludedRepo;  // YENİ
+
+  /// Gün 17: kasa deposu. Testler için opsiyonel; null ise yasak filtresi
+  /// uygulanmaz (boş kümelerle aynı davranış).
+  final BannedSongRepository? bannedRepo;
   final bool useIsolate;
 
   _LibraryIndex? _index;
@@ -137,13 +148,19 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
       // Görev 4.3: indeks, güncel min. süre tercihiyle baştan filtreli kurulur.
       final minDurSec = (await _prefs.loadLibrary()).minDurationSeconds;
+      // Gün 17: kasa indeksi — tek sorgu, O(1) üyelik kümeleri.
+      final banIdx = bannedRepo == null
+          ? const BanIndex()
+          : await bannedRepo!.banIndex();
       _rawSongs = songs;
       _excludedPaths = excludedPaths;
       _indexMinDurSec = minDurSec;
 
       final index = useIsolate
-          ? await _buildIndexInIsolate(songs, excludedPaths, minDurSec)
-          : _buildIndex(songs, excludedPaths, minDurSec);
+          ? await _buildIndexInIsolate(
+              songs, excludedPaths, minDurSec, banIdx.ids, banIdx.paths)
+          : _buildIndex(
+              songs, excludedPaths, minDurSec, banIdx.ids, banIdx.paths);
       _orders.clear();
       _sorted.clear();
       _index = index;
@@ -197,9 +214,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
         .map((f) => f.path)
         .toList(growable: false);
     final minDurSec = (await _prefs.loadLibrary()).minDurationSeconds;
+    // Gün 17: kasa listesi her taramada yeniden okunur.
+    final banIdx = bannedRepo == null
+        ? const BanIndex()
+        : await bannedRepo!.banIndex();
     final index = useIsolate
-        ? await _buildIndexInIsolate(fresh, excludedPaths, minDurSec)
-        : _buildIndex(fresh, excludedPaths, minDurSec);
+        ? await _buildIndexInIsolate(
+            fresh, excludedPaths, minDurSec, banIdx.ids, banIdx.paths)
+        : _buildIndex(
+            fresh, excludedPaths, minDurSec, banIdx.ids, banIdx.paths);
     _rawSongs = fresh;
     _excludedPaths = excludedPaths;
     _indexMinDurSec = minDurSec;
@@ -237,9 +260,43 @@ class LibraryRepositoryImpl implements LibraryRepository {
       await rescan();
       return;
     }
+    final banIdx = bannedRepo == null
+        ? const BanIndex()
+        : await bannedRepo!.banIndex();
     final index = useIsolate
-        ? await _buildIndexInIsolate(raw, excluded, minDurSec)
-        : _buildIndex(raw, excluded, minDurSec);
+        ? await _buildIndexInIsolate(
+            raw, excluded, minDurSec, banIdx.ids, banIdx.paths)
+        : _buildIndex(raw, excluded, minDurSec, banIdx.ids, banIdx.paths);
+    _indexMinDurSec = minDurSec;
+    _index = index;
+    _orders.clear();
+    _sorted.clear();
+  }
+
+  /// Gün 17: kasa ban/unban sonrası çağrılır. Ham MediaStore verisi
+  /// dokunulmadan, güncel filtre kümeleriyle indeks yeniden kurulur.
+  /// Geçiş atomiktir: yeni indeks hazır olana dek tüketiciler eskisini okur.
+  @override
+  Future<void> refreshFilters() async {
+    final raw = _rawSongs;
+    if (raw == null) {
+      // İlk yük hiç başlamadıysa sonraki ilk yükleme zaten güncel filtreyle
+      // kurulur; burada yapılacak iş yok.
+      return;
+    }
+    final excludedPaths = (await _excludedRepo.getExcludedFolders())
+        .map((f) => f.path)
+        .toList(growable: false);
+    final minDurSec = (await _prefs.loadLibrary()).minDurationSeconds;
+    final banIdx = bannedRepo == null
+        ? const BanIndex()
+        : await bannedRepo!.banIndex();
+    final index = useIsolate
+        ? await _buildIndexInIsolate(
+            raw, excludedPaths, minDurSec, banIdx.ids, banIdx.paths)
+        : _buildIndex(
+            raw, excludedPaths, minDurSec, banIdx.ids, banIdx.paths);
+    _excludedPaths = excludedPaths;
     _indexMinDurSec = minDurSec;
     _index = index;
     _orders.clear();
@@ -597,11 +654,14 @@ class LibraryRepositoryImpl implements LibraryRepository {
 // ---------- Isolate ----------
 
 Future<_LibraryIndex> _buildIndexInIsolate(
-        List<SongModel> songs,
-        List<String> excludedPaths,
-        int minDurationSeconds) =>
-    Isolate.run<_LibraryIndex>(
-        () => _buildIndex(songs, excludedPaths, minDurationSeconds));
+  List<SongModel> songs,
+  List<String> excludedPaths,
+  int minDurationSeconds,
+  Set<int> bannedIds,
+  Set<String> bannedPaths,
+) =>
+    Isolate.run<_LibraryIndex>(() => _buildIndex(
+        songs, excludedPaths, minDurationSeconds, bannedIds, bannedPaths));
 
 class _LibraryIndex {
   _LibraryIndex({
@@ -700,6 +760,8 @@ _LibraryIndex _buildIndex(
   List<SongModel> songs,
   List<String> excludedPaths,
   int minDurationSeconds,
+  Set<int> bannedIds,
+  Set<String> bannedPaths,
 ) {
   // Görev 4.3: min. süre filtresi indeks girişinde uygulanır; böylece
   // albüm/sanatçı/tür/klasör sayaçları ve detay listeleri de aynı kümeden
@@ -717,6 +779,17 @@ _LibraryIndex _buildIndex(
       }
       return true;
     }).toList(growable: false);
+  }
+
+  // Gün 17 (Kasa): yasaklı şarkılar indeks GİRİŞİNDE elenir. Tüm liste,
+  // sayaç, detay ve arama yüzeyleri bu indeksten türediği için tek noktada
+  // kapanır: kütüphane, albüm/sanatçı/tür/klasör sayfaları, arama,
+  // akıllı listeler, çalma geçmişi ve çalma listesi çözümlemesi.
+  if (bannedIds.isNotEmpty || bannedPaths.isNotEmpty) {
+    songs = songs
+        .where((s) =>
+            !bannedIds.contains(s.id) && !bannedPaths.contains(s.path))
+        .toList(growable: false);
   }
 
   final n = songs.length;

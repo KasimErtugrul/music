@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/core/settings/settings_registry.dart';
 import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/l10n/app_localizations.dart';
@@ -290,6 +291,14 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                         id: 'nav_notifications',
                         builder: () => const NotificationSettingsPage(),
                       )),
+                    ),
+                    // Gün 17 (Kasa): iki bölmeye gömülmez, tam ekran rota.
+                    // Hassas içerik yalnız kendi ekranında gösterilir.
+                    _NavRow(
+                      icon: Icons.lock_outline,
+                      title: l10n.vaultTitle,
+                      desc: l10n.settingsDescVault,
+                      onTap: () => Get.toNamed(AppRoutes.vault),
                     ),
                   ]),
 

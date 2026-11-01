@@ -6,6 +6,9 @@ abstract class HistoryRepository {
   Future<void> recordPlay(SongModel song);
   Stream<List<SongModel>> watchRecentHistory({int limit = 100});
   Future<void> clearHistory();
+
+  /// Gün 17 (Kasa): bir şarkının tüm çalma kayıtlarını siler (ban akışı).
+  Future<void> deleteHistoryForSong(int songId, String? path);
 }
 
 class HistoryRepositoryImpl implements HistoryRepository {
@@ -18,6 +21,10 @@ class HistoryRepositoryImpl implements HistoryRepository {
 
   @override
   Future<void> clearHistory() => _dao.clear();
+
+  @override
+  Future<void> deleteHistoryForSong(int songId, String? path) =>
+      _dao.deleteForSong(songId, path);
 
   @override
   Stream<List<SongModel>> watchRecentHistory({int limit = 100}) {

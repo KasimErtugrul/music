@@ -46,4 +46,19 @@ class HistoryDao extends DatabaseAccessor<AppDatabase> with _$HistoryDaoMixin {
   }
 
   Future<void> clear() => delete(playHistory).go();
+
+  /// Gün 17 (Kasa): bir şarkının tüm çalma kayıtlarını siler. Kasaya alınan
+  /// şarkının geçmişteki başlık/sanatçı anlık görüntüleri bilgi sızdırdığı
+  /// için ban anında (kullanıcı onaylarsa) temizlenir. songId yeterli
+  /// değildir: MediaStore yeniden taramasında kimlik değişen kayıtlar yol
+  /// üzerinden de yakalanır.
+  Future<void> deleteForSong(int songId, String? path) {
+    return (delete(playHistory)
+          ..where(
+            (t) => path == null
+                ? t.songId.equals(songId)
+                : t.songId.equals(songId) | t.path.equals(path),
+          ))
+        .go();
+  }
 }

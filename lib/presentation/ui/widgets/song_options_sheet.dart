@@ -5,6 +5,7 @@ import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/vault_controller.dart'; // YENİ (Gün 17)
 import 'package:resonance/presentation/ui/pages/tag_viewer_page.dart';
 import 'package:resonance/presentation/ui/widgets/playlist_picker_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/song_info_sheet.dart';
@@ -98,9 +99,74 @@ class SongOptionsSheet extends StatelessWidget {
               SongInfoSheet.show(context, song);
             },
           ),
+          // Gün 17 (Kasa): yıkıcı eylem en sonda, hata rengiyle. Şarkı
+          // kütüphaneden/aramadan/çalmadan tamamen çekilir; dosyaya
+          // dokunulmaz.
+          ListTile(
+            leading: Icon(Icons.gpp_bad, color: theme.colorScheme.error),
+            title: Text(
+              l10n.banSongAction,
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              _confirmBan(context, song);
+            },
+          ),
           const SizedBox(height: 8),
         ],
       ),
+    );
+  }
+
+  /// Gün 17: kasa onay diyaloğu. «Geçmişi de temizle» onay kutusu
+  /// varsayılan açıktır — çalma geçmişi tablosu başlık anlık görüntüsü
+  /// tuttuğu için şarkı kasaya alınınca geçmişi de silinmeden bırakılması
+  /// bilgi sızdırır. Dosyanın kendisine dokunulmaz; metinde belirtilir.
+  Future<void> _confirmBan(BuildContext context, SongModel song) async {
+    final l10n = AppLocalizations.of(context);
+    final vault = Get.find<VaultController>();
+    var cleanHistory = true;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: Text(l10n.banConfirmTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.banConfirmBody(song.title)),
+              const SizedBox(height: 12),
+              CheckboxListTile(
+                value: cleanHistory,
+                onChanged: (v) =>
+                    setDialogState(() => cleanHistory = v ?? true),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                title: Text(l10n.banConfirmCleanHistory),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.commonCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.banSongAction),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true) return;
+    await vault.ban(song, cleanHistory: cleanHistory);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.banSongDone)),
     );
   }
 }

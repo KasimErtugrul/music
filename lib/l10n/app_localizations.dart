@@ -3595,6 +3595,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Boosts volume by 0–15 dB; helpful for quietly mastered tracks, very high values may distort. When ReplayGain is on, this channel is used by the per-track loudness normalization.'**
   String get loudnessInfo;
+
+  /// Gün 17: hidden songs vault (screen title and settings entry)
+  ///
+  /// In en, this message translates to:
+  /// **'Vault'**
+  String get vaultTitle;
+
+  /// No description provided for @settingsDescVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide songs everywhere and never play them; your files stay untouched'**
+  String get settingsDescVault;
+
+  /// No description provided for @banSongAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to vault'**
+  String get banSongAction;
+
+  /// No description provided for @banConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to vault?'**
+  String get banConfirmTitle;
+
+  /// No description provided for @banConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'“{title}” will disappear from the library, search, playlists and history, and can never be played. The audio file itself is not touched, moved or deleted.'**
+  String banConfirmBody(String title);
+
+  /// No description provided for @banConfirmCleanHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Also clear its play history'**
+  String get banConfirmCleanHistory;
+
+  /// No description provided for @banSongDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to vault'**
+  String get banSongDone;
+
+  /// No description provided for @bannedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'This song is in the vault and cannot be played'**
+  String get bannedToast;
+
+  /// No description provided for @vaultSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a PIN'**
+  String get vaultSetupTitle;
+
+  /// No description provided for @vaultSetupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This PIN opens the vault only inside Resonance. Nobody can see the list without it.'**
+  String get vaultSetupDesc;
+
+  /// No description provided for @vaultCreatePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a 4–6 digit PIN'**
+  String get vaultCreatePin;
+
+  /// No description provided for @vaultConfirmPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the PIN'**
+  String get vaultConfirmPin;
+
+  /// No description provided for @pinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'PINs do not match'**
+  String get pinMismatch;
+
+  /// No description provided for @pinInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN must be 4–6 digits'**
+  String get pinInvalid;
+
+  /// No description provided for @vaultEnterPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the PIN'**
+  String get vaultEnterPin;
+
+  /// No description provided for @pinWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong PIN'**
+  String get pinWrong;
+
+  /// No description provided for @pinLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again in {seconds} s.'**
+  String pinLocked(int seconds);
+
+  /// No description provided for @vaultEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The vault is empty'**
+  String get vaultEmptyTitle;
+
+  /// No description provided for @vaultEmptyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use “Add to vault” in a song\'s options menu to hide it here.'**
+  String get vaultEmptyDesc;
+
+  /// No description provided for @unbanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from vault'**
+  String get unbanAction;
+
+  /// No description provided for @unbanConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from vault?'**
+  String get unbanConfirmTitle;
+
+  /// No description provided for @unbanConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'“{title}” will become visible and playable again.'**
+  String unbanConfirmBody(String title);
+
+  /// No description provided for @vaultPinNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Files in the vault are never deleted or modified. If you forget the PIN, the vault can only be opened again by clearing the app\'s data.'**
+  String get vaultPinNote;
 }
 
 class _AppLocalizationsDelegate

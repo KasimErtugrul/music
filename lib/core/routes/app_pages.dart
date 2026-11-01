@@ -20,6 +20,7 @@ import 'package:resonance/presentation/ui/pages/settings/appearance/list_style_p
 import 'package:resonance/presentation/ui/pages/settings/appearance/player_style_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/appearance/theme_gallery_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/audio_settings_page.dart';
+import 'package:resonance/presentation/ui/pages/settings/vault_page.dart'; // YENİ (Gün 17)
 import 'package:resonance/presentation/ui/pages/songs_page.dart';
 import 'package:resonance/presentation/ui/pages/splash_page.dart';
 import 'package:resonance/presentation/ui/pages/stats_page.dart';
@@ -85,5 +86,8 @@ abstract final class AppPages {
       name: AppRoutes.notificationSettings,
       page: () => const NotificationSettingsPage(),
     ),
+    // Gün 17 (Kasa): tam ekran rota; denetleyiciler InitialBinding'de
+    // kalıcıdır, ek binding gerekmez.
+    GetPage(name: AppRoutes.vault, page: () => const VaultPage()),
   ];
 }

@@ -8,6 +8,7 @@ import 'package:resonance/data/datasources/equalizer_datasource.dart';
 import 'package:resonance/data/datasources/external_intent_datasource.dart';
 import 'package:resonance/data/datasources/home_widget_datasource.dart';
 import 'package:resonance/data/datasources/local/app_database.dart';
+import 'package:resonance/data/datasources/local/daos/banned_song_dao.dart'; // YENİ (Gün 17)
 import 'package:resonance/data/datasources/local/daos/custom_theme_dao.dart';
 import 'package:resonance/data/datasources/local/daos/equalizer_preset_dao.dart';
 import 'package:resonance/data/datasources/local/daos/excluded_folder_dao.dart'; // YENİ
@@ -42,12 +43,14 @@ import 'package:resonance/presentation/controllers/permission_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/search_controller.dart';
 import 'package:resonance/presentation/controllers/stats_controller.dart';
+import 'package:resonance/presentation/controllers/vault_controller.dart'; // YENİ (Gün 17)
 import 'package:resonance/presentation/controllers/waveform_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resonance/data/datasources/backup_datasource.dart';
 import 'package:resonance/data/datasources/auto_backup_storage.dart';
 import 'package:resonance/data/repositories/backup_repository.dart';
 import 'package:resonance/data/repositories/auto_backup_repository.dart';
+import 'package:resonance/data/repositories/banned_song_repository.dart'; // YENİ (Gün 17)
 import 'package:resonance/presentation/controllers/backup_controller.dart';
 import 'package:resonance/presentation/controllers/auto_backup_controller.dart';
 class InitialBinding extends Bindings {
@@ -72,6 +75,10 @@ class InitialBinding extends Bindings {
       Get.find<AppDatabase>().excludedFolderDao,
       permanent: true,
     );
+    Get.put<BannedSongDao>(
+      Get.find<AppDatabase>().bannedSongDao, // YENİ (Gün 17)
+      permanent: true,
+    );
     Get.put<QueueStateDao>(
       Get.find<AppDatabase>().queueStateDao,
       permanent: true,
@@ -93,11 +100,16 @@ class InitialBinding extends Bindings {
       ExcludedFolderRepositoryImpl(Get.find<ExcludedFolderDao>()),
       permanent: true,
     );
+    Get.put<BannedSongRepository>(
+      BannedSongRepositoryImpl(Get.find<BannedSongDao>()), // YENİ (Gün 17)
+      permanent: true,
+    );
     Get.lazyPut<LibraryRepository>(
       () => LibraryRepositoryImpl(
         Get.find<DeviceMediaDataSource>(),
         Get.find<PreferencesRepository>(),
         Get.find<ExcludedFolderRepository>(),
+        bannedRepo: Get.find<BannedSongRepository>(), // YENİ (Gün 17)
       ),
       fenix: true,
     );
@@ -151,6 +163,18 @@ class InitialBinding extends Bindings {
       permanent: true,
     );
 
+    // --- GÜN 17: KASA (PlayerController'dan ÖNCE; oynatıcı koruması
+    // yapıcıya enjekte edilir) ---
+    Get.put<VaultController>(
+      VaultController(
+        Get.find<BannedSongRepository>(),
+        Get.find<HistoryRepository>(),
+        Get.find<LibraryRepository>(),
+        Get.find<SharedPreferences>(),
+      ),
+      permanent: true,
+    );
+
     // --- CONTROLLER'LAR ---
     Get.put<PlayerRepository>(
       PlayerRepositoryImpl(Get.find<ResonanceAudioHandler>()),
@@ -162,6 +186,7 @@ class InitialBinding extends Bindings {
         Get.find<LibraryRepository>(),
         Get.find<QueueStateRepository>(),
         Get.find<HistoryRepository>(),
+        vault: Get.find<VaultController>(), // YENİ (Gün 17)
       ),
       permanent: true,
     );

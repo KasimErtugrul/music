@@ -18,21 +18,30 @@ import 'package:resonance/data/repositories/history_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/player_repository.dart';
 import 'package:resonance/data/repositories/queue_state_repository.dart';
+import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
 import 'package:resonance/presentation/controllers/preferences_controller.dart';
+import 'package:resonance/presentation/controllers/vault_controller.dart';
 
 class PlayerController extends GetxController implements AutoPlayController {
   PlayerController(
     this._repository,
     this._libraryRepo,
     this._stateRepo,
-    this._historyRepo,
-  );
+    this._historyRepo, {
+    this.vault,
+  });
 
   final PlayerRepository _repository;
   final LibraryRepository _libraryRepo;
   final QueueStateRepository _stateRepo;
   final HistoryRepository _historyRepo;
+
+  /// Gün 17 (Kasa): son savunma hattı. Kasadaki şarkı kütüphaneden
+  /// zaten süzüldüğü için bu koruma normalde hiç tetiklenmez; kuyruk
+  /// geri yükleme ve harici açma gibi UI dışı yollara karşı durur.
+  /// Null ise (bazı testler) koruma devre dışıdır.
+  final VaultController? vault;
   final prefCtrl = Get.find<PreferencesController>();
 
   final currentItem = Rxn<MediaItem>();
@@ -320,7 +329,19 @@ class PlayerController extends GetxController implements AutoPlayController {
     _ => AudioServiceRepeatMode.none,
   };
 
-  Future<void> playSong(SongModel song, {List<SongModel>? queue}) async {
+  /// Gün 17 (Kasa): playSong'in dönüş değeri — kasadaki şarkı reddedilirse
+  /// false döner ve hiçbir depo çağrısı yapılmaz (ses/QUEUE dokunulmaz).
+  /// AutoPlayController sözleşmesi Future<void> bildirir; Future<bool>
+  /// onun bir alt tipidir (arayanlar sonucu yok sayabilir).
+  @override
+  Future<bool> playSong(SongModel song, {List<SongModel>? queue}) async {
+    // Gün 17: kasa koruması — şarkı yasaklıysa asla çalmaz.
+    final vaultCtrl = vault;
+    if (vaultCtrl != null && vaultCtrl.isBanned(song)) {
+      _notifyVaultBlocked();
+      return false;
+    }
+
     // Varsayılanları uygula
     final pref = prefCtrl.playback.value;
     await _repository.setSpeed(pref.speed);
@@ -349,6 +370,22 @@ class PlayerController extends GetxController implements AutoPlayController {
     songQueue.assignAll(list);
     await _repository.loadQueue(list, initialIndex: index < 0 ? 0 : index);
     await _repository.play();
+    return true;
+  }
+
+  /// Gün 17: kasadan çalma denemesi bildirimi. Denetleyici katmanından
+  /// arayüze tek köprü Get.context üzerinden l10n'dir (LibraryController
+  /// deseninin aynısı); bağlam yoksa sessizce döner.
+  void _notifyVaultBlocked() {
+    final context = Get.context;
+    if (context == null) return;
+    final l10n = AppLocalizations.of(context);
+    Get.snackbar(
+      l10n.vaultTitle,
+      l10n.bannedToast,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 3),
+    );
   }
 
   /// Görev 2.3: ReplayGain uygulaması.
@@ -428,6 +465,12 @@ class PlayerController extends GetxController implements AutoPlayController {
 
 
   Future<void> playNext(SongModel song) async {
+    // Gün 17: kasadaki şarkı kuyruğa da eklenemez.
+    final vaultCtrl = vault;
+    if (vaultCtrl != null && vaultCtrl.isBanned(song)) {
+      _notifyVaultBlocked();
+      return;
+    }
     if (songQueue.isEmpty) {
       await playSong(song);
       return;
@@ -438,6 +481,12 @@ class PlayerController extends GetxController implements AutoPlayController {
   }
 
   Future<void> addToQueue(SongModel song) async {
+    // Gün 17: kasadaki şarkı kuyruğa da eklenemez.
+    final vaultCtrl = vault;
+    if (vaultCtrl != null && vaultCtrl.isBanned(song)) {
+      _notifyVaultBlocked();
+      return;
+    }
     if (songQueue.isEmpty) {
       await playSong(song);
       return;

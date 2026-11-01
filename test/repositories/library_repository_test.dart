@@ -13,6 +13,8 @@ import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/preferences_repository.dart';
 import 'package:resonance/data/models/excluded_folder_model.dart';
 import 'package:resonance/data/repositories/excluded_folder_repository.dart';
+import 'package:resonance/data/models/banned_song_model.dart';
+import 'package:resonance/data/repositories/banned_song_repository.dart';
 
 class FakeDataSource implements DeviceMediaDataSource {
   FakeDataSource(this.songs);
@@ -78,6 +80,32 @@ class _FakeExcludedFolderRepository implements ExcludedFolderRepository {
 
   @override
   Future<void> removeFolder(String path) async {}
+}
+
+/// Gün 17: ayarlanabilir sahte kasa deposu (test başına kümeler değiştirilir).
+class FakeBannedRepo implements BannedSongRepository {
+  Set<int> ids = {};
+  Set<String> paths = {};
+  int indexReads = 0;
+
+  @override
+  Future<BanIndex> banIndex() async {
+    indexReads++;
+    return BanIndex(ids: ids, paths: paths);
+  }
+
+  @override
+  Future<List<BannedSongModel>> getBanned() async => const [];
+
+  @override
+  Stream<List<BannedSongModel>> watchBanned() =>
+      const Stream<List<BannedSongModel>>.empty();
+
+  @override
+  Future<void> ban(SongModel songModel) async {}
+
+  @override
+  Future<void> unban(BannedSongModel bannedSongModel) async {}
 }
 
 SongModel song(
@@ -611,6 +639,82 @@ void main() {
         '/storage/emulated/0/Music/Pop',
         '/storage/emulated/0/Music/Rock',
       ]);
+    });
+  });
+
+  group('Gün 17: kasa filtresi', () {
+    late FakeBannedRepo banned;
+    late LibraryRepositoryImpl vaultRepo;
+
+    setUp(() {
+      banned = FakeBannedRepo();
+      vaultRepo = LibraryRepositoryImpl(
+        source,
+        _FakePreferencesRepository(),
+        _FakeExcludedFolderRepository(),
+        bannedRepo: banned,
+        useIsolate: false,
+      );
+    });
+
+    test('yasaklı songId ve path kütüphaneden düşer', () async {
+      banned.ids = {2};
+      banned.paths = {'/storage/emulated/0/Music/5.mp3'};
+
+      final list = await vaultRepo.songs();
+      expect(ids(list), <int>[3, 4, 6, 1]); // 2 (id) ve 5 (path) yok — Türkçe sıra
+    });
+
+    test('arama yasaklı şarkıyı döndürmez', () async {
+      banned.ids = {2}; // 'Çiçek'
+      final result = await vaultRepo.search('çiçek');
+      expect(result.songs, isEmpty);
+    });
+
+    test('tüm şarkıları yasaklanan albüm sayfalardan düşer', () async {
+      // 'Bahar' albümü: 2 ve 5. İkisi de yasaklı → albüm tamamen yok.
+      banned.ids = {2, 5};
+      final albums = await vaultRepo.albums();
+      expect(albums.map((a) => a.title), isNot(contains('Bahar')));
+    });
+
+    test('refreshFilters MediaStore tekrar sorgulamadan indeksi yeniler',
+        () async {
+      await vaultRepo.songs();
+      final before = source.queryCount;
+      expect(before, 1);
+
+      banned.ids = {1}; // sonradan yasakla
+      await vaultRepo.refreshFilters();
+
+      expect(source.queryCount, before); // MediaStore'a dokunulmadı
+      expect(ids(await vaultRepo.songs()), <int>[3, 2, 4, 5, 6]);
+    });
+
+    test('erken dönüş: veri değişmediyse incrementalScan banı işlemez; '
+        'kasa akışı refreshFilters ile işler', () async {
+      await vaultRepo.songs();
+      banned.paths = {'/storage/emulated/0/Music/6.mp3'};
+
+      // Ham MediaStore verisi aynı → erken dönüş, indeks eski kalır.
+      // (Gerçek akışta ban, VaultController.refreshFilters ile anında
+      // işlenir; incrementalScan yalnız MediaStore değişimi içindir.)
+      await vaultRepo.incrementalScan();
+      expect(ids(await vaultRepo.songs()), <int>[3, 2, 4, 5, 6, 1]);
+
+      await vaultRepo.refreshFilters();
+      expect(ids(await vaultRepo.songs()), <int>[3, 2, 4, 5, 1]);
+    });
+
+    test('veri değişen taramada kasa listesi yeniden okunur', () async {
+      await vaultRepo.songs();
+      banned.paths = {'/storage/emulated/0/Music/6.mp3'};
+      source.songs = [
+        ...fixture(),
+        song(7, 'Yeni', dateAdded: DateTime(2026, 1, 6)),
+      ];
+      await vaultRepo.incrementalScan();
+      expect(ids(await vaultRepo.songs()), <int>[3, 2, 4, 5, 7, 1]);
     });
   });
 }

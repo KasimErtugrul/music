@@ -23,5 +23,8 @@ abstract final class AppRoutes {
     static const String backup = '/settings/backup';
     static const String externalPlayer = '/external-player';
 static const String notificationSettings = '/settings/notifications';
+  // Gün 17 (Kasa): tam ekran özel rota — iki bölmeli ayar düzenine gömülmez;
+  // hassas içerik yalnız kendi ekranında gösterilir.
+  static const String vault = '/vault';
 
 }

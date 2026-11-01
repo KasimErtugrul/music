@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:resonance/data/datasources/local/daos/banned_song_dao.dart'; // YENİ (Gün 17)
 import 'package:resonance/data/datasources/local/daos/custom_theme_dao.dart';
 import 'package:resonance/data/datasources/local/daos/equalizer_preset_dao.dart';
 import 'package:resonance/data/datasources/local/daos/excluded_folder_dao.dart';
@@ -11,6 +12,7 @@ import 'package:resonance/data/datasources/local/daos/history_dao.dart';
 import 'package:resonance/data/datasources/local/daos/lyrics_dao.dart';
 import 'package:resonance/data/datasources/local/daos/playlist_dao.dart';
 import 'package:resonance/data/datasources/local/daos/queue_state_dao.dart';
+import 'package:resonance/data/datasources/local/tables/banned_songs_table.dart'; // YENİ (Gün 17)
 import 'package:resonance/data/datasources/local/tables/custom_themes_table.dart';
 import 'package:resonance/data/datasources/local/tables/equalizer_presets_table.dart';
 import 'package:resonance/data/datasources/local/tables/excluded_folders_table.dart';
@@ -26,11 +28,11 @@ part 'app_database.g.dart';
 @DriftDatabase(
   tables: [
     Playlists, PlaylistSongs, Favorites, PlayHistory, Lyrics, QueueStates,
-    CustomThemes, EqualizerPresets, ExcludedFolders, // YENİ
+    CustomThemes, EqualizerPresets, ExcludedFolders, BannedSongs, // YENİ
   ],
   daos: [
     PlaylistDao, FavoriteDao, HistoryDao, LyricsDao, QueueStateDao,
-    CustomThemeDao, EqualizerPresetDao, ExcludedFolderDao, // YENİ
+    CustomThemeDao, EqualizerPresetDao, ExcludedFolderDao, BannedSongDao, // YENİ
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -38,7 +40,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(_open());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -64,6 +66,7 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 6) await m.createTable(equalizerPresets);
           if (from < 7) await m.createTable(excludedFolders); // YENİ
+          if (from < 8) await m.createTable(bannedSongs); // Gün 17: Kasa
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
