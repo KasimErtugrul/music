@@ -2028,4 +2028,79 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vaultPinNote =>
       'Files in the vault are never deleted or modified. If you forget the PIN, the vault can only be opened again by clearing the app\'s data.';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingGetStarted => 'Get started';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to Resonance';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Your music stays on your device; Resonance offers a sleek, fast and fully offline listening experience.';
+
+  @override
+  String get onboardingFeaturesTitle => 'What awaits you';
+
+  @override
+  String get onboardingFeatureLibraryTitle => 'Smart library';
+
+  @override
+  String get onboardingFeatureLibraryDesc =>
+      'Songs, albums, artists, genres and playlists under one roof, with smart lists and listening statistics.';
+
+  @override
+  String get onboardingFeatureSoundTitle => 'Rich sound experience';
+
+  @override
+  String get onboardingFeatureSoundDesc =>
+      'Shape the sound your way with the equalizer, audio effects, speed control and sleep timer.';
+
+  @override
+  String get onboardingFeatureLyricsTitle => 'Lyrics and tags';
+
+  @override
+  String get onboardingFeatureLyricsDesc =>
+      'Synced lyrics, artwork and a powerful tag editor keep your library spotless.';
+
+  @override
+  String get onboardingFeaturePersonalizeTitle => 'Truly yours';
+
+  @override
+  String get onboardingFeaturePersonalizeDesc =>
+      'Themes, fonts, player styles, list layouts and a home screen widget let you tune the interface to your taste.';
+
+  @override
+  String get onboardingMediaTitle => 'Access to your music files';
+
+  @override
+  String get onboardingMediaBody =>
+      'We need permission to read the audio files on your device to build your library. Your files stay on your device and are never uploaded.';
+
+  @override
+  String get onboardingNotificationTitle => 'Playback notification';
+
+  @override
+  String get onboardingNotificationBody =>
+      'We ask for the notification permission so you can see playback controls and the sleep timer in the notification while playing in the background.';
+
+  @override
+  String get onboardingNotificationNotRequired =>
+      'This device does not require an extra notification permission.';
+
+  @override
+  String get onboardingSummaryTitle => 'You\'re all set!';
+
+  @override
+  String get onboardingSummaryBody =>
+      'Your library will be scanned automatically on first use. You can change permission states anytime in Settings.';
+
+  @override
+  String get onboardingPermissionPending => 'Not granted yet';
 }

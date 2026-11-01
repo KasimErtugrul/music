@@ -2024,4 +2024,79 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get vaultPinNote =>
       'Kasadaki dosyalar asla silinmez ya da değiştirilmez. PIN\'i unutursanız kasayı yalnızca uygulamanın verilerini silerek yeniden açabilirsiniz.';
+
+  @override
+  String get onboardingSkip => 'Atla';
+
+  @override
+  String get onboardingNext => 'İleri';
+
+  @override
+  String get onboardingGetStarted => 'Başlayalım';
+
+  @override
+  String get onboardingWelcomeTitle => 'Resonance\'a hoş geldiniz';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Müzikleriniz cihazınızda kalır; Resonance şık, hızlı ve tamamen çevrimdışı bir dinleme deneyimi sunar.';
+
+  @override
+  String get onboardingFeaturesTitle => 'Sizi bekleyenler';
+
+  @override
+  String get onboardingFeatureLibraryTitle => 'Akıllı kütüphane';
+
+  @override
+  String get onboardingFeatureLibraryDesc =>
+      'Şarkılar, albümler, sanatçılar, türler ve çalma listeleri tek çatı altında; akıllı listeler ve dinleme istatistikleriyle birlikte.';
+
+  @override
+  String get onboardingFeatureSoundTitle => 'Zengin ses deneyimi';
+
+  @override
+  String get onboardingFeatureSoundDesc =>
+      'Ekolayzer, ses efektleri, hız ayarı ve uyku zamanlayıcısı ile sesi dilediğiniz gibi biçimlendirin.';
+
+  @override
+  String get onboardingFeatureLyricsTitle => 'Sözler ve etiketler';
+
+  @override
+  String get onboardingFeatureLyricsDesc =>
+      'Senkronize sözler, kapak görselleri ve güçlü etiket düzenleyiciyle kitaplığınızı kusursuz tutun.';
+
+  @override
+  String get onboardingFeaturePersonalizeTitle => 'Tamamen size özel';
+
+  @override
+  String get onboardingFeaturePersonalizeDesc =>
+      'Temalar, yazı tipleri, oynatıcı stilleri, liste düzenleri ve ana ekran widget\'ı ile arayüzü kendinize göre ayarlayın.';
+
+  @override
+  String get onboardingMediaTitle => 'Müzik dosyalarınıza erişim';
+
+  @override
+  String get onboardingMediaBody =>
+      'Kitaplığınızı oluşturabilmemiz için cihazınızdaki ses dosyalarını okuma iznine ihtiyacımız var. Dosyalarınız yalnızca cihazınızda kalır, hiçbir yere gönderilmez.';
+
+  @override
+  String get onboardingNotificationTitle => 'Oynatma bildirimi';
+
+  @override
+  String get onboardingNotificationBody =>
+      'Arka planda çalarken bildirimde oynatma kontrollerini ve uyku zamanlayıcısını görebilmemiz için bildirim izni istiyoruz.';
+
+  @override
+  String get onboardingNotificationNotRequired =>
+      'Bu cihazda bildirim için ayrıca izin gerekmez.';
+
+  @override
+  String get onboardingSummaryTitle => 'Her şey hazır!';
+
+  @override
+  String get onboardingSummaryBody =>
+      'Kitaplığınız ilk kullanımda otomatik taranacak. İzin durumunu istediğiniz zaman Ayarlar\'dan değiştirebilirsiniz.';
+
+  @override
+  String get onboardingPermissionPending => 'Henüz verilmedi';
 }

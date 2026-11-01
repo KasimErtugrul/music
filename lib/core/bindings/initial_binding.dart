@@ -39,6 +39,7 @@ import 'package:resonance/presentation/controllers/external_open_controller.dart
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/history_controller.dart';
 import 'package:resonance/presentation/controllers/home_widget_controller.dart';
+import 'package:resonance/presentation/controllers/onboarding_controller.dart'; // YENİ (Gün 18)
 import 'package:resonance/presentation/controllers/permission_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/search_controller.dart';
@@ -60,6 +61,13 @@ class InitialBinding extends Bindings {
     Get.put<PermissionHelper>(PermissionHelper(), permanent: true);
     Get.put<PermissionController>(
       PermissionController(Get.find<PermissionHelper>()),
+      permanent: true,
+    );
+    // Gün 18 (Onboarding): izin durumunun tek kaynağı yukarıdaki kalıcı
+    // PermissionController'dır; onboarding yalnızca köprü kurar. Bayrak
+    // SharedPreferences'ta kalıcıdır (onboarding.completed).
+    Get.put<OnboardingController>(
+      OnboardingController(prefs: Get.find<SharedPreferences>()),
       permanent: true,
     );
     Get.lazyPut<DeviceMediaDataSource>(

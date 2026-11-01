@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/l10n/app_localizations.dart';
+import 'package:resonance/presentation/controllers/onboarding_controller.dart'; // YENİ (Gün 18)
 import 'package:resonance/presentation/controllers/permission_controller.dart';
 
 /// Minimal açılış sayfası: izin durumunu okur ve uygun sayfaya yönlendirir.
@@ -16,7 +17,15 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<PermissionController>().checkAndRoute();
+      // Gün 18: ilk açılışta (bayrak yoksa) 5 sayfalık onboarding; izin
+      // adımları akışın içindedir. Sonraki açılışlar mevcut izin kapısından
+      // devam eder: bayrak kalıcıdır, izin kısıtlaması değişmez.
+      final onboarding = Get.find<OnboardingController>();
+      if (onboarding.shouldShow) {
+        onboarding.start();
+      } else {
+        Get.find<PermissionController>().checkAndRoute();
+      }
     });
   }
 

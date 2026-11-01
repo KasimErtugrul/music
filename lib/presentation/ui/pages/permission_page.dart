@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:resonance/core/utils/permission_helper.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/permission_controller.dart';
+import 'package:resonance/presentation/ui/widgets/app_monogram.dart'; // Gün 18: monogram paylaşıma açıldı
 
 class PermissionPage extends GetView<PermissionController> {
   const PermissionPage({super.key});
@@ -131,14 +132,9 @@ class _HeroSection extends StatelessWidget {
                     color: theme.colorScheme.surfaceContainerHighest,
                   ),
                   child: Center(
-                    child: SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: CustomPaint(
-                        painter: _MonogramPainter(
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
+                    child: AppMonogram(
+                      size: 32,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
@@ -485,7 +481,7 @@ class _Card extends StatelessWidget {
                   ],
                 ),
               ),
-              if (trailing != null) trailing!,
+              ?trailing,
             ],
           ),
           const SizedBox(height: 10),
@@ -512,72 +508,4 @@ class _Card extends StatelessWidget {
   }
 }
 
-// ========== MONOGRAM PAINTER ==========
-
-class _MonogramPainter extends CustomPainter {
-  _MonogramPainter({required this.color});
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final s = size.width / 32.0;
-
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 2.2 * s;
-
-    // Headphone arch (cubic bezier)
-    final arch = Path()
-      ..moveTo(5 * s, 16 * s)
-      ..cubicTo(5 * s, 9.925 * s, 9.925 * s, 5 * s, 16 * s, 5 * s)
-      ..cubicTo(22.075 * s, 5 * s, 27 * s, 9.925 * s, 27 * s, 16 * s);
-    canvas.drawPath(arch, strokePaint);
-
-    final fillPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    // Sol kulaklık
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(4 * s, 16 * s, 3.5 * s, 7.5 * s),
-        Radius.circular(1.75 * s),
-      ),
-      fillPaint,
-    );
-    // Sağ kulaklık
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(24.5 * s, 16 * s, 3.5 * s, 7.5 * s),
-        Radius.circular(1.75 * s),
-      ),
-      fillPaint,
-    );
-
-    // Ses dalgaları
-    final barPaint = Paint()
-      ..color = color
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 2 * s;
-
-    final barPaintThick = Paint()
-      ..color = color
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 2.2 * s;
-
-    canvas.drawLine(
-        Offset(11 * s, 18.5 * s), Offset(11 * s, 13.5 * s), barPaint);
-    canvas.drawLine(
-        Offset(14.5 * s, 21 * s), Offset(14.5 * s, 11 * s), barPaint);
-    canvas.drawLine(
-        Offset(18 * s, 23 * s), Offset(18 * s, 9 * s), barPaintThick);
-    canvas.drawLine(
-        Offset(21.5 * s, 19.5 * s), Offset(21.5 * s, 12.5 * s), barPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MonogramPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
+// ========== ORTAK KART ==========

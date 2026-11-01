@@ -9,6 +9,7 @@ import 'package:resonance/presentation/ui/pages/favorites_page.dart';
 import 'package:resonance/presentation/ui/pages/genre_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/history_page.dart';
 import 'package:resonance/presentation/ui/pages/home_page.dart';
+import 'package:resonance/presentation/ui/pages/onboarding/onboarding_page.dart'; // YENİ (Gün 18)
 import 'package:resonance/presentation/ui/pages/permission_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/notifications/notification_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/player/player_page.dart';
@@ -32,6 +33,12 @@ abstract final class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.permission,
       page: () => const PermissionPage(),
+    ),
+    // Gün 18 (Onboarding): denetleyiciler InitialBinding'de kalıcıdır,
+    // ek binding gerekmez.
+    GetPage<dynamic>(
+      name: AppRoutes.onboarding,
+      page: () => const OnboardingPage(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.home,

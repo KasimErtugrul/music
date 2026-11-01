@@ -3733,6 +3733,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Files in the vault are never deleted or modified. If you forget the PIN, the vault can only be opened again by clearing the app\'s data.'**
   String get vaultPinNote;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingGetStarted;
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Resonance'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your music stays on your device; Resonance offers a sleek, fast and fully offline listening experience.'**
+  String get onboardingWelcomeBody;
+
+  /// No description provided for @onboardingFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What awaits you'**
+  String get onboardingFeaturesTitle;
+
+  /// No description provided for @onboardingFeatureLibraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart library'**
+  String get onboardingFeatureLibraryTitle;
+
+  /// No description provided for @onboardingFeatureLibraryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs, albums, artists, genres and playlists under one roof, with smart lists and listening statistics.'**
+  String get onboardingFeatureLibraryDesc;
+
+  /// No description provided for @onboardingFeatureSoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rich sound experience'**
+  String get onboardingFeatureSoundTitle;
+
+  /// No description provided for @onboardingFeatureSoundDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape the sound your way with the equalizer, audio effects, speed control and sleep timer.'**
+  String get onboardingFeatureSoundDesc;
+
+  /// No description provided for @onboardingFeatureLyricsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics and tags'**
+  String get onboardingFeatureLyricsTitle;
+
+  /// No description provided for @onboardingFeatureLyricsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced lyrics, artwork and a powerful tag editor keep your library spotless.'**
+  String get onboardingFeatureLyricsDesc;
+
+  /// No description provided for @onboardingFeaturePersonalizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Truly yours'**
+  String get onboardingFeaturePersonalizeTitle;
+
+  /// No description provided for @onboardingFeaturePersonalizeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Themes, fonts, player styles, list layouts and a home screen widget let you tune the interface to your taste.'**
+  String get onboardingFeaturePersonalizeDesc;
+
+  /// No description provided for @onboardingMediaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access to your music files'**
+  String get onboardingMediaTitle;
+
+  /// No description provided for @onboardingMediaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We need permission to read the audio files on your device to build your library. Your files stay on your device and are never uploaded.'**
+  String get onboardingMediaBody;
+
+  /// No description provided for @onboardingNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback notification'**
+  String get onboardingNotificationTitle;
+
+  /// No description provided for @onboardingNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We ask for the notification permission so you can see playback controls and the sleep timer in the notification while playing in the background.'**
+  String get onboardingNotificationBody;
+
+  /// No description provided for @onboardingNotificationNotRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This device does not require an extra notification permission.'**
+  String get onboardingNotificationNotRequired;
+
+  /// No description provided for @onboardingSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set!'**
+  String get onboardingSummaryTitle;
+
+  /// No description provided for @onboardingSummaryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your library will be scanned automatically on first use. You can change permission states anytime in Settings.'**
+  String get onboardingSummaryBody;
+
+  /// No description provided for @onboardingPermissionPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Not granted yet'**
+  String get onboardingPermissionPending;
 }
 
 class _AppLocalizationsDelegate
