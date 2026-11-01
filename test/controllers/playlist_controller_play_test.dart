@@ -60,9 +60,18 @@ void main() {
     // PlaylistController.onInit → loadPlaylists; Get.put bu çağrıyı
     // tetikler, stub'sız mocktail Future dönen çağrıda fırlatır.
     when(() => repo.getPlaylists()).thenAnswer((_) async => []);
+    // Gün 21: loadPlaylists artık üyelik haritasını da ister.
+    when(() => repo.playlistNamesBySong())
+        .thenAnswer((_) async => <int, List<String>>{});
 
     when(() => player.playSong(any(), queue: any(named: 'queue')))
         .thenAnswer((_) async => true);
+    // DİKKAT: `false.obs()` DEĞİL `false.obs`. Parantezli yazım RxBool'u
+    // çağırıp bool döndürür; thenReturn(bool) tip hatası verir ve — daha
+    // kötüsü — mocktail'in when kaydını yarım bırakır (_whenCall yalnız
+    // thenReturn/thenAnswer'da temizlenir). Yarım kayıt, aynı izolasyondaki
+    // TÜM sonraki when() çağrılarını «Cannot call `when` within a stub
+    // response» ile düşürür.
     when(() => player.shuffleEnabled).thenReturn(false.obs);
     when(() => player.toggleShuffle()).thenAnswer((_) async {});
 

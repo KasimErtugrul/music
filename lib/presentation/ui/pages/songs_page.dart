@@ -111,6 +111,8 @@ class _SongsViewState extends State<SongsView> {
                     itemBuilder: (context, i) => SongTile(
                       song: controller.songs[i],
                       queueContext: controller.songs,
+                      // Gün 21: kütüphane kartı üyelik rozetini gösterir.
+                      showPlaylistBadge: true,
                     ),
                   );
                 }
@@ -128,6 +130,8 @@ class _SongsViewState extends State<SongsView> {
                         child: SongTile(
                           song: controller.songs[i],
                           queueContext: controller.songs,
+                          // Gün 21: kütüphane kartı üyelik rozetini gösterir.
+                          showPlaylistBadge: true,
                         ),
                       ),
                     ),

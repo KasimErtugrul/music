@@ -1,4 +1,3 @@
-
 import 'package:drift/drift.dart';
 import 'package:resonance/data/datasources/local/app_database.dart';
 import 'package:resonance/data/datasources/local/tables/playlist_songs_table.dart';
@@ -127,6 +126,11 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase>
           ..orderBy([(t) => OrderingTerm.asc(t.position)]))
         .get();
   }
+
+  /// Gün 21: tüm playlist–şarkı satırları TEK sorguda. Kütüphane
+  /// kartlarındaki üyelik rozetleri bu ham haritadan kurulur; şarkı
+  /// başına ayrı sorgu atılmaz (N+1 yok).
+  Future<List<PlaylistSong>> getAllEntries() => select(playlistSongs).get();
 
   Future<void> reorderSongs(int playlistId, List<int> songIdsInOrder) async {
     await transaction(() async {

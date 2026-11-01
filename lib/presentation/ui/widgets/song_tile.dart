@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/utils/duration_extensions.dart';
@@ -6,6 +5,7 @@ import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/playlist_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/song_options_sheet.dart';
 
@@ -18,6 +18,7 @@ class SongTile extends StatelessWidget {
     this.trailing,
     this.height = 72,
     this.playlistId,
+    this.showPlaylistBadge = false,
   });
 
   final SongModel song;
@@ -31,6 +32,14 @@ class SongTile extends StatelessWidget {
   /// dokunulmaz (kütüphane, arama, kuyruk vb. davranış değişmez).
   final int? playlistId;
 
+  /// Gün 21: true ise satır, şarkının içinde bulunduğu çalma
+  /// listelerini küçük bir rozetle gösterir. Yalnızca kütüphane
+  /// sekmesindeki «Şarkılar» görünümü açar; albüm/sanatçı/arama
+  /// gibi sayfalar bugünkü görünümünü korur. PlaylistController
+  /// kayıtlı değilse (binding'siz pompalanan testler) rozet sessizce
+  /// atlanır — «not found» patlaması yok.
+  final bool showPlaylistBadge;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -42,6 +51,14 @@ class SongTile extends StatelessWidget {
       final isCurrent = player.currentItem.value?.id == song.uri;
       final isPlaying = player.isPlaying.value;
       final isFav = favCtrl.isFavorite(song.id);
+
+      // Gün 21: üyelik rozeti yalnızca bayrak açıksa ve playlist
+      // motoru kayıtlıysa okunur. Okuma Obx içinde olduğu için
+      // listeler değişince satır kendiliğinden güncellenir.
+      final listNames = showPlaylistBadge &&
+              Get.isRegistered<PlaylistController>()
+          ? Get.find<PlaylistController>().listNamesOf(song.id)
+          : const <String>[];
 
       final subtitle = <String>[
         song.artist ?? l10n.unknownArtist,
@@ -93,7 +110,7 @@ class SongTile extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Orta: Başlık ve Alt Başlık
+                  // Orta: Başlık, Alt Başlık ve Liste Rozeti
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -148,6 +165,15 @@ class SongTile extends StatelessWidget {
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
+                        if (listNames.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: Row(
+                              children: [
+                                Flexible(child: _PlaylistBadge(names: listNames)),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -190,6 +216,54 @@ class SongTile extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+/// Gün 21: şarkının üyesi olduğu çalma listelerini gösteren rozet.
+/// Tek satıra sığar: ilk listenin adı, varsa kalan sayısı
+/// («Spor +2» biçimi). Liste adı kullanıcı verisidir; çevrilmez.
+class _PlaylistBadge extends StatelessWidget {
+  const _PlaylistBadge({required this.names});
+
+  final List<String> names;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final label = names.length == 1
+        ? names.first
+        : '${names.first} +${names.length - 1}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.queue_music,
+            size: 13,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

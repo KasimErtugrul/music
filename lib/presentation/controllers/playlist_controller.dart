@@ -1,4 +1,3 @@
-
 import 'package:get/get.dart';
 import 'package:resonance/data/models/playlist_model.dart';
 import 'package:resonance/data/models/song_model.dart';
@@ -15,6 +14,19 @@ class PlaylistController extends GetxController {
   final currentPlaylist = Rxn<PlaylistModel>();
   final currentSongs = <SongModel>[].obs;
 
+  /// Gün 21: şarkı kimliği -> içinde bulunduğu çalma listesi adları.
+  /// Kütüphane sekmesindeki şarkı kartı «hangi listelerde» rozetini
+  /// buradan okur. loadPlaylists her çağrıda haritayı da tazeler;
+  /// ekle/çıkar/sil akışlarının tümü zaten loadPlaylists çağırdığı
+  /// için ayrı bir dinleyiciye gerek yok.
+  final playlistNamesBySong = RxMap<int, List<String>>();
+
+  /// Gün 21: şarkının üyesi olduğu listeler; hiçbiri yoksa boş döner.
+  /// SongTile'ın Obx'i içinde okunur — harita değişince rozetler
+  /// kendiliğinden güncellenir.
+  List<String> listNamesOf(int songId) =>
+      playlistNamesBySong[songId] ?? const <String>[];
+
   @override
   void onInit() {
     super.onInit();
@@ -25,6 +37,8 @@ class PlaylistController extends GetxController {
     isLoading.value = true;
     try {
       playlists.assignAll(await _repo.getPlaylists());
+      // Gün 21: üyelik haritası aynı tazelemede güncellenir.
+      playlistNamesBySong.value = await _repo.playlistNamesBySong();
     } finally {
       isLoading.value = false;
     }

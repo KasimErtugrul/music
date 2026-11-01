@@ -112,7 +112,9 @@ void main() {
 
       await prefs.setBool(SettingsPersistence.autoBackupEnabled, true);
       await prefs.setString(
-          SettingsPersistence.autoBackupFrequency, AutoBackupFrequency.daily);
+        SettingsPersistence.autoBackupFrequency,
+        AutoBackupFrequency.daily,
+      );
 
       await reloadLiveSettingsControllers();
 
@@ -120,70 +122,76 @@ void main() {
       expect(auto.frequency.value, AutoBackupFrequency.daily);
     });
 
-    test('kayıtsız controller\u2019lar sessizce atlanır; akış tamamlanır',
-        () async {
-      await seededPrefs();
-      // Hiçbir canlı controller kayıtlı değil: zincir fırlatmadan biter.
-      await reloadLiveSettingsControllers();
-    });
+    test(
+      'kayıtsız controller\u2019lar sessizce atlanır; akış tamamlanır',
+      () async {
+        await seededPrefs();
+        // Hiçbir canlı controller kayıtlı değil: zincir fırlatmadan biter.
+        await reloadLiveSettingsControllers();
+      },
+    );
   });
 
   group('AutoBackupController.restore canlı yeniden yükleme (Gün 7)', () {
-    test('geri yükleme sonrası ayarlar canlı controller\u2019lara yansır',
-        () async {
-      final prefs = await seededPrefs();
-      Get.put<SharedPreferences>(prefs);
+    test(
+      'geri yükleme sonrası ayarlar canlı controller\u2019lara yansır',
+      () async {
+        final prefs = await seededPrefs();
+        Get.put<SharedPreferences>(prefs);
 
-      final search = Get.put<AppSearchController>(
-        AppSearchController(libraryRepo),
-      );
-      final auto = Get.put<AutoBackupController>(
-        AutoBackupController(
-          autoRepo: autoRepo,
-          backupRepo: backupRepo,
-          libraryRepo: libraryRepo,
-          prefs: prefs,
-        ),
-      );
+        final search = Get.put<AppSearchController>(
+          AppSearchController(libraryRepo),
+        );
+        final auto = Get.put<AutoBackupController>(
+          AutoBackupController(
+            autoRepo: autoRepo,
+            backupRepo: backupRepo,
+            libraryRepo: libraryRepo,
+            prefs: prefs,
+          ),
+        );
 
-      // Canlı durum, geri yüklenecek yedekten sapkın:
-      search.searchHistory.clear();
-      expect(auto.enabled.value, isFalse);
+        // Canlı durum, geri yüklenecek yedekten sapkın:
+        search.searchHistory.clear();
+        expect(auto.enabled.value, isFalse);
 
-      final entry = AutoBackupEntry(
-        fileName: 'resonance_auto_1799999999999.json',
-        path: '/fake/backups/resonance_auto_1799999999999.json',
-        createdAt: DateTime(2026, 10, 31, 9, 30),
-        sizeBytes: 128,
-      );
-      final model = BackupModel(
-        settings: <String, dynamic>{
-          SettingsPersistence.searchHistory: '["metallica","megadeth"]',
-          SettingsPersistence.autoBackupEnabled: true,
-        },
-        playlists: const [],
-        favorites: const [],
-        customThemes: const [],
-        equalizerPresets: const [],
-      );
+        final entry = AutoBackupEntry(
+          fileName: 'resonance_auto_1799999999999.json',
+          path: '/fake/backups/resonance_auto_1799999999999.json',
+          createdAt: DateTime(2026, 10, 31, 9, 30),
+          sizeBytes: 128,
+        );
+        final model = BackupModel(
+          settings: <String, dynamic>{
+            SettingsPersistence.searchHistory: '["metallica","megadeth"]',
+            SettingsPersistence.autoBackupEnabled: true,
+          },
+          playlists: const [],
+          favorites: const [],
+          customThemes: const [],
+          equalizerPresets: const [],
+        );
 
-      // Gerçek veri katmanı davranışı: import ayarları diske uygular
-      // (BackupDatasource.importData sonunda applyBackedUpSettings çağırır).
-      when(() => autoRepo.read(entry)).thenAnswer((_) async => model);
-      when(() => backupRepo.import(model)).thenAnswer((_) async {
-        await prefs.setString(SettingsPersistence.searchHistory,
-            '["metallica","megadeth"]');
-        await prefs.setBool(SettingsPersistence.autoBackupEnabled, true);
-      });
-      when(() => libraryRepo.rescan()).thenAnswer((_) async {});
+        // Gerçek veri katmanı davranışı: import ayarları diske uygular
+        // (BackupDatasource.importData sonunda applyBackedUpSettings çağırır).
+        when(() => autoRepo.read(entry)).thenAnswer((_) async => model);
+        when(() => backupRepo.import(model)).thenAnswer((_) async {
+          await prefs.setString(
+            SettingsPersistence.searchHistory,
+            '["metallica","megadeth"]',
+          );
+          await prefs.setBool(SettingsPersistence.autoBackupEnabled, true);
+        });
+        when(() => libraryRepo.rescan()).thenAnswer((_) async {});
 
-      final ok = await auto.restore(entry);
-      expect(ok, isTrue);
+        final ok = await auto.restore(entry);
+        expect(ok, isTrue);
 
-      // Uygulama yeniden başlatmadan canlı durum yedekteki hale döner:
-      expect(search.searchHistory, <String>['metallica', 'megadeth']);
-      expect(auto.enabled.value, isTrue);
-    });
+        // Uygulama yeniden başlatmadan canlı durum yedekteki hale döner:
+        expect(search.searchHistory, <String>['metallica', 'megadeth']);
+        expect(auto.enabled.value, isTrue);
+      },
+    );
   });
 
   group('reloadLivePlaylistControllers (Gün 9)', () {
@@ -202,6 +210,11 @@ void main() {
       final playlists = Get.put<PlaylistController>(
         PlaylistController(playlistRepo),
       );
+
+      // Gün 21: loadPlaylists üyelik haritasını da ister.
+      when(() => playlistRepo.playlistNamesBySong())
+          .thenAnswer((_) async => <int, List<String>>{});
+
       // onInit'in ilk yüklemesi tamamlanır:
       await Future<void>.delayed(const Duration(milliseconds: 10));
       expect(playlists.playlists.length, 1);
@@ -231,67 +244,74 @@ void main() {
       expect(Get.isPrepared<PlaylistController>(), isTrue);
     });
 
-    test('restore sonrası çalma listeleri canlı controller\u2019a yansır',
-        () async {
-      final prefs = await seededPrefs();
-      Get.put<SharedPreferences>(prefs);
+    test(
+      'restore sonrası çalma listeleri canlı controller\u2019a yansır',
+      () async {
+        final prefs = await seededPrefs();
+        Get.put<SharedPreferences>(prefs);
 
-      final auto = Get.put<AutoBackupController>(
-        AutoBackupController(
-          autoRepo: autoRepo,
-          backupRepo: backupRepo,
-          libraryRepo: libraryRepo,
-          prefs: prefs,
-        ),
-      );
+        final auto = Get.put<AutoBackupController>(
+          AutoBackupController(
+            autoRepo: autoRepo,
+            backupRepo: backupRepo,
+            libraryRepo: libraryRepo,
+            prefs: prefs,
+          ),
+        );
 
-      // Gerçek veri katmanı davranışı: repository her okumada tablonun O
-      // anki durumunu döndürür; import (backupRepo.import) tabloyu silip
-      // yeniden kurar. Restore öncesi liste boş, sonrasında doludur:
-      final playlistRepo = _MockPlaylistRepo();
-      final fresh = <PlaylistModel>[
-        PlaylistModel(
-          id: 7,
-          name: 'Yedekten',
-          songCount: 3,
-          updatedAt: DateTime(2026, 10, 31, 11),
-        ),
-      ];
-      var imported = false;
-      when(() => playlistRepo.getPlaylists()).thenAnswer((_) async {
-        return imported ? fresh : <PlaylistModel>[];
-      });
-      final playlists = Get.put<PlaylistController>(
-        PlaylistController(playlistRepo),
-      );
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-      expect(playlists.playlists, isEmpty);
+        // Gerçek veri katmanı davranışı: repository her okumada tablonun O
+        // anki durumunu döndürür; import (backupRepo.import) tabloyu silip
+        // yeniden kurar. Restore öncesi liste boş, sonrasında doludur:
+        final playlistRepo = _MockPlaylistRepo();
+        final fresh = <PlaylistModel>[
+          PlaylistModel(
+            id: 7,
+            name: 'Yedekten',
+            songCount: 3,
+            updatedAt: DateTime(2026, 10, 31, 11),
+          ),
+        ];
+        var imported = false;
+        when(() => playlistRepo.getPlaylists()).thenAnswer((_) async {
+          return imported ? fresh : <PlaylistModel>[];
+        });
 
-      final entry = AutoBackupEntry(
-        fileName: 'resonance_auto_1799999999999.json',
-        path: '/fake/backups/resonance_auto_1799999999999.json',
-        createdAt: DateTime(2026, 10, 31, 9, 30),
-        sizeBytes: 128,
-      );
-      final model = BackupModel(
-        settings: <String, dynamic>{},
-        playlists: const [],
-        favorites: const [],
-        customThemes: const [],
-        equalizerPresets: const [],
-      );
-      when(() => autoRepo.read(entry)).thenAnswer((_) async => model);
-      when(() => backupRepo.import(model)).thenAnswer((_) async {
-        imported = true; // çalma listeleri tablosu yeniden kuruldu
-      });
-      when(() => libraryRepo.rescan()).thenAnswer((_) async {});
+        // Gün 21: loadPlaylists üyelik haritasını da ister.
+        when(() => playlistRepo.playlistNamesBySong())
+            .thenAnswer((_) async => <int, List<String>>{});
 
-      final ok = await auto.restore(entry);
-      expect(ok, isTrue);
+        final playlists = Get.put<PlaylistController>(
+          PlaylistController(playlistRepo),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(playlists.playlists, isEmpty);
 
-      // Uygulama yeniden başlatmadan liste yedekteki hale döner:
-      expect(playlists.playlists.length, 1);
-      expect(playlists.playlists.first.name, 'Yedekten');
-    });
+        final entry = AutoBackupEntry(
+          fileName: 'resonance_auto_1799999999999.json',
+          path: '/fake/backups/resonance_auto_1799999999999.json',
+          createdAt: DateTime(2026, 10, 31, 9, 30),
+          sizeBytes: 128,
+        );
+        final model = BackupModel(
+          settings: <String, dynamic>{},
+          playlists: const [],
+          favorites: const [],
+          customThemes: const [],
+          equalizerPresets: const [],
+        );
+        when(() => autoRepo.read(entry)).thenAnswer((_) async => model);
+        when(() => backupRepo.import(model)).thenAnswer((_) async {
+          imported = true; // çalma listeleri tablosu yeniden kuruldu
+        });
+        when(() => libraryRepo.rescan()).thenAnswer((_) async {});
+
+        final ok = await auto.restore(entry);
+        expect(ok, isTrue);
+
+        // Uygulama yeniden başlatmadan liste yedekteki hale döner:
+        expect(playlists.playlists.length, 1);
+        expect(playlists.playlists.first.name, 'Yedekten');
+      },
+    );
   });
 }

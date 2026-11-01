@@ -15,6 +15,12 @@ abstract class PlaylistRepository {
   Future<void> removeSong(int playlistId, int songId);
   Future<void> reorderSongs(int playlistId, List<int> songIds);
   Future<bool> isSongInPlaylist(int playlistId, int songId);
+
+  /// Gün 21: şarkı kimliği -> içinde bulunduğu çalma listesi adları.
+  /// Kütüphane sekmesindeki şarkı kartı rozeti bu haritayla beslenir.
+  /// Adı çözülemeyen satırlar (listesi silinmiş «hayalet» kayıtlar)
+  /// haritaya alınmaz.
+  Future<Map<int, List<String>>> playlistNamesBySong();
 }
 
 class PlaylistRepositoryImpl implements PlaylistRepository {
@@ -96,4 +102,22 @@ class PlaylistRepositoryImpl implements PlaylistRepository {
 
   @override
   Future<bool> isSongInPlaylist(int playlistId, int songId) => _dao.isSongInPlaylist(playlistId, songId);
+
+  @override
+  Future<Map<int, List<String>>> playlistNamesBySong() async {
+    final lists = await _dao.getAll();
+    final entries = await _dao.getAllEntries();
+    final nameOf = <int, String>{for (final p in lists) p.id: p.name};
+
+    final map = <int, List<String>>{};
+    for (final e in entries) {
+      final name = nameOf[e.playlistId];
+      // Hayalet satır: playlist silinmiş ama üyelik kalmış (cascade'in
+      // çalışmadığı kurulumlar). Şarkı artık o listede değil; haritaya
+      // adı çözülemeyen bir üyelik yazmak rozette «ölü» ad gösterir.
+      if (name == null) continue;
+      map.putIfAbsent(e.songId, () => <String>[]).add(name);
+    }
+    return map;
+  }
 }
