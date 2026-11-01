@@ -2261,8 +2261,68 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDescAudio.
   ///
   /// In en, this message translates to:
-  /// **'Equalizer, loudness and audio effects'**
+  /// **'Equalizer, volume boost, fade and audio effects'**
   String get settingsDescAudio;
+
+  /// No description provided for @audioGroupEqualizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Equalizer'**
+  String get audioGroupEqualizer;
+
+  /// No description provided for @audioGroupFade.
+  ///
+  /// In en, this message translates to:
+  /// **'Smooth transitions'**
+  String get audioGroupFade;
+
+  /// No description provided for @eqSwitchInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Enables or disables the equalizer. Bands, presets and the volume boost slider live on the equalizer screen.'**
+  String get eqSwitchInfo;
+
+  /// No description provided for @audioEqOpenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Equalizer screen'**
+  String get audioEqOpenTitle;
+
+  /// No description provided for @audioEqOpenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Bands, presets and volume boost'**
+  String get audioEqOpenDesc;
+
+  /// No description provided for @fadeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fade (volume)'**
+  String get fadeTitle;
+
+  /// No description provided for @fadeOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get fadeOff;
+
+  /// No description provided for @fadeShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Short'**
+  String get fadeShort;
+
+  /// No description provided for @fadeLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Long'**
+  String get fadeLong;
+
+  /// No description provided for @fadeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Play and pause are applied gradually instead of instantly: starting a song fades the volume in, pausing fades it out. Short is 0.25 s, long is 1 s.'**
+  String get fadeInfo;
 
   /// No description provided for @settingsDescLibrary.
   ///

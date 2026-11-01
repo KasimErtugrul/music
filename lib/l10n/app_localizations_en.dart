@@ -1183,7 +1183,40 @@ class AppLocalizationsEn extends AppLocalizations {
       'Seek intervals, headphone pause, ReplayGain and repeat';
 
   @override
-  String get settingsDescAudio => 'Equalizer, loudness and audio effects';
+  String get settingsDescAudio =>
+      'Equalizer, volume boost, fade and audio effects';
+
+  @override
+  String get audioGroupEqualizer => 'Equalizer';
+
+  @override
+  String get audioGroupFade => 'Smooth transitions';
+
+  @override
+  String get eqSwitchInfo =>
+      'Enables or disables the equalizer. Bands, presets and the volume boost slider live on the equalizer screen.';
+
+  @override
+  String get audioEqOpenTitle => 'Equalizer screen';
+
+  @override
+  String get audioEqOpenDesc => 'Bands, presets and volume boost';
+
+  @override
+  String get fadeTitle => 'Fade (volume)';
+
+  @override
+  String get fadeOff => 'Off';
+
+  @override
+  String get fadeShort => 'Short';
+
+  @override
+  String get fadeLong => 'Long';
+
+  @override
+  String get fadeInfo =>
+      'Play and pause are applied gradually instead of instantly: starting a song fades the volume in, pausing fades it out. Short is 0.25 s, long is 1 s.';
 
   @override
   String get settingsDescLibrary =>

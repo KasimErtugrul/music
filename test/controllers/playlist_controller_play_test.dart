@@ -1,5 +1,4 @@
-﻿
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:resonance/data/models/song_model.dart';
@@ -14,7 +13,24 @@ import 'package:resonance/presentation/controllers/playlist_controller.dart';
 /// playlist'in tamamıdır; bu testler o sözleşmeyi sabitler.
 class _MockPlaylistRepository extends Mock implements PlaylistRepository {}
 
-class _MockPlayerController extends Mock implements PlayerController {}
+class _MockPlayerController extends Mock implements PlayerController {
+  // GetX 4.7 yaşam döngüsü düzeltmesi: `Get.put` → `_startController`
+  // denetleyiciye `i.onStart()` der; `Get.reset` → `delete` ise `i.onDelete()`.
+  // Bu iki üye GetLifeCycleBase'de `final InternalFinalCallback<void>`
+  // alanlarıdır; `extends Mock implements PlayerController` yazımı temel
+  // sınıf alanlarını DEVRALMADIĞI için bu okumalar noSuchMethod'a düşer ve
+  // mocktail null döndürür → «Null is not a subtype of
+  // InternalFinalCallback<void>» TypeError'ı. Alanları boş geri çağrılı
+  // gerçek örneklerle eziyoruz: mock'un yaşam döngüsü no-op olur (davranış
+  // tamamen stub'lardan gelir); gerçek PlaylistController etkilenmez.
+  @override
+  final InternalFinalCallback<void> onStart =
+      InternalFinalCallback<void>(callback: () {});
+
+  @override
+  final InternalFinalCallback<void> onDelete =
+      InternalFinalCallback<void>(callback: () {});
+}
 
 SongModel _song(int id) => SongModel(
       id: id,

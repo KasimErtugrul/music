@@ -95,6 +95,13 @@ class PreferencesController extends GetxController {
     _repo.savePlayback(playback.value);
   }
 
+    /// Gün 20: yumuşatma (fade) süresi, ms (0 = kapalı). Canlı uygulama
+  /// PlayerController'daki alan dinleyicisi üzerinden depoya yansır.
+  void setFadeMs(int ms) {
+    playback.value = playback.value.copyWith(fadeMs: ms);
+    _repo.savePlayback(playback.value);
+  }
+
   void setPauseOnHeadphone(bool v) {
     playback.value = playback.value.copyWith(pauseOnHeadphone: v);
     _repo.savePlayback(playback.value);
@@ -152,10 +159,13 @@ class PreferencesController extends GetxController {
   /// yaşar, bu sayfada DEĞİLDİR) kullanıcının kendi tercihleri olarak
   /// korunur; aynısı gün içinde ThemeController'ın sayfa sıfırlaması için
   /// de geçerlidir (yazı tipi/ölçek/liste korunur).
-  Future<void> resetPlayback() async {
+    Future<void> resetPlayback() async {
+    // Gün 20 notu: hız/perde gibi fadeMs de BU sayfanın anahtarı değil
+    // (ses ayarları sayfasında yaşar); sıfırlama onlara dokunmaz.
     playback.value = const PlaybackSettingsModel().copyWith(
       speed: playback.value.speed,
       pitch: playback.value.pitch,
+      fadeMs: playback.value.fadeMs,
     );
     await _repo.savePlayback(playback.value);
   }

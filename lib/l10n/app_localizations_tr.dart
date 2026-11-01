@@ -1179,7 +1179,40 @@ class AppLocalizationsTr extends AppLocalizations {
       'Aralıklar, kulaklık duraklatma, ReplayGain ve tekrar';
 
   @override
-  String get settingsDescAudio => 'Ekolayzır, loudness ve ses efektleri';
+  String get settingsDescAudio =>
+      'Ekolayzer, ses yükseltme, yumuşatma ve ses efektleri';
+
+  @override
+  String get audioGroupEqualizer => 'Ekolayzer';
+
+  @override
+  String get audioGroupFade => 'Yumuşatma';
+
+  @override
+  String get eqSwitchInfo =>
+      'Ekolayzerı açar veya kapatır. Bantlar, hazır ayarlar ve ses yükseltme ekolayzer ekranındadır.';
+
+  @override
+  String get audioEqOpenTitle => 'Ekolayzer ekranı';
+
+  @override
+  String get audioEqOpenDesc => 'Bantlar, hazır ayarlar ve ses yükseltme';
+
+  @override
+  String get fadeTitle => 'Ses yumuşatma (fade)';
+
+  @override
+  String get fadeOff => 'Kapalı';
+
+  @override
+  String get fadeShort => 'Kısa';
+
+  @override
+  String get fadeLong => 'Uzun';
+
+  @override
+  String get fadeInfo =>
+      'Çalma ve duraklatma anlık yerine kademeli uygulanır: şarkı başlarken ses yavaşça girer, duraklatınca yavaşça çıkar. Kısa 0,25 sn, uzun 1 sndir.';
 
   @override
   String get settingsDescLibrary =>

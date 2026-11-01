@@ -27,11 +27,17 @@ abstract class PlayerRepository {
   Future<void> skipToPrevious();
   Future<void> setShuffleMode(bool enabled);
   Future<void> setRepeatMode(AudioServiceRepeatMode mode);
-  
+
   Future<void> setVolume(double volume);
   Future<void> setSpeed(double speed);
   Future<void> setPitch(double pitch);
   Future<void> setSkipSilenceEnabled(bool enabled);
+
+  /// Gün 20: oynat/duraklat yumuşatma (fade) süresi. Duration.zero =
+  /// kapalı (davranış eskisi gibi anlıktır). Somut gövdeli bir üyedir:
+  /// yalnız PlayerRepositoryImpl uygular; test sahteleri ve Mock'lar
+  /// (noSuchMethod) bu üyeyi uygulamak zorunda kalmaz.
+  void setFadeDuration(Duration duration) {}
 
   bool get hasNext;
   bool get hasPrevious;
@@ -58,6 +64,75 @@ class PlayerRepositoryImpl implements PlayerRepository {
   @override
   int? get currentIndex => _handler.currentIndex;
 
+  // --- Gün 20: yumuşatma (fade) -------------------------------------------
+  // Oynat/duraklat sesi [_fadeSteps] adımda hedefe taşır. Rampa, kullanıcının
+  // kayıtlı hedef sesine ([_volumeTarget]) göre yapılır; kullanıcı fade
+  // sırasında sesi değiştirirse (setVolume) rampa iptal edilir. Jenerasyon
+  // sayacı, iptal edilmiş bir rampanın son tıkının (örn. fade-out'un
+  // sonundaki pause) geç yazmasını engeller.
+  static const int _fadeSteps = 20;
+
+  Timer? _fadeTimer;
+  int _fadeGeneration = 0;
+  Duration _fadeDuration = Duration.zero;
+  double _volumeTarget = 1.0;
+
+  /// Rampa son bilinen değeri; fade-out bir önceki fade-in'in ortasında
+  /// başlarsa kaldığı yerden inmek için kullanılır.
+  double _fadeValue = 1.0;
+
+  /// Son bilinen çalma durumu. Kulaklık çıkarmada duraklatma, ses akışı
+  /// katmanında (AudioSessionDatasource) yapıldığı için depoyu geçmez;
+  /// o yolda [_assumedPlaying] true kalır ve sonraki play() rampasız
+  /// çalar — ses zaten hedefte olduğundan tutarlıdır.
+  bool _assumedPlaying = false;
+
+  @override
+  void setFadeDuration(Duration duration) {
+    _fadeDuration = duration;
+  }
+
+  void _cancelFade() {
+    _fadeGeneration++;
+    _fadeTimer?.cancel();
+    _fadeTimer = null;
+  }
+
+  /// [from] → [to] arasında [_fadeSteps] adımlı ses rampası. Başlangıçta
+  /// [from] hemen yazılır (ilk adım aralığı eski sesle çalınmasın); bitişte
+  /// tam [to] yazılır ve [then] çalışır (fade-out sonunda pause gibi).
+  /// [then], rampa bu arada iptal edildiyse atlanır.
+  void _rampVolume(double from, double to, Future<void> Function()? then) {
+    final gen = _fadeGeneration;
+    _fadeValue = from;
+    unawaited(_handler.setVolume(from));
+    final stepGap = Duration(
+      microseconds: _fadeDuration.inMicroseconds ~/ _fadeSteps,
+    );
+    var step = 0;
+    _fadeTimer = Timer.periodic(stepGap, (timer) {
+      if (gen != _fadeGeneration) {
+        timer.cancel();
+        return;
+      }
+      step++;
+      if (step >= _fadeSteps) {
+        timer.cancel();
+        _fadeTimer = null;
+        _fadeValue = to;
+        unawaited(() async {
+          await _handler.setVolume(to);
+          if (gen != _fadeGeneration) return; // bu arada iptal olduysa son eylemi atla
+          await then?.call();
+        }());
+      } else {
+        final v = from + (to - from) * (step / _fadeSteps);
+        _fadeValue = v;
+        unawaited(_handler.setVolume(v));
+      }
+    });
+  }
+
   @override
   Future<void> loadQueue(List<SongModel> songs, {int initialIndex = 0, Duration? initialPosition}) async {
     final items = <MediaItem>[
@@ -80,12 +155,40 @@ class PlayerRepositoryImpl implements PlayerRepository {
   Future<void> removeSong(int index) => _handler.removeTrack(index);
   @override
   Future<void> moveSong(int from, int to) => _handler.moveTrack(from, to);
+
   @override
-  Future<void> play() => _handler.play();
+  Future<void> play() async {
+    _cancelFade();
+    final wasPlaying = _assumedPlaying;
+    _assumedPlaying = true;
+    await _handler.play();
+    if (_fadeDuration <= Duration.zero || wasPlaying) return;
+    // Duraklatılmıştan başlama: ses sıfırdan hedefe girer.
+    _rampVolume(0.0, _volumeTarget, null);
+  }
+
   @override
-  Future<void> pause() => _handler.pause();
+  Future<void> pause() async {
+    _cancelFade();
+    final wasPlaying = _assumedPlaying;
+    _assumedPlaying = false;
+    if (_fadeDuration <= Duration.zero || !wasPlaying) {
+      await _handler.pause();
+      return;
+    }
+    // Ses hedefe inince duraklat; play() bu arada gelirse jenerasyon
+    // eşleşmez ve beklemedeki pause atlanır.
+    final from = _fadeValue.clamp(0.0, 1.0).toDouble();
+    _rampVolume(from, 0.0, () => _handler.pause());
+  }
+
   @override
-  Future<void> stop() => _handler.stop();
+  Future<void> stop() async {
+    _cancelFade();
+    _assumedPlaying = false;
+    await _handler.stop();
+  }
+
   @override
   Future<void> seek(Duration position) => _handler.seek(position);
   @override
@@ -98,8 +201,16 @@ class PlayerRepositoryImpl implements PlayerRepository {
       );
   @override
   Future<void> setRepeatMode(AudioServiceRepeatMode mode) => _handler.setRepeatMode(mode);
+
   @override
-  Future<void> setVolume(double volume) => _handler.setVolume(volume);
+  Future<void> setVolume(double volume) async {
+    // Kullanıcının ses tercihi rampadan önce gelir: fade varsa iptal edilir.
+    _volumeTarget = volume;
+    if (_fadeTimer != null) _cancelFade();
+    _fadeValue = volume;
+    await _handler.setVolume(volume);
+  }
+
   @override
   Future<void> setSpeed(double speed) => _handler.setSpeed(speed);
   @override

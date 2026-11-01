@@ -9,6 +9,7 @@ class PlaybackSettingsModel {
     this.pitch = 1.0,
     this.skipSilence = false,
     this.replayGain = false,
+    this.fadeMs = 0,
   });
 
   final int seekIntervalSeconds;
@@ -20,6 +21,13 @@ class PlaybackSettingsModel {
   final double pitch;
   final bool skipSilence;
   final bool replayGain;
+
+  /// Gün 20: oynat/duraklat yumuşatma (fade) süresi, milisaniye.
+  /// 0 = kapalı (davranış eskisi gibi anlıktır); 250 = kısa, 1000 = uzun.
+  /// Depo katmanı (PlayerRepositoryImpl) çalma/duraklatma sırasında sesi
+  /// bu süre boyunca kademeli taşır; kullanıcı fade sırasında ses
+  /// değiştirirse rampa iptal edilir.
+  final int fadeMs;
 
   // Gün 10 notu (Gün 2 bulgusunun ele alınışı): eski sürümlerdeki ölü
   // «gapless» alanı modelden KALDIRILDI — just_audio, setAudioSources ile
@@ -40,6 +48,7 @@ class PlaybackSettingsModel {
     double? pitch,
     bool? skipSilence,
     bool? replayGain,
+    int? fadeMs,
   }) {
     return PlaybackSettingsModel(
       seekIntervalSeconds: seekIntervalSeconds ?? this.seekIntervalSeconds,
@@ -51,6 +60,7 @@ class PlaybackSettingsModel {
       pitch: pitch ?? this.pitch,
       skipSilence: skipSilence ?? this.skipSilence,
       replayGain: replayGain ?? this.replayGain,
+      fadeMs: fadeMs ?? this.fadeMs,
     );
   }
 
@@ -64,6 +74,7 @@ class PlaybackSettingsModel {
     'pitch': pitch,
     'skipSilence': skipSilence,
     'replayGain': replayGain,
+    'fadeMs': fadeMs,
   };
 
   /// Gün 10: alan-seviyesi güvenli ayrıştırma — Gün 3'te ThemeSettings'e
@@ -99,6 +110,7 @@ class PlaybackSettingsModel {
       pitch: doubleOf('pitch', 1.0),
       skipSilence: boolOf('skipSilence', false),
       replayGain: boolOf('replayGain', false),
+      fadeMs: intOf('fadeMs', 0),
     );
   }
 }

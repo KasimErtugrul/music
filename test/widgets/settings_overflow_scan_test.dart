@@ -35,6 +35,7 @@ import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/auto_backup_repository.dart';
 import 'package:resonance/data/repositories/backup_repository.dart';
 import 'package:resonance/data/repositories/custom_theme_repository.dart';
+import 'package:resonance/data/repositories/equalizer_repository.dart';
 import 'package:resonance/data/repositories/excluded_folder_repository.dart';
 import 'package:resonance/data/repositories/favorite_repository.dart';
 import 'package:resonance/data/repositories/history_repository.dart';
@@ -49,6 +50,7 @@ import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/auto_backup_controller.dart';
 import 'package:resonance/presentation/controllers/backup_controller.dart';
 import 'package:resonance/presentation/controllers/excluded_folders_controller.dart';
+import 'package:resonance/presentation/controllers/equalizer_controller.dart';
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/home_widget_controller.dart';
 import 'package:resonance/presentation/controllers/permission_controller.dart';
@@ -97,6 +99,8 @@ class _MockHomeWidgetDatasource extends Mock implements HomeWidgetDatasource {}
 class _MockBackupRepository extends Mock implements BackupRepository {}
 
 class _MockAutoBackupRepository extends Mock implements AutoBackupRepository {}
+
+class _MockEqualizerRepository extends Mock implements EqualizerRepository {}
 
 class _FakeSettingsRepo implements SettingsRepository {
   @override
@@ -279,6 +283,17 @@ void main() {
     Get.put<PreferencesController>(PreferencesController(
       PreferencesRepositoryImpl(prefs),
     ));
+    
+    // Gün 20: ses ayarları sayfası EqualizerController da kullanır. Gerçek
+    // controller + mock depo: _init() parametre okuyamayınca yakalanan
+    // «Not supported» yoluna düşer; sayfa yine taşmasız kurulur.
+    final eqRepo = _MockEqualizerRepository();
+    when(() => eqRepo.isEnabled()).thenAnswer((_) async => false);
+    when(() => eqRepo.setEnabled(any())).thenAnswer((_) async {});
+    when(() => eqRepo.getParameters())
+        .thenAnswer((_) async => throw Exception('Test: EQ parametresi yok'));
+    Get.put<EqualizerRepository>(eqRepo);
+    Get.put<EqualizerController>(EqualizerController(eqRepo));
 
     playerStream = StreamController<MediaItem?>();
     themeCtrl = ThemeController(themeRepo, playerStream.stream, libRepo);

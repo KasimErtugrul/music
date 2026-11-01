@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
@@ -9,9 +10,9 @@ import 'package:resonance/data/datasources/audio_format_datasource.dart';
 import 'package:resonance/data/datasources/auto_browse_delegate.dart';
 import 'package:resonance/data/datasources/metadata_datasource.dart';
 import 'package:resonance/data/models/album_model.dart';
+import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/audio_format_info.dart';
 import 'package:resonance/data/models/playback_settings_model.dart';
-import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/queue_state_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/equalizer_repository.dart';
@@ -62,8 +63,8 @@ class PlayerController extends GetxController implements AutoPlayController {
   final position = Duration.zero.obs;
   final duration = Duration.zero.obs;
 
-   Stream<PlaybackState> get playbackStateStream => _repository.playbackStateStream;
-
+  Stream<PlaybackState> get playbackStateStream =>
+      _repository.playbackStateStream;
 
   String? _loggedSongUri;
   bool _isRestoring = true;
@@ -86,8 +87,6 @@ class PlayerController extends GetxController implements AutoPlayController {
   // her uygulama açılışında kart görünür başlar.
   final miniPlayerHidden = false.obs;
 
-
-
   SongModel? get currentSong {
     final id = currentItem.value?.id;
     if (id == null) return null;
@@ -108,7 +107,6 @@ class PlayerController extends GetxController implements AutoPlayController {
   DateTime? _lastPositionSave;
 
   void _bind() {
-
     _repository.mediaItemStream.listen((item) {
       if (currentItem.value?.id != item?.id) {
         _loggedSongUri = null;
@@ -161,7 +159,8 @@ class PlayerController extends GetxController implements AutoPlayController {
       if (!_isRestoring && isPlaying.value) {
         final now = DateTime.now();
         final last = _lastPositionSave;
-        if (last == null || now.difference(last) >= const Duration(seconds: 5)) {
+        if (last == null ||
+            now.difference(last) >= const Duration(seconds: 5)) {
           _lastPositionSave = now;
           unawaited(_saveQueueState());
         }
@@ -201,6 +200,11 @@ class PlayerController extends GetxController implements AutoPlayController {
         // kanal manuel loudness'e döner (Görev 2.3 sözleşmesi).
         unawaited(_applyReplayGain(currentSong!));
       }
+      if (cur.fadeMs != prev.fadeMs) {
+        // Gün 20: yumuşatma süresi canlı uygulanır; sonraki play/pause'ta
+        // geçerlidir. Süreyi değiştirmek çalan sesi bozmaz.
+        _repository.setFadeDuration(Duration(milliseconds: cur.fadeMs));
+      }
       prev = cur;
     });
   }
@@ -218,7 +222,7 @@ class PlayerController extends GetxController implements AutoPlayController {
 
   void setVolume(double vol) => _repository.setVolume(vol);
 
-    void _checkHistory(Duration pos) {
+  void _checkHistory(Duration pos) {
     final song = currentSong;
     if (song == null || _loggedSongUri == song.uri) return;
 
@@ -231,17 +235,17 @@ class PlayerController extends GetxController implements AutoPlayController {
 
     if (pos >= threshold) {
       unawaited(
-        _historyRepo.recordPlay(song).then<void>(
-          (_) {},
-          onError: (Object e, StackTrace st) =>
-              AppLog.error(e, st, source: 'recordPlay'),
-        ),
+        _historyRepo
+            .recordPlay(song)
+            .then<void>(
+              (_) {},
+              onError: (Object e, StackTrace st) =>
+                  AppLog.error(e, st, source: 'recordPlay'),
+            ),
       );
       _loggedSongUri = song.uri;
     }
   }
-
-
 
   Future<void> fastForward() async {
     final sec = prefCtrl.playback.value.seekIntervalSeconds;
@@ -290,7 +294,8 @@ class PlayerController extends GetxController implements AutoPlayController {
           await _repository.setSpeed(pref.speed);
           await _repository.setPitch(pref.pitch);
           await _repository.setSkipSilenceEnabled(pref.skipSilence);
-
+          // Gün 20: yumuşatma süresi (ses rampası depo katmanında yaşar).
+          _repository.setFadeDuration(Duration(milliseconds: pref.fadeMs));
           // Görev 2.3: geri yüklenen ilk parçaya ReplayGain uygula.
           await _applyReplayGain(restored[safeIndex]);
 
@@ -371,7 +376,8 @@ class PlayerController extends GetxController implements AutoPlayController {
     await _repository.setSpeed(pref.speed);
     await _repository.setPitch(pref.pitch);
     await _repository.setSkipSilenceEnabled(pref.skipSilence);
-
+    // Gün 20: yumuşatma süresi (ses rampası depo katmanında yaşar).
+    _repository.setFadeDuration(Duration(milliseconds: pref.fadeMs));
     // Gün 2 / Karar: varsayılan rastgele/tekrar yalnız YENİ KUYRUK
     // başlarken uygulanır (playSong = yeni kuyruk; playNext/addToQueue
     // yeniden uygulamaz). Kullanıcının mevcut kuyruk üzerindeki manuel
@@ -465,7 +471,7 @@ class PlayerController extends GetxController implements AutoPlayController {
     }
   }
 
-   Future<void> pause() => _repository.pause();
+  Future<void> pause() => _repository.pause();
 
   /// Gün 15: hızlı hız seçeneklerinin TEK kaynağı. SpeedPitchSheet'in
   /// çipleriyle harici oynatıcının hız döngüsü aynı listeyi kullanırdı;
@@ -494,8 +500,6 @@ class PlayerController extends GetxController implements AutoPlayController {
     await _repository.setPitch(pitch);
     prefCtrl.setPitch(pitch);
   }
-
-
 
   Future<void> playNext(SongModel song) async {
     // Gün 17: kasadaki şarkı kuyruğa da eklenemez.
@@ -716,8 +720,13 @@ class PlayerController extends GetxController implements AutoPlayController {
         song.path.isNotEmpty ? song.path : song.uri,
       );
       if (codec == null) return null;
-      final lossless = const {'flac', 'wav', 'aiff', 'ape', 'alac'}
-          .contains(codec.toLowerCase());
+      final lossless = const {
+        'flac',
+        'wav',
+        'aiff',
+        'ape',
+        'alac',
+      }.contains(codec.toLowerCase());
       return AudioFormatInfo(
         codec: codec,
         bitrateKbps: avgKbps > 0 ? avgKbps : null,
