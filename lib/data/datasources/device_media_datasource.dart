@@ -44,9 +44,10 @@ class MediaStoreChannelDataSource implements DeviceMediaDataSource {
     try {
       final raw = await _channel
           .invokeListMethod<Map<Object?, Object?>>('querySongs');
-      return (raw ?? const <Map<Object?, Object?>>[])
+      final songs = (raw ?? const <Map<Object?, Object?>>[])
           .map(SongModel.fromMap)
           .toList(growable: false);
+      return _dedupeByPath(songs);
     } on Exception catch (e) {
       throw AppException(
         AppErrorCode.mediaQueryFailed,
@@ -54,6 +55,37 @@ class MediaStoreChannelDataSource implements DeviceMediaDataSource {
         cause: e,
       );
     }
+  }
+
+  /// Gün 17.7: aynı dosya için çift MediaStore satırını tekilleştirir.
+  ///
+  /// MediaStore bazı durumlarda (MTP ile kopyalama, yedekten dönme, medya
+  /// tarayıcısı yarışı) aynı `_data` yolunu farklı `_id` ile ikinci kez
+  /// kaydedebilir. İki satır da kütüphaneye girer ve aynı dosya iki kez
+  /// görünür; kasadan çıkarma akışında fark edildi — şarkı kasadayken yol
+  /// filtresi her iki satırı da saklıyor, kasadan çıkınca ikisi birden
+  /// ortaya çıkıyordu.
+  ///
+  /// Sözleşme: tek dosya = tek satır. Her yol İLK GÖRÜNDÜĞÜ konumda kalır;
+  /// içeriği o yolun en güncel (en büyük `_id`) kaydıdır — kazanan satır
+  /// kendi konumuna taşınmaz, aksi hâlde liste sırası sessizce değişirdi.
+  /// Yol dosya kimliğidir: iki farklı dosyanın yolu aynı olamaz (aynı
+  /// dosya iki hacimde duruyorsa yolları farklıdır ve her ikisi korunur).
+  static List<SongModel> _dedupeByPath(List<SongModel> songs) {
+    if (songs.length < 2) return songs;
+    // 1. tur: yol -> en güncel kayıt (en büyük _id kazanır).
+    final newestByPath = <String, SongModel>{};
+    for (final s in songs) {
+      final cur = newestByPath[s.path];
+      if (cur == null || s.id > cur.id) newestByPath[s.path] = s;
+    }
+    if (newestByPath.length == songs.length) return songs; // kopya yok
+    // 2. tur: her yol ilk göründüğü konumda, en güncel içerikle yayımlanır.
+    final emitted = <String>{};
+    return <SongModel>[
+      for (final s in songs)
+        if (emitted.add(s.path)) newestByPath[s.path]!,
+    ];
   }
 
   @override

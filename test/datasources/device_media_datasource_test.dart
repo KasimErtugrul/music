@@ -1,4 +1,3 @@
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:resonance/core/errors/app_exception.dart';
@@ -54,8 +53,11 @@ void main() {
     expect(
       dataSource.querySongs(),
       throwsA(
-        isA<AppException>()
-            .having((e) => e.code, 'code', AppErrorCode.mediaQueryFailed),
+        isA<AppException>().having(
+          (e) => e.code,
+          'code',
+          AppErrorCode.mediaQueryFailed,
+        ),
       ),
     );
   });
@@ -70,5 +72,69 @@ void main() {
 
     mock((call) async => throw PlatformException(code: 'media_store_error'));
     expect(await dataSource.queryArtwork(5, size: 96), isNull);
+  });
+
+  group('Gün 17.7: yol bazlı tekilleştirme', () {
+    Map<String, Object?> row(int id, String path, {String? title}) =>
+        <String, Object?>{
+          'id': id,
+          'uri': 'content://media/external/audio/media/$id',
+          'path': path,
+          'title': title ?? 'Şarkı $id',
+          'durationMs': 1000,
+        };
+
+    test(
+      'aynı yol için en güncel kayıt (en büyük id) kazanır, sıra korunur',
+      () async {
+        // Kullanıcı senaryosu: MediaStore aynı dosyayı iki _id ile döndürdü;
+        // şarkı kasadayken yol filtresi ikisini de saklıyordu, kasadan
+        // çıkınca iki kopya birden görünüyordu.
+        mock(
+          (call) async => <Map<String, Object?>>[
+            row(7, '/music/a.mp3', title: 'Eski kayıt'),
+            row(3, '/music/b.mp3'),
+            row(9, '/music/a.mp3', title: 'Taze kayıt'),
+          ],
+        );
+        final songs = await dataSource.querySongs();
+
+        expect(songs, hasLength(2));
+        expect(songs[0].id, 9);
+        expect(songs[0].title, 'Taze kayıt');
+        expect(songs[0].path, '/music/a.mp3');
+        expect(songs[1].id, 3);
+      },
+    );
+
+    test('farklı yollar ayrı dosyalardır ve korunur', () async {
+      mock(
+        (call) async => <Map<String, Object?>>[
+          row(1, '/music/a.mp3'),
+          row(2, '/music/copy/a.mp3'),
+        ],
+      );
+      final songs = await dataSource.querySongs();
+      expect(songs, hasLength(2));
+      expect(songs.map((s) => s.id), [1, 2]);
+    });
+
+    test('kopya yoksa girdi listesi olduğu gibi döner', () async {
+      final input = <Map<String, Object?>>[
+        row(1, '/music/a.mp3'),
+        row(2, '/music/b.mp3'),
+      ];
+      mock((call) async => input);
+      final songs = await dataSource.querySongs();
+      expect(songs, hasLength(2));
+    });
+
+    test('tek satır ve boş liste değişmez', () async {
+      mock((call) async => <Map<String, Object?>>[row(1, '/music/a.mp3')]);
+      expect((await dataSource.querySongs()), hasLength(1));
+
+      mock((call) async => null);
+      expect(await dataSource.querySongs(), isEmpty);
+    });
   });
 }
