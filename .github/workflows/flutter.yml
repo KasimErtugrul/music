@@ -1,0 +1,49 @@
+# Resonance — Flutter CI
+# Analiz + test: her push ve her PR'da çalışır.
+
+name: Flutter CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:   # Actions sekmesinden elle tetiklenebilir
+
+jobs:
+  analyze-and-test:
+    name: analyze & test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Kodu indir
+        uses: actions/checkout@v4
+
+      - name: Flutter kur (stable, önbellekli)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Sürüm bilgisi
+        run: flutter --version
+
+      # packages/resonance_media_store path bağımlılığı repoda
+      # olduğu için ek adım gerekmez, pub get halleder.
+      - name: Bağımlılıkları yükle
+        run: flutter pub get
+
+      - name: Analiz (flutter analyze)
+        run: flutter analyze
+
+      - name: Testleri çalıştır
+        run: flutter test --coverage
+
+      - name: Kapsam raporunu yükle (artifact)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: coverage/lcov.info
+          if-no-files-found: ignore
