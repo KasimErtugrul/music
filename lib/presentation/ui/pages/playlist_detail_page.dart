@@ -59,7 +59,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                 // yalnız tutamaçtan, uzun bas her satırda menü açar.
                 buildDefaultDragHandles: false,
                 itemCount: controller.currentSongs.length,
-                onReorder: (o, n) => controller.reorderSongs(_playlistId, o, n),
+                // onReorderItem: newIndex «çıkarma sonrası» konumdur
+                // (kütüphane önceden düzeltir); controller bu sözleşmede.
+                onReorderItem: (o, n) =>
+                    controller.reorderSongs(_playlistId, o, n),
                 itemBuilder: (context, i) {
                   final song = controller.currentSongs[i];
                   return Row(

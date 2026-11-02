@@ -155,8 +155,11 @@ class EqualizerController extends GetxController {
       double val;
       if (band.centerFrequency < 250) {
         val = preset.curve[0];
-      } else if (band.centerFrequency < 4000) val = preset.curve[1];
-      else val = preset.curve[2];
+      } else if (band.centerFrequency < 4000) {
+        val = preset.curve[1];
+      } else {
+        val = preset.curve[2];
+      }
 
       // -1..1 aralığını cihazın min/max dB değerlerine ölçekle
       if (val > 0) return val * maxDecibels;

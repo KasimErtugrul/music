@@ -68,8 +68,8 @@ void main() {
     expect(c.currentSongs.map((s) => s.id), <int>[1, 2, 3]);
 
     // İlk şarkıyı üçüncü sıraya sürükle: [1,2,3] → [2,1,3]
-    // (ReorderableListView sözleşmesi: newIndex > oldIndex ise -1).
-    await c.reorderSongs(pid, 0, 2);
+    // (onReorderItem sözleşmesi: ham 2, çıkarma için önceden 1'e düzeltilir).
+    await c.reorderSongs(pid, 0, 1);
 
     // Görünüm, DB gerçeğinden yeniden okundu.
     expect(c.currentSongs.map((s) => s.id), <int>[2, 1, 3]);
@@ -98,7 +98,8 @@ void main() {
         .go();
     expect(c.currentSongs.map((s) => s.id), <int>[1, 2, 3]);
 
-    await c.reorderSongs(pid, 0, 2);
+    // Ham 2, onReorderItem sözleşmesinde önceden düzeltilmiş 1'dir.
+    await c.reorderSongs(pid, 0, 1);
 
     // Yazım bayat yerel listeden türetildi ([2,1,3]); 2 numaralı satır DB'de
     // olmadığı için güncelleme onu bulamaz. DB gerçeği [1,3] olur; akış

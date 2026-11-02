@@ -41,7 +41,7 @@ class AutoBackupStorage {
     return Directory('${docs.path}/backups');
   }
 
-  /// Dosya adı sözleşmesi: resonance_auto_<millis>.json
+  /// Dosya adı sözleşmesi: `resonance_auto_<millis>.json`
   /// millis, yaratma zamanıdır; listede DateTime'a çevrilir.
   static const String filePrefix = 'resonance_auto_';
   static const String fileExt = '.json';

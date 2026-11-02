@@ -148,18 +148,13 @@ abstract class AutoMediaIdKind {
 
 class AutoBrowseDelegate {
   AutoBrowseDelegate({
-    required LibraryRepository library,
-    required PlaylistRepository playlists,
-    required FavoriteRepository favorites,
-    required AutoPlayController player,
-    required AppLocalizations Function() l10n,
-    required Future<Uri?> Function(int artworkSongId) artResolver,
-  })  : _library = library,
-        _playlists = playlists,
-        _favorites = favorites,
-        _player = player,
-        _l10n = l10n,
-        _artResolver = artResolver;
+    required this._library,
+    required this._playlists,
+    required this._favorites,
+    required this._player,
+    required this._l10n,
+    required this._artResolver,
+  });
 
   final LibraryRepository _library;
   final PlaylistRepository _playlists;
@@ -437,7 +432,7 @@ class AutoBrowseDelegate {
   // --- ÇALMA ------------------------------------------------------------
 
   /// Browsable bir düğüme "çal" emri geldiğinde düğümün şarkı listesi
-  /// çözülür ve oynatıcıya devredilir. song/<id> tek şarkıyı çalar
+  /// çözülür ve oynatıcıya devredilir. `song/<id>` tek şarkıyı çalar
   /// (kuyruk = kendisi); kategori düğümleri ve bilinmeyen id'ler no-op'tur.
   /// Boş çözüm asla oynatma başlatmaz.
   Future<void> playFromMediaId(String mediaId) async {

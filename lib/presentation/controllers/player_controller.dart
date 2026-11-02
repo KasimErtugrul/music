@@ -360,7 +360,7 @@ class PlayerController extends GetxController implements AutoPlayController {
 
   /// Gün 17 (Kasa): playSong'in dönüş değeri — kasadaki şarkı reddedilirse
   /// false döner ve hiçbir depo çağrısı yapılmaz (ses/QUEUE dokunulmaz).
-  /// AutoPlayController sözleşmesi Future<void> bildirir; Future<bool>
+  /// AutoPlayController sözleşmesi `Future<void>` bildirir; `Future<bool>`
   /// onun bir alt tipidir (arayanlar sonucu yok sayabilir).
   @override
   Future<bool> playSong(SongModel song, {List<SongModel>? queue}) async {
@@ -545,18 +545,20 @@ class PlayerController extends GetxController implements AutoPlayController {
     await _stateRepo.clearState();
   }
 
+  /// [newIndex] «çıkarma sonrası» konumdur (onReorderItem önceden düzeltir);
+  /// moveTrack→moveAudioSource zinciri de bu sözleşmede, -1 tekrarlanmaz.
   Future<void> reorderQueue(int oldIndex, int newIndex) async {
-    if (newIndex > oldIndex) newIndex -= 1;
     final song = songQueue.removeAt(oldIndex);
     songQueue.insert(newIndex, song);
     await _repository.moveSong(oldIndex, newIndex);
   }
 
   Future<void> togglePlayPause() async {
-    if (isPlaying.value)
+    if (isPlaying.value) {
       await _repository.pause();
-    else
+    } else {
       await _repository.play();
+    }
   }
 
   Future<void> seek(Duration pos) => _repository.seek(pos);

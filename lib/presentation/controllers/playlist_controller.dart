@@ -125,8 +125,10 @@ class PlaylistController extends GetxController {
     return player.playSong(first, queue: songs);
   }
 
+  /// [newIndex] «çıkarma sonrası» konumdur: ReorderableListView.onReorderItem
+  /// newIndex'i çıkarma için ÖNCEDEN düzeltir; burada tekrar -1 yapılırsa
+  /// çift kayma olur. just_audio moveAudioSource da aynı sözleşmededir.
   Future<void> reorderSongs(int playlistId, int oldIndex, int newIndex) async {
-    if (newIndex > oldIndex) newIndex -= 1;
     final song = currentSongs.removeAt(oldIndex);
     currentSongs.insert(newIndex, song);
     try {

@@ -10,6 +10,7 @@ abstract final class ShareHelper {
     final album = song.album ?? 'Unknown Album';
     final text = 'Listening to "${song.title}" by $artist (Album: $album)';
     
-    await Share.share(text, subject: song.title);
+    await SharePlus.instance
+        .share(ShareParams(text: text, subject: song.title));
   }
 }

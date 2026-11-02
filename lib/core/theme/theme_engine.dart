@@ -92,7 +92,7 @@ class ThemeSettings {
     return {
       'themeMode': themeMode.name,
       'themeSource': themeSource,
-      'seedColor': seedColor.value,
+      'seedColor': seedColor.toARGB32(),
       'amoled': amoled,
       'highContrast': highContrast,
       'surfaceTint': surfaceTint,

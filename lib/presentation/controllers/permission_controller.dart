@@ -61,6 +61,7 @@ class PermissionController extends GetxController with WidgetsBindingObserver {
     _navigate(media.value.isGranted ? AppRoutes.home : AppRoutes.permission);
   }
 
+  @override
   Future<void> refresh() async {
     try {
       final freshMedia = await _helper.mediaStatus();

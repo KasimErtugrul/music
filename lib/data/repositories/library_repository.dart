@@ -189,7 +189,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
     if (pending != null) {
       try {
         await pending;
-      } on Object {}
+      } on Object {
+        // «Zaten yükleniyor» bekleme hatası: akış zaten sıfırlamaya girer.
+      }
       _index = null;
       _orders.clear();
       _sorted.clear();

@@ -41,8 +41,8 @@ class BackupDatasource {
   BackupDatasource(
     this._db,
     this._prefs, {
-    Future<List<SongModel>> Function()? songsLoader,
-  }) : _songsLoader = songsLoader;
+    this._songsLoader,
+  });
 
   /// Son içe aktarmada eşleşmediği için atlanan şarkı kaydı sayısı.
   int lastImportSkipped = 0;

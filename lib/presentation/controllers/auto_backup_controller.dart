@@ -28,16 +28,12 @@ abstract class AutoBackupFrequency {
 
 class AutoBackupController extends GetxController {
   AutoBackupController({
-    required AutoBackupRepository autoRepo,
-    required BackupRepository backupRepo,
-    required LibraryRepository libraryRepo,
-    SharedPreferences? prefs,
+    required this._autoRepo,
+    required this._backupRepo,
+    required this._libraryRepo,
+    this._prefs,
     DateTime Function()? now,
-  })  : _autoRepo = autoRepo,
-        _backupRepo = backupRepo,
-        _libraryRepo = libraryRepo,
-        _prefs = prefs,
-        _now = now ?? DateTime.now;
+  }) : _now = now ?? DateTime.now;
 
   final AutoBackupRepository _autoRepo;
   final BackupRepository _backupRepo;

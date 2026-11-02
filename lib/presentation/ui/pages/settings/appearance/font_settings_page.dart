@@ -27,23 +27,30 @@ class FontSettingsPage extends StatelessWidget {
 
         return ListView(
           children: [
-            ...FontRegistry.fonts.map((font) {
-              return RadioListTile<String>(
-                title: Text(
-                  font.label,
-                  style: TextStyle(fontFamily: font.family),
-                ),
-                subtitle: Text(
-                  'ç ğ ı İ ö ş ü — 0123456789',
-                  style: TextStyle(fontFamily: font.family),
-                ),
-                value: font.family,
-                groupValue: current,
-                onChanged: (v) {
-                  if (v != null) themeCtrl.setFont(v);
-                },
-              );
-            }),
+            // RadioListTile.groupValue/onChanged 3.32+ deprecated:
+            // grup yönetimi RadioGroup atasına taşındı.
+            RadioGroup<String>(
+              groupValue: current,
+              onChanged: (v) {
+                if (v != null) themeCtrl.setFont(v);
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: FontRegistry.fonts.map((font) {
+                  return RadioListTile<String>(
+                    title: Text(
+                      font.label,
+                      style: TextStyle(fontFamily: font.family),
+                    ),
+                    subtitle: Text(
+                      'ç ğ ı İ ö ş ü — 0123456789',
+                      style: TextStyle(fontFamily: font.family),
+                    ),
+                    value: font.family,
+                  );
+                }).toList(),
+              ),
+            ),
             const Divider(height: 32),
             // --- Yazı ölçeği (Görev 1.6) ---
             Padding(

@@ -119,7 +119,9 @@ class QueuePage extends GetView<PlayerController> {
                                 _UpNextHeader(count: upNext.length),
                               ],
                             ),
-                            onReorder: (oldIndex, newIndex) =>
+                            // onReorderItem: newIndex «çıkarma sonrası»
+                            // konumdur; -1 düzeltmesi yapılmaz.
+                            onReorderItem: (oldIndex, newIndex) =>
                                 controller.reorderQueue(
                               upNextOffset + oldIndex,
                               upNextOffset + newIndex,
