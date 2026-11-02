@@ -4,8 +4,16 @@ import 'package:get/get.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 
 class PlayerControls extends StatelessWidget {
-  const PlayerControls({super.key, this.compact = false});
+  const PlayerControls({super.key, this.compact = false, this.playOnly = false});
+
   final bool compact;
+
+  /// Bulgu 6 düzeltmesi: mini player'ın «geniş» stilinde prev/next düğmeleri
+  /// kartın kendisinde zaten var; PlayerControls bunlarla yan yana çizilirse
+  /// play'in iki yanında İKİŞER tane aynı ikon görünür. playOnly=true iken
+  /// bu satır yalnızca büyük oynat/duraklat düğmesini çizer; prev/next'i
+  /// çağıran yer kendi çizer.
+  final bool playOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -37,18 +45,19 @@ class PlayerControls extends StatelessWidget {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          if (!compact)
+          if (!compact && !playOnly)
             IconButton(
               icon: Icon(Icons.shuffle, color: shuffleColor),
               iconSize: iconSize,
               onPressed: controller.toggleShuffle,
             ),
-          IconButton(
-            icon: const Icon(Icons.skip_previous),
-            iconSize: iconSize + 4,
-            color: theme.colorScheme.onSurface,
-            onPressed: controller.previous,
-          ),
+          if (!playOnly)
+            IconButton(
+              icon: const Icon(Icons.skip_previous),
+              iconSize: iconSize + 4,
+              color: theme.colorScheme.onSurface,
+              onPressed: controller.previous,
+            ),
           
           // Tasarımdaki dolgulu (Filled) Büyük Buton
           Container(
@@ -72,13 +81,14 @@ class PlayerControls extends StatelessWidget {
             ),
           ),
 
-          IconButton(
-            icon: const Icon(Icons.skip_next),
-            iconSize: iconSize + 4,
-            color: theme.colorScheme.onSurface,
-            onPressed: controller.next,
-          ),
-          if (!compact)
+          if (!playOnly)
+            IconButton(
+              icon: const Icon(Icons.skip_next),
+              iconSize: iconSize + 4,
+              color: theme.colorScheme.onSurface,
+              onPressed: controller.next,
+            ),
+          if (!compact && !playOnly)
             IconButton(
               icon: Icon(repeatIcon, color: repeatColor),
               iconSize: iconSize,

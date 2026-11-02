@@ -23,7 +23,10 @@ class CompactLayout extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const MiniPlayer(),
+          // Bulgu 8: M3 varsayılanı 80dp olan gezinme çubuğu 66dp'ye
+          // indirildi; içeriğe ~14dp daha fazla dikey alan kalır.
           NavigationBar(
+            height: 66,
             selectedIndex: currentIndex,
             onDestinationSelected: onDestinationSelected,
             destinations: destinations,

@@ -421,7 +421,12 @@ class _GroupedResults extends StatelessWidget {
             trailing: _PlayAllButton(songs: songs),
           ),
           ...songs.map(
-            (s) => SongTile(song: s, queueContext: songs),
+            // Bulgu 2: arama sonuçlarında da liste üyeliği rozeti gösterilir.
+            (s) => SongTile(
+              song: s,
+              queueContext: songs,
+              showPlaylistBadge: true,
+            ),
           ),
         ],
         if (showAlbums && albums.isNotEmpty) ...[

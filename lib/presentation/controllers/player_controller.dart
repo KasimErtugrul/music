@@ -563,6 +563,40 @@ class PlayerController extends GetxController implements AutoPlayController {
   Future<void> next() => _repository.skipToNext();
   Future<void> previous() => _repository.skipToPrevious();
 
+  /// Bulgu 3: kuyruğun gerçek «şu an çalan» indisi. songQueue orijinal
+  /// sırayı tuttuğu için bu indisteki kayıt currentSong ile birebir aynıdır.
+  /// UI (kuyruk sayfası) uri eşleşmesi yerine bunu okur; aynı şarkı
+  /// kuyrukta iki kez varken yanlış kaydın vurgulanmasını engeller.
+  int? get currentQueueIndex => _repository.currentIndex;
+
+  /// Bulgu 3: kuyruk sayfasındaki bir kayda doğrudan atlama.
+  ///
+  /// Eskiden kuyruktan şarkı seçmek playSong(song, queue: fullQueue)
+  /// çağırıyordu; playSong «yeni kuyruk» sözleşmesi gereği karıştırma/
+  /// tekrar modunu TERCİHTEKİ VARSAYILANA geri çekiyor ve setAudioSources
+  /// ile tüm kuyruğu yeniden kuruyordu. Artık kuyruk hiç yeniden kurulmaz
+  /// (skipToIndex: just_audio seek(index)), kullanıcı o an seçili karıştırma/
+  /// tekrar modu aynen korunur ve kasadaki şarkı koruması aynen geçerlidir.
+  /// Dönüş değeri: atlama yapıldıysa true.
+  Future<bool> playFromQueue(int index) async {
+    if (index < 0 || index >= songQueue.length) return false;
+    final song = songQueue[index];
+    final vaultCtrl = vault;
+    if (vaultCtrl != null && vaultCtrl.isBanned(song)) {
+      _notifyVaultBlocked();
+      return false;
+    }
+    try {
+      await _applyReplayGain(song);
+      await _repository.skipToIndex(index);
+      await _repository.play();
+    } on Object catch (e, st) {
+      AppLog.error(e, st, source: 'playFromQueue');
+      rethrow;
+    }
+    return true;
+  }
+
   /// Aşama 4: mini player kartını ince tutamağa küçültür
   /// (kartta aşağı kaydırma hareketi).
   void hideMiniPlayer() => miniPlayerHidden.value = true;

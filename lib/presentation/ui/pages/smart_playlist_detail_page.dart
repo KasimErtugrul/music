@@ -63,6 +63,8 @@ class _SmartPlaylistDetailPageState extends State<SmartPlaylistDetailPage> {
           itemBuilder: (context, i) => SongTile(
             song: controller.songs[i],
             queueContext: controller.songs,
+            // Bulgu 2: akıllı liste detayında diğer liste üyelikleri görünür.
+            showPlaylistBadge: true,
           ),
         );
       }),

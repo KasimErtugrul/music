@@ -126,8 +126,9 @@ class _MiniPlayerCard extends GetView<PlayerController> {
     final theme = Theme.of(context);
     return Padding(
       // Tasarım: yüzen kart — yatayda kenar boşluğu, gezinme çubuğundan
-      // önce hafif boşluk.
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      // önce hafif boşluk. (Bulgu 8: dikey boşluklar daraltıldı; kart
+      // alt gezinme çubuğuna daha yakın oturur, listeye alan kalır.)
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
       child: Material(
         elevation: elevation,
         color: theme.colorScheme.surfaceContainerHigh,
@@ -160,7 +161,7 @@ class _MiniPlayerCard extends GetView<PlayerController> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Row(
                   children: [
                     const SizedBox(width: 8),
@@ -194,11 +195,16 @@ class _MiniPlayerCard extends GetView<PlayerController> {
                       ),
                     ),
                     if (isWide) ...[
+                      // Bulgu 6: geniş stilde prev/next düğmeleri kartta
+                      // birer kez vardır; PlayerControls playOnly ile yalnız
+                      // büyük play düğmesini çizer. Eskiden PlayerControls
+                      // (prev+play+next) ile dış prev/next yan yana çizildiği
+                      // için play'in iki yanında ikizer aynı ikon vardı.
                       IconButton(
                         icon: const Icon(Icons.skip_previous),
                         onPressed: controller.previous,
                       ),
-                      const PlayerControls(compact: true),
+                      const PlayerControls(compact: true, playOnly: true),
                       IconButton(
                         icon: const Icon(Icons.skip_next),
                         onPressed: controller.next,

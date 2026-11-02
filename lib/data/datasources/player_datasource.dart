@@ -52,6 +52,15 @@ class PlayerDataSource {
     if (player.hasPrevious) await player.seekToPrevious();
   }
 
+  /// Bulgu 3: kuyruk YENİDEN KURULMADAN verilen sıradaki parçaya geçer.
+  /// just_audio'nun seek'i index parametresiyle çağrıldığında oynatma
+  /// listesi, karıştırma sırası ve tekrar modu aynen korunur; yalnızca
+  /// oynatma konumu o kayda taşınır. (setAudioSources ile kuyruğu baştan
+  /// kurmak karıştırma sırasını yeniden üretir ve geçiş gecikmesine yol
+  /// açar.)
+  Future<void> seekToIndex(int index) =>
+      player.seek(Duration.zero, index: index);
+
   Stream<PlayerState> get playerStateStream => player.playerStateStream;
   Stream<Duration> get positionStream => player.positionStream;
   Stream<Duration?> get durationStream => player.durationStream;

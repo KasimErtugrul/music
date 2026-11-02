@@ -7,11 +7,13 @@ import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/playlist_controller.dart';
 import 'package:resonance/presentation/ui/pages/player/player_expanded_view.dart';
 import 'package:resonance/presentation/ui/pages/waveform_viewer_page.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/player_controls.dart';
 import 'package:resonance/presentation/ui/widgets/seek_bar.dart';
+import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 import 'package:resonance/presentation/ui/widgets/state_views.dart';
 import 'package:resonance/presentation/ui/widgets/sleep_timer_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/speed_pitch_sheet.dart';
@@ -41,60 +43,12 @@ class PlayerPage extends GetView<PlayerController> {
       _ => 24.0,
     };
 
+    // Bulgu 5: AppBar kaldırıldı. Eski AppBar'da «ŞİMDİ ÇALIYOR + albüm»
+    // başlığı ve kuyruk ikonu vardı; başlık bilgisi ekranın gövdesinde
+    // zaten var, kuyruğa ise alttaki tutamakla (dokunma/yukarı kaydırma)
+    // erişiliyor. Şimdi yalnızca kapatma ve uyku zamanlayıcı için ince,
+    // arka planın ÜZERİNE çizilen bir üst satır var.
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.keyboard_arrow_down, size: 28),
-          onPressed: () => Get.back(),
-        ),
-        title: Column(
-          children: [
-            Text(
-              l10n.homeNowPlaying.toUpperCase(),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                letterSpacing: 1.5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            // Albüm adına dokununca albüm detay sayfası açılır
-            // (sanatçı adındaki davranışın albüm kardeşi).
-            Obx(() => InkWell(
-              onTap: controller.openAlbumDetail,
-              borderRadius: BorderRadius.circular(6),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
-                child: Text(
-                  controller.currentSong?.album ?? l10n.unknownAlbum,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            )),
-          ],
-        ),
-        centerTitle: true,
-        actions: [
-          // Kuyruk: kullanıcı şarkıları kuyruğa ekleyebiliyor ama kuyruk
-          // sayfasına hiçbir giriş noktası yoktu; AppBar'dan erişim eklendi.
-          IconButton(
-            icon: const Icon(Icons.queue_music_outlined),
-            tooltip: l10n.queue,
-            onPressed: () => Get.toNamed(AppRoutes.queue),
-          ),
-          IconButton(
-            icon: const Icon(Icons.timer_outlined),
-            tooltip: l10n.sleepTimer,
-            onPressed: () => SleepTimerSheet.show(context),
-          ),
-        ],
-      ),
       body: Stack(
         children: [
           // 1. Arka Plan Katmanı (Solid, Gradient veya Blur)
@@ -133,17 +87,21 @@ class PlayerPage extends GetView<PlayerController> {
               );
             }),
 
-          // 2. İçerik
+          // 2. İçerik — üst satır (kapat + uyku zamanlayıcı) ve gövde
           SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide =
-                    Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
-                if (isWide) return const PlayerExpandedView();
+            child: Column(
+              children: [
+                _PlayerTopBar(l10n: l10n),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide =
+                          Responsive.fromWidth(constraints.maxWidth) != WindowSize.compact;
+                      if (isWide) return const PlayerExpandedView();
 
-                return Column(
-                  children: [
-                    const Spacer(),
+                      return Column(
+                        children: [
+                          const Spacer(),
                     // Kapak Görseli ve Atmosferik Işık
                     Obx(() {
                       final song = controller.currentSong;
@@ -253,6 +211,9 @@ class PlayerPage extends GetView<PlayerController> {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
+                                  // Bulgu 2: şarkının üyesi olduğu çalma
+                                  // listeleri oynatıcı ekranında da görünür.
+                                  _SongPlaylistChips(songId: song.id),
                                 ],
                               ),
                             ),
@@ -392,8 +353,73 @@ class PlayerPage extends GetView<PlayerController> {
                     ),
                   ],
                 );
-              },
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
+          ],
+      ),
+    );
+  }
+}
+
+/// Bulgu 2: çalan şarkının üyesi olduğu çalma listelerini gösteren çip
+/// satırı. SongTile'daki rozetle aynı görsel dili kullanır (PlaylistBadge).
+/// PlaylistController kayıtlı değilse (binding'siz testler) sessizce
+/// yok olur; şarkı hiçbir listede değilse satır hiç çizilmez.
+class _SongPlaylistChips extends StatelessWidget {
+  const _SongPlaylistChips({required this.songId});
+
+  final int songId;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Get.isRegistered<PlaylistController>()) {
+      return const SizedBox.shrink();
+    }
+    final playlistCtrl = Get.find<PlaylistController>();
+    return Obx(() {
+      final names = playlistCtrl.listNamesOf(songId);
+      if (names.isEmpty) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(top: 6, left: 2),
+        child: Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          children: [for (final n in names) PlaylistBadge(names: [n])],
+        ),
+      );
+    });
+  }
+}
+
+/// Bulgu 5: AppBar'ın yerini alan ince üst satır. Sol: oynatıcıyı kapat
+/// (aşağı ok). Sağ: uyku zamanlayıcı. Kuyruk ikonu bilinçli olarak
+/// YOKTUR — alttaki sürükleme tutamağı (dokunma / yukarı kaydırma) aynı
+/// işi yapar ve kullanıcının talebi üzerine ikon kaldırıldı.
+class _PlayerTopBar extends StatelessWidget {
+  const _PlayerTopBar({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 4, 8, 0),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.keyboard_arrow_down, size: 28),
+            tooltip: l10n.backToParent,
+            onPressed: () => Get.back(),
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.timer_outlined),
+            tooltip: l10n.sleepTimer,
+            onPressed: () => SleepTimerSheet.show(context),
           ),
         ],
       ),

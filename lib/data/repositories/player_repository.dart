@@ -25,6 +25,11 @@ abstract class PlayerRepository {
   Future<void> seek(Duration position);
   Future<void> skipToNext();
   Future<void> skipToPrevious();
+
+  /// Bulgu 3: kuyruk sırasını yeniden kurmadan verilen indisteki parçaya
+  /// geçer (karıştırma/tekrar durumu korunur). Somut gövdeli üye: yalnız
+  /// PlayerRepositoryImpl uygular; test sahteleri bozulmaz.
+  Future<void> skipToIndex(int index) async {}
   Future<void> setShuffleMode(bool enabled);
   Future<void> setRepeatMode(AudioServiceRepeatMode mode);
 
@@ -195,6 +200,8 @@ class PlayerRepositoryImpl implements PlayerRepository {
   Future<void> skipToNext() => _handler.skipToNext();
   @override
   Future<void> skipToPrevious() => _handler.skipToPrevious();
+  @override
+  Future<void> skipToIndex(int index) => _handler.skipToIndex(index);
   @override
   Future<void> setShuffleMode(bool enabled) => _handler.setShuffleMode(
         enabled ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none,

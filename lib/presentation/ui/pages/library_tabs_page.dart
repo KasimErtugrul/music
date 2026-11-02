@@ -85,7 +85,10 @@ class _LibraryTabsPageState extends State<LibraryTabsPage>
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
+          // Bulgu 8: sekme hapları bölgesi 60dp'den 46dp'ye indirildi
+          // (hap yüksekliği 40 + 6dp boşluk); orta alandaki listeye ~14dp
+          // daha fazla yer kalır.
+          preferredSize: const Size.fromHeight(46),
           child: Column(
             children: [
               // 1. Search Bar (Animated)
@@ -121,13 +124,13 @@ class _LibraryTabsPageState extends State<LibraryTabsPage>
               // Gün 17.8: sayaçlar LibraryTabPills içinde Obx ile okunur;
               // yükleme bitince rozetler kendiliğinden güncellenir.
               SizedBox(
-                height: 48,
+                height: 40,
                 child: LibraryTabPills(
                   controller: libCtrl,
                   tabController: _tabController,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
             ],
           ),
         ),

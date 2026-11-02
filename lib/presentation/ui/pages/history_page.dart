@@ -29,7 +29,11 @@ class HistoryPage extends GetView<HistoryController> {
 
         return ListView.builder(
           itemCount: controller.history.length,
-          itemBuilder: (context, i) => SongTile(song: controller.history[i]),
+          // Bulgu 2: geçmiş satırlarında da hangi listelerde olduğu görünür.
+          itemBuilder: (context, i) => SongTile(
+            song: controller.history[i],
+            showPlaylistBadge: true,
+          ),
         );
       }),
     );

@@ -183,6 +183,10 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   @override
   Future<void> skipToPrevious() => _source.skipToPrevious();
 
+  /// Bulgu 3: kuyruk sayfasındaki bir kayda doğrudan atlama; kuyruk ve
+  /// karıştırma/tekrar durumu yeniden kurulmaz.
+  Future<void> skipToIndex(int index) => _source.seekToIndex(index);
+
   // BaseAudioHandler'da override edilmesi gerekmeyenler
   Future<void> setVolume(double volume) => _source.setVolume(volume);
   Future<void> setPitch(double pitch) => _source.setPitch(pitch);

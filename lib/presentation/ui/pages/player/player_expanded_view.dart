@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:resonance/core/theme/extensions/player_theme_extension.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
+import 'package:resonance/presentation/controllers/playlist_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/player_controls.dart';
 import 'package:resonance/presentation/ui/widgets/seek_bar.dart';
+import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 
+/// Geniş ekran (tablet / yatay) oynatıcı düzeni.
+///
+/// Bulgu 7: bu düzen daha önce «Oynatıcı görünümü» ayarlarının çoğunu
+/// yok sayıyordu — kapak köşesi 32'ye sabitti (artworkShape okunmuyor),
+/// animasyon seviyesi 'none' olsa bile parıltı yoktu/çizim mantığı
+/// ayara bağlı değildi. Artık kompakt düzendeyle AYNI PlayerThemeExtension
+/// değerlerini kullanır: backgroundStyle sayfanın kendisinde zaten
+/// uygulanır; burada artworkShape ve animationLevel uygulanır.
 class PlayerExpandedView extends GetView<PlayerController> {
   const PlayerExpandedView({super.key});
 
@@ -13,6 +24,17 @@ class PlayerExpandedView extends GetView<PlayerController> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final playerSettings = theme.extension<PlayerThemeExtension>() ??
+        PlayerThemeExtension.defaults;
+    final artworkShape = playerSettings.artworkShape;
+    final anim = playerSettings.animationLevel;
+
+    // Kompakt düzenle aynı eşleme: circle → tam yuvarlak, square → keskin.
+    final borderRadius = switch (artworkShape) {
+      'circle' => 400.0,
+      'square' => 0.0,
+      _ => 32.0,
+    };
 
     return Row(
       children: [
@@ -20,11 +42,38 @@ class PlayerExpandedView extends GetView<PlayerController> {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(48),
+              // Parıltı katmanı kare kapakla aynı sınırlar içinde çizilir
+              // (StackFit.expand): aksi hâlde dekorasyonsuz Container satırın
+              // tüm genişliğine yayılır ve parıltı «dikdörtgen» görünürdü.
               child: AspectRatio(
                 aspectRatio: 1,
-                child: ArtworkImage(
-                  songId: controller.currentSong?.id,
-                  borderRadius: BorderRadius.circular(32),
+                child: Stack(
+                  fit: StackFit.expand,
+                  alignment: Alignment.center,
+                  children: [
+                    // Bulgu 7: kapak parıltısı artık animasyon seviyesine
+                    // duyarlı ('none' iken hiç çizilmez; 'reduced' yumuşak).
+                    if (anim != 'none')
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(borderRadius),
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: anim == 'reduced' ? 0.12 : 0.25,
+                              ),
+                              blurRadius: anim == 'reduced' ? 30 : 60,
+                              spreadRadius: anim == 'reduced' ? 5 : 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ArtworkImage(
+                      songId: controller.currentSong?.id,
+                      borderRadius: BorderRadius.circular(borderRadius),
+                      fallbackIcon: Icons.music_note,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -77,6 +126,28 @@ class PlayerExpandedView extends GetView<PlayerController> {
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }),
+                // Bulgu 2: üye olunan çalma listeleri geniş düzende de
+                // görünür; kompakt düzendeyle aynı çip bileşeni kullanılır.
+                Obx(() {
+                  final song = controller.currentSong;
+                  if (song == null ||
+                      !Get.isRegistered<PlaylistController>()) {
+                    return const SizedBox.shrink();
+                  }
+                  final names = Get.find<PlaylistController>()
+                      .listNamesOf(song.id);
+                  if (names.isEmpty) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8, left: 2),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        for (final n in names) PlaylistBadge(names: [n]),
+                      ],
                     ),
                   );
                 }),

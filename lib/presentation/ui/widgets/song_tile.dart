@@ -170,7 +170,7 @@ class SongTile extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 3),
                             child: Row(
                               children: [
-                                Flexible(child: _PlaylistBadge(names: listNames)),
+                                Flexible(child: PlaylistBadge(names: listNames)),
                               ],
                             ),
                           ),
@@ -222,8 +222,12 @@ class SongTile extends StatelessWidget {
 /// Gün 21: şarkının üyesi olduğu çalma listelerini gösteren rozet.
 /// Tek satıra sığar: ilk listenin adı, varsa kalan sayısı
 /// («Spor +2» biçimi). Liste adı kullanıcı verisidir; çevrilmez.
-class _PlaylistBadge extends StatelessWidget {
-  const _PlaylistBadge({required this.names});
+///
+/// Bulgu 2: artık yalnızca SongTile'ın değil, oynatıcı ekranının da
+/// kullanımına açık — aynı görsel dil şarkı kartlarında ve player
+/// sayfasında aynen korunur.
+class PlaylistBadge extends StatelessWidget {
+  const PlaylistBadge({super.key, required this.names});
 
   final List<String> names;
 

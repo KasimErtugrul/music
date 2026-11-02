@@ -31,7 +31,9 @@ class FavoritesPage extends GetView<FavoriteController> {
 
             return ListView.builder(
               itemCount: songs.length,
-              itemBuilder: (context, i) => SongTile(song: songs[i]),
+              // Bulgu 2: rozet artık TÜM şarkı kartlarında; favoriler de dahil.
+              itemBuilder: (context, i) =>
+                  SongTile(song: songs[i], showPlaylistBadge: true),
             );
           },
         );

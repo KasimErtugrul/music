@@ -165,7 +165,12 @@ class _FoldersPageState extends State<FoldersPage> {
                         count: _songs.length,
                       ),
                       for (final s in _songs)
-                        SongTile(song: s, queueContext: _songs),
+                        // Bulgu 2: klasör görünümünde de liste üyeliği rozeti.
+                        SongTile(
+                          song: s,
+                          queueContext: _songs,
+                          showPlaylistBadge: true,
+                        ),
                     ],
                     if (_currentPath != null) _SummaryChip(folders: _folders),
                   ],

@@ -20,8 +20,46 @@ import 'package:resonance/presentation/controllers/vault_controller.dart';
 /// hangi dosyaları göstermeyeceğine/çalmayacağına ilişkin kaydı yönetir.
 /// Ayarlar iki bölmeli düzenine bilinçli olarak gömülmez: hassas içerik
 /// yalnız tam ekran kendi rotasında gösterilir (/vault).
-class VaultPage extends StatelessWidget {
+///
+/// Bulgu 4: PIN doğrulaması artık «oturum boyunca bir kez» değil «her
+/// girişte bir kez» sorulur. Sayfadan çıkış (route pop) ve uygulamanın
+/// arka plana düşmesi (paused/hidden) anında denetleyici kilitlenir;
+/// kullanıcı kasaya HER dönüşünde kilit ekranını görür.
+class VaultPage extends StatefulWidget {
   const VaultPage({super.key});
+
+  @override
+  State<VaultPage> createState() => _VaultPageState();
+}
+
+class _VaultPageState extends State<VaultPage> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // Sayfadan her çıkışta yeniden kilitle: bir sonraki girişte PIN sorulur.
+    if (Get.isRegistered<VaultController>()) {
+      Get.find<VaultController>().lock();
+    }
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Uygulama arka plana inerken (veya ekran kapanırken) de kilitle —
+    // kasa açıkken uygulamayı simgeye küçülten kullanıcıya karşı da aynı
+    // koruma geçerlidir.
+    if ((state == AppLifecycleState.paused ||
+            state == AppLifecycleState.hidden) &&
+        Get.isRegistered<VaultController>()) {
+      Get.find<VaultController>().lock();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
