@@ -41,15 +41,14 @@ class SongTile extends StatelessWidget {
   /// atlanır — «not found» patlaması yok.
   final bool showPlaylistBadge;
 
-  /// Zengin kart modu: daha yüksek satır (84dp, kapak 56dp) ve altta
-  /// EN FAZLA İKİ hücreli künye satırı — liste rozeti + «FLAC · 1046
-  /// kbps» biçiminde tek format rozeti. V2 (kullanıcı geri bildirimi):
-  /// ilk sürümdeki dört ayrı hüce (codec/bit hızı/tür) dar satırda
-  /// üç noktaya dönüşüyordu, tür hücresi kaldırıldı; «ÇALIYOR» etiketi
-  /// de bu modda çizilmez (kapaktaki equalizer + renkli başlık aynı
-  /// bilgiyi verir, etiket başlığı yutuyordu). Yalnızca kütüphane
-  /// «Şarkılar» görünümü açar; favoriler, arama, klasör ve kuyruk
-  /// kompakt (72dp) görünümde kalır.
+  /// Zengin kart şablonu (V3 — kullanıcı şablonu, dört satırlık sütun):
+  /// 1. Şarkı adı → 2. Albüm adı → 3. Varsa çalma listesi rozeti →
+  /// 4. «MP3/128kbps» biçiminde format satırı.
+  /// Kart 96dp yüksekliktedir (kapak 56dp); kütüphane «Şarkılar» ve
+  /// kuyruk sayfası («Sıradakiler» + «Son çalınanlar») AYNI şablonu
+  /// kullanır — tek şablon ilkesi, kart yapısı tek yerde tanımlı.
+  /// Kompakt (72dp) mod: sanatçı • albüm alt başlığı + isteğe bağlı
+  /// rozet; «ÇALIYOR» etiketi de yalnızca kompakt modda çizilir.
   final bool detailed;
 
   @override
@@ -78,10 +77,31 @@ class SongTile extends StatelessWidget {
             ? Get.find<PlaylistController>().listNamesOf(song.id)
             : const <String>[];
 
-        final subtitle = <String>[
-          song.artist ?? l10n.unknownArtist,
-          song.album ?? l10n.unknownAlbum,
-        ].join(' • ');
+        // V3 şablonu: zengin kartın ikinci satırı ALBÜM adıdır;
+        // «sanatçı • albüm» birleşimi yalnızca kompakt modda kalır.
+        final subtitle = detailed
+            ? (song.album ?? l10n.unknownAlbum)
+            : <String>[
+                song.artist ?? l10n.unknownArtist,
+                song.album ?? l10n.unknownAlbum,
+              ].join(' • ');
+
+        // 4. satır: «MP3/128kbps» (kullanıcı şablonu). Uzantı yoksa
+        // yalnız bit hızı, o da yoksa satır hiç çizilmez.
+        final codec = _codecLabel(song.path);
+        final kbps = _averageBitrateKbps(song);
+        final String? formatLabel;
+        if (codec != null && kbps != null) {
+          formatLabel = '$codec/${kbps}kbps';
+        } else if (codec != null) {
+          formatLabel = codec;
+        } else if (kbps != null) {
+          formatLabel = '${kbps}kbps';
+        } else {
+          formatLabel = null;
+        }
+        final lossless =
+            codec != null && _losslessExtensions.contains(codec.toLowerCase());
 
         return SizedBox(
           height: height,
@@ -189,15 +209,42 @@ class SongTile extends StatelessWidget {
                               height: 1.2,
                             ),
                           ),
-                          if (detailed)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: _DetailMetaRow(
-                                song: song,
-                                listNames: listNames,
+                          if (detailed) ...[
+                            // 3. satır: varsa çalma listeleri (rozet
+                            // kendi satırında — kullanıcı şablonu).
+                            if (listNames.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 3),
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: PlaylistBadge(names: listNames),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            )
-                          else if (listNames.isNotEmpty)
+                            // 4. satır: «MP3/128kbps»; kayıpsız codec'te
+                            // vurgu rengi (kütüphane ipucunun kart
+                            // karşılığı). Düz metin — çip kalabalığı yok.
+                            if (formatLabel != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 3),
+                                child: Text(
+                                  formatLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    height: 1.2,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.2,
+                                    color: lossless
+                                        ? theme.colorScheme.tertiary
+                                        : theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                          ] else if (listNames.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 3),
                               child: Row(
@@ -307,10 +354,11 @@ class PlaylistBadge extends StatelessWidget {
   }
 }
 
-// ========== ZENGİN KART KÜNYE ŞERİDİ ==========
+// ========== ZENGİN KART YARDIMCILARI ==========
 
-/// Kayıpsız codec uzantıları: rozet, bu kümedeyken vurgu rengiyle
-/// çizilir (kütüphane başlığındaki «kayıpsız» ipucunun kart karşılığı).
+/// Kayıpsız codec uzantıları: format satırı bu kümedeyken vurgu
+/// rengiyle (tertiary) çizilir (kütüphane başlığındaki «kayıpsız»
+/// ipucunun kart karşılığı).
 const Set<String> _losslessExtensions = {
   'flac',
   'wav',
@@ -340,90 +388,6 @@ int? _averageBitrateKbps(SongModel song) {
   if (song.durationMs <= 0 || song.sizeBytes <= 0) return null;
   final kbps = (song.sizeBytes * 8) / (song.durationMs / 1000.0) / 1000.0;
   return kbps > 0 ? kbps.round() : null;
-}
-
-/// Kütüphane kartının üçüncü satırı: liste rozeti + codec + bit hızı +
-/// tür. Hiçbir bilgi yoksa boş küçülür; satır yüksekliğini sabit
-/// SizedBox zaten taşır.
-class _DetailMetaRow extends StatelessWidget {
-  const _DetailMetaRow({required this.song, required this.listNames});
-
-  final SongModel song;
-  final List<String> listNames;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final chips = <Widget>[];
-
-    // Bulgu 7: önce üyelik rozeti — kullanıcının asıl istediği bilgi.
-    if (listNames.isNotEmpty) {
-      chips.add(Flexible(child: PlaylistBadge(names: listNames)));
-    }
-
-    // V2: codec ve bit hızı TEK hücrede («FLAC · 1046 kbps»). İlk
-    // sürümdeki dört ayrı hüce dar satırda üç noktaya dönüşüyordu;
-    // tek hücre + liste rozeti daima okunur kalır. Tür hücresi
-    // tamamen kaldırıldı.
-    final codec = _codecLabel(song.path);
-    final kbps = _averageBitrateKbps(song);
-    final parts = <String>[?codec, if (kbps != null) '$kbps kbps'];
-    if (parts.isNotEmpty) {
-      final lossless =
-          codec != null && _losslessExtensions.contains(codec.toLowerCase());
-      chips.add(
-        Flexible(
-          child: _DetailChip(
-            label: parts.join(' · '),
-            foreground: lossless ? theme.colorScheme.tertiary : null,
-          ),
-        ),
-      );
-    }
-
-    if (chips.isEmpty) return const SizedBox.shrink();
-    return Row(
-      children: [
-        for (var i = 0; i < chips.length; i++) ...[
-          if (i > 0) const SizedBox(width: 6),
-          chips[i],
-        ],
-      ],
-    );
-  }
-}
-
-/// Künye şeridinin tek hücresi: küçük, tek satır, taşınca üç nokta.
-/// [foreground] verilmezse nötr (onSurfaceVariant) görünüm kullanılır.
-class _DetailChip extends StatelessWidget {
-  const _DetailChip({required this.label, this.foreground});
-
-  final String label;
-  final Color? foreground;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = foreground ?? theme.colorScheme.onSurfaceVariant;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 10.5,
-          height: 1.2,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
-    );
-  }
 }
 
 class _AnimatedEqualizer extends StatefulWidget {

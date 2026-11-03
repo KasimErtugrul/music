@@ -8,16 +8,20 @@ import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 import 'package:resonance/presentation/ui/widgets/mini_player.dart';
-import 'package:resonance/presentation/ui/widgets/song_options_sheet.dart';
-import 'package:resonance/presentation/ui/widgets/song_playlist_chips.dart';
+import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 
 /// Çalma kuyruğu — M3 tasarım güncellemesi:
 /// - Üstte "şu an çalan" vurgulu kart (EQ animasyonu + ÇALIYOR çipi +
 ///   oynat/duraklat düğmesi)
 /// - "Sıradakiler" bölümü: sürükleme tutamacıyla yeniden sıralama
 ///   (ReorderableListView) + sağa kaydırarak kuyruktan çıkarma
-///   (Dismissible) + parça seçenekleri + üyelik rozetleri (Bulgu 1)
+///   (Dismissible) + parça seçenekleri
 /// - Alt tarafta mini oynatıcı (tasarımdaki yüzen kart)
+/// - V3 TEK ŞABLON: liste satırları kütüphane kartıyla birebir aynı
+///   SongTile(detailed) şablonunu kullanır (ad / albüm / varsa listeler /
+///   format) — kullanıcı isteği: «kuyrukta da aynı olsun». Dokunma
+///   playFromQueue ile yalnız o kayda atlar; tutamaç ve kaydırma jestleri
+///   şablonun dışında korunur.
 ///
 /// Tasarımdaki iki ayrı "Sonra Çalınacaklar / Sıradakiler" bölümü, veri
 /// modelinde "play next" kuyruğu ayrı tutulmadığı için tek bir gerçek
@@ -48,10 +52,7 @@ class QueuePage extends GetView<PlayerController> {
       body: Obx(() {
         final queue = controller.songQueue;
         if (queue.isEmpty) {
-          return EmptyState(
-            icon: Icons.queue_music,
-            title: l10n.queueEmpty,
-          );
+          return EmptyState(icon: Icons.queue_music, title: l10n.queueEmpty);
         }
 
         // Gerçek «şu an çalan» indisi: oynatıcının o anki index'i güvenilir
@@ -64,11 +65,15 @@ class QueuePage extends GetView<PlayerController> {
                 repoIdx < queue.length &&
                 queue[repoIdx].uri == controller.currentItem.value?.id)
             ? repoIdx
-            : queue.indexWhere((s) => s.uri == controller.currentItem.value?.id);
+            : queue.indexWhere(
+                (s) => s.uri == controller.currentItem.value?.id,
+              );
         final current = curIdx >= 0 ? queue[curIdx] : null;
         // Bulgu 3: mevcut indisten ÖNCEKİ kayıtlar «Son çalınanlar» olarak
         // yukarıda listelenir; eskiden bunlar hiç gösterilmiyordu.
-        final played = curIdx > 0 ? queue.sublist(0, curIdx) : const <SongModel>[];
+        final played = curIdx > 0
+            ? queue.sublist(0, curIdx)
+            : const <SongModel>[];
         final upNextOffset = curIdx >= 0 ? curIdx + 1 : 0;
         final upNext = queue.sublist(upNextOffset);
 
@@ -89,7 +94,9 @@ class QueuePage extends GetView<PlayerController> {
                         child: Text(
                           l10n.queueEmpty,
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Theme.of(context).colorScheme.outline),
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -112,10 +119,7 @@ class QueuePage extends GetView<PlayerController> {
                                 if (played.isNotEmpty) ...[
                                   _PlayedHeader(count: played.length),
                                   for (var i = 0; i < played.length; i++)
-                                    _PlayedItem(
-                                      song: played[i],
-                                      queueIndex: i,
-                                    ),
+                                    _PlayedItem(song: played[i], queueIndex: i),
                                 ],
                                 _UpNextHeader(count: upNext.length),
                               ],
@@ -124,9 +128,9 @@ class QueuePage extends GetView<PlayerController> {
                             // konumdur; -1 düzeltmesi yapılmaz.
                             onReorderItem: (oldIndex, newIndex) =>
                                 controller.reorderQueue(
-                              upNextOffset + oldIndex,
-                              upNextOffset + newIndex,
-                            ),
+                                  upNextOffset + oldIndex,
+                                  upNextOffset + newIndex,
+                                ),
                             itemBuilder: (context, i) {
                               final song = upNext[i];
                               final queueIndex = upNextOffset + i;
@@ -186,14 +190,17 @@ class _QueueHeader extends StatelessWidget {
                     Flexible(
                       child: Text(
                         l10n.queueTitle,
-                        style: theme.textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(10),
@@ -229,7 +236,9 @@ class _QueueHeader extends StatelessWidget {
                 onTap: () => _confirmClear(context),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 7),
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -237,8 +246,9 @@ class _QueueHeader extends StatelessWidget {
                       const SizedBox(width: 5),
                       Text(
                         l10n.clearQueue,
-                        style: theme.textTheme.labelMedium
-                            ?.copyWith(color: cs.primary),
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: cs.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -350,7 +360,9 @@ class _CurrentTrackCard extends StatelessWidget {
                   // ÇALIYOR çipi
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 2),
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: cs.primaryContainer,
                       borderRadius: BorderRadius.circular(8),
@@ -530,17 +542,17 @@ class _QueueItem extends StatelessWidget {
           // Bulgu 3: dokunma artık kuyruğu yeniden kurmaz; o kayda atlar
           // (karıştırma/tekrar modu ve kuyruk sırası korunur).
           onTap: () => player.playFromQueue(queueIndex),
-          onLongPress: () => SongOptionsSheet.show(context, song),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.only(left: 6),
             child: Row(
               children: [
-                // Sürükleme tutamacı (tasarımdaki drag_indicator)
+                // Sürükleme tutamacı (tasarımdaki drag_indicator);
+                // şablon kartının dışında, jest alanı geniş kalır.
                 ReorderableDragStartListener(
                   index: listIndex,
                   child: SizedBox(
                     width: 30,
-                    height: 40,
+                    height: 48,
                     child: Icon(
                       Icons.drag_indicator,
                       size: 20,
@@ -548,55 +560,17 @@ class _QueueItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 6),
-                SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: ArtworkImage(
-                    songId: song.id,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                const SizedBox(width: 10),
+                // V3 TEK ŞABLON: kütüphane kartıyla birebir aynı satır
+                // (96dp: ad / albüm / varsa listeler / format). Favori,
+                // süre ve seçenekler şablonun sağ sütunundan gelir.
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        song.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      Text(
-                        song.artist ?? l10n.unknownArtist,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      // Bulgu 1: kuyruk kartlarında da şarkının üyesi
-                      // olduğu çalma listeleri görünür (kütüphane ve
-                      // oynatıcıyla aynı paylaşılan çip bileşeni).
-                      SongPlaylistChips(songId: song.id),
-                    ],
+                  child: SongTile(
+                    song: song,
+                    onTap: () => player.playFromQueue(queueIndex),
+                    height: 96,
+                    showPlaylistBadge: true,
+                    detailed: true,
                   ),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  song.duration.clock,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-                IconButton(
-                  tooltip: l10n.songInfo,
-                  icon: Icon(Icons.more_vert,
-                      size: 20, color: cs.onSurfaceVariant),
-                  onPressed: () => SongOptionsSheet.show(context, song),
                 ),
               ],
             ),
@@ -627,10 +601,10 @@ class _PlayedHeader extends StatelessWidget {
           Text(
             '${l10n.homeRecentlyPlayed} ($count)',
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: cs.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.8,
-                ),
+              color: cs.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.8,
+            ),
           ),
         ],
       ),
@@ -652,67 +626,21 @@ class _PlayedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
     final player = Get.find<PlayerController>();
 
     return InkWell(
       onTap: () => player.playFromQueue(queueIndex),
-      onLongPress: () => SongOptionsSheet.show(context, song),
       child: Opacity(
         opacity: 0.55,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: ArtworkImage(
-                  songId: song.id,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      song.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    Text(
-                      song.artist ?? l10n.unknownArtist,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                song.duration.clock,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-              IconButton(
-                tooltip: l10n.songInfo,
-                icon: Icon(Icons.more_vert,
-                    size: 20, color: cs.onSurfaceVariant),
-                onPressed: () => SongOptionsSheet.show(context, song),
-              ),
-            ],
-          ),
+        // V3 TEK ŞABLON: «Sıradakiler»le birebir aynı kart (96dp); sönük
+        // çizim «geçmiş» ayrımını korur. Sürükleme/kaydırma jestleri bu
+        // bölüme bilinçli olarak dahil değildir.
+        child: SongTile(
+          song: song,
+          onTap: () => player.playFromQueue(queueIndex),
+          height: 96,
+          showPlaylistBadge: true,
+          detailed: true,
         ),
       ),
     );
