@@ -21,7 +21,7 @@ class SongsView extends StatefulWidget {
 
 class _SongsViewState extends State<SongsView> {
   final ScrollController _scrollController = ScrollController();
-  static const double _itemHeight = 76.0; // 72dp tile + 4dp padding
+  static const double _itemHeight = 88.0; // 84dp zengin kart + 4dp padding
 
   void _scrollToLetter(String letter) {
     final controller = Get.find<LibraryController>();
@@ -113,7 +113,7 @@ class _SongsViewState extends State<SongsView> {
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 400,
-                          mainAxisExtent: 76,
+                          mainAxisExtent: 88,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 4,
                         ),
@@ -121,8 +121,11 @@ class _SongsViewState extends State<SongsView> {
                     itemBuilder: (context, i) => SongTile(
                       song: controller.songs[i],
                       queueContext: controller.songs,
+                      height: 84,
                       // Gün 21: kütüphane kartı üyelik rozetini gösterir.
                       showPlaylistBadge: true,
+                      // Zengin kart: codec / bit hızı / tür künye şeridi.
+                      detailed: true,
                     ),
                   );
                 }
@@ -142,8 +145,11 @@ class _SongsViewState extends State<SongsView> {
                         child: SongTile(
                           song: controller.songs[i],
                           queueContext: controller.songs,
+                          height: 84,
                           // Gün 21: kütüphane kartı üyelik rozetini gösterir.
                           showPlaylistBadge: true,
+                          // Zengin kart: codec / bit hızı / tür künye şeridi.
+                          detailed: true,
                         ),
                       ),
                     ),
