@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/routes/app_routes.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/playlist_controller.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
+import 'package:resonance/presentation/ui/widgets/resonance_app_bar.dart';
 
 class PlaylistsPage extends GetView<PlaylistController> {
   const PlaylistsPage({super.key});
@@ -14,7 +14,8 @@ class PlaylistsPage extends GetView<PlaylistController> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.playlistsTitle)),
+      // Marka başlığı beş sekmede ortak: ResonanceAppBar.
+      appBar: ResonanceAppBar(),
       body: Column(
         children: [
           // Gün 15: Akıllı listeler ve istatistiklere geçici erişim butonları
@@ -73,7 +74,8 @@ class PlaylistsPage extends GetView<PlaylistController> {
                         const Icon(Icons.chevron_right),
                       ],
                     ),
-                    onTap: () => Get.toNamed(AppRoutes.playlistDetail, arguments: p.id),
+                    onTap: () =>
+                        Get.toNamed(AppRoutes.playlistDetail, arguments: p.id),
                   );
                 },
               );
@@ -101,7 +103,10 @@ class PlaylistsPage extends GetView<PlaylistController> {
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.commonCancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.commonCancel),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, textController.text.trim()),
             child: Text(l10n.commonSave),

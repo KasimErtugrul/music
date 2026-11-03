@@ -46,11 +46,11 @@ Future<void> _seedControllers() async {
 }
 
 Widget _host() => GetMaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('tr'),
-      home: const SettingsHomePage(),
-    );
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('tr'),
+  home: const SettingsHomePage(),
+);
 
 void _setSurface(WidgetTester tester, Size size) {
   tester.view.physicalSize = size;
@@ -69,8 +69,9 @@ void main() {
     Get.reset();
   });
 
-  testWidgets('compact: yer tutucu yok; satır sayfayı route olarak açar',
-      (tester) async {
+  testWidgets('compact: yer tutucu yok; satır sayfayı route olarak açar', (
+    tester,
+  ) async {
     _setSurface(tester, const Size(400, 800));
     await _seedControllers();
 
@@ -84,8 +85,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Ayrıntı sayfası ROUTE olarak açıldı: ana sayfa AppBar'ı artık ağaçta
-    // değil (push edilen rota ekranı kaplar).
+    // değil (push edilen rota ekranı kaplar). AppBar'daki marka başlığı
+    // «Resonance» (ResonanceAppBar) — eski «Ayarlar» başlığı kalktı.
     expect(find.text('Ayarlar'), findsNothing);
+    expect(find.text('Resonance'), findsNothing);
     expect(find.text('Denetim'), findsOneWidget);
     expect(find.text('Sarma süresi'), findsOneWidget);
   });
@@ -105,9 +108,10 @@ void main() {
     await tester.tap(find.text('Oynatma'));
     await tester.pumpAndSettle();
 
-    // Route açılmadı: ana sayfa AppBar'ı hâlâ görünür; ayrıntı sayfası
-    // sağ bölmede çizildi (bölüm başlığı + ilk satır).
-    expect(find.text('Ayarlar'), findsOneWidget);
+    // Route açılmadı: ana sayfa AppBar'ı hâlâ görünür (marka başlığı
+    // «Resonance»); ayrıntı sayfası sağ bölmede çizildi (bölüm başlığı +
+    // ilk satır).
+    expect(find.text('Resonance'), findsOneWidget);
     expect(find.text('Denetim'), findsOneWidget);
     expect(find.text('Sarma süresi'), findsOneWidget);
     // Yer tutucu kalktı:
@@ -116,8 +120,9 @@ void main() {
     expect(find.text('Oynatma'), findsNWidgets(2));
   });
 
-  testWidgets('geniş ekran: seçim değişince sağ bölme yeni sayfayı çizer',
-      (tester) async {
+  testWidgets('geniş ekran: seçim değişince sağ bölme yeni sayfayı çizer', (
+    tester,
+  ) async {
     _setSurface(tester, const Size(1200, 800));
     await _seedControllers();
 
@@ -138,8 +143,7 @@ void main() {
     expect(find.text('Ekolayzer'), findsOneWidget);
   });
 
-  testWidgets('geniş ekran: arama sonucu sağ bölmeyi doldurur',
-      (tester) async {
+  testWidgets('geniş ekran: arama sonucu sağ bölmeyi doldurur', (tester) async {
     _setSurface(tester, const Size(1200, 800));
     await _seedControllers();
 

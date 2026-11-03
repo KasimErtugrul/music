@@ -11,6 +11,7 @@ import 'package:resonance/presentation/ui/pages/album_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/artist_detail_page.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
+import 'package:resonance/presentation/ui/widgets/resonance_app_bar.dart';
 import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 import 'package:resonance/presentation/ui/widgets/state_views.dart';
 
@@ -71,32 +72,19 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
 
     return Scaffold(
+      // Marka başlığı beş sekmede ortak: ResonanceAppBar. Gövde içindeki
+      // «Ara» taklit başlığı kaldırıldı — üst bant artık diğer sekmelerle
+      // birebir aynı; arama çubuğu doğrudan onun altında başlıyor.
+      appBar: ResonanceAppBar(),
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            // --- Sayfa başlığı (tasarımdaki "Ara" üst bandı) ---
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Row(
-                children: [
-                  Icon(Icons.graphic_eq, size: 24, color: cs.primary),
-                  const SizedBox(width: 10),
-                  Text(
-                    l10n.tabSearch,
-                    style: theme.textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
             // --- M3 arama çubuğu ---
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
               child: _SearchField(
                 controller: _textController,
                 focusNode: _focusNode,
@@ -155,7 +143,9 @@ class _SearchPageState extends State<SearchPage> {
                 }
 
                 final total =
-                    result.songs.length + result.albums.length + result.artists.length;
+                    result.songs.length +
+                    result.albums.length +
+                    result.artists.length;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -241,8 +231,7 @@ class _SearchField extends StatelessWidget {
               ),
               if (hasText)
                 IconButton(
-                  tooltip:
-                      AppLocalizations.of(context).commonClear,
+                  tooltip: AppLocalizations.of(context).commonClear,
                   icon: const Icon(Icons.close, size: 20),
                   onPressed: onClear,
                 ),
@@ -378,9 +367,8 @@ class _ResultBanner extends StatelessWidget {
           Expanded(
             child: Text(
               l10n.searchResultCount(count),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: cs.onSurfaceVariant),
             ),
           ),
         ],
@@ -407,9 +395,12 @@ class _GroupedResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final showSongs = filter == _SearchFilter.all || filter == _SearchFilter.songs;
-    final showAlbums = filter == _SearchFilter.all || filter == _SearchFilter.albums;
-    final showArtists = filter == _SearchFilter.all || filter == _SearchFilter.artists;
+    final showSongs =
+        filter == _SearchFilter.all || filter == _SearchFilter.songs;
+    final showAlbums =
+        filter == _SearchFilter.all || filter == _SearchFilter.albums;
+    final showArtists =
+        filter == _SearchFilter.all || filter == _SearchFilter.artists;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(0, 4, 0, 24),
@@ -422,11 +413,8 @@ class _GroupedResults extends StatelessWidget {
           ),
           ...songs.map(
             // Bulgu 2: arama sonuçlarında da liste üyeliği rozeti gösterilir.
-            (s) => SongTile(
-              song: s,
-              queueContext: songs,
-              showPlaylistBadge: true,
-            ),
+            (s) =>
+                SongTile(song: s, queueContext: songs, showPlaylistBadge: true),
           ),
         ],
         if (showAlbums && albums.isNotEmpty) ...[
@@ -467,17 +455,18 @@ class _SectionHeader extends StatelessWidget {
               count != null ? '$title ($count)' : title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: cs.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w600),
             ),
           ),
           const SizedBox(width: 6),
           Container(
             width: 6,
             height: 6,
-            decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: cs.primary,
+              shape: BoxShape.circle,
+            ),
           ),
           const Spacer(),
           ?trailing,
@@ -542,10 +531,8 @@ class _AlbumCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => Get.to<void>(
-          () => const AlbumDetailPage(),
-          arguments: album,
-        ),
+        onTap: () =>
+            Get.to<void>(() => const AlbumDetailPage(), arguments: album),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -585,9 +572,8 @@ class _AlbumCard extends StatelessWidget {
                     album.artist ?? l10n.unknownArtist,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -615,8 +601,7 @@ class _AlbumPlayFab extends StatelessWidget {
           final songs = await lib.songsOfAlbum(album.id);
           if (songs.isEmpty) return;
           if (!context.mounted) return;
-          Get.find<PlayerController>()
-              .playSong(songs.first, queue: songs);
+          Get.find<PlayerController>().playSong(songs.first, queue: songs);
         },
         style: FilledButton.styleFrom(
           padding: EdgeInsets.zero,
@@ -661,10 +646,8 @@ class _ArtistRow extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
-        onTap: () => Get.to<void>(
-          () => const ArtistDetailPage(),
-          arguments: artist,
-        ),
+        onTap: () =>
+            Get.to<void>(() => const ArtistDetailPage(), arguments: artist),
       ),
     );
   }
@@ -691,10 +674,7 @@ class _RecentSearches extends StatelessWidget {
     return Obx(() {
       final terms = Get.find<AppSearchController>().searchHistory;
       if (terms.isEmpty) {
-        return EmptyState(
-          icon: Icons.search,
-          title: l10n.noSearchYet,
-        );
+        return EmptyState(icon: Icons.search, title: l10n.noSearchYet);
       }
       return ListView(
         padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
@@ -708,9 +688,8 @@ class _RecentSearches extends StatelessWidget {
                 Expanded(
                   child: Text(
                     l10n.searchHistoryTitle,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ),
                 TextButton(
@@ -744,7 +723,11 @@ class _RecentSearches extends StatelessWidget {
 }
 
 class _HistoryChip extends StatelessWidget {
-  const _HistoryChip({required this.term, required this.onUse, required this.onRemove});
+  const _HistoryChip({
+    required this.term,
+    required this.onUse,
+    required this.onRemove,
+  });
   final String term;
   final VoidCallback onUse;
   final VoidCallback onRemove;
@@ -766,10 +749,7 @@ class _HistoryChip extends StatelessWidget {
           const SizedBox(width: 6),
           InkWell(
             onTap: onUse,
-            child: Text(
-              term,
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
+            child: Text(term, style: Theme.of(context).textTheme.labelMedium),
           ),
           const SizedBox(width: 2),
           InkWell(

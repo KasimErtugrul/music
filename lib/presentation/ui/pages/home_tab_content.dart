@@ -15,6 +15,7 @@ import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/ui/pages/smart_playlist_detail_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/library_settings_page.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
+import 'package:resonance/presentation/ui/widgets/resonance_app_bar.dart';
 import 'package:resonance/presentation/ui/widgets/state_views.dart';
 
 class HomeTabContent extends StatelessWidget {
@@ -27,21 +28,9 @@ class HomeTabContent extends StatelessWidget {
     final homeCtrl = Get.find<HomeController>();
 
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 20,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.graphic_eq,
-                color: Theme.of(context).colorScheme.primary, size: 24),
-            const SizedBox(width: 8),
-            Text(
-              l10n.appName,
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
-          ],
-        ),
-      ),
+      // Marka başlığı beş sekmede ortak: ResonanceAppBar (tek doğruluk
+      // kaynağı). Ana sayfa eylem düğmesi kullanmadığı için sade geçilir.
+      appBar: ResonanceAppBar(),
       body: Obx(() {
         if (libCtrl.isLoading.value || homeCtrl.isLoading.value) {
           return const _LoadingView();
@@ -186,17 +175,13 @@ class HomeTabContent extends StatelessWidget {
                         Icon(
                           Icons.headphones,
                           size: 16,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
+                          color: Theme.of(context).colorScheme.onSurfaceVariant
                               .withValues(alpha: 0.5),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           l10n.homeOfflineEngine,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
+                          style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
@@ -260,8 +245,8 @@ class _LoadingView extends StatelessWidget {
           Text(
             l10n.homeLoadingMessage,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -383,10 +368,8 @@ class _FeaturedCarouselState extends State<_FeaturedCarousel> {
                 decoration: BoxDecoration(
                   color: i == _currentPage
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.4),
+                      : Theme.of(context).colorScheme.primary
+                            .withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -444,8 +427,10 @@ class _FeaturedCard extends StatelessWidget {
               top: 14,
               right: 14,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(20),
@@ -534,8 +519,11 @@ class _FeaturedCard extends StatelessWidget {
                       child: const SizedBox(
                         width: 52,
                         height: 52,
-                        child: Icon(Icons.play_arrow_rounded,
-                            color: Colors.black, size: 28),
+                        child: Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.black,
+                          size: 28,
+                        ),
                       ),
                     ),
                   ),
@@ -572,8 +560,9 @@ class _HeroNowPlaying extends StatelessWidget {
 
       final totalMs = playerCtrl.duration.value.inMilliseconds;
       final currentMs = playerCtrl.position.value.inMilliseconds;
-      final progress =
-          totalMs > 0 ? (currentMs / totalMs).clamp(0.0, 1.0) : 0.0;
+      final progress = totalMs > 0
+          ? (currentMs / totalMs).clamp(0.0, 1.0)
+          : 0.0;
 
       return Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -674,10 +663,11 @@ class _HeroNowPlaying extends StatelessWidget {
                           child: LinearProgressIndicator(
                             value: progress,
                             minHeight: 3,
-                            backgroundColor:
-                                theme.colorScheme.onSurface.withValues(alpha: 0.12),
+                            backgroundColor: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.12),
                             valueColor: AlwaysStoppedAnimation(
-                                theme.colorScheme.primary),
+                              theme.colorScheme.primary,
+                            ),
                           ),
                         ),
                       ),
@@ -826,9 +816,11 @@ class _SectionHeader extends StatelessWidget {
       child: Row(
         children: [
           if (leadingIcon != null) ...[
-            Icon(leadingIcon,
-                size: 20,
-                color: leadingIconColor ?? theme.colorScheme.primary),
+            Icon(
+              leadingIcon,
+              size: 20,
+              color: leadingIconColor ?? theme.colorScheme.primary,
+            ),
             const SizedBox(width: 6),
           ],
           Expanded(
@@ -939,8 +931,11 @@ class _AlbumCarousel extends StatelessWidget {
                                   color: Colors.black.withValues(alpha: 0.65),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.play_arrow,
-                                    color: Colors.white, size: 18),
+                                child: const Icon(
+                                  Icons.play_arrow,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
                               ),
                             ),
                           ],
@@ -1083,7 +1078,9 @@ class _SongCard extends StatelessWidget {
                       left: 6,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(10),
@@ -1110,8 +1107,11 @@ class _SongCard extends StatelessWidget {
                           color: Colors.black.withValues(alpha: 0.65),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.favorite,
-                            color: theme.colorScheme.tertiary, size: 14),
+                        child: Icon(
+                          Icons.favorite,
+                          color: theme.colorScheme.tertiary,
+                          size: 14,
+                        ),
                       ),
                     ),
                   if (style == SongRowStyle.mostPlayed && playCount != null)
@@ -1120,7 +1120,9 @@ class _SongCard extends StatelessWidget {
                       left: 6,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primary,
                           borderRadius: BorderRadius.circular(20),
@@ -1141,7 +1143,9 @@ class _SongCard extends StatelessWidget {
                       left: 6,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(6),
@@ -1149,8 +1153,11 @@ class _SongCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.casino,
-                                color: theme.colorScheme.primary, size: 11),
+                            Icon(
+                              Icons.casino,
+                              color: theme.colorScheme.primary,
+                              size: 11,
+                            ),
                             const SizedBox(width: 3),
                             Text(
                               l10n.homeLucky,
@@ -1225,10 +1232,8 @@ class _ArtistCarousel extends StatelessWidget {
                 width: 100,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(50),
-                  onTap: () => Get.toNamed(
-                    AppRoutes.artistDetail,
-                    arguments: artist,
-                  ),
+                  onTap: () =>
+                      Get.toNamed(AppRoutes.artistDetail, arguments: artist),
                   child: Column(
                     children: [
                       SizedBox(
@@ -1261,4 +1266,3 @@ class _ArtistCarousel extends StatelessWidget {
     );
   }
 }
-

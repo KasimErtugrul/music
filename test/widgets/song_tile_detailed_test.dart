@@ -1,13 +1,17 @@
-// Zengin kütüphane kartı sözleşmesi (SongTile.detailed).
+// Zengin kütüphane kartı sözleşmesi (SongTile.detailed) — V2.
 //
-// SongTile PlayerController + FavoriteController'ı Get.find ile zorunlu
-// bulur; düzenek ikisini de kurar. Kilitlenen davranışlar:
-// * detailed: true → codec (uzantıdan), ortalama bit hızı (boyut/süre)
-//   ve tür künye şeridi çizilir; kayıpsız uzantı (FLAC) da etiket olur.
-// * detailed: false (varsayılan) → künye şeridi çizilmez; favoriler,
-//   arama, klasör, kuyruk gibi sayfaların kompakt görünümü korunur.
-// * Meta verisi hiç olmayan şarkıda (uzantısız yol, boyut 0, tür yok)
-//   şerit boş küçülür — taşma/istisna yok.
+// V2 (kullanıcı geri bildirimi): ilk sürümdeki dört ayrı künye hücesi
+// (codec, bit hızı, tür) dar satırda üç noktaya dönüşüyordu; codec ve
+// bit hızı tek hücrede birleştirildi, tür hücresi kaldırıldı. «ÇALIYOR»
+// etiketi de zengin modda çizilmez (etiket başlığı yutuyordu).
+//
+// Kilitlenen davranışlar:
+// * detailed: true → «MP3 · 128 kbps» biçiminde TEK format hücesi;
+//   tür (genre) çizilmez; «PLAYING» etiketi çizilmez.
+// * detailed: false (varsayılan) → künye hücesi çizilmez, «PLAYING»
+//   etiketi çalınan şarkıda aynen korunur (diğer sayfalar etkilenmez).
+// * Meta verisi hiç olmayan şarkıda (uzantısız yol, boyut 0) hüce
+//   çizilmez — taşma/istisna yok.
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,12 +30,14 @@ class _MockFavRepo extends Mock implements FavoriteRepository {}
 /// düzenin aynısı): mock yaşam döngüsü no-op olur.
 class _FakePlayerController extends Mock implements PlayerController {
   @override
-  final InternalFinalCallback<void> onStart =
-      InternalFinalCallback<void>(callback: () {});
+  final InternalFinalCallback<void> onStart = InternalFinalCallback<void>(
+    callback: () {},
+  );
 
   @override
-  final InternalFinalCallback<void> onDelete =
-      InternalFinalCallback<void>(callback: () {});
+  final InternalFinalCallback<void> onDelete = InternalFinalCallback<void>(
+    callback: () {},
+  );
 }
 
 /// 3.200.000 bayt / 200 s → 8 × 3.200.000 / 200.000 = 128.000 bit/s =
@@ -42,16 +48,15 @@ SongModel _song({
   String? genre,
   int durationMs = 200000,
   int sizeBytes = 3200000,
-}) =>
-    SongModel(
-      id: id,
-      uri: 'content://media/external/audio/media/$id',
-      path: path,
-      title: 'Song $id',
-      genre: genre,
-      durationMs: durationMs,
-      sizeBytes: sizeBytes,
-    );
+}) => SongModel(
+  id: id,
+  uri: 'content://media/external/audio/media/$id',
+  path: path,
+  title: 'Song $id',
+  genre: genre,
+  durationMs: durationMs,
+  sizeBytes: sizeBytes,
+);
 
 void main() {
   late _MockFavRepo favRepo;
@@ -65,9 +70,9 @@ void main() {
 
   tearDown(Get.reset);
 
-  void putPlayerAndFavorites() {
+  void putPlayerAndFavorites({MediaItem? current}) {
     final player = _FakePlayerController();
-    when(() => player.currentItem).thenReturn(Rxn<MediaItem>());
+    when(() => player.currentItem).thenReturn(Rxn<MediaItem>(current));
     when(() => player.isPlaying).thenReturn(false.obs);
     Get
       ..put<PlayerController>(player)
@@ -78,36 +83,38 @@ void main() {
     WidgetTester tester,
     SongModel song, {
     bool detailed = false,
-  }) =>
-      tester.pumpWidget(
-        GetMaterialApp(
-          // Alt başlıkta l10n («Bilinmeyen sanatçı/album») okunur.
-          locale: const Locale('en'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: SongTile(song: song, detailed: detailed),
-          ),
+    double textScale = 1.0,
+  }) => tester.pumpWidget(
+    GetMaterialApp(
+      // Alt başlıkta l10n («Bilinmeyen sanatçı/album») okunur.
+      locale: const Locale('en'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: MediaQuery(
+        data: const MediaQueryData().copyWith(
+          textScaler: TextScaler.linear(textScale),
         ),
-      );
+        child: Scaffold(
+          body: SongTile(song: song, detailed: detailed),
+        ),
+      ),
+    ),
+  );
 
-  testWidgets('zengin kart codec, bit hızı ve türü çizer', (tester) async {
+  testWidgets('zengin kartta codec ve bit hızı TEK hücede', (tester) async {
     putPlayerAndFavorites();
 
-    await pumpTile(
-      tester,
-      _song(id: 1, genre: 'Rock'),
-      detailed: true,
-    );
+    await pumpTile(tester, _song(id: 1, genre: 'Rock'), detailed: true);
     await tester.pumpAndSettle();
 
-    expect(find.text('MP3'), findsOneWidget);
-    expect(find.text('128 kbps'), findsOneWidget);
-    expect(find.text('Rock'), findsOneWidget);
+    expect(find.text('MP3 · 128 kbps'), findsOneWidget);
+    // V2: tür hücresi kaldırıldı.
+    expect(find.text('Rock'), findsNothing);
+    expect(find.text('MP3'), findsNothing);
+    expect(find.text('128 kbps'), findsNothing);
   });
 
-  testWidgets('kayıpsız uzantı da codec etiketi olarak görünür',
-      (tester) async {
+  testWidgets('kayıpsız uzantı da tek formatta görünür', (tester) async {
     putPlayerAndFavorites();
 
     await pumpTile(
@@ -117,41 +124,66 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('FLAC'), findsOneWidget);
+    expect(find.text('FLAC · 128 kbps'), findsOneWidget);
   });
 
-  testWidgets('kompakt modda künye şeridi çizilmez (diğer sayfalar korunur)',
-      (tester) async {
-    putPlayerAndFavorites();
-
-    await pumpTile(
-      tester,
-      _song(id: 3, genre: 'Rock'),
-      // detailed: false (varsayılan)
+  testWidgets('zengin kartta «PLAYING» etiketi çizilmez', (tester) async {
+    final song = _song(id: 3);
+    putPlayerAndFavorites(
+      current: MediaItem(id: song.uri, title: song.title),
     );
+
+    await pumpTile(tester, song, detailed: true);
     await tester.pumpAndSettle();
 
-    expect(find.text('MP3'), findsNothing);
-    expect(find.text('128 kbps'), findsNothing);
-    expect(find.text('Rock'), findsNothing);
+    expect(find.text('PLAYING'), findsNothing);
   });
 
-  testWidgets('meta verisi olmayan şarkıda şerit boş küçülür', (tester) async {
+  testWidgets('kompakt modda «PLAYING» etiketi korunur', (tester) async {
+    final song = _song(id: 4);
+    putPlayerAndFavorites(
+      current: MediaItem(id: song.uri, title: song.title),
+    );
+
+    await pumpTile(tester, song); // detailed: false (varsayılan)
+    await tester.pumpAndSettle();
+
+    expect(find.text('PLAYING'), findsOneWidget);
+    expect(find.text('MP3 · 128 kbps'), findsNothing);
+  });
+
+  testWidgets('meta verisi olmayan şarkıda hüce çizilmez', (tester) async {
     putPlayerAndFavorites();
 
     await pumpTile(
       tester,
-      _song(
-        id: 4,
-        path: '/music/noextension',
-        genre: null,
-        sizeBytes: 0,
-      ),
+      _song(id: 5, path: '/music/noextension', genre: null, sizeBytes: 0),
       detailed: true,
     );
     await tester.pumpAndSettle();
 
-    expect(find.text(' kbps'), findsNothing);
-    expect(find.text('Rock'), findsNothing);
+    expect(find.textContaining('kbps'), findsNothing);
+    expect(find.textContaining('·'), findsNothing);
+  });
+
+  testWidgets('sistem yazı tipi ölçeği 2.0x iken kart taşmaz', (tester) async {
+    // Erişilebilirlik sözleşmesi: kullanıcı sistem ölçeğini abartılı
+    // büyüttüğünde kartın kepenk (1.3x) devreye girer ve layout
+    // «RenderFlex overflowed» hatası FIRLATMAZ. Zengin ve kompakt
+    // modun ikisi de denetlenir.
+    putPlayerAndFavorites();
+
+    await pumpTile(
+      tester,
+      _song(id: 6, genre: null),
+      detailed: true,
+      textScale: 2.0,
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    await pumpTile(tester, _song(id: 7, genre: null), textScale: 2.0);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }

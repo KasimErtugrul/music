@@ -8,6 +8,7 @@ import 'package:resonance/presentation/ui/pages/folders_page.dart';
 import 'package:resonance/presentation/ui/pages/genres_page.dart';
 import 'package:resonance/presentation/ui/pages/songs_page.dart';
 import 'package:resonance/presentation/ui/widgets/library_tab_pills.dart';
+import 'package:resonance/presentation/ui/widgets/resonance_app_bar.dart';
 
 class LibraryTabsPage extends StatefulWidget {
   const LibraryTabsPage({super.key});
@@ -40,34 +41,11 @@ class _LibraryTabsPageState extends State<LibraryTabsPage>
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            Text(
-              l10n.tabLibrary,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                l10n.libraryLocal,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
+      appBar: ResonanceAppBar(
+        // Beş sekmede de aynı marka başlığı çizilir (ResonanceAppBar);
+        // sekmeye özgü içerik yalnızca eylemler ve alt bölgededir.
+        // Eski «Kütüphane + Yerel» özel başlığı marka tutarlılığı için
+        // kaldırıldı — sekme adı artık haplarda yaşıyor.
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -101,11 +79,17 @@ class _LibraryTabsPageState extends State<LibraryTabsPage>
                         child: TextField(
                           autofocus: true,
                           decoration: InputDecoration(
-                            hintText: l10n.searchInLibraryHint(libCtrl.songs.length),
-                            prefixIcon: const Icon(Icons.manage_search, size: 20),
+                            hintText: l10n.searchInLibraryHint(
+                              libCtrl.songs.length,
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.manage_search,
+                              size: 20,
+                            ),
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.close, size: 18),
-                              onPressed: () => setState(() => _isSearching = false),
+                              onPressed: () =>
+                                  setState(() => _isSearching = false),
                             ),
                             isDense: true,
                             filled: true,
@@ -114,7 +98,9 @@ class _LibraryTabsPageState extends State<LibraryTabsPage>
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide.none,
                             ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                            ),
                           ),
                         ),
                       )

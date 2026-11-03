@@ -22,6 +22,7 @@ import 'package:resonance/presentation/ui/pages/settings/tags_artwork_settings_p
 import 'package:resonance/presentation/ui/pages/settings/notifications/notification_settings_page.dart';
 import 'package:resonance/presentation/ui/pages/settings/widget_settings_page.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
+import 'package:resonance/presentation/ui/widgets/resonance_app_bar.dart';
 import 'package:resonance/presentation/ui/widgets/settings_choice_tile.dart';
 import 'package:resonance/presentation/ui/widgets/settings_group_card.dart';
 import 'package:resonance/presentation/ui/widgets/settings_page_reset_action.dart';
@@ -90,14 +91,16 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
     final search = Get.put(SettingsSearchController());
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.tabSettings)),
+      // Marka başlığı beş sekmede ortak: ResonanceAppBar. Sekmenin adı
+      // («Ayarlar») artık AppBar'da değil; sayfa içi başlıkta yaşıyor.
+      appBar: ResonanceAppBar(),
       body: LayoutBuilder(
         builder: (context, constraints) {
           // Gün 14: eşik, ayar alanının kendi genişliğinde M3 expanded
           // kırılımıdır (840 dp). 800x600'lük varsayılan test yüzeyi ve
           // orta boy telefonlar compact'ta kalır — mevcut davranış korunur.
-          _twoPane = Responsive.fromWidth(constraints.maxWidth) ==
-              WindowSize.expanded;
+          _twoPane =
+              Responsive.fromWidth(constraints.maxWidth) == WindowSize.expanded;
           final listPane = _buildListPane(l10n, theme, ctrl, search);
           if (!_twoPane) return listPane;
           return Row(
@@ -121,10 +124,7 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
     return Obx(() {
       final target = _selected.value;
       if (target == null) {
-        return EmptyState(
-          icon: Icons.tune,
-          title: l10n.settingsPickPrompt,
-        );
+        return EmptyState(icon: Icons.tune, title: l10n.settingsPickPrompt);
       }
       return KeyedSubtree(
         key: ValueKey<String>(target.id),
@@ -140,157 +140,169 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
     SettingsSearchController search,
   ) {
     return Column(
-        children: [
-          // --- M3 arama çubuğu (tasarım: yuvarlak, dolgulu) ---
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (v) => search.query.value = v,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: l10n.settingsSearchHint,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _searchController,
-                  builder: (_, value, _) => value.text.isEmpty
-                      ? const SizedBox.shrink()
-                      : IconButton(
-                          icon: const Icon(Icons.close, size: 20),
-                          tooltip: l10n.commonClear,
-                          onPressed: () {
-                            _searchController.clear();
-                            search.query.value = '';
-                          },
-                        ),
-                ),
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHigh,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28),
-                  borderSide: BorderSide.none,
-                ),
+      children: [
+        // --- M3 arama çubuğu (tasarım: yuvarlak, dolgulu) ---
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (v) => search.query.value = v,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: l10n.settingsSearchHint,
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _searchController,
+                builder: (_, value, _) => value.text.isEmpty
+                    ? const SizedBox.shrink()
+                    : IconButton(
+                        icon: const Icon(Icons.close, size: 20),
+                        tooltip: l10n.commonClear,
+                        onPressed: () {
+                          _searchController.clear();
+                          search.query.value = '';
+                        },
+                      ),
+              ),
+              filled: true,
+              fillColor: theme.colorScheme.surfaceContainerHigh,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(28),
+                borderSide: BorderSide.none,
               ),
             ),
           ),
-          Expanded(
-            child: Obx(() {
-              if (ctrl.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final settings = ctrl.settings.value;
-              if (settings == null) return const Center(child: Text('—'));
+        ),
+        Expanded(
+          child: Obx(() {
+            if (ctrl.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final settings = ctrl.settings.value;
+            if (settings == null) return const Center(child: Text('—'));
 
-              // Görev 4.2: arama boş değilse registry üzerinden iki dilli
-              // eşleme; sonuç satırı hedef sayfayı builder ile açar.
-              if (search.query.value.trim().isNotEmpty) {
-                final results = search.filter(SettingsRegistry.all, l10n);
-                return ListView(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  children: <Widget>[
-                    for (final e in results)
-                      ListTile(
-                        leading: const Icon(Icons.settings_outlined),
-                        title: Text(e.title(l10n)),
-                        trailing: e.pageBuilder != null
-                            ? const Icon(Icons.chevron_right)
-                            : null,
-                        onTap: e.pageBuilder == null
-                            ? null
-                            : () => _open(
-                                  _PaneTarget(
-                                    id: e.key,
-                                    builder: e.pageBuilder!,
-                                  ),
-                                ),
-                      ),
-                  ],
-                );
-              }
-
-              final general = search.filter(
-                SettingsRegistry.byGroup(SettingsGroup.general),
-                l10n,
-              );
-
+            // Görev 4.2: arama boş değilse registry üzerinden iki dilli
+            // eşleme; sonuç satırı hedef sayfayı builder ile açar.
+            if (search.query.value.trim().isNotEmpty) {
+              final results = search.filter(SettingsRegistry.all, l10n);
               return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                padding: const EdgeInsets.only(bottom: 24),
                 children: <Widget>[
-                  if (general.isNotEmpty) ...<Widget>[
-                    SettingsSectionHeader(title: l10n.settingsGroupGeneral),
-                    SettingsGroupCard(children: [
-                      ...general.map((e) => _entry(e, l10n, ctrl)),
-                    ]),
-                  ],
+                  for (final e in results)
+                    ListTile(
+                      leading: const Icon(Icons.settings_outlined),
+                      title: Text(e.title(l10n)),
+                      trailing: e.pageBuilder != null
+                          ? const Icon(Icons.chevron_right)
+                          : null,
+                      onTap: e.pageBuilder == null
+                          ? null
+                          : () => _open(
+                              _PaneTarget(id: e.key, builder: e.pageBuilder!),
+                            ),
+                    ),
+                ],
+              );
+            }
 
-                  // --- Genel & motor ---
-                  SettingsGroupCard(children: [
+            final general = search.filter(
+              SettingsRegistry.byGroup(SettingsGroup.general),
+              l10n,
+            );
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              children: <Widget>[
+                if (general.isNotEmpty) ...<Widget>[
+                  SettingsSectionHeader(title: l10n.settingsGroupGeneral),
+                  SettingsGroupCard(
+                    children: [...general.map((e) => _entry(e, l10n, ctrl))],
+                  ),
+                ],
+
+                // --- Genel & motor ---
+                SettingsGroupCard(
+                  children: [
                     _NavRow(
                       icon: Icons.play_circle_outline,
                       title: l10n.settingsPlayback,
                       desc: l10n.settingsDescPlayback,
                       selected: _selected.value?.id == 'nav_playback',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_playback',
-                        builder: () => const PlaybackSettingsPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_playback',
+                          builder: () => const PlaybackSettingsPage(),
+                        ),
+                      ),
                     ),
                     _NavRow(
                       icon: Icons.equalizer,
                       title: l10n.audioSettingsTitle,
                       desc: l10n.settingsDescAudio,
                       selected: _selected.value?.id == 'nav_audio',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_audio',
-                        builder: () => const AudioSettingsPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_audio',
+                          builder: () => const AudioSettingsPage(),
+                        ),
+                      ),
                     ),
-                  ]),
+                  ],
+                ),
 
-                  // --- Kütüphane ve içerik ---
-                  SettingsSectionHeader(title: l10n.settingsGroupContent),
-                  SettingsGroupCard(children: [
+                // --- Kütüphane ve içerik ---
+                SettingsSectionHeader(title: l10n.settingsGroupContent),
+                SettingsGroupCard(
+                  children: [
                     _NavRow(
                       icon: Icons.folder_special,
                       title: l10n.settingsLibrary,
                       desc: l10n.settingsDescLibrary,
                       selected: _selected.value?.id == 'nav_library',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_library',
-                        builder: () => const LibrarySettingsPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_library',
+                          builder: () => const LibrarySettingsPage(),
+                        ),
+                      ),
                     ),
                     _NavRow(
                       icon: Icons.image_outlined,
                       title: l10n.tagsArtworkSettings,
                       desc: l10n.settingsDescTags,
                       selected: _selected.value?.id == 'nav_tags',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_tags',
-                        builder: () => const TagsArtworkSettingsPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_tags',
+                          builder: () => const TagsArtworkSettingsPage(),
+                        ),
+                      ),
                     ),
                     _NavRow(
                       icon: Icons.widgets_outlined,
                       title: l10n.widgetSettings,
                       desc: l10n.settingsDescWidget,
                       selected: _selected.value?.id == 'nav_widget',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_widget',
-                        builder: () => const WidgetSettingsPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_widget',
+                          builder: () => const WidgetSettingsPage(),
+                        ),
+                      ),
                     ),
                     _NavRow(
                       icon: Icons.notifications_outlined,
                       title: l10n.settingsRowNotifications,
                       desc: l10n.settingsDescNotifications,
                       selected: _selected.value?.id == 'nav_notifications',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_notifications',
-                        builder: () => const NotificationSettingsPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_notifications',
+                          builder: () => const NotificationSettingsPage(),
+                        ),
+                      ),
                     ),
                     // Gün 17 (Kasa): iki bölmeye gömülmez, tam ekran rota.
                     // Hassas içerik yalnız kendi ekranında gösterilir.
@@ -300,100 +312,119 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
                       desc: l10n.settingsDescVault,
                       onTap: () => Get.toNamed(AppRoutes.vault),
                     ),
-                  ]),
+                  ],
+                ),
 
-                  // --- Görünüm ---
-                  SettingsSectionHeader(title: l10n.settingsGroupAppearance),
-                  SettingsGroupCard(children: [
+                // --- Görünüm ---
+                SettingsSectionHeader(title: l10n.settingsGroupAppearance),
+                SettingsGroupCard(
+                  children: [
                     _NavRow(
                       icon: Icons.palette_outlined,
                       title: l10n.settingsRowAppearance,
                       desc: l10n.settingsDescTheme,
                       selected: _selected.value?.id == 'nav_appearance',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_appearance',
-                        builder: () => const ThemeGalleryPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_appearance',
+                          builder: () => const ThemeGalleryPage(),
+                        ),
+                      ),
                     ),
                     _NavRow(
                       icon: Icons.text_fields,
                       title: l10n.themeFont,
                       desc: l10n.settingsDescFont,
                       selected: _selected.value?.id == 'nav_font',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_font',
-                        builder: () => const FontSettingsPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_font',
+                          builder: () => const FontSettingsPage(),
+                        ),
+                      ),
                     ),
                     _NavRow(
                       icon: Icons.music_note,
                       title: l10n.themePlayerTitle,
                       desc: l10n.settingsDescPlayerStyle,
                       selected: _selected.value?.id == 'nav_player_style',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_player_style',
-                        builder: () => const PlayerStylePage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_player_style',
+                          builder: () => const PlayerStylePage(),
+                        ),
+                      ),
                     ),
                     _NavRow(
                       icon: Icons.list_alt,
                       title: l10n.themeListTitle,
                       desc: l10n.settingsDescListStyle,
                       selected: _selected.value?.id == 'nav_list_style',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_list_style',
-                        builder: () => const ListStylePage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_list_style',
+                          builder: () => const ListStylePage(),
+                        ),
+                      ),
                     ),
-                  ]),
+                  ],
+                ),
 
-                  // --- Sistem ---
-                  SettingsSectionHeader(title: l10n.settingsGroupSystem),
-                  SettingsGroupCard(children: [
+                // --- Sistem ---
+                SettingsSectionHeader(title: l10n.settingsGroupSystem),
+                SettingsGroupCard(
+                  children: [
                     _NavRow(
                       icon: Icons.backup,
                       title: l10n.backupTitle,
                       desc: l10n.settingsDescBackup,
                       selected: _selected.value?.id == 'nav_backup',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_backup',
-                        builder: () => const BackupPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_backup',
+                          builder: () => const BackupPage(),
+                        ),
+                      ),
                     ),
                     _NavRow(
                       icon: Icons.info_outline,
                       title: l10n.settingsAbout,
                       desc: l10n.settingsDescAbout,
                       selected: _selected.value?.id == 'nav_about',
-                      onTap: () => _open(_PaneTarget(
-                        id: 'nav_about',
-                        builder: () => const AboutPage(),
-                      )),
+                      onTap: () => _open(
+                        _PaneTarget(
+                          id: 'nav_about',
+                          builder: () => const AboutPage(),
+                        ),
+                      ),
                     ),
-                  ]),
+                  ],
+                ),
 
-                  // --- Gün 6: Tüm ayarları sıfırla ---
-                  // Yıkıcı eylem en sonda, kendi kartında. Taban l10n
-                  // dizgeleri (resetAll / resetConfirm) Gün 6 ile ilk kez
-                  // gerçek bir ekrana bağlandı.
-                  SettingsGroupCard(children: [
+                // --- Gün 6: Tüm ayarları sıfırla ---
+                // Yıkıcı eylem en sonda, kendi kartında. Taban l10n
+                // dizgeleri (resetAll / resetConfirm) Gün 6 ile ilk kez
+                // gerçek bir ekrana bağlandı.
+                SettingsGroupCard(
+                  children: [
                     _NavRow(
                       icon: Icons.restart_alt,
                       title: l10n.resetAll,
                       desc: l10n.resetAllDesc,
                       onTap: () => _confirmReset(context),
                     ),
-                  ]),
+                  ],
+                ),
 
-                  // --- Alt durum kartı (gerçek veri) ---
-                  const SizedBox(height: 16),
-                  const _EngineStatusCard(),
-                ],
-              );
-            }),
-          ),
-        ],
-      );
+                // --- Alt durum kartı (gerçek veri) ---
+                const SizedBox(height: 16),
+                const _EngineStatusCard(),
+              ],
+            );
+          }),
+        ),
+      ],
+    );
   }
 
   Widget _entry(
@@ -467,47 +498,47 @@ class _NavRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Ink(
-        color: selected
-            ? cs.secondaryContainer.withValues(alpha: 0.45)
-            : null,
+        color: selected ? cs.secondaryContainer.withValues(alpha: 0.45) : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: cs.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 22, color: cs.onPrimaryContainer),
               ),
-              child: Icon(icon, size: 22, color: cs.onPrimaryContainer),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyLarge
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    desc,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: cs.onSurfaceVariant),
-                  ),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      desc,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Icon(Icons.chevron_right, size: 20, color: cs.onSurfaceVariant),
-          ],
-        ),
+              Icon(Icons.chevron_right, size: 20, color: cs.onSurfaceVariant),
+            ],
+          ),
         ),
       ),
     );
@@ -565,8 +596,9 @@ class _EngineStatusCard extends StatelessWidget {
                     _statusText(context),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelMedium
-                        ?.copyWith(color: cs.onSurfaceVariant),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
@@ -619,4 +651,3 @@ class _PaneTarget {
   final String id;
   final Widget Function() builder;
 }
-

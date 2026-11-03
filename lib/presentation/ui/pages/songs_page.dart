@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resonance/core/utils/responsive.dart';
@@ -9,6 +7,7 @@ import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/library_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/theme_controller.dart';
+import 'package:resonance/presentation/ui/widgets/alphabet_scroller.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 import 'package:resonance/presentation/ui/widgets/song_tile.dart';
 
@@ -158,7 +157,11 @@ class _SongsViewState extends State<SongsView> {
                         right: 4,
                         top: 0,
                         bottom: 32,
-                        child: _AlphabetScroller(
+                        // Alfabe şeridi ayrı dosyada taşınmıştır:
+                        // widgets/alphabet_scroller.dart (test edilebilir
+                        // public widget; RenderFlex taşması garantili
+                        // engelli — ölçü taraması testiyle kilitli).
+                        child: AlphabetScroller(
                           offsets: controller.letterOffsets,
                           onLetterSelected: _scrollToLetter,
                         ),
@@ -238,9 +241,8 @@ class _CompactHeader extends StatelessWidget {
               l10n.libraryLosslessHint,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: cs.onSurfaceVariant),
             ),
           ),
           _RoundAction(
@@ -407,231 +409,6 @@ class _RoundAction extends StatelessWidget {
           child: Icon(icon, color: color, size: 20),
         ),
       ),
-    );
-  }
-}
-
-// ========== ALPHABET SCROLLER (Bulgu 1) ==========
-
-/// Eski sürümün iki sorunu vardı:
-///  1. FittedBox tüm sütunu mevcut yüksekliğe ölçekleyince harfler küçülüyor,
-///     dokunma alanları ~10px'e düşüyor ve «çalışmıyor» hissi veriyordu;
-///     ayrıca yalnızca tek tek DOKUNMA vardı, parmağı kaydırma (drag) yoktu.
-///  2. Görsel dil zayıftı: yarı saydam kutu, küçük tipografi, ince vurgu.
-///
-/// Yeni sürüm:
-///  • Hem dokunma hem DİKEY SÜRÜKLEME destekler (parmak harflerin üstünde
-///    gezinirken liste anlık kayar).
-///  • Her harfin dokunma alanı en az 11dp yüksekliktedir; kutu asla
-///    küçültülmez (aşırı kısa ekranlarda harf aralığı toparlanır).
-///  • Kütüphanede olmayan harfe dokunulursa sıradaki İLK mevcut harfe
-///    gider — her dokunuş bir sonuç üretir.
-///  • Sürükleme sırasında parmağın hizasında yuvarlak bir baloncuğda
-///    seçilen harf gösterilir.
-class _AlphabetScroller extends StatefulWidget {
-  const _AlphabetScroller({
-    required this.offsets,
-    required this.onLetterSelected,
-  });
-
-  final Map<String, int> offsets;
-  final ValueChanged<String> onLetterSelected;
-
-  @override
-  State<_AlphabetScroller> createState() => _AlphabetScrollerState();
-}
-
-class _AlphabetScrollerState extends State<_AlphabetScroller> {
-  static const List<String> _alphabet = [
-    'A',
-    'B',
-    'C',
-    'Ç',
-    'D',
-    'E',
-    'F',
-    'G',
-    'Ğ',
-    'H',
-    'I',
-    'İ',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'Ö',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'Ş',
-    'T',
-    'U',
-    'Ü',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
-    '#',
-  ];
-
-  static const Duration _bubbleFade = Duration(milliseconds: 120);
-  Timer? _bubbleTimer;
-  String? _dragLetter;
-
-  @override
-  void dispose() {
-    _bubbleTimer?.cancel();
-    super.dispose();
-  }
-
-  /// Seçilen harf kütüphanede yoksa ALFABEDEKİ sıradaki ilk mevcut harfe
-  /// iner; hiçbiri yoksa null. Böylece «ölü» harfe dokunmak boşa gitmez.
-  String? _resolve(String letter) {
-    if (widget.offsets.containsKey(letter)) return letter;
-    final start = _alphabet.indexOf(letter);
-    for (var i = start + 1; i < _alphabet.length; i++) {
-      if (widget.offsets.containsKey(_alphabet[i])) return _alphabet[i];
-    }
-    return null;
-  }
-
-  void _selectAt(double dy, double slotHeight) {
-    var idx = dy ~/ slotHeight;
-    if (idx < 0) idx = 0;
-    if (idx > _alphabet.length - 1) idx = _alphabet.length - 1;
-    final letter = _alphabet[idx];
-    final target = _resolve(letter);
-    if (target == null) return;
-    _bubbleTimer?.cancel();
-    setState(() => _dragLetter = letter);
-    widget.onLetterSelected(target);
-  }
-
-  void _scheduleBubbleClear() {
-    _bubbleTimer?.cancel();
-    _bubbleTimer = Timer(const Duration(milliseconds: 350), () {
-      if (mounted) setState(() => _dragLetter = null);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final n = _alphabet.length;
-        // Her harfe 9-16dp arası eşit slot; normal durumda kutu asla
-        // küçültülmez (eski «harfler çalışmıyor» hatasının kökü).
-        // Yalnız AŞIRI kısa alanlarda (h < 9dp x 33) FittedBox devreye girer.
-        final slot =
-            (constraints.maxHeight / n).clamp(9.0, 16.0).toDouble();
-        final stripHeight = slot * n;
-        final overflows = stripHeight > constraints.maxHeight;
-        final fontSize = (slot * 0.62).clamp(8.0, 10.5).toDouble();
-
-        final lettersColumn = Column(
-          children: [
-            for (var i = 0; i < n; i++)
-              SizedBox(
-                height: slot,
-                width: 26,
-                child: Center(
-                  child: Text(
-                    _alphabet[i],
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      height: 1.0,
-                      fontWeight: _dragLetter == _alphabet[i]
-                          ? FontWeight.w800
-                          : widget.offsets.containsKey(_alphabet[i])
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                      color: _dragLetter == _alphabet[i]
-                          ? cs.primary
-                          : widget.offsets.containsKey(_alphabet[i])
-                              ? cs.onSurface
-                              : cs.onSurfaceVariant.withValues(alpha: 0.38),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 26,
-              height: overflows ? constraints.maxHeight : stripHeight,
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerLowest.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(13),
-                border: Border.all(
-                  color: cs.outlineVariant.withValues(alpha: 0.4),
-                ),
-              ),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTapDown: (d) => _selectAt(d.localPosition.dy, slot),
-                onTapUp: (_) => _scheduleBubbleClear(),
-                onTapCancel: _scheduleBubbleClear,
-                onVerticalDragUpdate: (d) =>
-                    _selectAt(d.localPosition.dy, slot),
-                onVerticalDragEnd: (_) => _scheduleBubbleClear(),
-                onVerticalDragCancel: _scheduleBubbleClear,
-                child: overflows
-                    ? FittedBox(fit: BoxFit.scaleDown, child: lettersColumn)
-                    : lettersColumn,
-              ),
-            ),
-            // Sürükleme baloncuğu: parmağın hizasında, şeridin solunda.
-            Positioned(
-              right: 34,
-              top: _dragLetter == null
-                  ? -40.0
-                  : ((_alphabet.indexOf(_dragLetter!) * slot)
-                              .clamp(0.0, stripHeight - 32.0) -
-                          4)
-                      .toDouble(),
-              child: IgnorePointer(
-                child: AnimatedOpacity(
-                  duration: _bubbleFade,
-                  opacity: _dragLetter == null ? 0 : 1,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: cs.primary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: cs.primary.withValues(alpha: 0.4),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      _dragLetter ?? '',
-                      style: TextStyle(
-                        color: cs.onPrimary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
