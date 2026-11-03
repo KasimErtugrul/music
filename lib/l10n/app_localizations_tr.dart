@@ -834,7 +834,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sleepTimerEndOfTrackSet => 'Bu şarkıdan sonra duracak';
 
   @override
-  String get gaplessPlayback => 'Kesintisiz oynatma';
+  String get gaplessPlayback => 'Boşluksuz geçiş';
 
   @override
   String get skipSilence => 'Sessizliği atla';
@@ -2135,4 +2135,43 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get onboardingPermissionPending => 'Henüz verilmedi';
+
+  @override
+  String get playlistAlreadyContains => 'Bu şarkı listede zaten var';
+
+  @override
+  String get lyricsEditTitle => 'Şarkı sözünü düzenle';
+
+  @override
+  String get lyricsSave => 'Sözleri kaydet';
+
+  @override
+  String get lyricsDelete => 'Sözleri sil';
+
+  @override
+  String get lyricsSaved => 'Şarkı sözü kaydedildi';
+
+  @override
+  String get lyricsDeleted => 'Şarkı sözü silindi';
+
+  @override
+  String get lyricsHint =>
+      'Sözleri buraya yazın veya yapıştırın. [dd:ss.xx] ile başlayan satırlar eşzamanlı (LRC) söz sayılır.';
+
+  @override
+  String get lyricsEmpty => 'Henüz şarkı sözü yok';
+
+  @override
+  String get lyricsAddAction => 'Şarkı sözü ekle';
+
+  @override
+  String get lyricsSyncedBadge => 'Eşzamanlı (LRC)';
+
+  @override
+  String get gaplessPlaybackDesc =>
+      'Bir sonraki parçayı önceden hazırlar; şarkılar sessizliğe yer kalmadan birbirine bağlanır.';
+
+  @override
+  String get gaplessPlaybackInfo =>
+      'Açıkken oynatıcı sıradaki parçayı önceden hazırlar ve şarkılar yükleme boşluğu olmadan birbirine geçer. Çok uzun kuyruklarda daha fazla bellek kullanır. Değişiklik uygulamanın bir sonraki açılışında geçerli olur.';
 }

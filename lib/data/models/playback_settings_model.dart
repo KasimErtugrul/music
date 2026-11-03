@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class PlaybackSettingsModel {
   const PlaybackSettingsModel({
     this.seekIntervalSeconds = 10,
@@ -10,6 +12,7 @@ class PlaybackSettingsModel {
     this.skipSilence = false,
     this.replayGain = false,
     this.fadeMs = 0,
+    this.gaplessPlayback = true,
   });
 
   final int seekIntervalSeconds;
@@ -29,14 +32,28 @@ class PlaybackSettingsModel {
   /// değiştirirse rampa iptal edilir.
   final int fadeMs;
 
-  // Gün 10 notu (Gün 2 bulgusunun ele alınışı): eski sürümlerdeki ölü
-  // «gapless» alanı modelden KALDIRILDI — just_audio, setAudioSources ile
-  // yüklenen kuyruklarda kesintisiz geçişi zaten sağlar; hiçbir tüketici
-  // yoktu (Gün 2), setGapless'in de çağıranı yoktu. Uyumluluk: eski
-  // JSON'lardaki 'gapless' anahtarı artık bilinmeyen alan olarak doğal
-  // biçimde yok sayılır (fromJson adıyla okur), toJson yazmaz; eski
-  // yedeklerin geri yüklenmesi etkilenmez ('playback_settings' yedekte
-  // dizge olarak taşınır, ilk yüklemede alan düşer).
+  /// Bulgu 8: boşluksuz geçiş. Açıkken (varsayılan) AudioPlayer,
+  /// `useLazyPreparation: false` ile kurulur: bir sonraki parça ÖNCEDEN
+  /// çözülür, parçalar arası yükleme boşluğu kapanır. Kapalıyken motorun
+  /// varsayılan tembel hazırlığı kullanılır (düşük donanımda bellek
+  /// tasarrufu; geçişte kısa duraksama olabilir). just_audio 0.10'da bu
+  /// bayrak oynatıcı KURULUMUNDA sabitlenir (final alan) — değişiklik
+  /// uygulamanın SONRAKİ AÇILIŞINDA geçerlidir; ayar balonu bunu söyler.
+  final bool gaplessPlayback;
+
+  /// Bulgu 8: oynatıcı kurulurken (main → PlayerDataSource) tercih,
+  /// denetleyicinin asenkron yüklemesini beklemeden ham prefs'ten
+  /// senkron okunur. Eksik/bozuk JSON → varsayılan (açık).
+  static bool gaplessFromRaw(String? raw) {
+    if (raw == null || raw.isEmpty) return true;
+    try {
+      final v =
+          (jsonDecode(raw) as Map<String, dynamic>)['gaplessPlayback'];
+      return v is bool ? v : true;
+    } on Object {
+      return true;
+    }
+  }
 
   PlaybackSettingsModel copyWith({
     int? seekIntervalSeconds,
@@ -49,6 +66,7 @@ class PlaybackSettingsModel {
     bool? skipSilence,
     bool? replayGain,
     int? fadeMs,
+    bool? gaplessPlayback,
   }) {
     return PlaybackSettingsModel(
       seekIntervalSeconds: seekIntervalSeconds ?? this.seekIntervalSeconds,
@@ -61,6 +79,7 @@ class PlaybackSettingsModel {
       skipSilence: skipSilence ?? this.skipSilence,
       replayGain: replayGain ?? this.replayGain,
       fadeMs: fadeMs ?? this.fadeMs,
+      gaplessPlayback: gaplessPlayback ?? this.gaplessPlayback,
     );
   }
 
@@ -75,6 +94,7 @@ class PlaybackSettingsModel {
     'skipSilence': skipSilence,
     'replayGain': replayGain,
     'fadeMs': fadeMs,
+    'gaplessPlayback': gaplessPlayback,
   };
 
   /// Gün 10: alan-seviyesi güvenli ayrıştırma — Gün 3'te ThemeSettings'e
@@ -111,6 +131,9 @@ class PlaybackSettingsModel {
       skipSilence: boolOf('skipSilence', false),
       replayGain: boolOf('replayGain', false),
       fadeMs: intOf('fadeMs', 0),
+      // Bulgu 8: eski JSON'larda anahtar yoktur → varsayılan (açık).
+      // Eski ölü 'gapless' anahtarıyla ad çakışmaz, göz ardı edilir.
+      gaplessPlayback: boolOf('gaplessPlayback', true),
     );
   }
 }

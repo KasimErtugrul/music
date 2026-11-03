@@ -15,6 +15,7 @@ class ArtworkImage extends StatefulWidget {
     this.borderRadius,
     this.fit = BoxFit.cover,
     this.fallbackIcon = Icons.music_note,
+    this.heroTag,
   });
 
   /// null ise placeholder doğrudan gösterilir.
@@ -25,6 +26,11 @@ class ArtworkImage extends StatefulWidget {
   final BorderRadius? borderRadius;
   final BoxFit fit;
   final IconData fallbackIcon;
+
+  /// Bulgu 4: verilirse görsel [Hero] sarmalanır (tam ekran görüntüleyici
+  /// geçişi için). Varsayılan null — Hero etiketi ağaçta teke düşmeli;
+  /// yalnız oynatıcı kapağı ve görüntüleyici bu etiketi kullanır.
+  final Object? heroTag;
 
   /// Görev 1.4: "Kapak önbelleğini temizle" düğmesinin gerçek temizliği için
   /// statik boşaltma noktası. Bayt LRU'su [_ArtworkImageState._cache] içinde
@@ -142,9 +148,16 @@ class _ArtworkImageState extends State<ArtworkImage> {
         ? SizedBox(width: widget.size, height: widget.size, child: content)
         : SizedBox.expand(child: content);
 
-    return ClipRRect(
+    final clipped = ClipRRect(
       borderRadius: widget.borderRadius ?? BorderRadius.zero,
       child: sized,
     );
+
+    // Bulgu 4: Hero yalnız isteyen arayüzlerde açılır; aynı etiketli iki
+    // Hero'nun aynı ağaçta çakışması böylece imkânsız kılınır.
+    if (widget.heroTag != null) {
+      return Hero(tag: widget.heroTag!, child: clipped);
+    }
+    return clipped;
   }
 }

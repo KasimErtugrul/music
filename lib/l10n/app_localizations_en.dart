@@ -2139,4 +2139,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingPermissionPending => 'Not granted yet';
+
+  @override
+  String get playlistAlreadyContains => 'This song is already in the playlist';
+
+  @override
+  String get lyricsEditTitle => 'Edit lyrics';
+
+  @override
+  String get lyricsSave => 'Save lyrics';
+
+  @override
+  String get lyricsDelete => 'Delete lyrics';
+
+  @override
+  String get lyricsSaved => 'Lyrics saved';
+
+  @override
+  String get lyricsDeleted => 'Lyrics deleted';
+
+  @override
+  String get lyricsHint =>
+      'Type or paste lyrics here. Lines starting with [mm:ss.xx] are treated as synced (LRC) lyrics.';
+
+  @override
+  String get lyricsEmpty => 'No lyrics yet';
+
+  @override
+  String get lyricsAddAction => 'Add lyrics';
+
+  @override
+  String get lyricsSyncedBadge => 'Synced (LRC)';
+
+  @override
+  String get gaplessPlaybackDesc =>
+      'Preloads the next track so songs flow into each other without silence.';
+
+  @override
+  String get gaplessPlaybackInfo =>
+      'When enabled, the player prepares the upcoming track ahead of time and transitions between songs without a loading gap. Uses more memory on very long queues. Takes effect the next time the app starts.';
 }

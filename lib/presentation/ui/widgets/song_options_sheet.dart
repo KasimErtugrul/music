@@ -8,6 +8,7 @@ import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 import 'package:resonance/presentation/controllers/playlist_controller.dart';
 import 'package:resonance/presentation/controllers/vault_controller.dart'; // YENİ (Gün 17)
+import 'package:resonance/presentation/ui/pages/lyrics/lyrics_edit_page.dart';
 import 'package:resonance/presentation/ui/pages/tag_viewer_page.dart';
 import 'package:resonance/presentation/ui/widgets/playlist_picker_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/song_info_sheet.dart';
@@ -82,6 +83,15 @@ class SongOptionsSheet extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 PlaylistPickerSheet.show(context, song);
+              },
+            ),
+            // Bulgu 6: şarkı sözü ekleme/düzenleme girişi.
+            ListTile(
+              leading: const Icon(Icons.lyrics_outlined),
+              title: Text(l10n.lyrics),
+              onTap: () {
+                Navigator.pop(context);
+                LyricsEditPage.show(context, song);
               },
             ),
             ListTile(

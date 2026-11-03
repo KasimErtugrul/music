@@ -46,8 +46,21 @@ class PlaylistPickerSheet extends StatelessWidget {
                     leading: const Icon(Icons.queue_music),
                     title: Text(p.name),
                     onTap: () async {
-                      await controller.addSongToPlaylist(p.id, song);
-                      if (context.mounted) Navigator.pop(context);
+                      // Bulgu 2: kopya denemesi sessizce yutulmaz; aynı
+                      // liste için uyarı gösterilir, sayfa açık kalır.
+                      final added =
+                          await controller.addSongToPlaylist(p.id, song);
+                      if (!context.mounted) return;
+                      if (added) {
+                        Navigator.pop(context);
+                      } else {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.playlistAlreadyContains),
+                          ),
+                        );
+                      }
                     },
                   );
                 },

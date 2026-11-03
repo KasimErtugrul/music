@@ -7,14 +7,14 @@ import 'package:resonance/core/utils/responsive.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
-import 'package:resonance/presentation/controllers/playlist_controller.dart';
+import 'package:resonance/presentation/ui/pages/player/artwork_viewer_page.dart';
 import 'package:resonance/presentation/ui/pages/player/player_expanded_view.dart';
+import 'package:resonance/presentation/ui/pages/lyrics/lyrics_view_page.dart';
 import 'package:resonance/presentation/ui/pages/waveform_viewer_page.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/player_controls.dart';
 import 'package:resonance/presentation/ui/widgets/seek_bar.dart';
-import 'package:resonance/presentation/ui/widgets/song_tile.dart';
-import 'package:resonance/presentation/ui/widgets/state_views.dart';
+import 'package:resonance/presentation/ui/widgets/song_playlist_chips.dart';
 import 'package:resonance/presentation/ui/widgets/sleep_timer_sheet.dart';
 import 'package:resonance/presentation/ui/widgets/speed_pitch_sheet.dart';
 
@@ -131,10 +131,19 @@ class PlayerPage extends GetView<PlayerController> {
                               ),
                             AspectRatio(
                               aspectRatio: 1,
-                              child: ArtworkImage(
-                                songId: song.id,
-                                borderRadius: BorderRadius.circular(borderRadius),
-                                fallbackIcon: Icons.music_note,
+                              child: GestureDetector(
+                                // Bulgu 4: kapağa dokunma → tam ekran
+                                // görüntüleyici; Hero geçişi etiketle
+                                // bağlanır (yalnız bu kapakta açıktır).
+                                onTap: () => ArtworkViewerPage.show(
+                                    context, song),
+                                child: ArtworkImage(
+                                  songId: song.id,
+                                  borderRadius:
+                                      BorderRadius.circular(borderRadius),
+                                  fallbackIcon: Icons.music_note,
+                                  heroTag: ArtworkViewerPage.tagOf(song.id),
+                                ),
                               ),
                             ),
                           ],
@@ -213,7 +222,7 @@ class PlayerPage extends GetView<PlayerController> {
                                     ),
                                   // Bulgu 2: şarkının üyesi olduğu çalma
                                   // listeleri oynatıcı ekranında da görünür.
-                                  _SongPlaylistChips(songId: song.id),
+                                  SongPlaylistChips(songId: song.id),
                                 ],
                               ),
                             ),
@@ -277,9 +286,9 @@ class PlayerPage extends GetView<PlayerController> {
                               onPressed: () => SpeedPitchSheet.show(context),
                             );
                           }),
-                          // Sözler: şartname 6.15 durum görünümü
-                          // (söz gösterimi bu sürümde kapsam dışıdır;
-                          // düğme tasarlanmış bilgilendirme sheet'ini açar).
+                          // Bulgu 6: sözler artık gerçek görüntüleyiciyle
+                          // açılır — LRC satırları çalma konumuyla vurgulanır;
+                          // söz yoksa ekleme sayfası önerilir.
                           IconButton(
                             icon: const Icon(Icons.format_quote),
                             tooltip: l10n.lyrics,
@@ -288,7 +297,7 @@ class PlayerPage extends GetView<PlayerController> {
                             onPressed: () {
                               final song = controller.currentSong;
                               if (song != null) {
-                                NoLyricsView.show(context, song);
+                                LyricsViewPage.show(context, song);
                               }
                             },
                           ),
@@ -365,35 +374,6 @@ class PlayerPage extends GetView<PlayerController> {
   }
 }
 
-/// Bulgu 2: çalan şarkının üyesi olduğu çalma listelerini gösteren çip
-/// satırı. SongTile'daki rozetle aynı görsel dili kullanır (PlaylistBadge).
-/// PlaylistController kayıtlı değilse (binding'siz testler) sessizce
-/// yok olur; şarkı hiçbir listede değilse satır hiç çizilmez.
-class _SongPlaylistChips extends StatelessWidget {
-  const _SongPlaylistChips({required this.songId});
-
-  final int songId;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!Get.isRegistered<PlaylistController>()) {
-      return const SizedBox.shrink();
-    }
-    final playlistCtrl = Get.find<PlaylistController>();
-    return Obx(() {
-      final names = playlistCtrl.listNamesOf(songId);
-      if (names.isEmpty) return const SizedBox.shrink();
-      return Padding(
-        padding: const EdgeInsets.only(top: 6, left: 2),
-        child: Wrap(
-          spacing: 6,
-          runSpacing: 4,
-          children: [for (final n in names) PlaylistBadge(names: [n])],
-        ),
-      );
-    });
-  }
-}
 
 /// Bulgu 5: AppBar'ın yerini alan ince üst satır. Sol: oynatıcıyı kapat
 /// (aşağı ok). Sağ: uyku zamanlayıcı. Kuyruk ikonu bilinçli olarak

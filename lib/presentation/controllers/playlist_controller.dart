@@ -67,14 +67,18 @@ class PlaylistController extends GetxController {
     await loadPlaylists();
   }
 
-  Future<void> addSongToPlaylist(int playlistId, SongModel song) async {
+  /// Bulgu 2: şarkı zaten bu listedeyse ekleme YAPILMAZ ve false döner —
+  /// çağıran arayüz kullanıcıyı snackbar ile bilgilendirir (sessiz
+  /// başarısızlık kapatıldı). Diğer listelere ekleme her zaman serbesttir.
+  Future<bool> addSongToPlaylist(int playlistId, SongModel song) async {
     final exists = await _repo.isSongInPlaylist(playlistId, song.id);
-    if (exists) return; // Zaten varsa ekleme
+    if (exists) return false; // Zaten varsa ekleme
     await _repo.addSong(playlistId, song);
     await loadPlaylists();
     if (currentPlaylist.value?.id == playlistId) {
       await loadPlaylistDetail(playlistId);
     }
+    return true;
   }
 
   Future<void> removeSong(int playlistId, int songId) async {

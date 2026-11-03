@@ -3,11 +3,10 @@ import 'package:get/get.dart';
 import 'package:resonance/core/theme/extensions/player_theme_extension.dart';
 import 'package:resonance/l10n/app_localizations.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
-import 'package:resonance/presentation/controllers/playlist_controller.dart';
 import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/player_controls.dart';
 import 'package:resonance/presentation/ui/widgets/seek_bar.dart';
-import 'package:resonance/presentation/ui/widgets/song_tile.dart';
+import 'package:resonance/presentation/ui/widgets/song_playlist_chips.dart';
 
 /// Geniş ekran (tablet / yatay) oynatıcı düzeni.
 ///
@@ -129,27 +128,13 @@ class PlayerExpandedView extends GetView<PlayerController> {
                     ),
                   );
                 }),
-                // Bulgu 2: üye olunan çalma listeleri geniş düzende de
-                // görünür; kompakt düzendeyle aynı çip bileşeni kullanılır.
+                // Bulgu 2/3: üye olunan çalma listeleri geniş düzende de
+                // görünür; tüm yüzeyler aynı paylaşılan çip bileşenini
+                // kullanır (SongPlaylistChips).
                 Obx(() {
                   final song = controller.currentSong;
-                  if (song == null ||
-                      !Get.isRegistered<PlaylistController>()) {
-                    return const SizedBox.shrink();
-                  }
-                  final names = Get.find<PlaylistController>()
-                      .listNamesOf(song.id);
-                  if (names.isEmpty) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 2),
-                    child: Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        for (final n in names) PlaylistBadge(names: [n]),
-                      ],
-                    ),
-                  );
+                  if (song == null) return const SizedBox.shrink();
+                  return SongPlaylistChips(songId: song.id);
                 }),
                 const SizedBox(height: 64),
                 const SeekBar(),

@@ -16,6 +16,8 @@ import 'package:resonance/data/datasources/player_datasource.dart';
 import 'package:resonance/data/repositories/favorite_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/playlist_repository.dart';
+import 'package:resonance/core/settings/settings_persistence.dart';
+import 'package:resonance/data/models/playback_settings_model.dart';
 import 'package:resonance/data/repositories/preferences_repository.dart';
 import 'package:resonance/data/repositories/settings_repository.dart';
 import 'package:resonance/data/repositories/theme_repository.dart';
@@ -145,7 +147,16 @@ Future<void> _bootstrap() async {
     final audioEffects = AudioEffectsDatasource();
     Get.put<AudioEffectsDatasource>(audioEffects, permanent: true);
 
-    final playerSource = PlayerDataSource(audioEffects);
+    // Bulgu 8: boşluksuz geçiş tercihi oynatıcı kurulumunda okunur
+    // (motor bayrağı ctor'da sabitlenir); asenkron ayar yüklemesini
+    // beklemeden ham prefs'ten alınır.
+    final playerSource = PlayerDataSource(
+      audioEffects,
+      gaplessPlayback: PlaybackSettingsModel.gaplessFromRaw(
+        // Gün 5 kuralı: anahtar yalnız SettingsPersistence sabitiyle.
+        prefs.getString(SettingsPersistence.playbackSettings),
+      ),
+    );
     Get.put<PlayerDataSource>(playerSource, permanent: true);
 
     audioHandler = await AudioService.init(

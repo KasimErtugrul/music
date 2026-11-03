@@ -107,6 +107,15 @@ class PreferencesController extends GetxController {
     _repo.savePlayback(playback.value);
   }
 
+  /// Bulgu 8: boşluksuz geçiş anahtarı. just_audio 0.10'da
+  /// useLazyPreparation oynatıcı kurulumunda sabitlendiği için değişiklik
+  /// uygulamanın SONRAKİ AÇILIŞINDA geçerlidir; sayfadaki info balonu
+  /// da bunu bildirir.
+  void setGaplessPlayback(bool v) {
+    playback.value = playback.value.copyWith(gaplessPlayback: v);
+    _repo.savePlayback(playback.value);
+  }
+
   void setDefaultShuffle(bool v) {
     playback.value = playback.value.copyWith(defaultShuffle: v);
     _repo.savePlayback(playback.value);

@@ -673,4 +673,18 @@
   "onboardingSummaryTitle": "You're all set!",
   "onboardingSummaryBody": "Your library will be scanned automatically on first use. You can change permission states anytime in Settings.",
   "onboardingPermissionPending": "Not granted yet"
+,
+  "playlistAlreadyContains": "This song is already in the playlist",
+  "lyricsEditTitle": "Edit lyrics",
+  "lyricsSave": "Save lyrics",
+  "lyricsDelete": "Delete lyrics",
+  "lyricsSaved": "Lyrics saved",
+  "lyricsDeleted": "Lyrics deleted",
+  "lyricsHint": "Type or paste lyrics here. Lines starting with [mm:ss.xx] are treated as synced (LRC) lyrics.",
+  "lyricsEmpty": "No lyrics yet",
+  "lyricsAddAction": "Add lyrics",
+  "lyricsSyncedBadge": "Synced (LRC)",
+  "gaplessPlayback": "Gapless playback",
+  "gaplessPlaybackDesc": "Preloads the next track so songs flow into each other without silence.",
+  "gaplessPlaybackInfo": "When enabled, the player prepares the upcoming track ahead of time and transitions between songs without a loading gap. Uses more memory on very long queues. Takes effect the next time the app starts."
 }

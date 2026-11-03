@@ -3931,6 +3931,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not granted yet'**
   String get onboardingPermissionPending;
+
+  /// No description provided for @playlistAlreadyContains.
+  ///
+  /// In en, this message translates to:
+  /// **'This song is already in the playlist'**
+  String get playlistAlreadyContains;
+
+  /// No description provided for @lyricsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit lyrics'**
+  String get lyricsEditTitle;
+
+  /// No description provided for @lyricsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save lyrics'**
+  String get lyricsSave;
+
+  /// No description provided for @lyricsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete lyrics'**
+  String get lyricsDelete;
+
+  /// No description provided for @lyricsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics saved'**
+  String get lyricsSaved;
+
+  /// No description provided for @lyricsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics deleted'**
+  String get lyricsDeleted;
+
+  /// No description provided for @lyricsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type or paste lyrics here. Lines starting with [mm:ss.xx] are treated as synced (LRC) lyrics.'**
+  String get lyricsHint;
+
+  /// No description provided for @lyricsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No lyrics yet'**
+  String get lyricsEmpty;
+
+  /// No description provided for @lyricsAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add lyrics'**
+  String get lyricsAddAction;
+
+  /// No description provided for @lyricsSyncedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced (LRC)'**
+  String get lyricsSyncedBadge;
+
+  /// No description provided for @gaplessPlaybackDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Preloads the next track so songs flow into each other without silence.'**
+  String get gaplessPlaybackDesc;
+
+  /// No description provided for @gaplessPlaybackInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, the player prepares the upcoming track ahead of time and transitions between songs without a loading gap. Uses more memory on very long queues. Takes effect the next time the app starts.'**
+  String get gaplessPlaybackInfo;
 }
 
 class _AppLocalizationsDelegate

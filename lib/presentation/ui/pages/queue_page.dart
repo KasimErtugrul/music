@@ -9,13 +9,14 @@ import 'package:resonance/presentation/ui/widgets/artwork_image.dart';
 import 'package:resonance/presentation/ui/widgets/empty_state.dart';
 import 'package:resonance/presentation/ui/widgets/mini_player.dart';
 import 'package:resonance/presentation/ui/widgets/song_options_sheet.dart';
+import 'package:resonance/presentation/ui/widgets/song_playlist_chips.dart';
 
 /// Çalma kuyruğu — M3 tasarım güncellemesi:
 /// - Üstte "şu an çalan" vurgulu kart (EQ animasyonu + ÇALIYOR çipi +
 ///   oynat/duraklat düğmesi)
 /// - "Sıradakiler" bölümü: sürükleme tutamacıyla yeniden sıralama
 ///   (ReorderableListView) + sağa kaydırarak kuyruktan çıkarma
-///   (Dismissible) + parça seçenekleri + karıştır düğmesi
+///   (Dismissible) + parça seçenekleri + üyelik rozetleri (Bulgu 1)
 /// - Alt tarafta mini oynatıcı (tasarımdaki yüzen kart)
 ///
 /// Tasarımdaki iki ayrı "Sonra Çalınacaklar / Sıradakiler" bölümü, veri
@@ -444,7 +445,6 @@ class _UpNextHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final player = Get.find<PlayerController>();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 8, 4),
@@ -462,18 +462,6 @@ class _UpNextHeader extends StatelessWidget {
               ),
             ),
           ),
-          Obx(() {
-            final on = player.shuffleEnabled.value;
-            return IconButton(
-              tooltip: l10n.shuffleAll,
-              icon: Icon(
-                Icons.shuffle,
-                size: 18,
-                color: on ? cs.primary : cs.onSurfaceVariant,
-              ),
-              onPressed: player.toggleShuffle,
-            );
-          }),
         ],
       ),
     );
@@ -589,6 +577,10 @@ class _QueueItem extends StatelessWidget {
                           color: cs.onSurfaceVariant,
                         ),
                       ),
+                      // Bulgu 1: kuyruk kartlarında da şarkının üyesi
+                      // olduğu çalma listeleri görünür (kütüphane ve
+                      // oynatıcıyla aynı paylaşılan çip bileşeni).
+                      SongPlaylistChips(songId: song.id),
                     ],
                   ),
                 ),

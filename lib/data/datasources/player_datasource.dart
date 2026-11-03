@@ -6,8 +6,16 @@ import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 class PlayerDataSource {
   final AudioPlayer player;
 
-  PlayerDataSource(AudioEffectsDatasource effects)
-    : player = AudioPlayer(maxSkipsOnError: 6, audioPipeline: effects.pipeline);
+  /// Bulgu 8: [gaplessPlayback] true ise motor `useLazyPreparation: false`
+  /// ile kurulur → sıradaki parça önceden çözülür, geçiş boşluğu kapanır.
+  /// just_audio 0.10'da bayrak kurulumda sabitlendiği için tercih
+  /// değişikliği sonraki açılışta uygulanır.
+  PlayerDataSource(AudioEffectsDatasource effects, {bool gaplessPlayback = true})
+    : player = AudioPlayer(
+        maxSkipsOnError: 6,
+        audioPipeline: effects.pipeline,
+        useLazyPreparation: !gaplessPlayback,
+      );
 
   Future<void> loadQueue(
     List<AudioSource> sources, {

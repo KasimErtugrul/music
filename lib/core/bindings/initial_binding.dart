@@ -32,7 +32,10 @@ import 'package:resonance/data/repositories/queue_state_repository.dart';
 import 'package:resonance/data/repositories/stats_repository.dart';
 import 'package:resonance/data/repositories/tag_editor_repository.dart';
 import 'package:resonance/data/repositories/waveform_repository.dart';
-import 'package:resonance/presentation/bindings/playlist_binding.dart';
+import 'package:resonance/data/datasources/local/daos/lyrics_dao.dart';
+import 'package:resonance/presentation/controllers/lyrics_controller.dart';
+import 'package:resonance/presentation/controllers/playlist_controller.dart';
+import 'package:resonance/data/repositories/playlist_repository.dart';
 import 'package:resonance/presentation/controllers/equalizer_controller.dart';
 import 'package:resonance/presentation/controllers/excluded_folders_controller.dart'; // YENİ
 import 'package:resonance/presentation/controllers/external_open_controller.dart'; // YENİ
@@ -296,6 +299,34 @@ Get.put<BackupDatasource>(
       permanent: true,
     );
     // --- PLAYLIST ---
-    PlaylistBinding().dependencies();
+    // Bulgu 1/3/7: PlaylistController artık başlangıçta KALICI kurulur.
+    // Eski düzen (PlaylistBinding → lazyPut+fenix) denetleyiciyi ilk
+    // find'a kadar erteler; kütüphane/oynatıcı rozetleri isRegistered
+    // kapısından geçse bile üyelik haritası ilk tazelemeye kadar boş
+    // kalabiliyor, akıllı yönetim rota pop'larında da silebiliyordu.
+    // put+permanent ile harita uygulama açılışında dolar; rozetler her
+    // yüzeyde (kütüphane, kuyruk, oynatıcı) anında görünür.
+    Get.put<PlaylistRepository>(
+      PlaylistRepositoryImpl(
+        Get.find<PlaylistDao>(),
+        Get.find<LibraryRepository>(),
+      ),
+      permanent: true,
+    );
+    Get.put<PlaylistController>(
+      PlaylistController(Get.find<PlaylistRepository>()),
+      permanent: true,
+    );
+
+    // --- ŞARKI SÖZÜ (Bulgu 6) ---
+    // Veri katmanı (Lyrics tablosu, şema v9) hazırdı; denetleyiciyi
+    // bağlayıp özelliği aktifleştiriyoruz. lazyPut+fenix yeterli: söz
+    // sayfaları açıldığında oluşur, kapanınca silinse de harita
+    // veritabanından yeniden okunur.
+    Get.put<LyricsDao>(Get.find<AppDatabase>().lyricsDao, permanent: true);
+    Get.lazyPut<LyricsController>(
+      () => LyricsController(Get.find<LyricsDao>()),
+      fenix: true,
+    );
   }
 }

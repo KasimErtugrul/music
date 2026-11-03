@@ -651,4 +651,18 @@
   "onboardingSummaryTitle": "Her şey hazır!",
   "onboardingSummaryBody": "Kitaplığınız ilk kullanımda otomatik taranacak. İzin durumunu istediğiniz zaman Ayarlar'dan değiştirebilirsiniz.",
   "onboardingPermissionPending": "Henüz verilmedi"
+,
+  "playlistAlreadyContains": "Bu şarkı listede zaten var",
+  "lyricsEditTitle": "Şarkı sözünü düzenle",
+  "lyricsSave": "Sözleri kaydet",
+  "lyricsDelete": "Sözleri sil",
+  "lyricsSaved": "Şarkı sözü kaydedildi",
+  "lyricsDeleted": "Şarkı sözü silindi",
+  "lyricsHint": "Sözleri buraya yazın veya yapıştırın. [dd:ss.xx] ile başlayan satırlar eşzamanlı (LRC) söz sayılır.",
+  "lyricsEmpty": "Henüz şarkı sözü yok",
+  "lyricsAddAction": "Şarkı sözü ekle",
+  "lyricsSyncedBadge": "Eşzamanlı (LRC)",
+  "gaplessPlayback": "Boşluksuz geçiş",
+  "gaplessPlaybackDesc": "Bir sonraki parçayı önceden hazırlar; şarkılar sessizliğe yer kalmadan birbirine bağlanır.",
+  "gaplessPlaybackInfo": "Açıkken oynatıcı sıradaki parçayı önceden hazırlar ve şarkılar yükleme boşluğu olmadan birbirine geçer. Çok uzun kuyruklarda daha fazla bellek kullanır. Değişiklik uygulamanın bir sonraki açılışında geçerli olur."
 }

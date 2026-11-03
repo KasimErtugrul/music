@@ -102,11 +102,19 @@ class PlaybackSettingsPage extends StatelessWidget {
                 onChanged: ctrl.setSkipSilence,
                 info: l10n.skipSilenceInfo,
               ),
-              // Görev 2.3: ReplayGain anahtarı. just_audio setAudioSources ile
-              // yüklenen kuyruklarda kesintisiz geçişi zaten varsayılan olarak
-              // sağladığından, hiçbir şey yapmayan "Kesintisiz oynatma"
-              // anahtarı (Görev 2.2) bu sayfadan kaldırıldı; modeldeki gapless
-              // alanı eski JSON'ların uyumluluğu için korunuyor.
+              // Bulgu 8: boşluksuz geçiş anahtarı — Gün 2.3'te kaldırılan
+              // ölü anahtarın GERÇEK hali: motor tarafında
+              // useLazyPreparation bayrağını sürer (bkz. loadQueue).
+              // Eski anahtar, just_audio'ın varsayılan tembel hazırlığı
+              // yüklemeyi geciktirdiği için «hiçbir şey yapmayan» bir
+              // düğmeydi; artık kuyruk kurulumunda tüketiliyor.
+              SettingsSwitchTile(
+                title: l10n.gaplessPlayback,
+                subtitle: l10n.gaplessPlaybackDesc,
+                value: p.gaplessPlayback,
+                onChanged: ctrl.setGaplessPlayback,
+                info: l10n.gaplessPlaybackInfo,
+              ),
               SettingsSwitchTile(
                 title: l10n.replayGain,
                 subtitle: l10n.replayGainEnableDesc,
