@@ -143,6 +143,27 @@ class PlayerController extends GetxController implements AutoPlayController {
       isPlaying.value = state.playing;
       processingState.value = state.processingState;
       speed.value = state.speed; // Ek-B: hız çipi için canlı değer
+
+      // Bulgu 1: karıştırma/tekrar İKİ YÖNLÜ senkron. Bu denetleyici tek
+      // mod sahibi değil: medya oturumu da handler.setShuffleMode /
+      // setRepeatMode'u çağırabilir (bildirim kartı, Bluetooth/AVRCP,
+      // sesli asistan «karıştır'ı aç», Android Auto). Handler, just_audio
+      // dinleyicileriyle yeni PlaybackState yayınlar (audio_handler
+      // _transformEvent: repeatMode + shuffleMode alanları dolu); bu
+      // dinleyici o alanları okumazsa mini oynatıcı/oynatıcı sayfası
+      // rozetleri bayat kalır ve _saveQueueState yanlış modu diske yazıp
+      // yeniden başlatmada yanlış modu geri yükler. Yayın tek yönlüdür —
+      // bu dinleyici depoya geri yazma yapmaz — döngü riski yoktur.
+      // İlk değer: toggleShuffle/cycleRepeatMode iyimser Rx yazımı
+      // yapar; buradan gelen yayın aynı değere yakınsar (idempotent).
+      final streamShuffle = state.shuffleMode == AudioServiceShuffleMode.all;
+      if (shuffleEnabled.value != streamShuffle) {
+        shuffleEnabled.value = streamShuffle;
+      }
+      if (repeatMode.value != state.repeatMode) {
+        repeatMode.value = state.repeatMode;
+      }
+
       if (!_isRestoring &&
           (!state.playing ||
               state.processingState == AudioProcessingState.idle)) {
