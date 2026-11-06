@@ -651,6 +651,95 @@ void main() {
           )).called(1);
     });
   });
+
+  // Bulgu 5: süre (duration) sınır durumları. durationStream'in null'u
+  // «bilinmiyor» bilgisidir; yok saymak bayat toplamı bir sonraki parçaya
+  // taşır. durationMs=0 kayıtlarda ise eşik 0'a düşer ve şarkı İLK
+  // pozisyon olayında «dinlendi» sayılıyordu.
+  group('Bulgu 5: süre (duration) sınır durumları', () {
+    Future<void> pump() async {
+      for (var i = 0; i < 6; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+    }
+
+    test('durationStream null → süre sıfırlanır (bayat toplam sızmaz)',
+        () async {
+      final durations = StreamController<Duration?>.broadcast();
+      addTearDown(durations.close);
+      when(() => repo.durationStream).thenAnswer((_) => durations.stream);
+
+      final synced = PlayerController(repo, libRepo, stateRepo, historyRepo);
+      synced.onInit();
+      await pump();
+
+      durations.add(const Duration(minutes: 4));
+      await pump();
+      expect(synced.duration.value, const Duration(minutes: 4));
+
+      // Parça geçişi / stop / yükleme: motor «bilinmiyor» der → dürüst sıfır.
+      // (Eski davranış: 4:00 aynen kalıyordu.)
+      durations.add(null);
+      await pump();
+      expect(synced.duration.value, Duration.zero);
+
+      durations.add(const Duration(minutes: 2));
+      await pump();
+      expect(synced.duration.value, const Duration(minutes: 2));
+    });
+
+    test('süresi bilinmeyen şarkı (durationMs=0) geçmişe yazılmaz', () async {
+      final positions = StreamController<Duration>.broadcast();
+      addTearDown(positions.close);
+      when(() => repo.positionStream).thenAnswer((_) => positions.stream);
+
+      final synced = PlayerController(repo, libRepo, stateRepo, historyRepo);
+      synced.onInit();
+      await pump();
+
+      final zero = SongModel(
+        id: 5,
+        uri: 'content://media/external/audio/media/5',
+        path: '/music/5.mp3',
+        title: 'Zero',
+        durationMs: 0,
+        sizeBytes: 4000000,
+      );
+      when(() => repo.currentIndex).thenReturn(0);
+      synced.songQueue.assignAll([zero]);
+      synced.currentItem.value = MediaItem(id: zero.uri, title: 'Zero');
+      clearInteractions(historyRepo);
+
+      // İlk pozisyon olayı (0) ve sonrası: eşik kurulamadığı için kayıt YOK.
+      positions.add(Duration.zero);
+      positions.add(const Duration(seconds: 10));
+      await pump();
+
+      verifyNever(() => historyRepo.recordPlay(any()));
+    });
+
+    test('normal şarkı eşiği geçince geçmişe yazılır (kontrol)', () async {
+      final positions = StreamController<Duration>.broadcast();
+      addTearDown(positions.close);
+      when(() => repo.positionStream).thenAnswer((_) => positions.stream);
+
+      final synced = PlayerController(repo, libRepo, stateRepo, historyRepo);
+      synced.onInit();
+      await pump();
+
+      final song = _song(6, 'Normal');
+      when(() => repo.currentIndex).thenReturn(0);
+      synced.songQueue.assignAll([song]);
+      synced.currentItem.value = MediaItem(id: song.uri, title: 'Normal');
+      clearInteractions(historyRepo);
+
+      // Eşik: min(30 sn, 180 sn/2) = 30 sn → 45 sn kaydı tetikler.
+      positions.add(const Duration(seconds: 45));
+      await pump();
+
+      verify(() => historyRepo.recordPlay(song)).called(1);
+    });
+  });
 }
 
 /// Gün 17: yol bazlı sahte kasa — isBanned sözleşmesi + Bulgu 4 canlı

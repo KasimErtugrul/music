@@ -211,7 +211,18 @@ class PlayerController extends GetxController implements AutoPlayController {
     });
 
     _repository.durationStream.listen((dur) {
-      if (dur != null) duration.value = dur;
+      // Bulgu 5: null bir BİLGİDİR — «süre bilinmiyor». just_audio
+      // durationStream'i playbackEvent.duration'ı yayınlar; parça geçişi,
+      // stop/idle ve yüklenemezken null düşer. Eskiden null yok
+      // sayılıyordu ve bir önceki parçanın süresi aynen kalıyordu:
+      // geçiş penceresinde seek bar oranı, «-kalan» etiketi, mini kart
+      // ilerlemesi BAYAT toplamla hesaplanıyor, «parça sonu» uyku
+      // zamanlayıcısı (sleep_timer_controller) kısa parçadan uzuna
+      // geçişte YENİ parçanın ortasında yanlış tetikleniyordu.
+      // null → Duration.zero dürüst «bilinmiyor» durumudur; tüm UI
+      // tüketicileri totalMs>0 guard'lıdır (seek_bar, home_tab_content,
+      // waveform_viewer, notification_settings, sleep_timer).
+      duration.value = dur ?? Duration.zero;
     });
   }
 
@@ -275,6 +286,13 @@ class PlayerController extends GetxController implements AutoPlayController {
     final minDuration = const Duration(seconds: 30);
     final halfDuration = Duration(milliseconds: song.durationMs ~/ 2);
     final threshold = minDuration < halfDuration ? minDuration : halfDuration;
+
+    // Bulgu 5: süresi bilinmeyen kayıt (durationMs<=0 → eşik 0) İLK
+    // pozisyon olayında (pos>=0 her daim doğru) «dinlendi» sayılıyordu;
+    // hiç dinlenmeyen şarkı en çok çalananlara, rozetlere ve istatistik
+    // özetlerine işleniyordu. Eşik kurulamıyorsa kanıt yoktur: kayıt
+    // yazılmaz (temkinli ve dürüst davranış).
+    if (threshold <= Duration.zero) return;
 
     if (pos >= threshold) {
       unawaited(
