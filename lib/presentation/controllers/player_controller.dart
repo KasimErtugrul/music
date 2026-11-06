@@ -10,6 +10,7 @@ import 'package:resonance/data/datasources/audio_format_datasource.dart';
 import 'package:resonance/data/datasources/auto_browse_delegate.dart';
 import 'package:resonance/data/datasources/metadata_datasource.dart';
 import 'package:resonance/data/models/album_model.dart';
+import 'package:resonance/data/models/banned_song_model.dart';
 import 'package:resonance/data/models/artist_model.dart';
 import 'package:resonance/data/models/audio_format_info.dart';
 import 'package:resonance/data/models/playback_settings_model.dart';
@@ -42,7 +43,9 @@ class PlayerController extends GetxController implements AutoPlayController {
   /// Gün 17 (Kasa): son savunma hattı. Kasadaki şarkı kütüphaneden
   /// zaten süzüldüğü için bu koruma normalde hiç tetiklenmez; kuyruk
   /// geri yükleme ve harici açma gibi UI dışı yollara karşı durur.
-  /// Null ise (bazı testler) koruma devre dışıdır.
+  /// Bulgu 4: ayrıca [VaultController.entries] canlı dinlenir — küme
+  /// değişince ÇALAN kuyruk da arınır (doğal geçiş/next() yollarının
+  /// tek koruması budur). Null ise (bazı testler) koruma devre dışıdır.
   final VaultController? vault;
   final prefCtrl = Get.find<PreferencesController>();
 
@@ -87,6 +90,15 @@ class PlayerController extends GetxController implements AutoPlayController {
   // her uygulama açılışında kart görünür başlar.
   final miniPlayerHidden = false.obs;
 
+  // Bulgu 4: kasa kümesi değişince canlı kuyruğun reaktif temizliği.
+  // _vaultWorker: entries aboneliği (onClose'ta salınır). _purgingVault/
+  // _purgeVaultQueued: üst üste kasa olaylarında tek koşu + kuyrukta
+  // birleştirme; paralel koşular motor↔songQueue indeks kaydırması
+  // yaratabilirdi.
+  Worker? _vaultWorker;
+  bool _purgingVault = false;
+  bool _purgeVaultQueued = false;
+
   SongModel? get currentSong {
     final id = currentItem.value?.id;
     if (id == null) return null;
@@ -101,7 +113,17 @@ class PlayerController extends GetxController implements AutoPlayController {
     super.onInit();
     _bind();
     _bindPreferenceWatchers();
-    _restoreQueue();
+    _bindVaultWatcher();
+    // Bulgu 4: restore bittiği anda bir temizlik geçişi — kuyruk geri
+    // yükleme, kütüphane filtre indeksi bayatsa yasaklı kayıt taşıyabilir;
+    // tek geçişle değişmez («canlı kuyrukta yasaklı yok») güvenceye alınır.
+    unawaited(_restoreQueue().then<void>((_) => _purgeBannedFromQueue()));
+  }
+
+  @override
+  void onClose() {
+    _vaultWorker?.dispose();
+    super.onClose();
   }
 
   DateTime? _lastPositionSave;
@@ -416,12 +438,26 @@ class PlayerController extends GetxController implements AutoPlayController {
     await _applyReplayGain(song);
 
     final list = queue ?? <SongModel>[song];
-    final index = list.indexWhere((s) => s.id == song.id);
+    // Bulgu 4: yeni kuyruğun TAMAMI kasa filtresinden geçer. Eski kod
+    // yalnız hedef şarkıyı kontrol ediyordu; liste kaynağı bayatsa
+    // (çalma listesi satırı, eski anlık görüntü) yasaklı kayıt kuyruğa
+    // sızaibılır ve doğal geçişte çalabilirdi. Liste kaynakları filtreli
+    // kütüphaneden gelse de bu satır «son savunma hattı» sözleşmesini
+    // (yukarıdaki alan belgesi) kuyruk için de taşır.
+    var safeList = list;
+    if (vaultCtrl != null && list.any(vaultCtrl.isBanned)) {
+      safeList = list.where((s) => !vaultCtrl.isBanned(s)).toList();
+      if (safeList.isEmpty) safeList = <SongModel>[song];
+    }
+    final index = safeList.indexWhere((s) => s.id == song.id);
 
     final previousQueue = List<SongModel>.of(songQueue);
-    songQueue.assignAll(list);
+    songQueue.assignAll(safeList);
     try {
-      await _repository.loadQueue(list, initialIndex: index < 0 ? 0 : index);
+      await _repository.loadQueue(
+        safeList,
+        initialIndex: index < 0 ? 0 : index,
+      );
       await _repository.play();
     } on Object catch (e, st) {
       // Kaynak yüklenemediyse arayüz kuyruğu gerçek oynatma listesinden
@@ -446,6 +482,104 @@ class PlayerController extends GetxController implements AutoPlayController {
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 3),
     );
+  }
+
+  /// Bulgu 4: kasa kümesi değişimini CANLI kuyruğa yansıtan reaktif köprü.
+  ///
+  /// Sözleşme kırılması şuydu: ban/unban kütüphaneyi ve kasa listesini
+  /// canlı güncellerken çalan kuyruk «anlık kopya» olarak bayat kalmıştı
+  /// (song_options_sheet'teki yorumun kendisi bunu belgeler). Kuyrukta
+  /// duran yasaklı şarkı, parça bitiminde just_audio içindeki doğal
+  /// geçişle veya next() ile ÇALIYORDU — «asla çalamaz» sözleşmesi
+  /// (settingsDescVault) yalnız giriş noktalarında (playSong/playNext/
+  /// addToQueue/playFromQueue) uygulanıyordu, geçiş yollarında değil.
+  ///
+  /// Tek zorlama noktası bu yüzden kuyruğun kendisidir: küme değişir →
+  /// canlı kuyruk arınır. Böylece doğal geçiş, manuel skip, öncekiye
+  /// dönme gibi TÜM geçiş yolları tek değişmezle korunur: «canlı
+  /// kuyrukta yasaklı kayıt bulunamaz.»
+  void _bindVaultWatcher() {
+    final vaultCtrl = vault;
+    if (vaultCtrl == null) return;
+    _vaultWorker = ever<List<BannedSongModel>>(vaultCtrl.entries, (_) {
+      unawaited(_purgeBannedFromQueue());
+    });
+  }
+
+  /// Bulgu 4: temizlik koşularını serileştirir. Aynı turda birden çok
+  /// kasa olayı gelirse (ban + akış bildirimi) koşular birleştirilir;
+  /// paralel koşu aynı indeks üzerinde iki silme yapabilirdi.
+  Future<void> _purgeBannedFromQueue() async {
+    final vaultCtrl = vault;
+    if (vaultCtrl == null || _isRestoring) return;
+    if (_purgingVault) {
+      _purgeVaultQueued = true;
+      return;
+    }
+    _purgingVault = true;
+    try {
+      do {
+        _purgeVaultQueued = false;
+        await _purgeBannedOnce();
+      } while (_purgeVaultQueued);
+    } finally {
+      _purgingVault = false;
+    }
+  }
+
+  /// Bulgu 4: tek temizlik geçişi. songQueue ve motor çalma listesi
+  /// aynı silme dizisini uygular; her adımda ikisi kilitli kalır.
+  Future<void> _purgeBannedOnce() async {
+    final vaultCtrl = vault;
+    if (vaultCtrl == null) return;
+
+    final curIdx = _repository.currentIndex ?? -1;
+    final toRemove = <int>[];
+    for (var i = 0; i < songQueue.length; i++) {
+      if (i != curIdx && vaultCtrl.isBanned(songQueue[i])) toRemove.add(i);
+    }
+    // Büyük indisten küçüğe sil: küçükten silinse sonraki indeksler
+    // kayar, yanlış kayıt düşerdi.
+    for (final i in toRemove.reversed) {
+      if (i >= songQueue.length) continue;
+      final removed = songQueue.removeAt(i);
+      try {
+        await _repository.removeSong(i);
+      } on Object catch (e, st) {
+        // Motor düşmediyse UI geri sarar; kuyruk↔motor listesi
+        // AYRIŞMAZ (bu denetimin temel değişmezi).
+        songQueue.insert(i, removed);
+        AppLog.error(e, st, source: 'purgeBannedFromQueue');
+        return;
+      }
+    }
+
+    // Çalan parçanın GÜNCEL indisi: altındaki kayıtlar silindiyse
+    // motorun indisi kaymıştır; kimliği değil motorun söylediğini oku.
+    final curNow = _repository.currentIndex ?? -1;
+    if (curNow < 0 || curNow >= songQueue.length) return;
+    if (!vaultCtrl.isBanned(songQueue[curNow])) return;
+
+    // Çalan parça kasada: kaynağı düşür. Motor, aynı indisteki bir
+    // sonraki kayda kendi kendine geçer (removeFromQueue'nun bugüne
+    // kullandığı ilkelin aynısı); oynatma durumu motorun elinde kalır —
+    // duraklatılmış oturumda sessizlik bozulmaz. Tek kayıt kaldıysa
+    // kuyruk biter: tam duruş (clearQueue/removeFromQueue sözleşmesi).
+    final removed = songQueue.removeAt(curNow);
+    try {
+      await _repository.removeSong(curNow);
+    } on Object catch (e, st) {
+      songQueue.insert(curNow, removed);
+      AppLog.error(e, st, source: 'purgeBannedFromQueue');
+      return;
+    }
+    if (songQueue.isEmpty) {
+      try {
+        await _repository.stop();
+      } on Object catch (e, st) {
+        AppLog.error(e, st, source: 'purgeBannedFromQueue');
+      }
+    }
   }
 
   /// Görev 2.3: ReplayGain uygulaması.

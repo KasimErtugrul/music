@@ -91,9 +91,13 @@ class VaultController extends GetxController {
   }
 
   void _syncFrom(List<BannedSongModel> list) {
-    entries.assignAll(list);
+    // Bulgu 4: kümler ÖNCE güncellenir. [entries]'i dinleyen tüketiciler
+    // (PlayerController'ın canlı kuyruk temizliği) assignAll anında
+    // [isBanned] ile doğrular; ters sıralamada ilk bildirim bir tur
+    // bayat küme görür ve yeni banlanan şarkıyı kuyrukta bırakırdı.
     _bannedIds = {for (final e in list) e.songId};
     _bannedPaths = {for (final e in list) e.path};
+    entries.assignAll(list);
   }
 
   /// Oynatıcı koruması: şarkı kasadaysa çalınamaz. Kütüphane indeksi de

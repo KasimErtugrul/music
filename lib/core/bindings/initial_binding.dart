@@ -211,8 +211,14 @@ class InitialBinding extends Bindings {
     );
     // lazyPut: istatistik sayfası açılana kadar loadStats() koşmaz
     // (önceden her uygulama açılışında çalışıyordu).
+    // Bulgu 3: canlı senkron için HistoryRepository de enjekte edilir
+    // (watchRecentHistory aboneliği); lazyPut kapanışı sayfa ilk
+    // açıldığında koştuğundan HistoryRepository o ana kadar kayıtlıdır.
     Get.lazyPut<StatsController>(
-      () => StatsController(Get.find<StatsRepository>()),
+      () => StatsController(
+        Get.find<StatsRepository>(),
+        Get.find<HistoryRepository>(),
+      ),
       fenix: true,
     );
     Get.put<EqualizerController>(

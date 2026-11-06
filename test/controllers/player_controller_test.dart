@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -5,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:resonance/data/datasources/audio_effects_datasource.dart';
 import 'package:resonance/data/datasources/metadata_datasource.dart';
+import 'package:resonance/data/models/banned_song_model.dart';
 import 'package:resonance/data/models/library_settings_model.dart';
 import 'package:resonance/data/models/playback_settings_model.dart';
 import 'package:resonance/data/models/song_model.dart';
@@ -381,13 +384,303 @@ void main() {
       verify(repo.play).called(1);
     });
   });
+  // Bulgu 1: karıştırma/tekrar iki yönlü senkron. Medya oturumu
+  // (bildirim kartı, Bluetooth/AVRCP, sesli asistan, Android Auto)
+  // handler.setShuffleMode/setRepeatMode çağırdığında handler yeni
+  // PlaybackState yayınlar; denetleyici bu alanları okumazsa tüm mod
+  // rozetleri bayat kalır ve _saveQueueState yanlış modu diske yazar.
+  group('Bulgu 1: medya oturumu ters-yönlü senkron', () {
+    test('yayındaki shuffle/tekrar alanları Rx\'leri canlı günceller', () async {
+      final states = StreamController<PlaybackState>.broadcast();
+      addTearDown(states.close);
+      when(() => repo.playbackStateStream).thenAnswer((_) => states.stream);
+      when(() => stateRepo.clearState()).thenAnswer((_) async {});
+
+      final synced = PlayerController(repo, libRepo, stateRepo, historyRepo);
+      synced.onInit();
+      await Future<void>.delayed(Duration.zero);
+
+      // Kurulum/geri yükleme çağrılarını izole et; yalnız yayın sürüklü
+      // etkileşimleri ölç.
+      clearInteractions(repo);
+
+      expect(synced.shuffleEnabled.value, isFalse);
+      expect(synced.repeatMode.value, AudioServiceRepeatMode.none);
+
+      // Dış dünyadan «karıştır'ı aç + tekrarı bir'e al» (asistan/ARB davranışı).
+      states.add(PlaybackState(
+        shuffleMode: AudioServiceShuffleMode.all,
+        repeatMode: AudioServiceRepeatMode.one,
+      ));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(synced.shuffleEnabled.value, isTrue);
+      expect(synced.repeatMode.value, AudioServiceRepeatMode.one);
+
+      // Dış dünyadan kapatma: Rx'ler geri döner (yayın tek doğruluk kaynağı).
+      states.add(PlaybackState(
+        shuffleMode: AudioServiceShuffleMode.none,
+        repeatMode: AudioServiceRepeatMode.none,
+      ));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(synced.shuffleEnabled.value, isFalse);
+      expect(synced.repeatMode.value, AudioServiceRepeatMode.none);
+
+      // Yayın dinleyicisi depoya GERİ YAZMAZ (döngü riski yok);
+      // geri yazma yalnız kullanıcı eylemlerinde (toggle*) olur.
+      verifyNever(() => repo.setShuffleMode(any()));
+      verifyNever(() => repo.setRepeatMode(any()));
+    });
+
+    test('toggleShuffle sonrası yayın aynı değere yakınsar (çift yazım yok)', () async {
+      final states = StreamController<PlaybackState>.broadcast();
+      addTearDown(states.close);
+      when(() => repo.playbackStateStream).thenAnswer((_) => states.stream);
+
+      final synced = PlayerController(repo, libRepo, stateRepo, historyRepo);
+      synced.onInit();
+      await Future<void>.delayed(Duration.zero);
+      clearInteractions(repo);
+
+      // Kullanıcı eylemi: iyimser Rx yazımı + depo çağrısı.
+      await synced.toggleShuffle();
+      expect(synced.shuffleEnabled.value, isTrue);
+      verify(() => repo.setShuffleMode(true)).called(1);
+      clearInteractions(repo);
+
+      // Depodan dönen yayın aynı değeri taşır: Rx değişmez, depo dokunulmaz.
+      states.add(PlaybackState(shuffleMode: AudioServiceShuffleMode.all));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(synced.shuffleEnabled.value, isTrue);
+      verifyNever(() => repo.setShuffleMode(any()));
+    });
+  });
+
+  // Bulgu 4: kasa kümesi değiştiğinde ÇALAN kuyruk da reaktif arınmalı.
+  // Eski davranışta kuyruk «anlık kopya» olarak bayat kalıyordu; kuyrukta
+  // duran yasaklı şarkı parça bitiminde (doğal geçiş) veya next() ile
+  // ÇALIYORDU. Yeni değişmez: «canlı kuyrukta yasaklı kayıt bulunamaz.»
+  group('Bulgu 4: kasa değişiminde canlı kuyruk temizliği', () {
+    Future<void> pump() async {
+      for (var i = 0; i < 6; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+    }
+
+    test('kuyruktaki yasaklı şarkı, kasa kümesi değişince kuyruktan düşer',
+        () async {
+      final a = _song(1, 'A');
+      final b = _song(2, 'B');
+      final c = _song(3, 'C');
+      final v = _StubVault();
+      final guarded = PlayerController(
+        repo,
+        libRepo,
+        stateRepo,
+        historyRepo,
+        vault: v,
+      );
+      guarded.onInit();
+      await pump();
+
+      when(() => repo.removeSong(any())).thenAnswer((_) async {});
+      clearInteractions(repo);
+
+      guarded.songQueue.assignAll([a, b, c]); // çalan: index 0 (A)
+      v.publishBan(b); // VaultController._syncFrom sözleşmesi: küme+entries
+      await pump();
+
+      expect(guarded.songQueue, [a, c]);
+      verify(() => repo.removeSong(1)).called(1);
+      // Çalan korunur: kuyruk boşalmadıysa stop YOK.
+      verifyNever(repo.stop);
+    });
+
+    test('çalan parça kasaya alınırsa kuyruk sonraki kayda ilerler',
+        () async {
+      final a = _song(1, 'A');
+      final b = _song(2, 'B');
+      final c = _song(3, 'C');
+      final v = _StubVault();
+      final guarded = PlayerController(
+        repo,
+        libRepo,
+        stateRepo,
+        historyRepo,
+        vault: v,
+      );
+      guarded.onInit();
+      await pump();
+
+      when(() => repo.currentIndex).thenReturn(1); // çalan: B
+      when(() => repo.removeSong(any())).thenAnswer((_) async {});
+      clearInteractions(repo);
+
+      guarded.songQueue.assignAll([a, b, c]);
+      v.publishBan(b);
+      await pump();
+
+      expect(guarded.songQueue, [a, c]);
+      verify(() => repo.removeSong(1)).called(1);
+      verifyNever(repo.stop);
+    });
+
+    test('çoklu yasak: alttan silme motor indisini kaydırır, çalan korunur',
+        () async {
+      final a = _song(1, 'A');
+      final b = _song(2, 'B');
+      final c = _song(3, 'C');
+      final d = _song(4, 'D');
+      final v = _StubVault();
+      final guarded = PlayerController(
+        repo,
+        libRepo,
+        stateRepo,
+        historyRepo,
+        vault: v,
+      );
+      guarded.onInit();
+      await pump();
+
+      // Motor taklidi: çalanın ALTINDAKİ kayıt silinirse indis kayar
+      // (just_audio semantiği); temizlik motorun GÜNCEL indisini okur.
+      var engineIndex = 1; // çalan: B
+      when(() => repo.currentIndex).thenAnswer((_) => engineIndex);
+      when(() => repo.removeSong(any())).thenAnswer((inv) async {
+        final i = inv.positionalArguments[0] as int;
+        if (i < engineIndex) engineIndex--;
+      });
+      clearInteractions(repo);
+
+      guarded.songQueue.assignAll([a, b, c, d]);
+      v.publishBan(a);
+      v.publishBan(c); // üst üste iki olay: koşular serileştirip birleşmeli
+      await pump();
+
+      // a ve c düşer; çalan b ve yasaksız d kalır.
+      expect(guarded.songQueue, [b, d]);
+      // 1. koşu: a (indis 0, çalanın altı → motor indisini kaydırır).
+      // 2. koşu BAYAT İNDESLERLE DEĞİL, küçülmüş kuyrukta yeniden hesaplar:
+      // c artık indis 2 değil 1'dedir.
+      verifyInOrder([
+        () => repo.removeSong(0),
+        () => repo.removeSong(1),
+      ]);
+      expect(engineIndex, 0); // çalan hâlâ B (indis 1→0 kaydı)
+    });
+
+    test('kuyrukta yasaklı yoksa temizlik hiçbir depo çağrısı yapmaz',
+        () async {
+      final a = _song(1, 'A');
+      final v = _StubVault();
+      final guarded = PlayerController(
+        repo,
+        libRepo,
+        stateRepo,
+        historyRepo,
+        vault: v,
+      );
+      guarded.onInit();
+      await pump();
+      clearInteractions(repo);
+
+      guarded.songQueue.assignAll([a]);
+      v.publishBan(_song(9, 'Kuyrukta yok')); // alakasız ban → no-op
+      await pump();
+
+      expect(guarded.songQueue, [a]);
+      verifyNever(() => repo.removeSong(any()));
+      verifyNever(repo.stop);
+    });
+
+    test('tek kayıtlı kuyrukta çalan kasaya alınırsa çalma durur',
+        () async {
+      final a = _song(1, 'A');
+      final v = _StubVault();
+      final guarded = PlayerController(
+        repo,
+        libRepo,
+        stateRepo,
+        historyRepo,
+        vault: v,
+      );
+      guarded.onInit();
+      await pump();
+
+      when(() => repo.currentIndex).thenReturn(0);
+      when(() => repo.removeSong(any())).thenAnswer((_) async {});
+      when(repo.stop).thenAnswer((_) async {});
+      clearInteractions(repo);
+
+      guarded.songQueue.assignAll([a]);
+      v.publishBan(a);
+      await pump();
+
+      expect(guarded.songQueue, isEmpty);
+      verify(() => repo.removeSong(0)).called(1);
+      verify(repo.stop).called(1);
+    });
+
+    test('yeni kuyruk kasaya göre filtrelenir (son savunma hattı)',
+        () async {
+      final a = _song(1, 'A');
+      final banned = _song(2, 'Yasak');
+      final b = _song(3, 'C');
+      final v = _StubVault(bannedPaths: {'/music/2.mp3'});
+      final guarded = PlayerController(
+        repo,
+        libRepo,
+        stateRepo,
+        historyRepo,
+        vault: v,
+      );
+      guarded.onInit();
+      await pump();
+      clearInteractions(repo);
+
+      final ok = await guarded.playSong(a, queue: [a, banned, b]);
+
+      expect(ok, isTrue);
+      expect(guarded.songQueue, [a, b]);
+      verify(() => repo.loadQueue(
+            <SongModel>[a, b],
+            initialIndex: 0,
+            initialPosition: any(named: 'initialPosition'),
+          )).called(1);
+    });
+  });
 }
 
-/// Gün 17: yol bazlı sahte kasa — yalnız isBanned sözleşmesini taşır.
+/// Gün 17: yol bazlı sahte kasa — isBanned sözleşmesi + Bulgu 4 canlı
+/// entries bildirimi taşır.
+///
+/// [publishBan], VaultController._syncFrom sözleşmesinin aynısıdır:
+/// kümler ÖNCE, entries SONRA güncellenir (aksi hâlde abone bir tur
+/// bayat küme okurdu).
 class _StubVault implements VaultController {
-  _StubVault({required this.bannedPaths});
+  _StubVault({Set<String> bannedPaths = const <String>{}})
+      : bannedPaths = Set<String>.of(bannedPaths);
 
   final Set<String> bannedPaths;
+
+  @override
+  final entries = <BannedSongModel>[].obs;
+
+  /// Testte «ban» eylemi: küme + entries aynı sözleşmeyle yayına girer.
+  void publishBan(SongModel song) {
+    bannedPaths.add(song.path);
+    entries.add(
+      BannedSongModel(
+        id: entries.length + 1,
+        songId: song.id,
+        path: song.path,
+        title: song.title,
+        createdAt: DateTime(2026),
+      ),
+    );
+  }
 
   @override
   bool isBanned(SongModel song) => bannedPaths.contains(song.path);
