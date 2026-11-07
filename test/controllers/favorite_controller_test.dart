@@ -12,10 +12,13 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:resonance/data/datasources/local/app_database.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/favorite_repository.dart';
 import 'package:resonance/presentation/controllers/favorite_controller.dart';
+
+class _MockFavoriteRepository extends Mock implements FavoriteRepository {}
 
 SongModel _song(int id) => SongModel(
       id: id,
@@ -28,6 +31,9 @@ SongModel _song(int id) => SongModel(
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() {
+    registerFallbackValue(_song(1));
+  });
 
   late AppDatabase db;
 
@@ -66,5 +72,55 @@ void main() {
     // reload() çağrısı YOK: durum akışla günceldi (Gün 7 kaydının
     // düzeltmesi — FavoriteController'a reload eklenmesi gereksizdi).
     expect(controller.favoriteIds, <int>{2});
+  });
+
+  // --- Bulgu 11: optimistik toggle + hata rollback ---
+
+  test('toggle başarı: optimistik durum kalır, repo bir kez çağrılır',
+      () async {
+    final repo = _MockFavoriteRepository();
+    when(() => repo.watchFavoriteIds())
+        .thenAnswer((_) => const Stream.empty());
+    when(() => repo.toggleFavorite(any())).thenAnswer((_) async {});
+    final controller = Get.put<FavoriteController>(FavoriteController(repo));
+
+    await controller.toggle(_song(7));
+
+    expect(controller.favoriteIds, contains(7));
+    verify(() => repo.toggleFavorite(any())).called(1);
+  });
+
+  test('toggle DB hatası (ekleme yönü): kalp eski haline döner, hata fırlar',
+      () async {
+    final repo = _MockFavoriteRepository();
+    when(() => repo.watchFavoriteIds())
+        .thenAnswer((_) => const Stream.empty());
+    when(() => repo.toggleFavorite(any())).thenThrow(Exception('db kilitli'));
+    final controller = Get.put<FavoriteController>(FavoriteController(repo));
+
+    await expectLater(
+      controller.toggle(_song(7)),
+      throwsA(isA<Exception>()),
+    );
+
+    // Kilit: watch akışı hata durumunda emit üretmeyeceği için durum
+    // kendiliğinden düzelmez; rollback şart (Bulgu 11).
+    expect(controller.favoriteIds.contains(7), isFalse);
+  });
+
+  test('toggle DB hatası (çıkarma yönü): kalp eski haline döner', () async {
+    final repo = _MockFavoriteRepository();
+    when(() => repo.watchFavoriteIds())
+        .thenAnswer((_) => const Stream.empty());
+    when(() => repo.toggleFavorite(any())).thenThrow(Exception('db kilitli'));
+    final controller = Get.put<FavoriteController>(FavoriteController(repo));
+    controller.favoriteIds.add(9); // zaten favori
+
+    await expectLater(
+      controller.toggle(_song(9)),
+      throwsA(isA<Exception>()),
+    );
+
+    expect(controller.favoriteIds.contains(9), isTrue); // rollback
   });
 }

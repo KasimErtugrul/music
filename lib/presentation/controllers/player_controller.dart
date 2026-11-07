@@ -99,6 +99,16 @@ class PlayerController extends GetxController implements AutoPlayController {
   bool _purgingVault = false;
   bool _purgeVaultQueued = false;
 
+  // Bulgu 8: _bind()'teki altı depo akışı aboneliği ve
+  // _bindPreferenceWatchers()'daki ever worker'ı saklanır; onClose'ta
+  // iptal edilir. Denetim öncesi abonelikler yok değişkenliydi:
+  // permanent:true normal ömürde sorunu gizliyordu; Get.reset()/test/
+  // hot-restart'ta denetleyici öldüğü halde dinleyiciler depo akışlarına
+  // bağlı kalıyor, Rx'lere «ghost update» yazıyordu.
+  final List<StreamSubscription<dynamic>> _subs =
+      <StreamSubscription<dynamic>>[];
+  Worker? _prefWorker;
+
   // FAZ 1 (K3): tek yazıcı — motoru değiştiren komutlar _withEngineLock
   // ile tek sıradan geçer; aynı anda en fazla bir komut motor kuyruğunu
   // değiştirir. _engineTail: sıradaki komutun bağlandığı kuyruk sonu.
@@ -142,6 +152,12 @@ class PlayerController extends GetxController implements AutoPlayController {
 
   @override
   void onClose() {
+    // Bulgu 8: tüm akış abonelikleri + ever worker'ı serbest bırak.
+    for (final sub in _subs) {
+      unawaited(sub.cancel());
+    }
+    _subs.clear();
+    _prefWorker?.dispose();
     _vaultWorker?.dispose();
     super.onClose();
   }
@@ -149,7 +165,8 @@ class PlayerController extends GetxController implements AutoPlayController {
   DateTime? _lastPositionSave;
 
   void _bind() {
-    _repository.mediaItemStream.listen((item) {
+    // Bulgu 8: her abonelik _subs'a alınır (onClose iptali için).
+    _subs.add(_repository.mediaItemStream.listen((item) {
       if (currentItem.value?.id != item?.id) {
         _loggedSongUri = null;
         // Şarkı değişti: eski rozet anında gizlenir, yenisi arka planda
@@ -177,11 +194,11 @@ class PlayerController extends GetxController implements AutoPlayController {
       }
 
       if (!_isRestoring) _saveQueueState();
-    });
+    }));
 
-    _repository.queueStream.listen((items) => queue.assignAll(items));
+    _subs.add(_repository.queueStream.listen((items) => queue.assignAll(items)));
 
-    _repository.playbackStateStream.listen((state) {
+    _subs.add(_repository.playbackStateStream.listen((state) {
       isPlaying.value = state.playing;
       processingState.value = state.processingState;
       speed.value = state.speed; // Ek-B: hız çipi için canlı değer
@@ -211,11 +228,11 @@ class PlayerController extends GetxController implements AutoPlayController {
               state.processingState == AudioProcessingState.idle)) {
         _saveQueueState();
       }
-    });
+    }));
 
-    _repository.errorStream.listen((error) => lastError.value = error);
+    _subs.add(_repository.errorStream.listen((error) => lastError.value = error));
 
-    _repository.positionStream.listen((pos) {
+    _subs.add(_repository.positionStream.listen((pos) {
       position.value = pos;
       _checkHistory(pos);
       // İşlem ölümünde konum kaybolmasın: çalarken ~5 sn'de bir kaydet.
@@ -228,9 +245,9 @@ class PlayerController extends GetxController implements AutoPlayController {
           unawaited(_saveQueueState());
         }
       }
-    });
+    }));
 
-    _repository.durationStream.listen((dur) {
+    _subs.add(_repository.durationStream.listen((dur) {
       // Bulgu 5: null bir BİLGİDİR — «süre bilinmiyor». just_audio
       // durationStream'i playbackEvent.duration'ı yayınlar; parça geçişi,
       // stop/idle ve yüklenemezken null düşer. Eskiden null yok
@@ -243,7 +260,7 @@ class PlayerController extends GetxController implements AutoPlayController {
       // tüketicileri totalMs>0 guard'lıdır (seek_bar, home_tab_content,
       // waveform_viewer, notification_settings, sleep_timer).
       duration.value = dur ?? Duration.zero;
-    });
+    }));
   }
 
   /// Gün 2: oynatmayla doğrudan ilgili tercihlerin canlı uygulaması.
@@ -261,7 +278,8 @@ class PlayerController extends GetxController implements AutoPlayController {
   /// için içe aktarılan tercihler canlı oynatıcıya yansır (istenen davranış).
   void _bindPreferenceWatchers() {
     var prev = prefCtrl.playback.value;
-    ever<PlaybackSettingsModel>(prefCtrl.playback, (cur) {
+    // Bulgu 8: worker saklanır ve onClose'ta dispose edilir.
+    _prefWorker = ever<PlaybackSettingsModel>(prefCtrl.playback, (cur) {
       if (_isRestoring) {
         prev = cur;
         return;
@@ -423,6 +441,11 @@ class PlayerController extends GetxController implements AutoPlayController {
       // Kontrol noktası 4: varsayılanları uygulamayı da yeni niyete bırakır
       // (playSong kendi varsayılanlarını zaten uygular).
       if (myEpoch != _playEpoch) return;
+      // Denetim düşük öncelik: fallback dalı ready beklemeden playback
+      // okuyordu (kayıtlı-state dalının :411 sözleşmesiyle tutarsız);
+      // mikro-görev sıralaması pencereyi küçültüyordu ama sözleşme
+      // tutarsızdı — tek satır kapatır.
+      await prefCtrl.ready;
       final pref = prefCtrl.playback.value;
       await _repository.setShuffleMode(pref.defaultShuffle);
       shuffleEnabled.value = pref.defaultShuffle;
@@ -434,7 +457,32 @@ class PlayerController extends GetxController implements AutoPlayController {
     }
   }
 
+  // Bulgu 8: _saveQueueState serileştirme. Üç çağrı noktası (mediaItem
+  // dinleyicisi, playbackState dinleyicisi, position throttle'u) üst üste
+  // binen async yazımlar başlatıyordu; saveState anlık görüntüyü yarıştırıp
+  // BAYAT pozisyonu YENİ pozisyonun üstüne yazabiliyordu (geri yüklemede
+  // «5 sn geri sıçrama»). HomeWidgetController._requestSync'teki
+  // birleştirme döngüsü birebir uygulanır: çalışırken gelen istekler
+  // _saveDirty bayrağına düşer; döngü her turda GÜNCEL kuyruk/konumu
+  // okur — son durum kazanır, yazımlar asla iç içe girmez.
+  bool _saveRunning = false;
+  bool _saveDirty = false;
+
   Future<void> _saveQueueState() async {
+    _saveDirty = true;
+    if (_saveRunning) return; // çalışan döngü bir sonraki turda yeni durumu okuyacak
+    _saveRunning = true;
+    try {
+      while (_saveDirty) {
+        _saveDirty = false;
+        await _writeQueueStateOnce();
+      }
+    } finally {
+      _saveRunning = false;
+    }
+  }
+
+  Future<void> _writeQueueStateOnce() async {
     if (songQueue.isEmpty) {
       try {
         await _stateRepo.clearState();

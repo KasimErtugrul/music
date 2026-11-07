@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:resonance/l10n/app_localizations.dart';
+import 'package:resonance/presentation/controllers/settings_search_controller.dart';
 import 'package:resonance/presentation/ui/layouts/adaptive_scaffold.dart';
 import 'package:resonance/presentation/ui/pages/library_tabs_page.dart';
 import 'package:resonance/presentation/ui/pages/playlists/playlists_page.dart';
@@ -22,7 +24,15 @@ class _HomePageState extends State<HomePage> {
     final l10n = AppLocalizations.of(context);
     return AdaptiveScaffold(
       currentIndex: _index,
-      onDestinationSelected: (i) => setState(() => _index = i),
+      onDestinationSelected: (i) {
+        setState(() => _index = i);
+        // Bulgu 19: ayarlar sekmesine HER dönüşte arama filtresi sıfırlanır;
+        // IndexedStack sayfayı diri tuttuğu için sorgu eskiden sekme
+        // değişimlerinde yaşayıp eski filtreyi geri getiriyordu.
+        if (i == 4 && Get.isRegistered<SettingsSearchController>()) {
+          Get.find<SettingsSearchController>().query.value = '';
+        }
+      },
       destinations: <NavigationDestination>[
         NavigationDestination(
           icon: const Icon(Icons.home_outlined),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:resonance/data/models/equalizer_model.dart';
@@ -13,6 +15,19 @@ class BuiltInPreset {
 class EqualizerController extends GetxController {
   final EqualizerRepository _repo;
   EqualizerController(this._repo);
+
+  /// Bulgu 6: kalıcı yazımlar (platform + DB) tek sıradan geçer; her görev
+  /// önceki yazım tamamlanmadan başlamaz. Böylece iç içe çağrılarda
+  /// saveGains anlık görüntüsü yarışmaz (karışık eğri diske yazılamaz)
+  /// ve platform yazımlarının sırası korunur. Hatalı görev zinciri
+  /// kırmaz: sıra canlı kalır, hata çağırana yansır.
+  Future<void> _writeChain = Future.value();
+
+  Future<void> _enqueueWrite(Future<void> Function() task) {
+    final result = _writeChain.then((_) => task());
+    _writeChain = result.catchError((Object _) {});
+    return result;
+  }
 
   final isLoading = true.obs;
   final isEnabled = false.obs;
@@ -114,25 +129,83 @@ class EqualizerController extends GetxController {
   }
 
   Future<void> toggleEnabled(bool value) async {
+    // Get.find eski davranışta da patlayabilirdi; Rx'e dokunmadan ÖNCE
+    // okunur ki bağımlılık hatasında anahtar yarım durumda kalmasın.
+    final loudnessFollows =
+        !Get.find<PreferencesController>().playback.value.replayGain;
+    final previous = isEnabled.value;
     isEnabled.value = value;
-    await _repo.setEnabled(value);
-    // Görev 2.3: kanallar ayrıldı. ReplayGain kapalıyken eski davranış
-    // korunur (loudness kanalı EQ anahtarını izler); açıkken kanalın
-    // sahibi ReplayGain'dir ve burada dokunulmaz.
-    if (!Get.find<PreferencesController>().playback.value.replayGain) {
-      await _repo.setLoudnessEnabled(value);
+    try {
+      await _repo.setEnabled(value);
+      // Görev 2.3: kanallar ayrıldı. ReplayGain kapalıyken eski davranış
+      // korunur (loudness kanalı EQ anahtarını izler); açıkken kanalın
+      // sahibi ReplayGain'dir ve burada dokunulmaz.
+      if (loudnessFollows) {
+        await _repo.setLoudnessEnabled(value);
+      }
+    } on Object {
+      // Bulgu 12: optimistik anahtar geri alınır. Watch/akış bu alanı
+      // beslemediği için hata durumunda kendiliğinden düzelmez; kalp
+      // deseniyle (Bulgu 11) aynı sözleşme: eski değere dön + fırlat.
+      isEnabled.value = previous;
+      try {
+        // Donanımda kısmi yazım ihtimaline karşı önceki tercih
+        // best-effort geri yazılır; bu geri yazım da patlarsa Rx
+        // zaten doğru değeri gösteriyor, yapılacak başka şey yok.
+        await _repo.setEnabled(previous);
+        if (loudnessFollows) {
+          await _repo.setLoudnessEnabled(previous);
+        }
+      } on Object {
+        // Best-effort.
+      }
+      rethrow;
     }
   }
 
-  Future<void> updateBand(int index, double gain) async {
-    if (params.value == null) return;
-    await params.value!.bands[index].setGain(gain);
+  /// Bulgu 6: sürükleme tiki (Slider.onChanged). Sadece DONANIM değerini
+  /// günceller (just_audio 0.10.6 setGain yerel değeri senkron günceller:
+  /// gainSubject.add; canlı ses/etiket geri bildirimi korunur) ve Rx'i
+  /// tazeler. DB'ye (setBandGain/saveGains) DOKUNMAZ: eski kodda her tik
+  /// bir saveGains snapshot'ı başlatıyor, iç içe tıklerde görüntü yarışı
+  /// karışık eğriyi diske yazabiliyordu. Kalıcılık tek seferlik
+  /// [commitBand]'dedir (onChangeEnd).
+  void previewBand(int index, double gain) {
+    final p = params.value;
+    if (p == null || index < 0 || index >= p.bands.length) return;
+    unawaited(
+      p.bands[index].setGain(gain).catchError((Object _) {
+        // Önizleme platform hatası yutulur: yerel değer zaten güncel,
+        // kalıcı yazım commitBand'de yeniden denenir.
+      }),
+    );
     params.refresh();
-    await _repo.setBandGain(index, gain);
-    // Görev 2.4: kazanç eğrisini kalıcı hale getir. Preset uygulaması da
-    // updateBand üzerinden geçtiği için otomatik olarak kaydedilir.
-    await _repo.saveGains(params.value!.bands.map((b) => b.gain).toList());
   }
+
+  /// Bulgu 6: sürükleme bitti (Slider.onChangeEnd). Eski updateBand'in
+  /// tam yazım yolu (donanım setGain + setBandGain + saveGains) TEK
+  /// SEFERLİK ve yazım kuyruğundan çalışır; saveGains görüntüsü kuyruğun
+  /// kendi görevi içinde alındığı için eşzamanlı başka yazımla
+  /// serpiştirilemez. Sonuç: diske yalnız son eğri yazılır.
+  Future<void> commitBand(int index, double gain) => _enqueueWrite(() async {
+        final p = params.value;
+        if (p == null || index < 0 || index >= p.bands.length) return;
+        await p.bands[index].setGain(gain);
+        await _repo.setBandGain(index, gain);
+        await _repo.saveGains(p.bands.map((b) => b.gain).toList());
+      });
+
+  /// Preset uygulama yolu: bant sırasına göre tam yazım (davranış
+  /// eskisiyle aynı); Bulgu 6 ile birlikte yazım kuyruğundan geçer.
+  Future<void> updateBand(int index, double gain) => _enqueueWrite(() async {
+        if (params.value == null) return;
+        await params.value!.bands[index].setGain(gain);
+        params.refresh();
+        await _repo.setBandGain(index, gain);
+        // Görev 2.4: kazanç eğrisini kalıcı hale getir. Preset uygulaması da
+        // updateBand üzerinden geçtiği için otomatik olarak kaydedilir.
+        await _repo.saveGains(params.value!.bands.map((b) => b.gain).toList());
+      });
 
   Future<void> setLoudness(double gain) async {
     loudnessGain.value = gain;

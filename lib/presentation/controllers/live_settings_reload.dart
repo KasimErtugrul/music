@@ -65,21 +65,34 @@ Future<void> _reloadIfRegistered<T extends GetxController>() async {
 /// listesi yarısı; favoriler yarısı kayıt düzeltmesiyle çözümsüzdür —
 /// FavoriteController Drift canlı akışıyla beslenir, reload gerekmez).
 ///
-/// PlaylistController `PlaylistBinding` içinde `lazyPut(fenix)` ile
-/// kayıtlıdır ve `loadPlaylists()`'i yalnız onInit'te bir kez çalıştırır;
-/// canlıyken içe aktarma sonrası listesi bayat kalırdı. Burada yalnız
-/// CANLI örneği tazeleriz: `isRegistered` fabrika KAYDINI, `isPrepared`
-/// ise henüz hiç kurulmamış fabrikayı işaretler (GetX 4.7: lazyPut +
-/// isInit=false). Hiç açılmamışsa (kullanıcı bu oturumda çalma
-/// listeleri sayfasına girmediyse) örnek ÖRNEKLENDİRİLMEZ; sayfa ilk
-/// açıldığında onInit zaten taze veri yükler. Hata akışı başarısız
-/// saymaz (yukarıdaki zincirle aynı sözleşme).
+/// Bulgu 7: PlaylistController InitialBinding'de `put+permanent` ile
+/// kayıtlıdır (eski PlaylistBinding → lazyPut+fenix düzeni silindi) ve
+/// `loadPlaylists()`'i onInit'te çalıştırır; canlıyken içe aktarma
+/// sonrası listesi bayat kalırdı. Burada canlı örneği tazeleriz.
+/// `isPrepared` koruması lazyPut kayıtları için savunmacı kalır: henüz
+/// hiç örneklenmemiş fabrikada örnek OLUŞTURULMAZ; sayfa ilk açıldığında
+/// onInit zaten taze veri yükler. Hata akışı başarısız saymaz
+/// (yukarıdaki zincirle aynı sözleşme).
+///
+/// Bulgu 17: kullanıcı playlist DETAY sayfasındaysa yalnız liste
+/// tazelemesi yetmez — currentPlaylist/currentSongs bayat kalır (silinmiş
+/// listenin şarkıları ekranda kalır). Açık detay varsa
+/// loadPlaylistDetail de çalıştırılır: silinen listenin detayı boş
+/// geçerli değere düşer, kalan listenin şarkıları DB gerçeğiyle
+/// yeniden çözümlenir.
 Future<void> reloadLivePlaylistControllers() async {
   if (!Get.isRegistered<PlaylistController>()) return;
   // isPrepared = lazyPut fabrikası kurulu ama örneklendirilmemiş:
   if (Get.isPrepared<PlaylistController>()) return;
   try {
-    await Get.find<PlaylistController>().loadPlaylists();
+    final ctrl = Get.find<PlaylistController>();
+    await ctrl.loadPlaylists();
+    // Bulgu 17: açık detayın tazelenmesi. loadPlaylists başarısızsa
+    // (hasError sözleşmesi) detaya dokunulmaz — eski içerik ekranda kalır.
+    final openId = ctrl.currentPlaylist.value?.id;
+    if (openId != null) {
+      await ctrl.loadPlaylistDetail(openId);
+    }
   } on Object catch (e) {
     debugPrint('Reload başarısız (PlaylistController): $e');
   }

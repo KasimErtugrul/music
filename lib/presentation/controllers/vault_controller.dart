@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:resonance/core/errors/app_logger.dart';
 import 'package:resonance/data/models/banned_song_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/banned_song_repository.dart';
@@ -81,7 +82,16 @@ class VaultController extends GetxController {
         // Depo ilk okumada düşerse akış yine de güncel kümeleri getirecektir.
       }
     }();
-    _sub = _repo.watchBanned().listen(_syncFrom, onError: (Object _) {});
+    // Bulgu 16: boş onError aboneliği hayatta tutuyordu ama hatayı sessizce
+    // yutuyordu; kasa kümesi güncellenemeyince oynatıcı koruması bayat kümeyle
+    // çalışır. Hata günlüğe yazılır; abonelik yaşar, sonraki olay kümeleri
+    // tazeler.
+    _sub = _repo.watchBanned().listen(
+      _syncFrom,
+      onError: (Object e, StackTrace st) {
+        AppLog.error(e, st, source: 'VaultController.watchBanned');
+      },
+    );
   }
 
   @override

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart' show AudioProcessingState, AudioServiceRepeatMode;
 import 'package:get/get.dart';
+import 'package:resonance/core/errors/app_logger.dart';
 import 'package:resonance/presentation/controllers/player_controller.dart';
 
 /// Uyku zamanlayıcısı.
@@ -134,13 +135,22 @@ class SleepTimerController extends GetxController {
     Future<void> handleEnd() async {
       if (hasPaused) return;
       hasPaused = true;
-      // FAZ 2: pause() rampa bitince döner; ardından sönüm katmanı
-      // sıfırlanır (kullanıcı sesi 1.0'a zorlanmaz).
-      await _player.pause();
-      _player.setSleepDamping(1.0);
-      isActive.value = false;
-      isEndOfTrackMode.value = false;
-      _cancelEotSubs();
+      try {
+        // FAZ 2: pause() rampa bitince döner; ardından sönüm katmanı
+        // sıfırlanır (kullanıcı sesi 1.0'a zorlanmaz).
+        await _player.pause();
+        _player.setSleepDamping(1.0);
+      } on Object catch (e, st) {
+        // Denetim düşük öncelik: pause() hata atarsa bayraklar true kalıyor
+        // ve parça sonu abonelikleri İPTAL EDİLMİYORDU; zamanlayıcı
+        // «çalışır» görünür, dinleyiciler sızardı. Hata günlüğe yazılır.
+        AppLog.error(e, st, source: 'SleepTimer.handleEnd');
+      } finally {
+        // Temizlik her koşulda yapılır: bayraklar iner, abonelikler iptal.
+        isActive.value = false;
+        isEndOfTrackMode.value = false;
+        _cancelEotSubs();
+      }
     }
 
     // --- FAZ 3: parça sonu OLAY TABANLI (K8) --------------------------------

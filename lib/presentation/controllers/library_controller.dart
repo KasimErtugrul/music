@@ -78,10 +78,20 @@ class LibraryController extends GetxController with WidgetsBindingObserver {
   Future<void> loadAll() async {
     isLoading.value = true;
     hasError.value = false;
+    // Bulgu 10: sıralama yarışı kilidi (setSongSort:123 korumasının
+    // kardeşi). Açılış yüklemesi sürerken kullanıcı sıralamayı değiştirirse
+    // bu yüklemenin BAYAT sıralı sonuçları setSongSort'un yenilerini ezerdi;
+    // yazımdan ÖNCE sıralama hâlâ başlangıçtakiyse yazılır.
+    final sort = songSort.value;
     try {
-      final sort = songSort.value;
-      songs.value = await _repository.songs(sort: sort);
-      letterOffsets.value = await _repository.letterOffsets(sort);
+      // Bulgu 10: her sıralama bağımlı yazım, YAZIM ANINDA denetlenir
+      // (yazım sırası korunur — rozetleri ilk await'ten sonra çizen
+      // mevcut davranış bozulmaz; setSongSort bu arada yazdıysa bayat
+      // sonuç EZİLMEZ).
+      final freshSongs = await _repository.songs(sort: sort);
+      if (songSort.value == sort) songs.value = freshSongs;
+      final freshOffsets = await _repository.letterOffsets(sort);
+      if (songSort.value == sort) letterOffsets.value = freshOffsets;
       albums.value = await _repository.albums();
       artists.value = await _repository.artists();
       genres.value = await _repository.genres();
@@ -95,13 +105,23 @@ class LibraryController extends GetxController with WidgetsBindingObserver {
 
   @override
   Future<void> refresh() async {
-    isLoading.value = true;
-    hasError.value = false;
+    // Bulgu 10: manuel yenileme, otomatik tarama alanına alındı. Eskiden
+    // isAutoScanning kapsamı DIŞINDAYDI: pull-to-refresh sürerken Resume
+    // tetiklenen otomatik tarama eşzamanlı koşabiliyordu; ayrıca refresh
+    // _lastScanAt'ı güncellemediği için Resume hemen yeniden tarıyordu.
+    if (isAutoScanning.value) return;
+    isAutoScanning.value = true;
     try {
-      await _repository.rescan();
+      isLoading.value = true;
+      hasError.value = false;
+      // Bulgu 10: loadAll ile aynı kilit — her sıralama bağımlı yazım
+      // yazım anında denetlenir.
       final sort = songSort.value;
-      songs.value = await _repository.songs(sort: sort);
-      letterOffsets.value = await _repository.letterOffsets(sort);
+      await _repository.rescan();
+      final freshSongs = await _repository.songs(sort: sort);
+      if (songSort.value == sort) songs.value = freshSongs;
+      final freshOffsets = await _repository.letterOffsets(sort);
+      if (songSort.value == sort) letterOffsets.value = freshOffsets;
       albums.value = await _repository.albums();
       artists.value = await _repository.artists();
       genres.value = await _repository.genres();
@@ -109,7 +129,11 @@ class LibraryController extends GetxController with WidgetsBindingObserver {
     } on Object {
       hasError.value = true;
     } finally {
-      isLoading.value = false;
+      // Bulgu 10: taze zaman damgası — Resume'daki minAutoScanInterval
+      // denetimi manuel yenilemeyi sayar, kullanıcıyı hemen yeniden
+      // taramayla yarıştırmaz.
+      _lastScanAt = DateTime.now();
+      isAutoScanning.value = false;
     }
   }
 
@@ -191,10 +215,16 @@ class LibraryController extends GetxController with WidgetsBindingObserver {
   /// Otomatik tarama sonrası listeleri yükleme göstergesi olmadan tazeler.
   /// isLoading'a dokunmaz: kullanıcı mevcut listeyi görmeye devam eder.
   Future<void> _reloadLists() async {
+    // Bulgu 10: loadAll ile aynı sıralama kilidi (yazımdan önce denetim;
+    // tarama sürerken kullanıcı sıralamayı değiştirirse bayat sıralı
+    // sonuç yazılmaz).
+    final sort = songSort.value;
     try {
-      final sort = songSort.value;
-      songs.value = await _repository.songs(sort: sort);
-      letterOffsets.value = await _repository.letterOffsets(sort);
+      // Bulgu 10: loadAll ile aynı kilit (yazım anında denetim).
+      final freshSongs = await _repository.songs(sort: sort);
+      if (songSort.value == sort) songs.value = freshSongs;
+      final freshOffsets = await _repository.letterOffsets(sort);
+      if (songSort.value == sort) letterOffsets.value = freshOffsets;
       albums.value = await _repository.albums();
       artists.value = await _repository.artists();
       genres.value = await _repository.genres();
