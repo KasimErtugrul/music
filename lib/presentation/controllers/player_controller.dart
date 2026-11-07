@@ -99,6 +99,26 @@ class PlayerController extends GetxController implements AutoPlayController {
   bool _purgingVault = false;
   bool _purgeVaultQueued = false;
 
+  // FAZ 1 (K3): tek yazıcı — motoru değiştiren komutlar _withEngineLock
+  // ile tek sıradan geçer; aynı anda en fazla bir komut motor kuyruğunu
+  // değiştirir. _engineTail: sıradaki komutun bağlandığı kuyruk sonu.
+  // _playEpoch: «çalma niyeti» jenerasyonu; playSong/playFromQueue çağrı
+  // anında (await ÖNCESİNDE, senkron) artar → sıra = dokunuş sırası.
+  // Sıradan geçerliliğini yitirmiş gövde ilk kontrol noktasında sessizce
+  // döner (son komut kazanır). _restoreQueueLocked aynı epoch'u yakalar:
+  // kullanıcı veya harici komut gelirse geri yükleme motor kuyruğunu
+  // ezip geçmeden vazgeçer (K4'ün yarış kısmı).
+  Future<void> _engineTail = Future<void>.value();
+  int _playEpoch = 0;
+
+  /// FAZ 1: tek yazıcı kilidi. Gövde hatası arayana iletilir; kuyruk
+  /// zinciri hataya rağmen canlı kalır (sonraki komutlar çalışır).
+  Future<T> _withEngineLock<T>(Future<T> Function() body) {
+    final run = _engineTail.then((_) => body());
+    _engineTail = run.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+    return run;
+  }
+
   SongModel? get currentSong {
     final id = currentItem.value?.id;
     if (id == null) return null;
@@ -276,6 +296,12 @@ class PlayerController extends GetxController implements AutoPlayController {
 
   void setVolume(double vol) => _repository.setVolume(vol);
 
+  /// FAZ 2: uyku zamanlayıcısı sönüm katmanı (0.0–1.0). [setVolume]'tan
+  /// farklıdır: kullanıcı ses tercihini DEĞİŞTİRMEZ; ses tek sahibi
+  /// koordinatörde kullanıcı sesiyle çarpılır ve aktif rampaları iptal
+  /// etmez. SleepTimerController bu yolu kullanır.
+  void setSleepDamping(double factor) => _repository.setSleepDamping(factor);
+
   void _checkHistory(Duration pos) {
     final song = currentSong;
     if (song == null || _loggedSongUri == song.uri) return;
@@ -320,9 +346,19 @@ class PlayerController extends GetxController implements AutoPlayController {
     await _repository.seek(newPos.isNegative ? Duration.zero : newPos);
   }
 
-  Future<void> _restoreQueue() async {
+  /// FAZ 1: oturum geri yükleme tek yazıcı kilitinden geçer ve İPTAL
+  /// edilebilirdir: gövde başında yakalanan epoch, kontrol noktalarında
+  /// değişmişse (kullanıcı/harici çalma niyeti gelmişse) geri yükleme
+  /// SESSİZCE vazgeçer — motor kuyruğunu ezmez, varsayılanları uygulamaz.
+  Future<void> _restoreQueue() => _withEngineLock(_restoreQueueLocked);
+
+  Future<void> _restoreQueueLocked() async {
+    final myEpoch = _playEpoch; // geri yüklemenin başlangıç jenerasyonu
     try {
       final state = await _stateRepo.loadState();
+      // Kontrol noktası 1: loadState beklemesi sırasında yeni çalma
+      // niyeti geldiyse DB sorgusuna bile girmeye gerek yok.
+      if (myEpoch != _playEpoch) return;
       if (state != null && state.songUris.isNotEmpty) {
         // Kayıtlı state varsa onu yükle
         final allSongs = await _libraryRepo.songs();
@@ -334,6 +370,10 @@ class PlayerController extends GetxController implements AutoPlayController {
           if (song != null) restored.add(song);
         }
 
+        // Kontrol noktası 2: kütüphane eşlemesi hazır; motora ve
+        // songQueue'ya dokunmadan önce son fırsat — yeni niyet varsa
+        // geri yükleme burada ölür, songQueue eskisi gibi kalır.
+        if (myEpoch != _playEpoch) return;
         if (restored.isNotEmpty) {
           int safeIndex = state.currentIndex.clamp(0, restored.length - 1);
           songQueue.assignAll(restored);
@@ -360,6 +400,9 @@ class PlayerController extends GetxController implements AutoPlayController {
           // Görev 2.3: geri yüklenen ilk parçaya ReplayGain uygula.
           await _applyReplayGain(restored[safeIndex]);
 
+          // Kontrol noktası 3: tercih beklemesi sırasında yeni niyet
+          // geldiyse yükleme YAPILMAZ (motor kuyruğu ezilmez).
+          if (myEpoch != _playEpoch) return;
           await _repository.loadQueue(
             restored,
             initialIndex: safeIndex,
@@ -377,6 +420,9 @@ class PlayerController extends GetxController implements AutoPlayController {
       // Kayıtlı state yoksa veya boşsa Varsayılanları uygula.
       // Gün 2: Rx durumu da senkronize edilir; aksi halde mini oynatıcının
       // shuffle/tekrar rozetleri depo durumundan geri kalırdı.
+      // Kontrol noktası 4: varsayılanları uygulamayı da yeni niyete bırakır
+      // (playSong kendi varsayılanlarını zaten uygular).
+      if (myEpoch != _playEpoch) return;
       final pref = prefCtrl.playback.value;
       await _repository.setShuffleMode(pref.defaultShuffle);
       shuffleEnabled.value = pref.defaultShuffle;
@@ -421,10 +467,28 @@ class PlayerController extends GetxController implements AutoPlayController {
 
   /// Gün 17 (Kasa): playSong'in dönüş değeri — kasadaki şarkı reddedilirse
   /// false döner ve hiçbir depo çağrısı yapılmaz (ses/QUEUE dokunulmaz).
+  /// FAZ 1: beklerken daha yeni bir çalma niyeti tarafından geçilirse
+  /// (supersede) de false döner; bu durumda kasa bildirimi GÖSTERİLMEZ.
   /// AutoPlayController sözleşmesi `Future<void>` bildirir; `Future<bool>`
   /// onun bir alt tipidir (arayanlar sonucu yok sayabilir).
   @override
-  Future<bool> playSong(SongModel song, {List<SongModel>? queue}) async {
+  Future<bool> playSong(SongModel song, {List<SongModel>? queue}) {
+    // FAZ 1: epoch çağrı anında (await öncesi, senkron) artar →
+    // sıra = dokunuş sırası. Hızlı üst üste dokunuşlarda bekleyen
+    // eskiler kilit sırasına girip ilk kontrolde sessizce döner.
+    final myEpoch = ++_playEpoch;
+    return _withEngineLock(() => _playSongLocked(song, queue, myEpoch));
+  }
+
+  Future<bool> _playSongLocked(
+    SongModel song,
+    List<SongModel>? queue,
+    int myEpoch,
+  ) async {
+    // FAZ 1: bu istek sıradayken daha yeni bir çalma niyeti geldiyse
+    // sessizce vazgeç: motora dokunma (son komut kazanır).
+    if (myEpoch != _playEpoch) return false;
+
     // Gün 17: kasa koruması — şarkı yasaklıysa asla çalmaz.
     final vaultCtrl = vault;
     if (vaultCtrl != null && vaultCtrl.isBanned(song)) {
@@ -527,6 +591,10 @@ class PlayerController extends GetxController implements AutoPlayController {
   /// Bulgu 4: temizlik koşularını serileştirir. Aynı turda birden çok
   /// kasa olayı gelirse (ban + akış bildirimi) koşular birleştirilir;
   /// paralel koşu aynı indeks üzerinde iki silme yapabilirdi.
+  /// FAZ 1: temizlik koşusu da tek yazıcı kilitinden geçer; böylece
+  /// playSong/insert/remove ile aynı anda motor kuyruğuna yazamaz.
+  /// (Koalescing bayrakları korunur: üst üste kasa olayı tek koşuda
+  /// birleştirilir; koşu sırasında gelen olay kuyruğa alınır.)
   Future<void> _purgeBannedFromQueue() async {
     final vaultCtrl = vault;
     if (vaultCtrl == null || _isRestoring) return;
@@ -536,10 +604,12 @@ class PlayerController extends GetxController implements AutoPlayController {
     }
     _purgingVault = true;
     try {
-      do {
-        _purgeVaultQueued = false;
-        await _purgeBannedOnce();
-      } while (_purgeVaultQueued);
+      await _withEngineLock(() async {
+        do {
+          _purgeVaultQueued = false;
+          await _purgeBannedOnce();
+        } while (_purgeVaultQueued);
+      });
     } finally {
       _purgingVault = false;
     }
@@ -674,7 +744,11 @@ class PlayerController extends GetxController implements AutoPlayController {
     prefCtrl.setPitch(pitch);
   }
 
-  Future<void> playNext(SongModel song) async {
+  /// FAZ 1: kuyruk düzenleme komutları da tek yazıcı kilitinden geçer.
+  Future<void> playNext(SongModel song) =>
+      _withEngineLock(() => _playNextLocked(song));
+
+  Future<void> _playNextLocked(SongModel song) async {
     // Gün 17: kasadaki şarkı kuyruğa da eklenemez.
     final vaultCtrl = vault;
     if (vaultCtrl != null && vaultCtrl.isBanned(song)) {
@@ -682,15 +756,28 @@ class PlayerController extends GetxController implements AutoPlayController {
       return;
     }
     if (songQueue.isEmpty) {
-      await playSong(song);
+      // FAZ 1: kilit İÇİNDEYİZ — iç gövde doğrudan çağrılır (kilit yeniden
+      // alınsaydı kendi kuyruğunu bekleyip kilitlenirdik).
+      await _playSongLocked(song, null, _playEpoch);
       return;
     }
     final nextIdx = (_repository.currentIndex ?? 0) + 1;
     songQueue.insert(nextIdx, song);
-    await _repository.insertSong(nextIdx, song);
+    try {
+      await _repository.insertSong(nextIdx, song);
+    } on Object {
+      // FAZ 1: iyimser ekleme her yolda geri alınır (tek doğruluk
+      // kaynağı sözleşmesi: songQueue ↔ motor kuyruğu ayrışmaz).
+      songQueue.removeAt(nextIdx);
+      rethrow;
+    }
   }
 
-  Future<void> addToQueue(SongModel song) async {
+  /// FAZ 1: [playNext] ile aynı kilit + geri alma sözleşmesi.
+  Future<void> addToQueue(SongModel song) =>
+      _withEngineLock(() => _addToQueueLocked(song));
+
+  Future<void> _addToQueueLocked(SongModel song) async {
     // Gün 17: kasadaki şarkı kuyruğa da eklenemez.
     final vaultCtrl = vault;
     if (vaultCtrl != null && vaultCtrl.isBanned(song)) {
@@ -698,32 +785,67 @@ class PlayerController extends GetxController implements AutoPlayController {
       return;
     }
     if (songQueue.isEmpty) {
-      await playSong(song);
+      await _playSongLocked(song, null, _playEpoch);
       return;
     }
     songQueue.add(song);
-    await _repository.insertSong(songQueue.length - 1, song);
+    try {
+      await _repository.insertSong(songQueue.length - 1, song);
+    } on Object {
+      songQueue.removeLast(); // FAZ 1: hata olunca geri alma
+      rethrow;
+    }
   }
 
-  Future<void> removeFromQueue(int index) async {
+  /// FAZ 1: kilit + geri alma. removeSong düşerse motor kuyruğu
+  /// değişmemiştir; songQueue eski haline döner, hata arayana gider.
+  Future<void> removeFromQueue(int index) =>
+      _withEngineLock(() => _removeFromQueueLocked(index));
+
+  Future<void> _removeFromQueueLocked(int index) async {
     if (index < 0 || index >= songQueue.length) return;
-    songQueue.removeAt(index);
-    await _repository.removeSong(index);
+    final removed = songQueue.removeAt(index);
+    try {
+      await _repository.removeSong(index);
+    } on Object {
+      songQueue.insert(index, removed); // FAZ 1: hata olunca geri alma
+      rethrow;
+    }
     if (songQueue.isEmpty) await _repository.stop();
   }
 
-  Future<void> clearQueue() async {
+  /// FAZ 1: kilit + geri alma. stop düşerse motor muhtemelen durmadıdır;
+  /// songQueue eski haline döner (UI ↔ motor ayrışmaz).
+  Future<void> clearQueue() => _withEngineLock(_clearQueueLocked);
+
+  Future<void> _clearQueueLocked() async {
+    final previous = List<SongModel>.of(songQueue);
     songQueue.clear();
-    await _repository.stop();
+    try {
+      await _repository.stop();
+    } on Object {
+      songQueue.assignAll(previous);
+      rethrow;
+    }
     await _stateRepo.clearState();
   }
 
   /// [newIndex] «çıkarma sonrası» konumdur (onReorderItem önceden düzeltir);
   /// moveTrack→moveAudioSource zinciri de bu sözleşmede, -1 tekrarlanmaz.
-  Future<void> reorderQueue(int oldIndex, int newIndex) async {
+  /// FAZ 1: kilit + geri alma — moveSong düşerse sıralama eski haline döner.
+  Future<void> reorderQueue(int oldIndex, int newIndex) =>
+      _withEngineLock(() => _reorderQueueLocked(oldIndex, newIndex));
+
+  Future<void> _reorderQueueLocked(int oldIndex, int newIndex) async {
     final song = songQueue.removeAt(oldIndex);
     songQueue.insert(newIndex, song);
-    await _repository.moveSong(oldIndex, newIndex);
+    try {
+      await _repository.moveSong(oldIndex, newIndex);
+    } on Object {
+      songQueue.removeAt(newIndex);
+      songQueue.insert(oldIndex, song);
+      rethrow;
+    }
   }
 
   Future<void> togglePlayPause() async {
@@ -752,8 +874,16 @@ class PlayerController extends GetxController implements AutoPlayController {
   /// ile tüm kuyruğu yeniden kuruyordu. Artık kuyruk hiç yeniden kurulmaz
   /// (skipToIndex: just_audio seek(index)), kullanıcı o an seçili karıştırma/
   /// tekrar modu aynen korunur ve kasadaki şarkı koruması aynen geçerlidir.
-  /// Dönüş değeri: atlama yapıldıysa true.
-  Future<bool> playFromQueue(int index) async {
+  /// Dönüş değeri: atlama yapıldıysa true. FAZ 1: beklerken daha yeni bir
+  /// çalma niyeti geldiyse false (motora dokunmaz); kilit altında index
+  /// YENİDEN doğrulanır — kuyruk bu arada değişmiş olabilir.
+  Future<bool> playFromQueue(int index) {
+    final myEpoch = ++_playEpoch;
+    return _withEngineLock(() => _playFromQueueLocked(index, myEpoch));
+  }
+
+  Future<bool> _playFromQueueLocked(int index, int myEpoch) async {
+    if (myEpoch != _playEpoch) return false;
     if (index < 0 || index >= songQueue.length) return false;
     final song = songQueue[index];
     final vaultCtrl = vault;
@@ -780,22 +910,26 @@ class PlayerController extends GetxController implements AutoPlayController {
   /// (tutamağa dokunma veya yukarı kaydırma hareketi).
   void showMiniPlayer() => miniPlayerHidden.value = false;
 
-  Future<void> toggleShuffle() async {
-    final next = !shuffleEnabled.value;
-    await _repository.setShuffleMode(next);
-    shuffleEnabled.value = next;
-  }
+  /// FAZ 1: toggle'lar kilit altında okur-yazar; hızlı çift dokunuşta
+  /// ikinci çağrı birincinin YAZDIĞI değeri okur (kilit olmadan ikisi de
+  /// false okuyup true yazar, Rx ↔ motor ayrışırdı).
+  Future<void> toggleShuffle() => _withEngineLock(() async {
+        final next = !shuffleEnabled.value;
+        await _repository.setShuffleMode(next);
+        shuffleEnabled.value = next;
+      });
 
-  Future<void> cycleRepeatMode() async {
-    final next = switch (repeatMode.value) {
-      AudioServiceRepeatMode.none => AudioServiceRepeatMode.all,
-      AudioServiceRepeatMode.all => AudioServiceRepeatMode.one,
-      AudioServiceRepeatMode.one => AudioServiceRepeatMode.none,
-      _ => AudioServiceRepeatMode.none,
-    };
-    await _repository.setRepeatMode(next);
-    repeatMode.value = next;
-  }
+  /// FAZ 1: [toggleShuffle] ile aynı kilit sözleşmesi.
+  Future<void> cycleRepeatMode() => _withEngineLock(() async {
+        final next = switch (repeatMode.value) {
+          AudioServiceRepeatMode.none => AudioServiceRepeatMode.all,
+          AudioServiceRepeatMode.all => AudioServiceRepeatMode.one,
+          AudioServiceRepeatMode.one => AudioServiceRepeatMode.none,
+          _ => AudioServiceRepeatMode.none,
+        };
+        await _repository.setRepeatMode(next);
+        repeatMode.value = next;
+      });
 
   void clearError() => lastError.value = null;
 

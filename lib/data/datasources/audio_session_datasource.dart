@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:audio_session/audio_session.dart';
 import 'package:resonance/data/datasources/player_datasource.dart';
+import 'package:resonance/data/datasources/volume_coordinator.dart';
 
 /// Ses odağı (arama, bildirim vb.) ve kulaklık çıkarma olaylarını yönetir.
 ///
@@ -8,12 +11,23 @@ import 'package:resonance/data/datasources/player_datasource.dart';
 /// Fonksiyon göstergeşi kullanmak, ayar değiştiğinde dinleyicinin yeniden
 /// kurulmasını gerektirmez; karar her olay anında güncel tercihi okur.
 class AudioSessionDatasource {
-  AudioSessionDatasource(this._player, {required this.shouldPauseOnUnplug});
+  AudioSessionDatasource(
+    this._player, {
+    required this.shouldPauseOnUnplug,
+    required this.volume,
+  });
 
   final PlayerDataSource _player;
 
-  /// Duck başlarken saklanan ses seviyesi (null: duck etkin değil).
-  double? _volumeBeforeDuck;
+  /// FAZ 2 (K1): ses tek sahipliği. Duck, ham setVolume YAZMAZ; ses tek
+  /// sahibi koordinatörün duck katmanına yazar. Eski «mevcut sesi sakla /
+  /// geri yükle» modeli kaldırıldı: o model bayat değer saklıyor, duck
+  /// sırasında kullanıcının ses değişikliğini eziyor ve rampa/uyku
+  /// sönümüyle çakışıyordu. Katman modelinde duck yalnızca kendi
+  /// çarpanını değiştirir; kesinti bittiğinde 1.0'a dönmek diğer
+  /// katmanların (kullanıcı sesi, rampa, uyku sönümü) değerlerini
+  /// bozmaz.
+  final VolumeCoordinator volume;
 
   /// Olay anında "Kulaklık çıkınca duraklat" tercihinin güncel değerini okur.
   /// main.dart'ta PreferencesController, AudioService.init'ten ÖNCE kalıcı
@@ -28,19 +42,17 @@ class AudioSessionDatasource {
     session.interruptionEventStream.listen((event) {
       if (event.begin) {
         if (event.type == AudioInterruptionType.duck) {
-          // Kullanıcının mevcut ses seviyesi saklanır; kesinti bitince
-          // koşulsuz 1.0'a değil buna dönülür.
-          _volumeBeforeDuck ??= _player.player.volume;
-          _player.setVolume(0.3);
+          // FAZ 2: duck bir katmandır — kullanıcı sesini saklamaya/geri
+          // yüklemeye gerek kalmaz; çarpım zaten kullanıcının tercihini
+          // korur. Tekrar duck gelmesi ayırt etmez (çarpan ayarlanır).
+          unawaited(volume.setDuckFactor(0.3));
         } else {
           // pause ve unknown: ikisi de duraklatır.
           _player.pause();
         }
       } else {
         if (event.type == AudioInterruptionType.duck) {
-          final restore = _volumeBeforeDuck ?? 1.0;
-          _volumeBeforeDuck = null;
-          _player.setVolume(restore);
+          unawaited(volume.setDuckFactor(1.0));
         }
         // Gün 21: Kesinti bitince çalmaya devam etme seçeneği.
       }
