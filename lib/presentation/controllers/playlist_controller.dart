@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:resonance/core/errors/app_logger.dart';
 import 'package:resonance/data/models/playlist_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/playlist_repository.dart';
@@ -11,12 +10,6 @@ class PlaylistController extends GetxController {
 
   final playlists = <PlaylistModel>[].obs;
   final isLoading = true.obs;
-
-  /// Bulgu 15: LibraryController'daki hasError sözleşmesi (loadAll:78-94
-  /// deseni). onInit fire-and-forget yüklemesinde DB hatası eskiden
-  /// işlenmemiş async hata olarak zone'a düşüyordu; artık hasError'a
-  /// yazılır ve günlüğe kaydedilir — kullanıcıya görünen sinyal.
-  final hasError = false.obs;
   
   final currentPlaylist = Rxn<PlaylistModel>();
   final currentSongs = <SongModel>[].obs;
@@ -42,17 +35,10 @@ class PlaylistController extends GetxController {
 
   Future<void> loadPlaylists() async {
     isLoading.value = true;
-    hasError.value = false;
     try {
       playlists.assignAll(await _repo.getPlaylists());
       // Gün 21: üyelik haritası aynı tazelemede güncellenir.
       playlistNamesBySong.value = await _repo.playlistNamesBySong();
-    } on Object catch (e, st) {
-      // Bulgu 15: try/finally tek başına hatayı YUTMAZ — buraya gelmeden
-      // yukarı fırlıyordu; onInit'teki beklenmeyen async hata bundu.
-      // LibraryController sözleşmesi: yakala + günlükle + hasError işaretle.
-      AppLog.error(e, st, source: 'PlaylistController.loadPlaylists');
-      hasError.value = true;
     } finally {
       isLoading.value = false;
     }
@@ -84,29 +70,15 @@ class PlaylistController extends GetxController {
   /// Bulgu 2: şarkı zaten bu listedeyse ekleme YAPILMAZ ve false döner —
   /// çağıran arayüz kullanıcıyı snackbar ile bilgilendirir (sessiz
   /// başarısızlık kapatıldı). Diğer listelere ekleme her zaman serbesttir.
-  ///
-  /// Bulgu 2 (TOCTOU yarışı): isSongInPlaylist (await'li DB sorgusu) ile
-  /// add arasında pencere vardı; aynı satıra çift hızlı dokunuşta iki
-  /// kontrol de false döner, aynı şarkı iki kez yazılıyordu. _adding
-  /// guard'ı ikinci çağrıyı pencereye GİRMEDEN false ile döndürür (tek
-  /// yazım; sayfa «zaten var» uyarısını gösterir).
-  bool _adding = false;
-
   Future<bool> addSongToPlaylist(int playlistId, SongModel song) async {
-    if (_adding) return false;
-    _adding = true;
-    try {
-      final exists = await _repo.isSongInPlaylist(playlistId, song.id);
-      if (exists) return false; // Zaten varsa ekleme
-      await _repo.addSong(playlistId, song);
-      await loadPlaylists();
-      if (currentPlaylist.value?.id == playlistId) {
-        await loadPlaylistDetail(playlistId);
-      }
-      return true;
-    } finally {
-      _adding = false;
+    final exists = await _repo.isSongInPlaylist(playlistId, song.id);
+    if (exists) return false; // Zaten varsa ekleme
+    await _repo.addSong(playlistId, song);
+    await loadPlaylists();
+    if (currentPlaylist.value?.id == playlistId) {
+      await loadPlaylistDetail(playlistId);
     }
+    return true;
   }
 
   Future<void> removeSong(int playlistId, int songId) async {

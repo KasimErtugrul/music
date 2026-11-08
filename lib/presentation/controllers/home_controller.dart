@@ -47,14 +47,6 @@ class HomeController extends GetxController {
   final _random = Random();
   StreamSubscription<List<int>>? _favSub;
 
-  // Bulgu 14: favori şarkı listesi yazımı için bayatlık kilidi (staleness
-  // token). İki hızlı favori değişiminde _updateFavoriteSongs'un songs()
-  // bekleyişi kesişir; eski listenin yazımı EN SON bitince favori şarkılar
-  // bayat kalır. Son olay kazanır: her olay bir sıra numarası alır,
-  // await bitiminde numara değişmişse yazım atılır. favoriteCount Rx'i
-  // zaten senkron yazıldığı için kendini düzeltir; kilit LISTE yazımı içindir.
-  int _favSyncEpoch = 0;
-
   // Bulgu 2: çalma geçmişi canlı izlenir. HistoryController (geçmiş
   // sayfası) zaten watchRecentHistory ile canlıyken ana sayfanın
   // geçmişten türeyen bölümleri yalnız pull-to-refresh ile
@@ -70,16 +62,7 @@ class HomeController extends GetxController {
     super.onInit();
     _favSub = _favRepo.watchFavoriteIds().listen((ids) async {
       favoriteCount.value = ids.length;
-      // Bulgu 14: hata sözleşmesi — loadAll ile aynı (logla, abonelik
-      // canlı kalır). Dinleyici async'i hatasız bırakmak işlenmemiş
-      // async hata olarak yutulurdu; ayrıca hata sonraki olayı da
-      // engellemez, sonraki olay listeyi tazeler.
-      final epoch = ++_favSyncEpoch;
-      try {
-        await _updateFavoriteSongs(ids, null, epoch);
-      } catch (e, st) {
-        AppLog.error(e, st, source: 'HomeController.watchFavoriteIds');
-      }
+      await _updateFavoriteSongs(ids);
     });
     _historySub = _historyRepo.watchRecentHistory(limit: 30).listen((history) {
       _latestHistory = history;
@@ -195,18 +178,12 @@ class HomeController extends GetxController {
   Future<void> _updateFavoriteSongs(
     List<int> favIds, [
     List<SongModel>? cachedSongs,
-    int? epoch,
   ]) async {
     if (favIds.isEmpty) {
       favoriteSongs.clear();
       return;
     }
     final allSongs = cachedSongs ?? await _libraryRepo.songs();
-    // Bulgu 14: songs() beklenirken yeni bir favori olayı geldiyse
-    // (sıra numarası arttıysa) bu yazım bayattır; son olayın yazımına
-    // yer bırak. loadAll çağrısı epoch geçirmez: kendi anlık
-    // görüntüsüyle yazar, mevcut sözleşme korunur.
-    if (epoch != null && epoch != _favSyncEpoch) return;
     final songById = {for (final s in allSongs) s.id: s};
     final favs = <SongModel>[];
     for (final id in favIds) {

@@ -55,14 +55,6 @@ class SettingsHomePage extends StatefulWidget {
 class _SettingsHomePageState extends State<SettingsHomePage> {
   final _searchController = TextEditingController();
 
-  /// Bulgu 19: arama denetleyicisi build içinde Get.put ile kaydediliyordu;
-  /// IndexedStack sayfayı diri tuttuğundan denetleyici hiç silinmiyor ve
-  /// sorgu sekmeler arasında YAŞIYORDU (ayarlara dönüşte eski filtre hâlâ
-  /// aktif). Kayıt initState'e alındı; sekmeye her dönüşte sıfırlama
-  /// HomePage.onDestinationSelected içinde yapılır (IndexedStack State'i
-  /// diri tuttuğu için initState burada yalnız bir kez çalışır).
-  late final SettingsSearchController _search;
-
   /// Gün 14: geniş ekranda sağ bölmede açık olan hedef (null = yer tutucu).
   /// Rxn: liste satırlarındaki seçim vurgusu da bu değeri okuduğu için
   /// değişimde her iki bölme de Obx ile kendiliğinden yeniden çizilir.
@@ -74,13 +66,6 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
 
   /// Sol bölme sabit genişlik: 840 dp'de ayrıntıya 840-340-1 ≈ 500 dp kalır.
   static const double _listPaneWidth = 340;
-
-  @override
-  void initState() {
-    super.initState();
-    // Bulgu 19: kayıt build'den initState'e taşındı (deterministik tek kayıt).
-    _search = Get.put(SettingsSearchController());
-  }
 
   @override
   void dispose() {
@@ -103,7 +88,7 @@ class _SettingsHomePageState extends State<SettingsHomePage> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final ctrl = Get.find<SettingsController>();
-    final search = _search;
+    final search = Get.put(SettingsSearchController());
 
     return Scaffold(
       // Marka başlığı beş sekmede ortak: ResonanceAppBar. Sekmenin adı

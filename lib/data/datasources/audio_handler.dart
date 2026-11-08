@@ -6,7 +6,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:resonance/data/datasources/auto_browse_delegate.dart';
 import 'package:resonance/data/datasources/audio_session_datasource.dart';
 import 'package:resonance/data/datasources/player_datasource.dart';
-import 'package:resonance/data/datasources/volume_coordinator.dart';
 
 class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   ResonanceAudioHandler({
@@ -16,31 +15,15 @@ class ResonanceAudioHandler extends BaseAudioHandler with SeekHandler {
   }) {
     // Görev 1.2: Kulaklık çıkarma koşulu yukarıdan gösterge olarak alınır;
     // AudioSessionDatasource olay anında bu göstergeyi okuyup karar verir.
-    // FAZ 2: duck artık ham setVolume yazmaz; ses tek sahibi
-    // VolumeCoordinator'ın duck katmanına yazar (kullanıcı sesi, rampa ve
-    // uyku sönümüyle çarpılır, birbirini ezmez).
     AudioSessionDatasource(
       _source,
       shouldPauseOnUnplug: shouldPauseOnUnplug,
-      // Getter tembel kurulur: gerçek handler'da burada asla null değildir;
-      // «!» yalnız statik tip için.
-      volume: volumeCoordinator!,
     ).init();
     _bindStreams();
   }
 
   final PlayerDataSource _source;
   final Future<Uri?> Function(String songUri) _artResolver;
-
-  /// FAZ 2 (K1): sesin TEK SAHİBİ. Duck yolu ve depo katmanı aynı
-  /// örnekten beslenir; motora ses yalnızca koordinatörün tek yazım
-  /// noktasından gider. Nullable + tembel: gerçek handler'da ilk erişimde
-  /// kurulur (constructor gövdesi, AudioSessionDatasource kurulumu);
-  /// mocktail sahteleri üyeyi bilmediği için null döndürür — depo o
-  /// durumda kendi örneğini kurar (mevcut testler bozulmaz).
-  VolumeCoordinator? _volumeCoordinator;
-  VolumeCoordinator? get volumeCoordinator =>
-      _volumeCoordinator ??= VolumeCoordinator(writeVolume: _source.setVolume);
 
   /// "Kulaklık çıkınca duraklat" tercihi (Görev 1.2). Olay anında canlı okunur;
   /// ayar değiştiğinde handler'ın yeniden kurulması gerekmez.

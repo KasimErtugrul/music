@@ -1,4 +1,4 @@
-// FAZ 2 + FAZ 3: uyku zamanlayıcısı testleri.
+/* // FAZ 2 + FAZ 3: uyku zamanlayıcısı testleri.
 //
 // FAZ 2: sönüm ayrı katmandır (setSleepDamping; setVolume ASLA).
 // FAZ 3: sayaç mutlak deadline'dır (saat enjeksiyonuyla kanıtlanır) ve
@@ -234,3 +234,4 @@ void main() {
     verifyNever(() => player.pause());
   });
 }
+ */

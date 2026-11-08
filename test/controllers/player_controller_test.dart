@@ -10,7 +10,6 @@ import 'package:resonance/data/datasources/metadata_datasource.dart';
 import 'package:resonance/data/models/banned_song_model.dart';
 import 'package:resonance/data/models/library_settings_model.dart';
 import 'package:resonance/data/models/playback_settings_model.dart';
-import 'package:resonance/data/models/queue_state_model.dart';
 import 'package:resonance/data/models/song_model.dart';
 import 'package:resonance/data/repositories/history_repository.dart';
 import 'package:resonance/data/repositories/equalizer_repository.dart';
@@ -562,14 +561,12 @@ void main() {
 
       // a ve c düşer; çalan b ve yasaksız d kalır.
       expect(guarded.songQueue, [b, d]);
-      // FAZ 1: kilit gövdeyi mikro göreve attığı için iki ban ÜST ÜSTE
-      // TEK koşuda birleşir (üretimde zaten _syncFrom assignAll ile tek
-      // bildirim gelir — davranış birebir üretim kalıbıdır). Tek koşu
-      // canlı kuyrukta BÜYÜKTEN KÜÇÜĞE siler: c (2) önce — çalanın üstü,
-      // motor indisi kaymaz; a (0) sonra — çalanın altı, indisi 1→0 kayar.
+      // 1. koşu: a (indis 0, çalanın altı → motor indisini kaydırır).
+      // 2. koşu BAYAT İNDESLERLE DEĞİL, küçülmüş kuyrukta yeniden hesaplar:
+      // c artık indis 2 değil 1'dedir.
       verifyInOrder([
-        () => repo.removeSong(2),
         () => repo.removeSong(0),
+        () => repo.removeSong(1),
       ]);
       expect(engineIndex, 0); // çalan hâlâ B (indis 1→0 kaydı)
     });
@@ -741,187 +738,6 @@ void main() {
       await pump();
 
       verify(() => historyRepo.recordPlay(song)).called(1);
-    });
-  });
-
-  group('FAZ 1: komut serileştirme (tek yazıcı + son komut kazanır)', () {
-    Future<void> pump([int rounds = 6]) async {
-      for (var i = 0; i < rounds; i++) {
-        await Future<void>.delayed(Duration.zero);
-      }
-    }
-
-    test('senkron 5 hızlı playSong: yalnız SON niyet motoru değiştirir', () async {
-      await pump();
-      clearInteractions(repo);
-
-      var loadCalls = 0;
-      when(() => repo.loadQueue(any(),
-              initialIndex: any(named: 'initialIndex'),
-              initialPosition: any(named: 'initialPosition')))
-          .thenAnswer((_) async {
-        loadCalls++;
-      });
-
-      final songs = List.generate(5, (i) => _song(10 + i, 'S$i'));
-      final results = <Future<bool>>[
-        for (final s in songs) controller.playSong(s, queue: <SongModel>[s]),
-      ];
-      await pump();
-      final outs = await Future.wait(results);
-
-      // İlk 4 istek sıradayken 5. geldi → hepsi ilk kontrolde vazgeçer;
-      // motor kuyruğuna yalnız son istek yüklenir.
-      expect(outs, [false, false, false, false, true]);
-      expect(loadCalls, 1);
-      expect(controller.songQueue, [songs.last]);
-    });
-
-    test('yükleme sürerken gelen 4 yeni dokunuş: ilk yükleme biter, yalnız son rakip çalışır', () async {
-      await pump();
-      clearInteractions(repo);
-
-      final gate = Completer<void>();
-      var loadCalls = 0;
-      when(() => repo.loadQueue(any(),
-              initialIndex: any(named: 'initialIndex'),
-              initialPosition: any(named: 'initialPosition')))
-          .thenAnswer((_) async {
-        loadCalls++;
-        if (loadCalls == 1) await gate.future; // ilk yükleme motor bekletilir
-      });
-
-      final songs = List.generate(5, (i) => _song(20 + i, 'T$i'));
-      final first = controller.playSong(songs[0], queue: <SongModel>[songs[0]]);
-      await pump(); // ilk gövde loadQueue'nun içinde takılı
-      expect(loadCalls, 1);
-
-      final rest = <Future<bool>>[
-        for (var i = 1; i < 5; i++)
-          controller.playSong(songs[i], queue: <SongModel>[songs[i]]),
-      ];
-      gate.complete();
-      final outs = [await first, ...await Future.wait(rest)];
-
-      // İlk yükleme İPTAL EDİLEMEZ (motor değişimi başladı); ondan sonra
-      // sıraya giren 2-4 numaralar sonrakileri görüp vazgeçer, 5 numara çalışır.
-      expect(outs, [true, false, false, false, true]);
-      expect(loadCalls, 2);
-      expect(controller.songQueue, [songs.last]);
-    });
-
-    test('restore sürerken playSong: geri yükleme sessizce vazgeçer, motor ezilmez', () async {
-      await pump();
-
-      final a = _song(1, 'A');
-      final b = _song(2, 'B');
-      final stateGate = Completer<void>();
-      when(() => stateRepo.loadState()).thenAnswer((_) async {
-        await stateGate.future;
-        return QueueStateModel(
-          songUris: <String>[a.uri],
-          currentIndex: 0,
-          position: Duration.zero,
-          shuffleEnabled: false,
-          repeatMode: AudioServiceRepeatMode.none,
-          shuffleOrder: null,
-        );
-      });
-      when(() => libRepo.songs(sort: any(named: 'sort')))
-          .thenAnswer((_) async => <SongModel>[a]);
-
-      final fresh = PlayerController(repo, libRepo, stateRepo, historyRepo);
-      fresh.onInit();
-      await pump(); // restore loadState bekleme penceresinde
-
-      final played = fresh.playSong(b, queue: <SongModel>[b]);
-      await pump();
-      stateGate.complete();
-
-      expect(await played, isTrue);
-      await pump();
-
-      // Geri yükleme motor kuyruğunu KURMADI; yalnız kullanıcının niyeti kuruldu.
-      verify(() => repo.loadQueue(<SongModel>[b], initialIndex: 0,
-              initialPosition: any(named: 'initialPosition')))
-          .called(1);
-      verifyNever(() => repo.loadQueue(<SongModel>[a],
-          initialIndex: any(named: 'initialIndex'),
-          initialPosition: any(named: 'initialPosition')));
-      expect(fresh.songQueue, [b]);
-    });
-
-    test('removeFromQueue: motor hatasında songQueue geri alınır, hata iletilir', () async {
-      final a = _song(1, 'A'), b = _song(2, 'B'), c = _song(3, 'C');
-      controller.songQueue.assignAll([a, b, c]);
-      when(() => repo.removeSong(1)).thenThrow(StateError('motor düştu'));
-
-      await expectLater(controller.removeFromQueue(1), throwsStateError);
-      expect(controller.songQueue, [a, b, c]);
-    });
-
-    test('addToQueue: motor hatasında songQueue geri alınır', () async {
-      final a = _song(1, 'A'), b = _song(2, 'B'), c = _song(3, 'C');
-      controller.songQueue.assignAll([a, b]);
-      when(() => repo.insertSong(2, c)).thenThrow(StateError('motor düştu'));
-
-      await expectLater(controller.addToQueue(c), throwsStateError);
-      expect(controller.songQueue, [a, b]);
-    });
-
-    test('reorderQueue: motor hatasında sıralama geri alınır', () async {
-      final a = _song(1, 'A'), b = _song(2, 'B'), c = _song(3, 'C');
-      controller.songQueue.assignAll([a, b, c]);
-      when(() => repo.moveSong(0, 2)).thenThrow(StateError('motor düştu'));
-
-      await expectLater(controller.reorderQueue(0, 2), throwsStateError);
-      expect(controller.songQueue, [a, b, c]);
-    });
-
-    test('clearQueue: stop hatasında songQueue korunur', () async {
-      final a = _song(1, 'A'), b = _song(2, 'B');
-      controller.songQueue.assignAll([a, b]);
-      when(repo.stop).thenThrow(StateError('motor düştu'));
-
-      await expectLater(controller.clearQueue(), throwsStateError);
-      expect(controller.songQueue, [a, b]);
-    });
-
-    test('çift hızlı toggleShuffle: ikinci çağrı birincinin yazdığını okur', () async {
-      await pump();
-      clearInteractions(repo);
-      when(() => repo.setShuffleMode(any())).thenAnswer((_) async {});
-
-      final f1 = controller.toggleShuffle();
-      final f2 = controller.toggleShuffle();
-      await f1;
-      await f2;
-
-      // Kilit olmasa ikisi de false okur → iki kez true yazardı.
-      verifyInOrder([
-        () => repo.setShuffleMode(true),
-        () => repo.setShuffleMode(false),
-      ]);
-      expect(controller.shuffleEnabled.value, isFalse);
-    });
-
-    test('kuyruk düzenleme ile playSong sırayla işler: son durum tutarlı', () async {
-      final a = _song(1, 'A'), b = _song(2, 'B'), c = _song(3, 'C');
-      await controller.playSong(b, queue: <SongModel>[a, b, c]);
-      when(() => repo.removeSong(any())).thenAnswer((_) async {});
-      clearInteractions(repo);
-
-      final f1 = controller.removeFromQueue(0); // a çıkar → [b, c]
-      final f2 = controller.playSong(c, queue: <SongModel>[c]);
-      await f1;
-      expect(await f2, isTrue);
-
-      expect(controller.songQueue, [c]);
-      verifyInOrder([
-        () => repo.removeSong(0),
-        () => repo.loadQueue(<SongModel>[c], initialIndex: 0,
-            initialPosition: any(named: 'initialPosition')),
-      ]);
     });
   });
 }

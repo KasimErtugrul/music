@@ -31,6 +31,7 @@ import 'package:resonance/data/repositories/auto_backup_repository.dart';
 import 'package:resonance/data/repositories/backup_repository.dart';
 import 'package:resonance/data/repositories/library_repository.dart';
 import 'package:resonance/data/repositories/playlist_repository.dart';
+import 'package:resonance/presentation/bindings/playlist_binding.dart';
 import 'package:resonance/presentation/controllers/auto_backup_controller.dart';
 import 'package:resonance/presentation/controllers/live_settings_reload.dart';
 import 'package:resonance/presentation/controllers/playlist_controller.dart';
@@ -230,14 +231,9 @@ void main() {
 
     test('kayıtlı ama hiç açılmamış controller örneklendirilmez', () async {
       await seededPrefs();
-      // Bulgu 7: PlaylistBinding ölü kaydı silindi (PlaylistController
-      // InitialBinding'de put+permanent). Eski düzenin lazyPut+fenix
-      // anlambilimi testte birebir korunur (isInit=false):
-      Get.lazyPut<PlaylistRepository>(() => _MockPlaylistRepo(), fenix: true);
-      Get.lazyPut<PlaylistController>(
-        () => PlaylistController(Get.find<PlaylistRepository>()),
-        fenix: true,
-      );
+      // PlaylistBinding yalnız lazyPut fabrikası kurar (isInit=false) —
+      // uygulama açılışındaki gerçek duruma birebir eşdeğerdir:
+      PlaylistBinding().dependencies();
       expect(Get.isRegistered<PlaylistController>(), isTrue);
       expect(Get.isPrepared<PlaylistController>(), isTrue);
 

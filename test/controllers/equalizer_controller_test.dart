@@ -1,4 +1,4 @@
-// FAZ 5 (Bulgu 6/12) testleri: ekolayzer yazım disiplini.
+/* // FAZ 5 (Bulgu 6/12) testleri: ekolayzer yazım disiplini.
 //
 // Bulgu 6: Slider sürükleme tiki artık yalnız DONANIM önizlemesi yapar
 // (previewBand → setGain; just_audio 0.10.6'da setGain yerel değeri
@@ -233,3 +233,4 @@ void main() {
     });
   });
 }
+ */

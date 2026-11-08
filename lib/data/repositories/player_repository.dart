@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:resonance/data/datasources/audio_handler.dart';
-import 'package:resonance/data/datasources/volume_coordinator.dart';
 import 'package:resonance/data/models/song_model.dart';
 
 abstract class PlayerRepository {
@@ -45,34 +44,13 @@ abstract class PlayerRepository {
   /// (noSuchMethod) bu üyeyi uygulamak zorunda kalmaz.
   void setFadeDuration(Duration duration) {}
 
-  /// FAZ 2: uyku zamanlayıcısı sönüm katmanı (0.0–1.0). Kullanıcı sesini
-  /// EZMEZ — ses tek sahibi VolumeCoordinator'da kullanıcı sesiyle
-  /// çarpılır. 1.0 = sönüm yok. Somut gövdeli üye: [setFadeDuration] ile
-  /// aynı gerekçe (test sahteleri bozulmaz).
-  void setSleepDamping(double factor) {}
-
   bool get hasNext;
   bool get hasPrevious;
 }
 
 class PlayerRepositoryImpl implements PlayerRepository {
-  /// FAZ 2 (K1): tek sahiplik — gerçek kablolamada handler'ın
-  /// koordinatörü devralınır (duck yolu da aynı örnekten beslenir).
-  /// Test mock'ları [ResonanceAudioHandler.volumeCoordinator] üyesini
-  /// bilmez (null döner); o zaman depo kendi örneğini kurar ve yazımlar
-  /// handler.setVolume üzerinden akar — mevcut test doğrulamaları
-  /// bozulmaz.
-  PlayerRepositoryImpl(this._handler, {VolumeCoordinator? volumeCoordinator}) {
-    final dynamic handlerOwned = _handler.volumeCoordinator;
-    _volume = volumeCoordinator ??
-        (handlerOwned is VolumeCoordinator ? handlerOwned : null) ??
-        VolumeCoordinator(writeVolume: (v) => _handler.setVolume(v));
-  }
+  PlayerRepositoryImpl(this._handler);
   final ResonanceAudioHandler _handler;
-
-  /// Sesin tek sahibi: katmanlar burada toplanır, motora tek yazımla
-  /// çarpım gider. Adı [volumeCoordinator] ile karışmasın diye _volume.
-  late final VolumeCoordinator _volume;
 
   @override
   Stream<MediaItem?> get mediaItemStream => _handler.mediaItem;
@@ -91,24 +69,22 @@ class PlayerRepositoryImpl implements PlayerRepository {
   @override
   int? get currentIndex => _handler.currentIndex;
 
-  // --- Gün 20 + FAZ 2: yumuşatma (fade) -----------------------------------
-  // Oynat/duraklat sesi [_fadeSteps] adımda hedefe taşır; yazılan değer
-  // koordinatörün katman çarpımıdır (kullanıcı sesi × rampa × duck ×
-  // uyku sönümü). Kullanıcı fade sırasında sesi değiştirirse (setVolume)
-  // rampa iptal edilir ve kullanıcı devralır (eski sözleşme). Jenerasyon
-  // sayacı, iptal edilmiş bir rampanın son tıkının geç yazmasını
-  // engeller. FAZ 2: pause() ARTIK rampa BİTİNCE döner (Completer);
-  // rampa bu arada iptal edilirse Future yine tamamlanır (asılı await
-  // yok), yalnız beklemedeki pause atlanır.
+  // --- Gün 20: yumuşatma (fade) -------------------------------------------
+  // Oynat/duraklat sesi [_fadeSteps] adımda hedefe taşır. Rampa, kullanıcının
+  // kayıtlı hedef sesine ([_volumeTarget]) göre yapılır; kullanıcı fade
+  // sırasında sesi değiştirirse (setVolume) rampa iptal edilir. Jenerasyon
+  // sayacı, iptal edilmiş bir rampanın son tıkının (örn. fade-out'un
+  // sonundaki pause) geç yazmasını engeller.
   static const int _fadeSteps = 20;
 
   Timer? _fadeTimer;
   int _fadeGeneration = 0;
   Duration _fadeDuration = Duration.zero;
+  double _volumeTarget = 1.0;
 
-  /// Aktif rampanın tamamlanma Future'ı: [_cancelRamp] iptal anında
-  /// bekleyenleri uyandırır (supersede edilen pause asılı kalmaz).
-  Completer<void>? _activeRampDone;
+  /// Rampa son bilinen değeri; fade-out bir önceki fade-in'in ortasında
+  /// başlarsa kaldığı yerden inmek için kullanılır.
+  double _fadeValue = 1.0;
 
   /// Son bilinen çalma durumu. Kulaklık çıkarmada duraklatma, ses akışı
   /// katmanında (AudioSessionDatasource) yapıldığı için depoyu geçmez;
@@ -121,36 +97,26 @@ class PlayerRepositoryImpl implements PlayerRepository {
     _fadeDuration = duration;
   }
 
-  void _cancelRamp() {
+  void _cancelFade() {
     _fadeGeneration++;
     _fadeTimer?.cancel();
     _fadeTimer = null;
-    // İptal edilen rampanın Future'ı hemen tamamlanır: await eden (FAZ 2
-    // ile rampa bitince dönen pause) asılı kalmaz; «then» eylemi zaten
-    // jenerasyon korumasıyla atlanır.
-    final done = _activeRampDone;
-    _activeRampDone = null;
-    if (done != null && !done.isCompleted) done.complete();
   }
 
-  /// Rampayı çarpan katmanı üzerinden yürütür: [from] → [to] rampa
-  /// çarpanı (0.0–1.0), motora yazılan değer katman çarpımıdır. Başlangıçta
+  /// [from] → [to] arasında [_fadeSteps] adımlı ses rampası. Başlangıçta
   /// [from] hemen yazılır (ilk adım aralığı eski sesle çalınmasın); bitişte
-  /// tam [to] yazılır, ardından [then] çalışır (fade-out sonunda pause
-  /// gibi). Dönen Future FAZ 2 sözleşmesidir: rampa bitince (veya iptal
-  /// edilince) tamamlanır; [then] hatası arayana iletilir.
-  Future<void> _rampVolume(double from, double to, Future<void> Function()? then) {
-    final gen = ++_fadeGeneration;
-    final done = Completer<void>();
-    _activeRampDone = done;
-    unawaited(_volume.setRampFactor(from));
+  /// tam [to] yazılır ve [then] çalışır (fade-out sonunda pause gibi).
+  /// [then], rampa bu arada iptal edildiyse atlanır.
+  void _rampVolume(double from, double to, Future<void> Function()? then) {
+    final gen = _fadeGeneration;
+    _fadeValue = from;
+    unawaited(_handler.setVolume(from));
     final stepGap = Duration(
       microseconds: _fadeDuration.inMicroseconds ~/ _fadeSteps,
     );
     var step = 0;
-    _fadeTimer = Timer.periodic(stepGap, (timer) async {
+    _fadeTimer = Timer.periodic(stepGap, (timer) {
       if (gen != _fadeGeneration) {
-        // İptal edildi: Future zaten _cancelRamp'ta tamamlandı.
         timer.cancel();
         return;
       }
@@ -158,28 +124,18 @@ class PlayerRepositoryImpl implements PlayerRepository {
       if (step >= _fadeSteps) {
         timer.cancel();
         _fadeTimer = null;
-        try {
-          await _volume.setRampFactor(to);
-          if (gen != _fadeGeneration) {
-            // Son yazım bu arada iptal olduysa son eylemi atla.
-            if (!done.isCompleted) done.complete();
-            return;
-          }
+        _fadeValue = to;
+        unawaited(() async {
+          await _handler.setVolume(to);
+          if (gen != _fadeGeneration) return; // bu arada iptal olduysa son eylemi atla
           await then?.call();
-          if (!done.isCompleted) done.complete();
-        } on Object catch (e, s) {
-          if (!done.isCompleted) {
-            done.completeError(e, s);
-          } else {
-            rethrow;
-          }
-        }
+        }());
       } else {
         final v = from + (to - from) * (step / _fadeSteps);
-        unawaited(_volume.setRampFactor(v));
+        _fadeValue = v;
+        unawaited(_handler.setVolume(v));
       }
     });
-    return done.future;
   }
 
   @override
@@ -207,40 +163,34 @@ class PlayerRepositoryImpl implements PlayerRepository {
 
   @override
   Future<void> play() async {
-    _cancelRamp();
+    _cancelFade();
     final wasPlaying = _assumedPlaying;
     _assumedPlaying = true;
     await _handler.play();
     if (_fadeDuration <= Duration.zero || wasPlaying) return;
-    // Duraklatılmıştan başlama: rampa çarpanı sıfırdan 1.0'a girer;
-    // motora yazılan efektif ses = kullanıcı sesi × çarpan (duck/sönüm
-    // katmanları aynen çarpılır).
-    unawaited(_rampVolume(0.0, 1.0, null));
+    // Duraklatılmıştan başlama: ses sıfırdan hedefe girer.
+    _rampVolume(0.0, _volumeTarget, null);
   }
 
   @override
   Future<void> pause() async {
-    _cancelRamp();
+    _cancelFade();
     final wasPlaying = _assumedPlaying;
     _assumedPlaying = false;
     if (_fadeDuration <= Duration.zero || !wasPlaying) {
       await _handler.pause();
       return;
     }
-    // FAZ 2: Future rampa BİTİNCE (ve fade-out sonundaki pause yapıldıktan
-    // sonra) döner; play() bu arada gelirse jenerasyon eşleşmez, beklemedeki
-    // pause atlanır ve Future yine tamamlanır.
-    final from = _volume.rampFactor;
-    await _rampVolume(from, 0.0, () => _handler.pause());
+    // Ses hedefe inince duraklat; play() bu arada gelirse jenerasyon
+    // eşleşmez ve beklemedeki pause atlanır.
+    final from = _fadeValue.clamp(0.0, 1.0).toDouble();
+    _rampVolume(from, 0.0, () => _handler.pause());
   }
 
   @override
   Future<void> stop() async {
-    _cancelRamp();
+    _cancelFade();
     _assumedPlaying = false;
-    // Rampayı temizle: ortada kalmış çarpan sonraki duck/sönüm yazımına
-    // sızmasın (FAZ 2 katman hijyeni).
-    unawaited(_volume.endRamp());
     await _handler.stop();
   }
 
@@ -261,21 +211,11 @@ class PlayerRepositoryImpl implements PlayerRepository {
 
   @override
   Future<void> setVolume(double volume) async {
-    // Kullanıcının ses tercihi rampadan önce gelir: fade varsa iptal
-    // edilir ve kullanıcı rampayı devralır (eski sözleşme; tek yazımla
-    // uygulanır).
-    _cancelRamp();
-    await _volume.userTakesOver(volume);
-  }
-
-  @override
-  void setSleepDamping(double factor) {
-    // FAZ 2: uyku sönümü bir katmandır — rampayı İPTAL ETMEZ, kullanıcı
-    // sesini EZMEZ; koordinatör çarpımı tek yazımla bildirir. (Eski
-    // davranış setVolume'e yazardı: aktif pause rampasını iptal eder,
-    // gecikmeli pause hiç çalışmaz ve kullanıcının tercihi ezilirdi —
-    // K2 yarışının kökü.)
-    unawaited(_volume.setSleepDamping(factor));
+    // Kullanıcının ses tercihi rampadan önce gelir: fade varsa iptal edilir.
+    _volumeTarget = volume;
+    if (_fadeTimer != null) _cancelFade();
+    _fadeValue = volume;
+    await _handler.setVolume(volume);
   }
 
   @override

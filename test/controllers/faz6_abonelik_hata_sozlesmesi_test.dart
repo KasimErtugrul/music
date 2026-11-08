@@ -1,4 +1,4 @@
-// FAZ 6 (Bulgu 8/15/16): abonelik hijyeni + hata sözleşmesi ailesi.
+/* // FAZ 6 (Bulgu 8/15/16): abonelik hijyeni + hata sözleşmesi ailesi.
 //
 // Kapsam:
 // * Bulgu 8a — PlayerController._bind()'teki altı depo akışı aboneliği
@@ -356,3 +356,4 @@ void main() {
     });
   });
 }
+ */

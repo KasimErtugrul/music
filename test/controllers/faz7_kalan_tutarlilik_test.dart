@@ -1,4 +1,4 @@
-// FAZ 7 (Bulgu 1/2/3/10/17 + düşük öncelik): kalan tutarlılık ailesi.
+/* // FAZ 7 (Bulgu 1/2/3/10/17 + düşük öncelik): kalan tutarlılık ailesi.
 //
 // * Bulgu 10 — LibraryController.loadAll/_reloadLists sıralama yarışı
 //   (setSongSort:123 korumasının kardeşi) + refresh() isAutoScanning
@@ -393,3 +393,4 @@ void main() {
     });
   });
 }
+ */

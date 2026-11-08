@@ -296,20 +296,14 @@ class _EqualizerPageState extends State<EqualizerPage> {
                                   value: gain,
                                   min: ctrl.minDecibels,
                                   max: ctrl.maxDecibels,
-                                  // Bulgu 6: sürükleme tiki yalnız donanım
-                                  // önizlemesi (DB yazımı yok); kalıcı
-                                  // yazım tek seferlik onChangeEnd'de.
                                   onChanged: enabled
                                       ? (v) {
-                                          ctrl.previewBand(index, v);
+                                          ctrl.updateBand(index, v);
                                           if (_activePreset != null) {
                                             setState(
                                                 () => _activePreset = null);
                                           }
                                         }
-                                      : null,
-                                  onChangeEnd: enabled
-                                      ? (v) => ctrl.commitBand(index, v)
                                       : null,
                                 ),
                               ),

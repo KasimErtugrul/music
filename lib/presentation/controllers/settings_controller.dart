@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:resonance/core/errors/app_logger.dart';
 import 'package:resonance/core/settings/settings_persistence.dart';
 import 'package:resonance/data/models/app_settings_model.dart';
 import 'package:resonance/data/repositories/settings_repository.dart';
@@ -20,16 +19,8 @@ class SettingsController extends GetxController {
   }
 
   Future<void> _load() async {
-    try {
-      settings.value = await _repo.load();
-    } on Object catch (e, st) {
-      // Denetim düşük öncelik: platform hatasında isLoading true takılıyor,
-      // app.dart kök kapısı sonsuza dek spinner gösteriyordu. Hata günlüğe
-      // yazılır; varsayılan ayar modeliyle devam edilir (kapı açılır).
-      AppLog.error(e, st, source: 'SettingsController._load');
-    } finally {
-      isLoading.value = false;
-    }
+    settings.value = await _repo.load();
+    isLoading.value = false;
   }
 
   /// Gün 1: yedek içe aktarma sonrası dil tercihini yeniden okur ve yerelini
